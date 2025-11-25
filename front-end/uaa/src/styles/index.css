@@ -1,4 +1,13 @@
 @import "tailwindcss";
+@plugin '../hero.ts';
+@import './custom.css';
+
+
+
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
+@custom-variant dark (&:is(.dark *));
+
 
 @font-face {
   font-family: 'Roboto';
@@ -25,8 +34,9 @@ body {
   font-family: Roboto, Arial, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  /* min-height: 100vh; */
   padding: 0;
+  background-color: #FFFFFF;
 }
 
 *,
@@ -35,21 +45,21 @@ body {
   box-sizing: border-box;
 }
 
-img,
+/* img,
 picture,
 video,
 canvas,
 svg {
   display: block;
   max-width: 100%;
-}
+} */
 
-input,
+/* input,
 button,
 textarea,
 select {
   font: inherit;
-}
+} */
 
 p,
 h1,
@@ -65,3 +75,14 @@ h6 {
 #__next {
   isolation: isolate;
 }
+
+@theme {
+  --color-black-900: #1A1A1A;
+}
+
+.text-black-900 {
+  color: var(--color-black-900);
+}
+
+
+

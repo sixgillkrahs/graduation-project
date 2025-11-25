@@ -1,0 +1,12 @@
+@theme {
+  --color-black-900: #1A1A1A;
+  --color-black-800: #333333;
+}
+
+.text-black-900 {
+  color: var(--color-black-900);
+}
+
+.text-black-800 {
+  color: var(--color-black-800);
+}

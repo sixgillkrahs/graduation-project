@@ -1,9 +1,10 @@
 import type { RouterConfig } from "./types/router";
 import NotFoundPage from "@/404";
+import authRoute from "@/features/auth/route";
 import { BlankLayout } from "@/layouts/BlankLayout";
 import _ from "lodash";
 
-const childRoutes: any = [];
+const childRoutes: any = [authRoute];
 
 function isRouterConfig(route: any): route is RouterConfig {
   return (
