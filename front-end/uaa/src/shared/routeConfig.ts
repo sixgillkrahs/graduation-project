@@ -20,7 +20,7 @@ const routes: RouterConfig[] = [
     component: BlankLayout,
     childRoutes: [
       ...childRoutes,
-      { path: "*", name: "Page not found", component: NotFoundPage },
+      { path: "*", name: "Page not found", component: NotFoundPage, hideInMenu: true },
     ].filter(isRouterConfig),
   },
 ];

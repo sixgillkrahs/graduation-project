@@ -5,6 +5,7 @@ import { lazy } from "react";
 const router: RouterConfig = {
   path: "auth",
   component: AuthLayout,
+  hideInMenu: true,
   childRoutes: [
     {
       path: "/sign-in",
