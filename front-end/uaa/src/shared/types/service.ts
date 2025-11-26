@@ -19,4 +19,5 @@ export interface IPagination<T> {
 export interface IParamsPagination {
   page: number;
   size: number;
+  query?: string;
 }
