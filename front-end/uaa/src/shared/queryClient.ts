@@ -1,3 +1,4 @@
+import { addToast } from "@heroui/toast";
 import {
   Mutation,
   MutationCache,
@@ -23,7 +24,7 @@ export const queryClient = new QueryClient({
         console.log(`${query.meta.SUCCESS_MESSAGE}:`);
       }
     },
-    onError: (error: unknown, query: Query<unknown, unknown, unknown, QueryKey>): void => {
+    onError: (error: any, query: Query<unknown, unknown, unknown, QueryKey>): void => {
       if (axios.isAxiosError(error) && query.meta?.ERROR_SOURCE) {
         // toast.error(`${query.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
         console.error(`${query.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
@@ -31,6 +32,12 @@ export const queryClient = new QueryClient({
       if (error instanceof Error && query.meta?.ERROR_SOURCE) {
         // toast.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
         console.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
+      }
+      if (error?.response && error.response.status === 404) {
+        addToast({
+          description: `${error?.response?.data?.message}` as string,
+          color: "danger",
+        });
       }
     },
   }),

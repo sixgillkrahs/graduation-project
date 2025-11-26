@@ -1,8 +1,7 @@
 import MainLayout from "@/layouts/MainLayout";
 import { type RouterConfig } from "@shared/types/router";
-import { lazy } from "react";
 import { Settings, Users } from "lucide-react";
-
+import { lazy } from "react";
 
 const router: RouterConfig = {
   path: "",
@@ -10,7 +9,7 @@ const router: RouterConfig = {
   childRoutes: [
     {
       path: "/user-manage",
-      component: lazy(() => import("./user-manage/resources")),
+      component: lazy(() => import("./user-manage")),
       name: "User Management",
       icon: Users,
       // childRoutes: [
@@ -25,8 +24,8 @@ const router: RouterConfig = {
       path: "/setting",
       component: lazy(() => import("./settings/setting")),
       name: "Setting",
-      icon: Settings
-    }
+      icon: Settings,
+    },
   ],
 };
 
