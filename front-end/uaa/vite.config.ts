@@ -64,11 +64,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("react")) return "vendor-react";
-            return "vendor";
-          }
-
           if (id.includes("/src/shared/")) {
             return "shared";
           }
