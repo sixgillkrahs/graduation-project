@@ -58,6 +58,11 @@ export const useUpdateResource = (): UseMutationResult<
     mutationFn: (resource: IResourceService.UpdateResourceDTO) => {
       return ResourceService.updateResource(resource);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [ResourceQueryKey.getResources],
+      });
+    },
     meta: {
       ERROR_SOURCE: "[Update resource failed]",
       SUCCESS_MESSAGE: "The resource has been successfully updated",

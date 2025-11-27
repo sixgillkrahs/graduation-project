@@ -61,10 +61,11 @@ export default class ResourceService {
   public static readonly updateResource = (
     resource: IResourceService.UpdateResourceDTO,
   ): Promise<IResp<IResourceService.ResourceDTO>> => {
+    const { id, ...rest } = resource;
     return request({
-      url: ResourceEndpoint.UpdateResource(),
+      url: ResourceEndpoint.UpdateResource(id),
       method: AxiosMethod.PUT,
-      data: resource,
+      data: rest,
     });
   };
 

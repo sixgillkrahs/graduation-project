@@ -132,7 +132,7 @@ const Resources = () => {
           return cellValue;
       }
     },
-    [onConfirmOpen],
+    [onConfirmOpen, onOpen],
   );
 
   const onClear = useCallback(() => {
@@ -158,6 +158,11 @@ const Resources = () => {
       sortOrder: sortDescriptor.direction === "ascending" ? "asc" : "desc",
     });
   };
+
+  const handleAddNew = useCallback(() => {
+    setIsSelectRecord(null);
+    onOpen();
+  }, [onOpen]);
 
   const topContent = useMemo(() => {
     return (
@@ -197,14 +202,14 @@ const Resources = () => {
                 ))}
               </DropdownMenu>
             </Dropdown>
-            <Button onPress={onOpen} color="primary" endContent={<PlusIcon />}>
+            <Button onPress={handleAddNew} color="primary" endContent={<PlusIcon />}>
               Add New
             </Button>
           </div>
         </div>
       </div>
     );
-  }, [filterValue, onClear, visibleColumns, onOpen]);
+  }, [filterValue, onClear, visibleColumns, handleAddNew]);
 
   const bottomContent = useMemo(() => {
     return (

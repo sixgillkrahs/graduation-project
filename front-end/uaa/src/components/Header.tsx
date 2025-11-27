@@ -2,7 +2,6 @@ import { Badge } from "@heroui/badge";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { User } from "@heroui/user";
 import { Bell, Menu } from "lucide-react";
-import React from "react";
 
 const Header = ({
   isMenuOpen,
