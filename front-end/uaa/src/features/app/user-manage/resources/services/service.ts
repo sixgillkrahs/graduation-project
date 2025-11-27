@@ -1,7 +1,7 @@
 import { ResourceEndpoint } from "./config";
 import { AxiosMethod } from "@shared/axios/method";
 import request from "@shared/axios/request";
-import type { IPaginationResp, IParamsPagination } from "@shared/types/service";
+import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 
 export default class ResourceService {
   public static readonly INITIAL_VISIBLE_COLUMNS = [
@@ -36,6 +36,44 @@ export default class ResourceService {
       url: ResourceEndpoint.GetResourcesByFilter(),
       method: AxiosMethod.GET,
       params,
+    });
+  };
+
+  public static readonly deleteResource = (
+    id: string,
+  ): Promise<IPaginationResp<IResourceService.ResourceDTO>> => {
+    return request({
+      url: ResourceEndpoint.DeleteResource(id),
+      method: AxiosMethod.DELETE,
+    });
+  };
+
+  public static readonly createResource = (
+    resource: IResourceService.CreateResourceDTO,
+  ): Promise<IResp<IResourceService.ResourceDTO>> => {
+    return request({
+      url: ResourceEndpoint.CreateResource(),
+      method: AxiosMethod.POST,
+      data: resource,
+    });
+  };
+
+  public static readonly updateResource = (
+    resource: IResourceService.UpdateResourceDTO,
+  ): Promise<IResp<IResourceService.ResourceDTO>> => {
+    return request({
+      url: ResourceEndpoint.UpdateResource(),
+      method: AxiosMethod.PUT,
+      data: resource,
+    });
+  };
+
+  public static readonly getResource = (
+    id: string,
+  ): Promise<IResp<IResourceService.ResourceDTO>> => {
+    return request({
+      url: ResourceEndpoint.GetResource(id),
+      method: AxiosMethod.GET,
     });
   };
 }

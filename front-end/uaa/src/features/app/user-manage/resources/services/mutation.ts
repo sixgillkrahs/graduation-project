@@ -1,20 +1,66 @@
-// import SignInService from "./service";
-// import { type UseMutationResult, useMutation } from "@tanstack/react-query";
+import { ResourceQueryKey } from "./config";
+import ResourceService from "./service";
+import { queryClient } from "@shared/queryClient";
+import type { IPaginationResp, IResp } from "@shared/types/service";
+import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 
-// export const useSignIn = (): UseMutationResult<
-//   ISignInService.SignInResponse,
-//   Error,
-//   ISignInService.SignInRequest,
-//   void
-// > => {
-//   return useMutation({
-//     mutationFn: (data: ISignInService.SignInRequest) => {
-//       const { ...rest } = data;
-//       return SignInService.signIn(rest);
-//     },
-//     meta: {
-//       ERROR_SOURCE: "[Sign in failed]",
-//       SUCCESS_MESSAGE: "The user has been successfully signed in",
-//     },
-//   });
-// };
+export const useDeleteResource = (): UseMutationResult<
+  IPaginationResp<IResourceService.ResourceDTO>,
+  Error,
+  string,
+  void
+> => {
+  return useMutation({
+    mutationFn: (id: string) => {
+      return ResourceService.deleteResource(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [ResourceQueryKey.getResources],
+      });
+    },
+    meta: {
+      ERROR_SOURCE: "[Delete resource failed]",
+      SUCCESS_MESSAGE: "The resource has been successfully deleted",
+    },
+  });
+};
+
+export const useCreateResource = (): UseMutationResult<
+  IResp<IResourceService.ResourceDTO>,
+  Error,
+  IResourceService.CreateResourceDTO,
+  void
+> => {
+  return useMutation({
+    mutationFn: (resource: IResourceService.CreateResourceDTO) => {
+      return ResourceService.createResource(resource);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [ResourceQueryKey.getResources],
+      });
+    },
+    meta: {
+      ERROR_SOURCE: "[Create resource failed]",
+      SUCCESS_MESSAGE: "The resource has been successfully created",
+    },
+  });
+};
+
+export const useUpdateResource = (): UseMutationResult<
+  IResp<IResourceService.ResourceDTO>,
+  Error,
+  IResourceService.UpdateResourceDTO,
+  void
+> => {
+  return useMutation({
+    mutationFn: (resource: IResourceService.UpdateResourceDTO) => {
+      return ResourceService.updateResource(resource);
+    },
+    meta: {
+      ERROR_SOURCE: "[Update resource failed]",
+      SUCCESS_MESSAGE: "The resource has been successfully updated",
+    },
+  });
+};

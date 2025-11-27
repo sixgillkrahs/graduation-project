@@ -49,12 +49,16 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (axios.isAxiosError(error) && mutation.meta?.ERROR_SOURCE) {
-        // toast.error(`${mutation.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
-        console.error(`${mutation.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
+        addToast({
+          description: `${mutation.meta.ERROR_SOURCE}: ${error.response?.data?.message}` as string,
+          color: "danger",
+        });
       }
       if (error instanceof Error && mutation.meta?.ERROR_SOURCE) {
-        // toast.error(`${mutation.meta.ERROR_SOURCE}: ${error.message}`);
-        console.error(`${mutation.meta.ERROR_SOURCE}: ${error.message}`);
+        addToast({
+          description: `${mutation.meta.ERROR_SOURCE}: ${error.message}` as string,
+          color: "danger",
+        });
       }
     },
     onSuccess: (
@@ -64,8 +68,10 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (mutation.meta?.SUCCESS_MESSAGE) {
-        // toast.success(`${mutation.meta.SUCCESS_MESSAGE}:`);
-        console.log(`${mutation.meta.SUCCESS_MESSAGE}:`);
+        addToast({
+          description: `${mutation.meta.SUCCESS_MESSAGE}` as string,
+          color: "success",
+        });
       }
     },
   }),

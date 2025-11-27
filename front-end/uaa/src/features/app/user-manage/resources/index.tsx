@@ -1,89 +1,139 @@
+import ModalCU from "./components/ModalCU";
+import ModalConfirm from "./components/ModalConfirm";
 import { useGetResources, useGetResourcesByFilter } from "./services/query";
 import ResourceService from "./services/service";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
+import { useDisclosure } from "@heroui/modal";
 import { Pagination } from "@heroui/pagination";
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  type Selection,
+  type SortDescriptor,
+} from "@heroui/table";
 import { toVietnamTime } from "@shared/render/time";
-import { EllipsisVertical, PlusIcon, SearchIcon } from "lucide-react";
+import type { IParamsPagination } from "@shared/types/service";
+import { capitalize } from "lodash";
+import { ChevronDownIcon, EllipsisVertical, PlusIcon, SearchIcon } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 const Resources = () => {
-  const { data, isLoading } = useGetResources({
-    page: 1,
-    size: 10,
-  });
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const {
+    isOpen: isConfirmOpen,
+    onOpenChange: onConfirmOpenChange,
+    onClose: onConfirmClose,
+    onOpen: onConfirmOpen,
+  } = useDisclosure();
   const [filterValue, setFilterValue] = useState("");
+  const [isSelectRecord, setIsSelectRecord] = useState<IResourceService.ResourceDTO | null>(null);
   const debouncedFilterValue = useDebouncedValue(filterValue, 500);
-  const { data: filteredData, isLoading: isLoadingFilter } = useGetResourcesByFilter({
+  const [pagination, setPagination] = useState<IParamsPagination>({
     page: 1,
-    size: 10,
+    limit: 10,
+  });
+  const { data, isLoading } = useGetResources({
+    page: pagination.page,
+    limit: pagination.limit,
+    sortBy: pagination?.sortBy,
+    sortOrder: pagination?.sortOrder,
+  });
+  const { data: filteredData, isLoading: isLoadingFilter } = useGetResourcesByFilter({
+    page: pagination.page,
+    limit: pagination.limit,
     query: debouncedFilterValue,
   });
-  const [visibleColumns, setVisibleColumns] = useState(
+  const [visibleColumns, setVisibleColumns] = useState<Selection>(
     new Set(ResourceService.INITIAL_VISIBLE_COLUMNS),
   );
-  const [pagination, setPagination] = useState({
-    page: 1,
-    size: 10,
-  });
 
   const headerColumns = useMemo(() => {
-    if (visibleColumns.has("all")) return ResourceService.columns;
+    if (visibleColumns == "all") return ResourceService.columns;
 
     return ResourceService.columns.filter((column) =>
       Array.from(visibleColumns).includes(column.uid),
     );
   }, [visibleColumns]);
 
-  const onPreviousPage = useCallback(() => {
-    if (pagination.page > 1) {
+  const onRowsPerPageChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const newLimit = Number(e.target.value);
       setPagination({
         ...pagination,
-        page: pagination.page - 1,
+        page: 1,
+        limit: newLimit,
       });
-    }
-  }, [pagination]);
+    },
+    [pagination],
+  );
 
-  const onNextPage = useCallback(() => {
-    if (pagination.page < (data?.data.totalPages || 0)) {
-      setPagination({
-        ...pagination,
-        page: pagination.page + 1,
-      });
-    }
-  }, [pagination, data?.data.totalPages]);
-
-  const renderCell = useCallback((item: IResourceService.ResourceDTO, columnKey: string) => {
-    const cellValue = item[columnKey as keyof IResourceService.ResourceDTO];
-    switch (columnKey) {
-      case "createdAt":
-        return <span>{toVietnamTime(cellValue)}</span>;
-      case "updatedAt":
-        return <span>{toVietnamTime(cellValue)}</span>;
-      case "action":
-        return (
-          <div className="flex items-center gap-2">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
-                  <EllipsisVertical />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem key="view">View</DropdownItem>
-                <DropdownItem key="edit">Edit</DropdownItem>
-                <DropdownItem key="delete">Delete</DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
-      default:
-        return cellValue;
-    }
-  }, []);
+  const renderCell = useCallback(
+    (item: IResourceService.ResourceDTO, columnKey: string) => {
+      const cellValue = item[columnKey as keyof IResourceService.ResourceDTO];
+      switch (columnKey) {
+        case "createdAt":
+          return <span>{toVietnamTime(cellValue)}</span>;
+        case "updatedAt":
+          return <span>{toVietnamTime(cellValue)}</span>;
+        case "action":
+          return (
+            <div className="flex items-center gap-2">
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button isIconOnly size="sm" variant="light">
+                    <EllipsisVertical />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
+                  <DropdownItem key="view">View</DropdownItem>
+                  <DropdownItem
+                    key="edit"
+                    onPress={() => {
+                      setIsSelectRecord({
+                        id: item.id,
+                        name: item.name,
+                        createdAt: item.createdAt,
+                        updatedAt: item.updatedAt,
+                        description: item.description,
+                      });
+                      onOpen();
+                    }}
+                  >
+                    Edit
+                  </DropdownItem>
+                  <DropdownItem
+                    key="delete"
+                    onPress={() => {
+                      setIsSelectRecord({
+                        id: item.id,
+                        name: item.name,
+                        createdAt: item.createdAt,
+                        updatedAt: item.updatedAt,
+                        description: item.description,
+                      });
+                      onConfirmOpen();
+                    }}
+                    color="danger"
+                  >
+                    Delete
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          );
+        default:
+          return cellValue;
+      }
+    },
+    [onConfirmOpen],
+  );
 
   const onClear = useCallback(() => {
     setFilterValue("");
@@ -101,6 +151,14 @@ const Resources = () => {
     }
   };
 
+  const setSortDescriptor = (sortDescriptor: SortDescriptor) => {
+    setPagination({
+      ...pagination,
+      sortBy: sortDescriptor.column.toString(),
+      sortOrder: sortDescriptor.direction === "ascending" ? "asc" : "desc",
+    });
+  };
+
   const topContent = useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
@@ -116,14 +174,37 @@ const Resources = () => {
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
-            <Button color="primary" endContent={<PlusIcon />}>
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                  Columns
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Table Columns"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={(selectedKeys) => {
+                  setVisibleColumns(new Set(selectedKeys));
+                }}
+              >
+                {ResourceService.columns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+            <Button onPress={onOpen} color="primary" endContent={<PlusIcon />}>
               Add New
             </Button>
           </div>
         </div>
       </div>
     );
-  }, [filterValue, onClear]);
+  }, [filterValue, onClear, visibleColumns, onOpen]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -141,22 +222,18 @@ const Resources = () => {
           onChange={(page) => setPagination({ ...pagination, page })}
         />
         <div className="hidden w-[30%] justify-end gap-2 sm:flex">
-          <Button
-            isDisabled={data?.data.page === 1}
-            size="sm"
-            variant="flat"
-            onPress={onPreviousPage}
-          >
-            Previous
-          </Button>
-          <Button
-            isDisabled={data?.data.page === data?.data.totalPages}
-            size="sm"
-            variant="flat"
-            onPress={onNextPage}
-          >
-            Next
-          </Button>
+          <label className="text-default-400 text-small flex items-center">
+            Rows per page:
+            <select
+              className="text-default-400 text-small bg-transparent outline-transparent outline-solid"
+              onChange={onRowsPerPageChange}
+              value={pagination.limit}
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+            </select>
+          </label>
         </div>
       </div>
     );
@@ -164,51 +241,66 @@ const Resources = () => {
     data?.data.page,
     data?.data.totalPages,
     data?.data.totalResults,
-    onNextPage,
-    onPreviousPage,
     pagination,
+    onRowsPerPageChange,
   ]);
 
   return (
-    <Table
-      isHeaderSticky
-      aria-label="Example table with custom cells, pagination and sorting"
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      classNames={{
-        wrapper: "max-h-[382px]",
-      }}
-      // sortDescriptor={sortDescriptor}
-      topContent={topContent}
-      topContentPlacement="outside"
-      // onSelectionChange={setSelectedKeys}
-      // onSortChange={setSortDescriptor}
-    >
-      <TableHeader columns={headerColumns}>
-        {(column) => (
-          <TableColumn
-            key={column.uid}
-            align={column.uid === "actions" ? "center" : "start"}
-            allowsSorting={column.sortable}
-          >
-            {column.name}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody
-        emptyContent={"No users found"}
-        items={debouncedFilterValue ? filteredData?.data.results || [] : data?.data.results || []}
-        isLoading={debouncedFilterValue ? isLoadingFilter : isLoading}
-      >
-        {(item) => {
-          return (
-            <TableRow>
-              {(columnKey: any) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
-            </TableRow>
-          );
+    <>
+      <Table
+        isHeaderSticky
+        aria-label="Example table with custom cells, pagination and sorting"
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        classNames={{
+          wrapper: "max-h-[382px]",
         }}
-      </TableBody>
-    </Table>
+        sortDescriptor={{
+          column: pagination.sortBy || "id",
+          direction: pagination.sortOrder === "asc" ? "ascending" : "descending",
+        }}
+        topContent={topContent}
+        topContentPlacement="outside"
+        onSortChange={setSortDescriptor}
+      >
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          emptyContent={"No users found"}
+          items={debouncedFilterValue ? filteredData?.data.results || [] : data?.data.results || []}
+          isLoading={debouncedFilterValue ? isLoadingFilter : isLoading}
+        >
+          {(item) => {
+            return (
+              <TableRow>
+                {(columnKey: any) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
+              </TableRow>
+            );
+          }}
+        </TableBody>
+      </Table>
+      <ModalCU
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onClose={onClose}
+        isSelectRecord={isSelectRecord!}
+      />
+      <ModalConfirm
+        isSelectRecord={isSelectRecord!}
+        isOpen={isConfirmOpen}
+        onOpenChange={onConfirmOpenChange}
+        onClose={onConfirmClose}
+      />
+    </>
   );
 };
 
