@@ -3,18 +3,24 @@ import { PermissionController } from "@/controllers/permission.controller";
 import { PermissionService } from "@/services/permission.service";
 import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
-import { createPermissionSchema, deletePermissionSchema, getPermissionByIdSchema, updatePermissionSchema } from "@/validators/permission.validator";
-import { OperationService } from "@/services/operation.service";
+import {
+  createPermissionSchema,
+  deletePermissionSchema,
+  getPermissionByIdSchema,
+  updatePermissionSchema,
+  updatePermissionStatusSchema,
+} from "@/validators/permission.validator";
 import { ResourcesService } from "@/services/resources.service";
 
 const router = Router();
 const permissionService = new PermissionService();
-const operationService = new OperationService();
 const resourcesService = new ResourcesService();
-const permissionController = new PermissionController(permissionService, operationService, resourcesService);
+const permissionController = new PermissionController(
+  permissionService,
+  resourcesService,
+);
 
-
-router.use(requireAuth);
+// router.use(requireAuth);
 
 /**
  * @swagger
@@ -30,22 +36,66 @@ router.use(requireAuth);
  *           type: string
  *         description:
  *           type: string
- *         resourceId:
+ *         resource:
  *           type: string
- *         operationId:
- *           type: string
+ *           format: uuid
+ *         operation:
+ *           type: enum
+ *           enum: [read, write, delete, approve, export]
+ *         isActive:
+ *           type: boolean
  *         createdAt:
  *           type: string
  *           format: date-time
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *     ResponsePaginated:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           description: Indicates if the request was successful
+ *         message:
+ *           type: string
+ *           description: Success message
+ *         data:
+ *           type: object
+ *           properties:
+ *             results:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Permission'
+ *             totalPages:
+ *               type: integer
+ *               description: Total number of resources
+ *             totalResults:
+ *               type: integer
+ *               description: Total number of resources
+ *             page:
+ *               type: integer
+ *               description: Current page number
+ *             limit:
+ *               type: integer
+ *               description: Number of items per page
+ *           description: List of resources
+ *     ResponsePermission:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           description: Indicates if the request was successful
+ *         message:
+ *           type: string
+ *           description: Success message
+ *         data:
+ *           type: object
+ *           $ref: '#/components/schemas/Permission'
  */
-
 
 /**
  * @swagger
- * /permissions/pagination:
+ * /permissions:
  *   get:
  *     summary: Get all permissions
  *     tags: [Permissions]
@@ -59,13 +109,13 @@ router.use(requireAuth);
  *           default: 10
  *         description: Number of items to return
  *       - in: query
- *         name: offset
+ *         name: page
  *         schema:
  *           type: integer
- *           default: 0
+ *           default: 1
  *         description: Number of items to skip
  *       - in: query
- *         name: search
+ *         name: query
  *         schema:
  *           type: string
  *         description: Search term for filtering results
@@ -90,7 +140,7 @@ router.use(requireAuth);
  *               items:
  *                 $ref: '#/components/schemas/Permission'
  */
-router.get("/pagination", permissionController.getPermissions);
+router.get("/", permissionController.getPermissions);
 
 /**
  * @swagger
@@ -113,9 +163,13 @@ router.get("/pagination", permissionController.getPermissions);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Permission'
+ *               $ref: '#/components/schemas/ResponsePermission'
  */
-router.get("/:id", validateRequest((lang) => getPermissionByIdSchema(lang)), permissionController.getPermissionById);
+router.get(
+  "/:id",
+  validateRequest((lang) => getPermissionByIdSchema(lang)),
+  permissionController.getPermissionById,
+);
 
 /**
  * @swagger
@@ -133,7 +187,6 @@ router.get("/:id", validateRequest((lang) => getPermissionByIdSchema(lang)), per
  *               type: object
  *               required:
  *                 - name
- *                 - description
  *                 - resourceId
  *                 - operationId
  *               properties:
@@ -143,28 +196,22 @@ router.get("/:id", validateRequest((lang) => getPermissionByIdSchema(lang)), per
  *                   type: string
  *                 resourceId:
  *                   type: string
- *                 operationId:
- *                   type: string
+ *                 operation:
+ *                   type: enum
+ *                   enum: [read, write, delete, approve, export]
  *     responses:
  *       201:
  *         description: Permission created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 description:
- *                   type: string
- *                 resourceId:
- *                   type: string
- *                 operationId:
- *                   type: string
+ *               $ref: '#/components/schemas/ResponsePermission'
  */
-router.post("/", validateRequest((lang) => createPermissionSchema(lang)), permissionController.createPermission);
+router.post(
+  "/",
+  validateRequest((lang) => createPermissionSchema(lang)),
+  permissionController.createPermission,
+);
 
 /**
  * @swagger
@@ -189,7 +236,6 @@ router.post("/", validateRequest((lang) => createPermissionSchema(lang)), permis
  *               type: object
  *               required:
  *                 - name
- *                 - description
  *                 - resourceId
  *                 - operationId
  *               properties:
@@ -205,22 +251,15 @@ router.post("/", validateRequest((lang) => createPermissionSchema(lang)), permis
  *       200:
  *         description: Permission updated successfully
  *         content:
- *           application/json:
+ *          application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
- *                 description:
- *                   type: string
- *                 resourceId:
- *                   type: string
- *                 operationId:
- *                   type: string
+ *               $ref: '#/components/schemas/ResponsePermission'
  */
-router.put("/:id", validateRequest((lang) => updatePermissionSchema(lang)), permissionController.updatePermission);
+router.put(
+  "/:id",
+  validateRequest((lang) => updatePermissionSchema(lang)),
+  permissionController.updatePermission,
+);
 
 /**
  * @swagger
@@ -241,6 +280,50 @@ router.put("/:id", validateRequest((lang) => updatePermissionSchema(lang)), perm
  *       200:
  *         description: Permission deleted successfully
  */
-router.delete("/:id", validateRequest((lang) => deletePermissionSchema(lang)), permissionController.deletePermission);
+router.delete(
+  "/:id",
+  validateRequest((lang) => deletePermissionSchema(lang)),
+  permissionController.deletePermission,
+);
+
+/**
+ * @swagger
+ * /permissions/{id}:
+ *   patch:
+ *     summary: Update permission status by id
+ *     tags: [Permissions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Permission id
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *          schema:
+ *               type: object
+ *               required:
+ *                 - isActive
+ *               properties:
+ *                 isActive:
+ *                   type: boolean
+ *     responses:
+ *       200:
+ *         description: Permission updated successfully
+ *         content:
+ *          application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ResponsePermission'
+ */
+router.patch(
+  "/:id",
+  validateRequest((lang) => updatePermissionStatusSchema(lang)),
+  permissionController.updatePermissionStatus,
+);
 
 export default router;

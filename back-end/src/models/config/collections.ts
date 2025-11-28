@@ -1,5 +1,6 @@
 const collections = {
-    resources: 'resources',
-}
+  resources: "resources",
+  permissions: "permissions",
+};
 
 export default collections;

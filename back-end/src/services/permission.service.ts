@@ -1,96 +1,37 @@
 import { singleton } from "@/decorators/singleton";
-import { Prisma, PrismaClient } from "@prisma/client";
-
+import { IPermission } from "@/models/permission.model";
+import PermissionModel from "@/models/permission.model";
 
 @singleton
 export class PermissionService {
-    private prisma: PrismaClient;
+  constructor() {}
 
-    constructor() {
-        this.prisma = new PrismaClient();
-    }
+  createPermission = async (permission: IPermission) => {
+    return await PermissionModel.createPermission(permission);
+  };
 
-    getPermissions = async (limit: number = 10, offset: number = 0, search?: string, sort: {
-        field: string;
-        order: 'asc' | 'desc';
-    } = {
-            field: 'id',
-            order: 'asc',
-        }, select?: Prisma.permissionSelect) => {
-        let whereCondition: Prisma.permissionWhereInput = {};
-        if (search) {
-            whereCondition = {
-                name: {
-                    contains: search
-                }
-            }
-        }
-        const [items, total] = await Promise.all([
-            this.prisma.permission.findMany({
-                take: limit,
-                skip: offset,
-                orderBy: {
-                    [sort.field]: sort.order,
-                },
-                select: select || {
-                    id: true,
-                    name: true,
-                    description: true,
-                }
-            }),
-            this.prisma.permission.count({
-                where: whereCondition
-            })
-        ]);
-        const hasNext = offset + limit < total;
-        const hasPrev = offset > 0;
-        const totalPages = Math.ceil(total / limit);
-        const currentPage = Math.floor(offset / limit) + 1;
-        return {
-            permission: items,
-            pagination: {
-                hasNext,
-                hasPrev,
-                totalPages,
-                currentPage,
-                total,
-            },
-        };
-    }
+  getPermissionsPaginated = async (
+    options: {
+      page: number;
+      limit: number;
+      sortBy?: string;
+      populate?: string;
+    },
+    filter?: Record<string, any>,
+  ) => {
+    filter = filter || {};
+    return await PermissionModel.paginate?.(options, filter);
+  };
 
-    getPermissionById = async (id: string, select?: Prisma.permissionSelect) => {
-        return this.prisma.permission.findUnique({
-            where: {
-                id: id.toString(),
-            },
-            select: select || {
-                id: true,
-                name: true,
-                description: true,
-            }
-        })
-    }
+  deletePermission = async (id: string) => {
+    return await PermissionModel.findByIdAndDelete(id);
+  };
 
-    createPermission = async (data: Prisma.permissionCreateInput) => {
-        return this.prisma.permission.create({
-            data,
-        })
-    }
-    updatePermission = async (id: string, data: Prisma.permissionUpdateInput) => {
-        return this.prisma.permission.update({
-            where: {
-                id: id.toString(),
-            },
-            data,
-        })
-    }
+  getPermissionById = async (id: string) => {
+    return await PermissionModel.findById(id);
+  };
 
-    deletePermission = async (id: string) => {
-        return this.prisma.permission.delete({
-            where: {
-                id: id.toString(),
-            },
-        })
-    }
-
+  updatePermission = async (id: string, permission: Partial<IPermission>) => {
+    return await PermissionModel.findByIdAndUpdate(id, permission);
+  };
 }
