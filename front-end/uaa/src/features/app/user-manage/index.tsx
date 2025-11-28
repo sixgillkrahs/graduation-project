@@ -1,3 +1,4 @@
+import Permissions from "./permissions";
 import Resources from "./resources";
 import Roles from "./roles";
 import { Tab, Tabs } from "@heroui/tabs";
@@ -8,6 +9,11 @@ const TabsArray = [
     key: "roles",
     title: "Roles",
     component: Roles,
+  },
+  {
+    key: "permissions",
+    title: "Permissions",
+    component: Permissions,
   },
   {
     key: "resources",

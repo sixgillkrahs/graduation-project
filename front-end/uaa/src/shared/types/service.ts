@@ -26,6 +26,12 @@ export interface IParamsPagination {
   page: number;
   limit: number;
   query?: string;
-  sortBy?: string;
+  sortField?: string;
   sortOrder?: "asc" | "desc";
+}
+
+export interface IColumn {
+  name: string;
+  uid: string;
+  sortable?: boolean;
 }

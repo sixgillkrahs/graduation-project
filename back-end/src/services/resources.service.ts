@@ -4,34 +4,39 @@ import Resource, { IResource } from "@/models/resource.model";
 
 @singleton
 export class ResourcesService {
+  constructor() {}
 
+  getResourcesPaginated = async (
+    page: number,
+    limit: number,
+    sortField: string,
+    sortOrder: number,
+  ) => {
+    return await ResourceModel.getResourcesPaginated(
+      page,
+      limit,
+      sortField,
+      sortOrder,
+    );
+  };
 
-    constructor() {
+  createResource = async (resource: IResource) => {
+    return await ResourceModel.createResource(resource);
+  };
 
-    }
+  searchResources = async (query: string, page: number, limit: number) => {
+    return await ResourceModel.searchResources(page, limit, query);
+  };
 
-    getResourcesPaginated = async (page: number, limit: number, sortBy: string, sortOrder: number) => {
-        return await ResourceModel.getResourcesPaginated(page, limit, sortBy, sortOrder);
-    }
+  getResourceById = async (id: string) => {
+    return await ResourceModel.getResourceById(id);
+  };
 
-    createResource = async (resource: IResource) => {
-        return await ResourceModel.createResource(resource);
-    }
+  updateResource = async (id: string, resource: IResource) => {
+    return await ResourceModel.updateResource(id, resource);
+  };
 
-    searchResources = async (query: string, page: number, limit: number) => {
-        return await ResourceModel.searchResources(page, limit, query);
-    }
-
-    getResourceById = async (id: string) => {
-        return await ResourceModel.getResourceById(id);
-    }
-
-    updateResource = async (id: string, resource: IResource) => {
-        return await ResourceModel.updateResource(id, resource);
-    }
-
-    deleteResource = async (id: string) => {
-        return await ResourceModel.deleteResource(id);
-    }
-
+  deleteResource = async (id: string) => {
+    return await ResourceModel.deleteResource(id);
+  };
 }

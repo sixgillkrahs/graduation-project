@@ -42,7 +42,7 @@ const Resources = () => {
   const { data, isLoading } = useGetResources({
     page: pagination.page,
     limit: pagination.limit,
-    sortBy: pagination?.sortBy,
+    sortField: pagination?.sortField,
     sortOrder: pagination?.sortOrder,
   });
   const { data: filteredData, isLoading: isLoadingFilter } = useGetResourcesByFilter({
@@ -154,7 +154,7 @@ const Resources = () => {
   const setSortDescriptor = (sortDescriptor: SortDescriptor) => {
     setPagination({
       ...pagination,
-      sortBy: sortDescriptor.column.toString(),
+      sortField: sortDescriptor.column.toString(),
       sortOrder: sortDescriptor.direction === "ascending" ? "asc" : "desc",
     });
   };
@@ -261,7 +261,7 @@ const Resources = () => {
           wrapper: "max-h-[382px]",
         }}
         sortDescriptor={{
-          column: pagination.sortBy || "id",
+          column: pagination.sortField || "id",
           direction: pagination.sortOrder === "asc" ? "ascending" : "descending",
         }}
         topContent={topContent}

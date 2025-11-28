@@ -23,7 +23,7 @@ interface ResourceModel
   getResourcesPaginated(
     page: number,
     limit: number,
-    sortBy: string,
+    sortField: string,
     sortOrder: number,
   ): Promise<{
     results: mongoose.HydratedDocument<IResource, IResourceMethods>[];
