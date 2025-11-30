@@ -28,6 +28,7 @@ export interface IParamsPagination {
   query?: string;
   sortField?: string;
   sortOrder?: "asc" | "desc";
+  total?: number;
 }
 
 export interface IColumn {

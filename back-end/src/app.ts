@@ -46,7 +46,7 @@ const setupMiddleware = (app: express.Application) => {
 
   // Rate Limiting
   app.use("/api/auth", authLimiter);
-  app.use("/api", apiLimiter);
+  // app.use("/api", apiLimiter);
 };
 
 app.use("/api/upload", uploadRoutes);

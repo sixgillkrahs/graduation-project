@@ -1,290 +1,181 @@
-import { Button } from "@heroui/button";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { Pagination } from "@heroui/pagination";
+import ModalCU from "./Modal";
+import MessageService from "@shared/message";
 import {
+  Button,
+  Dropdown,
+  Form,
+  Modal,
+  Pagination,
   Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  type SortDescriptor,
-} from "@heroui/table";
-import type { IColumn, IParamsPagination } from "@shared/types/service";
-import { EllipsisVertical, FileDown, PlusIcon } from "lucide-react";
-import { memo, useMemo, type ReactNode } from "react";
+  type FormInstance,
+  type PaginationProps,
+} from "antd";
+import type { ColumnsType } from "antd/es/table";
+import { EllipsisVertical, Eye, FileDown, Pencil, Plus, Trash } from "lucide-react";
+import { memo, useCallback, useState, type JSX, type ReactNode } from "react";
 
-const ProTable = ({
-  data,
-  pagination,
-  setPagination,
-  columns,
-  isLoading = false,
-  renderRow,
-  isAdd = true,
-  isDelete = true,
-  isUpdate = true,
-  isExport = true,
-  isView = true,
-  total,
-}: {
-  data: any;
-  pagination: IParamsPagination;
-  setPagination: (pagination: IParamsPagination) => void;
-  isLoading?: boolean;
-  columns: IColumn[];
-  renderRow?: (item: any, key: string) => ReactNode;
+interface IProTableProps<T extends { id: string | number }> {
+  columns: ColumnsType<T>;
+  dataSource: T[];
+  loading?: boolean;
   isAdd?: boolean;
-  isUpdate?: boolean;
+  onAdd?: (values: any) => void;
   isDelete?: boolean;
-  isView?: boolean;
-  isExport?: boolean;
-  total: {
-    page: number;
-    records: number;
+  onDelete?: (id: T["id"]) => void;
+  pagination?: PaginationProps;
+  form?: {
+    title?: string;
+    children?: (props: { form: FormInstance }) => JSX.Element;
   };
-}) => {
-  const bottomContent = useMemo(() => {
-    return (
-      <div className="flex items-center justify-between px-2 py-2">
-        <span className="text-small text-default-400 w-[30%]">{`${total?.records || 0} items`}</span>
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          color="primary"
-          page={pagination.page || 1}
-          total={total?.page || 1}
-          onChange={(page) => setPagination({ ...pagination, page })}
-        />
-        <div className="hidden w-[30%] justify-end gap-2 sm:flex">
-          <label className="text-default-400 text-small flex items-center">
-            Rows per page:
-            <select
-              className="text-default-400 text-small bg-transparent outline-transparent outline-solid"
-              //  onChange={onRowsPerPageChange}
-              //  value={pagination.limit}
+  onReload?: () => void;
+}
+
+const ProTable = <T extends { id: string | number }>({
+  columns,
+  dataSource,
+  loading,
+  isAdd = true,
+  onAdd,
+  isDelete = true,
+  onDelete,
+  pagination,
+  form,
+  onReload,
+}: IProTableProps<T>): JSX.Element => {
+  const [modal, contextHolder] = Modal.useModal();
+  const [formInstance] = Form.useForm();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const columnWithSttAndAction = () => {
+    return [
+      {
+        title: "STT",
+        dataIndex: "stt",
+        key: "stt",
+        width: 60,
+        render: (_: T, __: any, index: number) => index + 1,
+      },
+      ...columns,
+      {
+        title: "Action",
+        dataIndex: "action",
+        key: "action",
+        width: 100,
+        render: (_: any, record: T) => {
+          return (
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: "view",
+                    label: "View",
+                    icon: <Eye className="h-4 w-4" />,
+                  },
+                  {
+                    key: "edit",
+                    label: "Edit",
+                    icon: <Pencil className="h-4 w-4" />,
+                  },
+                  ...(isDelete ? [{ type: "divider" as const }] : []),
+                  ...(isDelete
+                    ? [
+                        {
+                          key: "delete",
+                          label: "Delete",
+                          icon: <Trash className="h-4 w-4" />,
+                          danger: true,
+                          onClick: () => {
+                            modal.confirm({
+                              title: "Confirm Delete",
+                              content: "Are you sure you want to delete this record?",
+                              okText: "Delete",
+                              okType: "danger",
+                              onOk: () => {
+                                if (onDelete) {
+                                  onDelete(record.id);
+                                } else {
+                                  MessageService.error("onDelete is not defined");
+                                }
+                              },
+                            });
+                          },
+                        },
+                      ]
+                    : []),
+                ],
+              }}
             >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-            </select>
-          </label>
-        </div>
-      </div>
-    );
-  }, [pagination, setPagination, total]);
-
-  const topContent = useMemo(() => {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            {/* <Input
-            isClearable
-            className="w-full sm:max-w-[44%]"
-            placeholder="Search by name..."
-            startContent={<SearchIcon />}
-            variant="bordered"
-            value={filterValue}
-            onClear={() => onClear()}
-            onValueChange={onSearchChange}
-          /> */}
-          </div>
-          <div className="flex gap-3">
-            {/* <Dropdown>
-              <DropdownTrigger className="hidden sm:flex">
-                <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                  Columns
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu
-                disallowEmptySelection
-                aria-label="Table Columns"
-                closeOnSelect={false}
-                selectedKeys={visibleColumns}
-                selectionMode="multiple"
-                onSelectionChange={(selectedKeys) => {
-                  setVisibleColumns(new Set(selectedKeys));
-                }}
-              >
-                {ResourceService.columns.map((column) => (
-                  <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown> */}
-            {isAdd && (
-              <Button color="primary" endContent={<PlusIcon />}>
-                Add New
-              </Button>
-            )}
-            {isExport && (
-              <Button color="secondary" endContent={<FileDown />}>
-                Export
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }, [isAdd, isExport]);
-
-  const columnsWithActions = useMemo(() => {
-    const hasActionsColumn = columns.some((column) => column.uid === "actions");
-
-    let updatedColumns = columns.map((column) => {
-      if (column.uid === "actions") {
-        return {
-          ...column,
-          align: "center",
-        };
-      }
-      return column;
-    });
-
-    if (!hasActionsColumn) {
-      updatedColumns = [
-        ...updatedColumns,
-        {
-          name: "ACTIONS",
-          uid: "actions",
-          align: "center",
-          sortable: false,
+              <EllipsisVertical />
+            </Dropdown>
+          );
         },
-      ];
-    }
-
-    return updatedColumns;
-  }, [columns]);
-
-  const setSortDescriptor = (sortDescriptor: SortDescriptor) => {
-    setPagination({
-      ...pagination,
-      sortField: sortDescriptor.column.toString(),
-      sortOrder: sortDescriptor.direction === "ascending" ? "asc" : "desc",
-    });
+      },
+    ];
   };
+
+  const handleOpen = () => setIsModalOpen(true);
+
+  const handleClose = useCallback(() => setIsModalOpen(false), []);
 
   return (
-    <>
-      <Table
-        isHeaderSticky
-        aria-label="Example table with custom cells, pagination and sorting"
-        bottomContent={bottomContent}
-        bottomContentPlacement="outside"
-        classNames={{
-          wrapper: "max-h-[382px]",
-        }}
-        sortDescriptor={{
-          column: pagination.sortField || "id",
-          direction: pagination.sortOrder === "asc" ? "ascending" : "descending",
-        }}
-        topContent={topContent}
-        topContentPlacement="outside"
-        onSortChange={setSortDescriptor}
-      >
-        <TableHeader columns={columnsWithActions}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={column.uid === "actions" ? "center" : "start"}
-              allowsSorting={column.sortable}
-            >
-              {column.name}
-            </TableColumn>
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between">
+        <div></div>
+        <div className="flex gap-2">
+          <Button color="cyan" icon={<FileDown />}>
+            Export
+          </Button>
+          {isAdd && (
+            <Button type="primary" icon={<Plus />} onClick={handleOpen}>
+              Add New
+            </Button>
           )}
-        </TableHeader>
-        <TableBody emptyContent={"No records found"} items={data || []} isLoading={isLoading}>
-          {(item: any) => {
-            return (
-              <TableRow>
-                {(columnKey: any) => {
-                  if (columnKey.split(".").length > 1) {
-                    return (
-                      <TableCell>
-                        {renderRow?.(item, columnKey) ||
-                          item[columnKey.split(".")[0]][columnKey.split(".")[1]]}
-                      </TableCell>
-                    );
-                  }
-                  if (columnKey === "actions") {
-                    return (
-                      <TableCell width={80}>
-                        <div className="flex items-center gap-2">
-                          <Dropdown>
-                            <DropdownTrigger>
-                              <Button isIconOnly size="sm" variant="light">
-                                <EllipsisVertical />
-                              </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu>
-                              <>
-                                {isView && <DropdownItem key="view">View</DropdownItem>}
-                                {isUpdate && (
-                                  <DropdownItem
-                                    key="edit"
-                                    onPress={() => {
-                                      // setIsSelectRecord({
-                                      //   id: item.id,
-                                      //   name: item.name,
-                                      //   createdAt: item.createdAt,
-                                      //   updatedAt: item.updatedAt,
-                                      //   description: item.description,
-                                      // });
-                                      // onOpen();
-                                    }}
-                                  >
-                                    Edit
-                                  </DropdownItem>
-                                )}
-                                {isDelete && (
-                                  <DropdownItem
-                                    key="delete"
-                                    onPress={() => {
-                                      // setIsSelectRecord({
-                                      //   id: item.id,
-                                      //   name: item.name,
-                                      //   createdAt: item.createdAt,
-                                      //   updatedAt: item.updatedAt,
-                                      //   description: item.description,
-                                      // });
-                                      // onConfirmOpen();
-                                    }}
-                                    color="danger"
-                                  >
-                                    Delete
-                                  </DropdownItem>
-                                )}
-                              </>
-                            </DropdownMenu>
-                          </Dropdown>
-                        </div>
-                      </TableCell>
-                    );
-                  }
-                  return <TableCell>{renderRow?.(item, columnKey) || item[columnKey]}</TableCell>;
-                }}
-              </TableRow>
-            );
-          }}
-        </TableBody>
-      </Table>
-      {/* <ModalCU
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        onClose={onClose}
-        isSelectRecord={isSelectRecord!}
+        </div>
+      </div>
+      <Table
+        columns={columnWithSttAndAction()}
+        dataSource={dataSource}
+        loading={loading}
+        key={"pro-table"}
+        className="h-[500px] overflow-auto"
+        rowKey={(record) => record.id}
+        pagination={false}
       />
-      <ModalConfirm
-        isSelectRecord={isSelectRecord!}
-        isOpen={isConfirmOpen}
-        onOpenChange={onConfirmOpenChange}
-        onClose={onConfirmClose}
-      /> */}
-    </>
+      {pagination && (
+        <div className="flex justify-between">
+          <div>Total {pagination.total} records</div>
+          <Pagination {...pagination} />
+          <div></div>
+        </div>
+      )}
+      {contextHolder}
+      <ModalCU
+        isOpen={isModalOpen}
+        onCancel={() => {
+          handleClose();
+          formInstance.resetFields();
+        }}
+        onOk={() => {
+          formInstance.validateFields().then((values) => {
+            if (onAdd) {
+              onAdd(values);
+              handleClose();
+              formInstance.resetFields();
+              if (onReload) {
+                onReload();
+              }
+            } else {
+              MessageService.error("onAdd is not defined");
+            }
+          });
+        }}
+        title={form?.title || "Add New"}
+      >
+        {form?.children ? form.children({ form: formInstance }) : null}
+      </ModalCU>
+    </div>
   );
 };
 
-export default memo(ProTable);
+export default memo(ProTable) as <T extends { id: string | number }>(
+  props: IProTableProps<T>,
+) => React.JSX.Element;

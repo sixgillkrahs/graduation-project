@@ -1,71 +1,70 @@
-import { ResourceQueryKey } from "./config";
-import ResourceService from "./service";
+import { PermissionQueryKey } from "./config";
 import { queryClient } from "@shared/queryClient";
-import type { IPaginationResp, IResp } from "@shared/types/service";
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
+import PermissionService from "./service";
 
-export const useDeleteResource = (): UseMutationResult<
-  IPaginationResp<IResourceService.ResourceDTO>,
+export const useDeletePermission = (): UseMutationResult<
+  void,
   Error,
   string,
   void
 > => {
   return useMutation({
     mutationFn: (id: string) => {
-      return ResourceService.deleteResource(id);
+      return PermissionService.DeletePermission(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [ResourceQueryKey.getResources],
+        queryKey: [PermissionQueryKey.getPermissions],
       });
     },
     meta: {
-      ERROR_SOURCE: "[Delete resource failed]",
-      SUCCESS_MESSAGE: "The resource has been successfully deleted",
+      ERROR_SOURCE: "[Delete permission failed]",
+      SUCCESS_MESSAGE: "The permission has been successfully deleted",
     },
   });
 };
 
-export const useCreateResource = (): UseMutationResult<
-  IResp<IResourceService.ResourceDTO>,
-  Error,
-  IResourceService.CreateResourceDTO,
-  void
-> => {
-  return useMutation({
-    mutationFn: (resource: IResourceService.CreateResourceDTO) => {
-      return ResourceService.createResource(resource);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [ResourceQueryKey.getResources],
-      });
-    },
-    meta: {
-      ERROR_SOURCE: "[Create resource failed]",
-      SUCCESS_MESSAGE: "The resource has been successfully created",
-    },
-  });
-};
+// export const useCreateResource = (): UseMutationResult<
+//   IResp<IResourceService.ResourceDTO>,
+//   Error,
+//   IResourceService.CreateResourceDTO,
+//   void
+// > => {
+//   return useMutation({
+//     mutationFn: (resource: IResourceService.CreateResourceDTO) => {
+//       return ResourceService.createResource(resource);
+//     },
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({
+//         queryKey: [ResourceQueryKey.getResources],
+//       });
+//     },
+//     meta: {
+//       ERROR_SOURCE: "[Create resource failed]",
+//       SUCCESS_MESSAGE: "The resource has been successfully created",
+//     },
+//   });
+// };
 
-export const useUpdateResource = (): UseMutationResult<
-  IResp<IResourceService.ResourceDTO>,
-  Error,
-  IResourceService.UpdateResourceDTO,
-  void
-> => {
-  return useMutation({
-    mutationFn: (resource: IResourceService.UpdateResourceDTO) => {
-      return ResourceService.updateResource(resource);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [ResourceQueryKey.getResources],
-      });
-    },
-    meta: {
-      ERROR_SOURCE: "[Update resource failed]",
-      SUCCESS_MESSAGE: "The resource has been successfully updated",
-    },
-  });
-};
+// export const useUpdateResource = (): UseMutationResult<
+//   IResp<IResourceService.ResourceDTO>,
+//   Error,
+//   IResourceService.UpdateResourceDTO,
+//   void
+// > => {
+//   return useMutation({
+//     mutationFn: (resource: IResourceService.UpdateResourceDTO) => {
+//       return ResourceService.updateResource(resource);
+//     },
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({
+//         queryKey: [ResourceQueryKey.getResources],
+//       });
+//     },
+//     meta: {
+//       ERROR_SOURCE: "[Update resource failed]",
+//       SUCCESS_MESSAGE: "The resource has been successfully updated",
+//     },
+//   });
+// };

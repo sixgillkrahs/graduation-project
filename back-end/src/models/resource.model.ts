@@ -5,12 +5,13 @@ import collections from "./config/collections";
 
 export interface IResource {
   name: string;
-  description: string;
+  path: string;
+  description?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export interface IResourceMethods {}
+export interface IResourceMethods { }
 
 interface ResourceModel
   extends mongoose.Model<IResource, {}, IResourceMethods> {
@@ -53,6 +54,11 @@ const resourceSchema = new mongoose.Schema<
 >(
   {
     name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    path: {
       type: String,
       required: true,
       trim: true,

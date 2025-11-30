@@ -12,7 +12,7 @@ const MainLayout = () => {
       </div>
       <div className="flex flex-1 flex-col">
         <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
-        <div className="flex-1 bg-[#F2F2F2] p-[31px] shadow-md">
+        <div className="box-content flex-1 bg-[#F2F2F2] p-[31px] shadow-md">
           <Outlet />
         </div>
       </div>

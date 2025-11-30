@@ -1,6 +1,7 @@
 namespace IResourceService {
   export interface ResourceDTO {
     name: string;
+    path: string;
     description: string;
     createdAt: string;
     updatedAt: string;
@@ -9,12 +10,14 @@ namespace IResourceService {
 
   export interface CreateResourceDTO {
     name: string;
+    path: string;
     description: string;
   }
 
   export interface UpdateResourceDTO {
     id: string;
     name: string;
+    path: string;
     description: string;
   }
 }

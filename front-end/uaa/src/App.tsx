@@ -1,7 +1,9 @@
 import Loading from "@/components/Loading";
+import MessageService from "@shared/message";
 import routeConfig from "@shared/routeConfig";
 import type { RouterConfig } from "@shared/types/router";
-import { Suspense } from "react";
+import { message } from "antd";
+import { Suspense, useEffect } from "react";
 import { Outlet, Route, Routes } from "react-router-dom";
 
 function renderRouteConfig(
@@ -54,7 +56,17 @@ function renderRouteConfig(
 }
 
 function App() {
-  return <Routes>{renderRouteConfig(routeConfig, <Loading />)}</Routes>;
+  const [messageApi, contextHolder] = message.useMessage();
+
+  useEffect(() => {
+    MessageService.init(messageApi);
+  }, [messageApi]);
+  return (
+    <>
+      {contextHolder}
+      <Routes>{renderRouteConfig(routeConfig, <Loading />)}</Routes>
+    </>
+  );
 }
 
 export default App;

@@ -1,6 +1,6 @@
 import logo from "@/assets/logo.svg";
 import routes from "@/shared/routeConfig";
-import { Image } from "@heroui/react";
+import { Image } from "antd";
 import React, { type ComponentType } from "react";
 import { NavLink } from "react-router-dom";
 

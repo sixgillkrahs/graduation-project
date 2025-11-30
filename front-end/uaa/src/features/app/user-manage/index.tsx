@@ -1,40 +1,52 @@
-import Permissions from "./permissions";
 import Resources from "./resources";
 import Roles from "./roles";
-import { Tab, Tabs } from "@heroui/tabs";
-import { useState, type Key } from "react";
-
-const TabsArray = [
-  {
-    key: "roles",
-    title: "Roles",
-    component: Roles,
-  },
-  {
-    key: "permissions",
-    title: "Permissions",
-    component: Permissions,
-  },
-  {
-    key: "resources",
-    title: "Resources",
-    component: Resources,
-  },
-];
+import { Tabs } from "antd";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const UserManager = () => {
   const [selected, setSelected] = useState("roles");
-  const handleSelectionChange = (key: Key) => setSelected(key as string);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const handleSelectionChange = (key: string) => {
+    setSelected(key);
+    setSearchParams({ tab: key });
+  };
+
+  useEffect(() => {
+    const tabFromParams = searchParams.get("tab");
+    if (tabFromParams && ["roles", "permissions", "resources"].includes(tabFromParams)) {
+      setSelected(tabFromParams);
+    } else {
+      setSelected("roles");
+      setSearchParams({ tab: "roles" });
+    }
+  }, [searchParams, setSearchParams]);
 
   return (
     <div className="flex w-full flex-col">
-      <Tabs aria-label="Options" selectedKey={selected} onSelectionChange={handleSelectionChange}>
-        {TabsArray.map((tab) => (
-          <Tab key={tab.key} title={tab.title}>
-            {<tab.component />}
-          </Tab>
-        ))}
-      </Tabs>
+      <Tabs
+        type="card"
+        aria-label="Options"
+        activeKey={selected}
+        onChange={handleSelectionChange}
+        items={[
+          {
+            key: "roles",
+            label: "Roles",
+            children: <Roles />,
+          },
+          {
+            key: "permissions",
+            label: "Permissions",
+            // children: <Permissions />,
+          },
+          {
+            key: "resources",
+            label: "Resources",
+            children: <Resources />,
+          },
+        ]}
+      />
     </div>
   );
 };

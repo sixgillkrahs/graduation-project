@@ -1,4 +1,3 @@
-import { addToast } from "@heroui/toast";
 import {
   Mutation,
   MutationCache,
@@ -8,6 +7,7 @@ import {
   type QueryKey,
 } from "@tanstack/react-query";
 import axios from "axios";
+import MessageService from "./message";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,10 +34,7 @@ export const queryClient = new QueryClient({
         console.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
       }
       if (error?.response && error.response.status === 404) {
-        addToast({
-          description: `${error?.response?.data?.message}` as string,
-          color: "danger",
-        });
+        MessageService.error(`${error?.response?.data?.message}`);
       }
     },
   }),
@@ -49,16 +46,10 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (axios.isAxiosError(error) && mutation.meta?.ERROR_SOURCE) {
-        addToast({
-          description: `${mutation.meta.ERROR_SOURCE}: ${error.response?.data?.message}` as string,
-          color: "danger",
-        });
+        MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
       }
       if (error instanceof Error && mutation.meta?.ERROR_SOURCE) {
-        addToast({
-          description: `${mutation.meta.ERROR_SOURCE}: ${error.message}` as string,
-          color: "danger",
-        });
+        MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.message}`);
       }
     },
     onSuccess: (
@@ -68,10 +59,7 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (mutation.meta?.SUCCESS_MESSAGE) {
-        addToast({
-          description: `${mutation.meta.SUCCESS_MESSAGE}` as string,
-          color: "success",
-        });
+        MessageService.success(`${mutation.meta.SUCCESS_MESSAGE}`);
       }
     },
   }),

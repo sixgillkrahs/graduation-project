@@ -11,14 +11,6 @@ export default class ResourceService {
     "updatedAt",
     "action",
   ];
-  public static readonly columns = [
-    { name: "ID", uid: "id", sortable: true },
-    { name: "NAME", uid: "name", sortable: true },
-    { name: "DESCRIPTION", uid: "description", sortable: true },
-    { name: "CREATED_AT", uid: "createdAt", sortable: true },
-    { name: "UPDATED_AT", uid: "updatedAt", sortable: true },
-    { name: "ACTION", uid: "action" },
-  ];
   public static readonly getResources = (
     params: IParamsPagination,
   ): Promise<IPaginationResp<IResourceService.ResourceDTO>> => {

@@ -1,6 +1,4 @@
-import { Badge } from "@heroui/badge";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { User } from "@heroui/user";
+import { Badge, Dropdown } from "antd";
 import { Bell, Menu } from "lucide-react";
 
 const Header = ({
@@ -19,8 +17,8 @@ const Header = ({
         <Badge color="danger" content="3">
           <Bell />
         </Badge>
-        <Dropdown placement="bottom-end">
-          <DropdownTrigger>
+        <Dropdown>
+          {/* <DropdownTrigger>
             <User
               as="button"
               avatarProps={{
@@ -36,7 +34,7 @@ const Header = ({
             <DropdownItem key="logout" color="danger">
               Log Out
             </DropdownItem>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </Dropdown>
       </div>
     </div>

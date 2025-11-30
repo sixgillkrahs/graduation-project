@@ -2,7 +2,7 @@ import { PermissionEndpoint } from "./config";
 import type { ChipProps } from "@heroui/chip";
 import { AxiosMethod } from "@shared/axios/method";
 import request from "@shared/axios/request";
-import type { IColumn, IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
+import type { IColumn, IPaginationResp, IParamsPagination } from "@shared/types/service";
 
 export default class PermissionService {
   public static readonly INITIAL_VISIBLE_COLUMNS = [
@@ -34,6 +34,15 @@ export default class PermissionService {
       url: PermissionEndpoint.GetPermissions(),
       method: AxiosMethod.GET,
       params,
+    });
+  };
+
+  public static readonly DeletePermission = (
+    id: string | number,
+  ): Promise<void> => {
+    return request({
+      url: PermissionEndpoint.DeletePermission(id),
+      method: AxiosMethod.DELETE,
     });
   };
 }

@@ -26,6 +26,7 @@ export const validationMessages = {
     emailExist: "Email đã tồn tại",
     error: "Internal server error",
     userNotFound: "Không tồn tại người dùng",
+    invalidPath: "Đường dẫn không hợp lệ",
     userNotActive: "Người dùng đã bị khóa",
   },
   en: {
@@ -55,6 +56,7 @@ export const validationMessages = {
     emailExist: "Email already exists",
     error: "Internal server error",
     userNotFound: "User not found",
+    invalidPath: "Invalid path",
     userNotActive: "User not active",
   },
 } as const;

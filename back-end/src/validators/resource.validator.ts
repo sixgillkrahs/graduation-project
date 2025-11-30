@@ -10,6 +10,10 @@ export const createUpdateResourceSchema = (
       name: z
         .string({ message: t.invalidName })
         .min(1, { message: t.invalidName }),
+      path: z
+        .string({ message: t.invalidPath })
+        .min(1, { message: t.invalidPath }),
+
       description: z.optional(z.string({ message: t.invalidDescription })),
     }),
   });
