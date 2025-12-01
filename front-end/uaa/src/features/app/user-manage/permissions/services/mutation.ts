@@ -2,9 +2,10 @@ import { PermissionQueryKey } from "./config";
 import { queryClient } from "@shared/queryClient";
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 import PermissionService from "./service";
+import type { IResp } from "@shared/types/service";
 
 export const useDeletePermission = (): UseMutationResult<
-  void,
+  IResp<void>,
   Error,
   string,
   void

@@ -16,4 +16,5 @@ export const ResourceQueryKey = {
   createResource: "createResource",
   updateResource: "updateResource",
   getResource: "getResource",
+  getInfiniteResources: "getInfiniteResources",
 } as const;

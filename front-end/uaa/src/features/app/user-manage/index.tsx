@@ -1,3 +1,4 @@
+import Permissions from "./permissions";
 import Resources from "./resources";
 import Roles from "./roles";
 import { Tabs } from "antd";
@@ -39,7 +40,7 @@ const UserManager = () => {
           {
             key: "permissions",
             label: "Permissions",
-            // children: <Permissions />,
+            children: <Permissions />,
           },
           {
             key: "resources",

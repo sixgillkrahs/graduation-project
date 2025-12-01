@@ -60,7 +60,6 @@ interface IProTableProps<T extends { id: string | number }> {
 }
 
 const ProTable = <T extends { id: string | number }>({
-  titleTable,
   bordered = false,
   columns,
   dataSource,
@@ -251,7 +250,6 @@ const ProTable = <T extends { id: string | number }>({
       }
     });
   };
-  console.log("first");
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">

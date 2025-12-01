@@ -146,7 +146,6 @@ const Resources = () => {
         buttonLoading: isCreating || isUpdating,
       }}
       key={"resource-form"}
-      bordered
       useGetDetail={useGetResource}
       search={{
         placeholder: "Search by name or path",
