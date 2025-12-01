@@ -24,6 +24,7 @@ const Resources = () => {
     limit: pagination.limit,
     sortField: pagination.sortField,
     sortOrder: pagination.sortOrder,
+    query: pagination.query,
   });
 
   const columns: ColumnsType<IResourceService.ResourceDTO> = [
@@ -104,6 +105,16 @@ const Resources = () => {
     [pagination],
   );
 
+  const onSearch = (values: { search: string }) => {
+    console.log("first");
+    setPagination({
+      ...pagination,
+      page: 1,
+      total: data?.data.totalResults || pagination.total,
+      query: values.search,
+    });
+  };
+
   return (
     <ProTable<IResourceService.ResourceDTO>
       titleTable="Danh sách tài nguyên"
@@ -137,6 +148,11 @@ const Resources = () => {
       key={"resource-form"}
       bordered
       useGetDetail={useGetResource}
+      search={{
+        placeholder: "Search by name or path",
+        name: "search",
+      }}
+      onSearch={onSearch}
     />
   );
 };

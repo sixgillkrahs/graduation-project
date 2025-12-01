@@ -2,13 +2,23 @@ import ModalForm from "./ModalForm";
 import MessageService from "@shared/message";
 import type { IResp } from "@shared/types/service";
 import type { UseQueryResult } from "@tanstack/react-query";
-import { Button, Dropdown, Form, Modal, Pagination, Table, type PaginationProps } from "antd";
+import {
+  Button,
+  Dropdown,
+  Form,
+  Input,
+  Modal,
+  Pagination,
+  Table,
+  type InputRef,
+  type PaginationProps,
+} from "antd";
 import type { SizeType } from "antd/es/config-provider/SizeContext";
 import type { ItemType } from "antd/es/menu/interface";
 import type { ColumnsType } from "antd/es/table";
 import type { SorterResult } from "antd/es/table/interface";
 import { EllipsisVertical, Eye, FileDown, Pencil, Plus, Trash } from "lucide-react";
-import { memo, useCallback, useEffect, useState, type JSX, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useRef, useState, type JSX, type ReactNode } from "react";
 
 interface IProTableProps<T extends { id: string | number }> {
   titleTable?: string;
@@ -42,6 +52,11 @@ interface IProTableProps<T extends { id: string | number }> {
   extraAction?: ItemType[];
   extraButtonTop?: ReactNode;
   filter?: ReactNode;
+  search?: {
+    placeholder?: string;
+    name?: string;
+  };
+  onSearch?: (values: { search: string }) => void;
 }
 
 const ProTable = <T extends { id: string | number }>({
@@ -68,6 +83,8 @@ const ProTable = <T extends { id: string | number }>({
   extraAction,
   extraButtonTop,
   filter,
+  search,
+  onSearch,
 }: IProTableProps<T>): JSX.Element => {
   const [modal, contextHolder] = Modal.useModal();
   const [formInstance] = Form.useForm();
@@ -75,6 +92,7 @@ const ProTable = <T extends { id: string | number }>({
   const [currentRecord, setCurrentRecord] = useState<T | null>(null);
   const [formMode, setFormMode] = useState<"ADD" | "EDIT" | "VIEW" | undefined>();
   const { data, isLoading } = useGetDetail?.(currentRecord?.id as T["id"]) || {};
+  const searchRef = useRef<InputRef>(null);
 
   const handleSetFormValues = useCallback(
     (data: T) => {
@@ -176,6 +194,14 @@ const ProTable = <T extends { id: string | number }>({
     setIsModalOpen(true);
   };
 
+  const handleSearch = () => {
+    if (searchRef.current) {
+      if (onSearch) {
+        onSearch({ search: searchRef.current?.input?.value || "" });
+      }
+    }
+  };
+
   const handleDelete = (id: T["id"]) => {
     modal.confirm({
       title: "Confirm Delete",
@@ -229,7 +255,16 @@ const ProTable = <T extends { id: string | number }>({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
-        <div className="text-2xl font-bold">{titleTable}</div>
+        <div>
+          {search && (
+            <Input
+              placeholder={search?.placeholder || "Search"}
+              name={search?.name || "search"}
+              ref={searchRef}
+              onPressEnter={handleSearch}
+            />
+          )}
+        </div>
         <div className="flex gap-2">
           {filter}
           {extraButtonTop}
