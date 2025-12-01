@@ -1,11 +1,11 @@
-import { Form, Input, type FormInstance } from "antd";
+import { Form, Input } from "antd";
 
 const { Item } = Form;
 const { TextArea } = Input;
 
-const FormResource = ({ form }: { form: FormInstance }) => {
+const FormResource = () => {
   return (
-    <Form layout="vertical" form={form}>
+    <>
       <Item label="Name" name="name" rules={[{ required: true, message: "Please input name!" }]}>
         <Input placeholder="Enter name" />
       </Item>
@@ -15,7 +15,7 @@ const FormResource = ({ form }: { form: FormInstance }) => {
       <Item label="Description" name="description">
         <TextArea placeholder="Enter description" />
       </Item>
-    </Form>
+    </>
   );
 };
 

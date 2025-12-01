@@ -1,9 +1,9 @@
 import { useSignIn } from "./services/mutation";
 import logo from "@assets/logo.svg";
-import { Button } from "@heroui/button";
-import { Form } from "@heroui/form";
-import { Input } from "@heroui/input";
-import { Divider, Image, Link, Switch } from "@heroui/react";
+// import { Button } from "@heroui/button";
+// import { Form } from "@heroui/form";
+// import { Input } from "@heroui/input";
+// import { Divider, Image, Link, Switch } from "@heroui/react";
 import { getEmailError, getPasswordError } from "@shared/validators/form";
 import { useState, type FormEvent } from "react";
 
@@ -36,7 +36,7 @@ const SignIn = () => {
   };
   return (
     <div className="flex h-full flex-col justify-between px-4 py-5 sm:p-12">
-      <div className="flex flex-col-reverse gap-12 sm:flex-col">
+      {/* <div className="flex flex-col-reverse gap-12 sm:flex-col">
         <div className="text-black-900 flex items-center justify-center gap-2 text-2xl font-bold sm:justify-start">
           <Image src={logo} alt="logo" />
           <span>UAA Portal</span>
@@ -92,7 +92,7 @@ const SignIn = () => {
           <span className="text-black-900 text-center text-sm">UAA Portal</span>
         </div>
         <span className="text-black-900 text-center text-sm">© 2023 UAA Portal</span>
-      </div>
+      </div> */}
     </div>
   );
 };

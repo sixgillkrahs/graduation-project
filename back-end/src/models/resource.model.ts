@@ -11,7 +11,7 @@ export interface IResource {
   updatedAt?: Date;
 }
 
-export interface IResourceMethods { }
+export interface IResourceMethods {}
 
 interface ResourceModel
   extends mongoose.Model<IResource, {}, IResourceMethods> {
@@ -91,7 +91,7 @@ class ResourceClass {
     page: number = 1,
     limit: number = 10,
     sortBy: string = "createdAt",
-    sortOrder: SortOrder = -1,
+    sortOrder: SortOrder = 1,
   ) {
     const skip = (page - 1) * limit;
     const sort = { [sortBy]: sortOrder };

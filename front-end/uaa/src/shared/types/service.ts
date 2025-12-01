@@ -1,3 +1,5 @@
+import type { Key } from "react";
+
 export interface ServiceEndpoint {
   [key: string]: (...args: any[]) => string;
 }
@@ -26,8 +28,8 @@ export interface IParamsPagination {
   page: number;
   limit: number;
   query?: string;
-  sortField?: string;
-  sortOrder?: "asc" | "desc";
+  sortField?: Key | readonly Key[];
+  sortOrder?: "asc" | "desc" | "descend";
   total?: number;
 }
 

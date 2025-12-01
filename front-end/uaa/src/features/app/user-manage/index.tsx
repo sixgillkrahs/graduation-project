@@ -29,6 +29,7 @@ const UserManager = () => {
         aria-label="Options"
         activeKey={selected}
         onChange={handleSelectionChange}
+        destroyOnHidden={true}
         items={[
           {
             key: "roles",

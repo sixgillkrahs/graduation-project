@@ -31,9 +31,7 @@ export default class ResourceService {
     });
   };
 
-  public static readonly deleteResource = (
-    id: string,
-  ): Promise<IPaginationResp<IResourceService.ResourceDTO>> => {
+  public static readonly deleteResource = (id: string): Promise<IResp<void>> => {
     return request({
       url: ResourceEndpoint.DeleteResource(id),
       method: AxiosMethod.DELETE,
