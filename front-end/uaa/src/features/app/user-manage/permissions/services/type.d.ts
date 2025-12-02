@@ -27,7 +27,7 @@ namespace IPermissionService {
     isActive: boolean;
   }
 
-  export interface IOOperation {
+  export interface IOperation {
     value: string;
     label: string;
     color: `#${string}`;

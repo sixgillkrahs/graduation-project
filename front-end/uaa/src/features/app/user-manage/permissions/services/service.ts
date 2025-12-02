@@ -4,7 +4,7 @@ import request from "@shared/axios/request";
 import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 
 export default class PermissionService {
-  public static readonly OPERATION: IPermissionService.IOOperation[] = [
+  public static readonly OPERATION: IPermissionService.IOperation[] = [
     {
       value: "create",
       label: "Create",
