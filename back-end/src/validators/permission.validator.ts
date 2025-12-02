@@ -20,8 +20,9 @@ export const createPermissionSchema = (
   return z.object({
     body: z.object({
       name: z.string({ message: t.invalidName }),
-      description: z.string({ message: t.invalidDescription }),
+      description: z.string().optional(),
       resourceId: createObjectIdSchema(lang),
+      isActive: z.boolean().default(true),
       operation: z.enum(
         ["read", "create", "update", "delete", "approve", "export"],
         {

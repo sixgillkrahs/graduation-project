@@ -1,13 +1,19 @@
 import FormPermission from "./components/FormPermission";
-import { OPERATION } from "./const";
-import { useDeletePermission } from "./services/mutation";
-import { useGetPermissions } from "./services/query";
+import {
+  useCreatePermission,
+  useDeletePermission,
+  useUpdatePermission,
+  useUpdatePermissionStatus,
+} from "./services/mutation";
+import { useGetPermission, useGetPermissions } from "./services/query";
+import PermissionService from "./services/service";
 import ProTable from "@/components/ProTable";
 import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
 import type { IParamsPagination, IResp } from "@shared/types/service";
 import { Checkbox } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import { Ban, CircleCheckBig } from "lucide-react";
 import { useCallback, useState } from "react";
 
 const Permissions = () => {
@@ -23,6 +29,10 @@ const Permissions = () => {
     query: pagination.query,
   });
   const { mutateAsync: deletePermission } = useDeletePermission();
+  const { mutateAsync: createPermission, isPending: isCreating } = useCreatePermission();
+  const { mutateAsync: updatePermission, isPending: isUpdating } = useUpdatePermission();
+  const { mutateAsync: updatePermissionStatus, isPending: isUpdatingStatus } =
+    useUpdatePermissionStatus();
 
   const columns: ColumnsType<IPermissionService.PermissionDTO> = [
     {
@@ -40,7 +50,7 @@ const Permissions = () => {
       title: "Operation",
       dataIndex: "operation",
       key: "operation",
-      render: (value) => renderConstant(value, OPERATION),
+      render: (value) => renderConstant(value, PermissionService.OPERATION),
     },
     {
       title: "Active",
@@ -88,15 +98,42 @@ const Permissions = () => {
     });
   };
 
-  const onAdd = (values: IResourceService.CreateResourceDTO): Promise<any> => {
-    console.log("values", values);
-    // return createResource(values, {
-    //   onSuccess: () => {
-    //     refetch();
-    //   },
-    // });
-    return Promise.resolve();
+  const onAdd = (values: IPermissionService.CreatePermissionDTO): Promise<any> => {
+    return createPermission(values, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
   };
+
+  const onEdit = (values: IPermissionService.UpdatePermissionDTO): Promise<any> => {
+    return updatePermission(values, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
+  };
+
+  const onUpdateStatus = (values: IPermissionService.UpdatePermissionStatusDTO): Promise<any> => {
+    return updatePermissionStatus(values, {
+      onSuccess: () => {
+        refetch();
+      },
+    });
+  };
+
+  const extraButton = (record: IPermissionService.PermissionDTO) => [
+    {
+      key: "changeStatus",
+      label: record.isActive ? "Inactivate" : "Activate",
+      icon: record.isActive ? <Ban className="h-4 w-4" /> : <CircleCheckBig className="h-4 w-4" />,
+      onClick: () =>
+        onUpdateStatus({
+          id: record.id,
+          isActive: !record.isActive,
+        }),
+    },
+  ];
 
   return (
     <>
@@ -105,7 +142,7 @@ const Permissions = () => {
         columns={columns}
         dataSource={data?.data.results || []}
         isExport={false}
-        loading={isLoading || isFetching}
+        loading={isLoading || isFetching || isUpdatingStatus}
         pagination={{
           total: data?.data.totalResults || pagination.total,
           current: data?.data.page || pagination.page,
@@ -119,15 +156,22 @@ const Permissions = () => {
         }}
         onDelete={onDelete}
         onAdd={onAdd}
+        onEdit={onEdit}
+        useGetDetail={useGetPermission}
+        extraAction={extraButton}
         form={{
           children: <FormPermission />,
           title: "Permission",
           initialValues: {
             name: "",
-            path: "",
+            description: "",
+            resourceId: "",
+            isActive: true,
+            operation: "",
           },
-          //   buttonLoading: isCreating || isUpdating,
+          buttonLoading: isCreating || isUpdating || isUpdatingStatus,
         }}
+        // filter={filter}
       />
     </>
   );

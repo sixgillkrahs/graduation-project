@@ -1,3 +1,4 @@
+import MessageService from "./message";
 import {
   Mutation,
   MutationCache,
@@ -7,7 +8,6 @@ import {
   type QueryKey,
 } from "@tanstack/react-query";
 import axios from "axios";
-import MessageService from "./message";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,6 +50,10 @@ export const queryClient = new QueryClient({
       }
       if (error instanceof Error && mutation.meta?.ERROR_SOURCE) {
         MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.message}`);
+      }
+      //@ts-ignore
+      if (error.code === "ERR_BAD_REQUEST" && mutation.meta?.ERROR_SOURCE) {
+        MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.response.data.message}`);
       }
     },
     onSuccess: (

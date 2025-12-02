@@ -31,7 +31,7 @@ export class PermissionController extends BaseController {
           {
             page: page ? Number(page) : 1,
             limit: limit ? Number(limit) : 10,
-            sortBy: `${sortField as string}:${sortOrder as string}`,
+            sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
             populate: "resourceId:id name",
           },
           filter,
@@ -67,13 +67,15 @@ export class PermissionController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       try {
-        const { name, description, resourceId, operation } = req.body as {
-          name: string;
-          description: string;
-          resourceId: string;
-          operation: Operation;
-        };
-        if (!name || !resourceId || !operation) {
+        const { name, description, resourceId, operation, isActive } =
+          req.body as {
+            name: string;
+            description: string;
+            resourceId: string;
+            operation: Operation;
+            isActive: boolean;
+          };
+        if (!name || !resourceId || !operation || isActive === undefined) {
           throw new Error("Missing required fields");
         }
         const resource =
@@ -87,7 +89,7 @@ export class PermissionController extends BaseController {
         const permission = await this.permissionService.createPermission({
           name,
           description,
-          isActive: true,
+          isActive: isActive,
           resourceId: resource.id,
           operation,
         });

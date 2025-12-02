@@ -13,11 +13,23 @@ namespace IPermissionService {
   export interface CreatePermissionDTO {
     name: string;
     description: string;
+    operation: string;
+    resourceId: string;
+    isActive: boolean;
   }
 
-  export interface UpdatePermissionDTO {
+  export interface UpdatePermissionDTO extends CreatePermissionDTO {
     id: string;
-    name: string;
-    description: string;
+  }
+
+  export interface UpdatePermissionStatusDTO {
+    id: string;
+    isActive: boolean;
+  }
+
+  export interface IOOperation {
+    value: string;
+    label: string;
+    color: `#${string}`;
   }
 }

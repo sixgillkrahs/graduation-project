@@ -9,3 +9,12 @@ export const useGetPermissions = (params: IParamsPagination) => {
     queryFn: () => PermissionService.GetPermissions(params),
   });
 };
+
+export const useGetPermission = (id: string | number) => {
+  return useQuery({
+    queryKey: [PermissionQueryKey.getPermission, id],
+    queryFn: () => PermissionService.GetPermissionById(id),
+    enabled: !!id,
+    refetchOnMount: "always",
+  });
+};

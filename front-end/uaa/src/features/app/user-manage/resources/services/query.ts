@@ -29,16 +29,14 @@ export const useGetResource = (id: string) => {
 export const useGetInfiniteResources = (params: IParamsPagination) => {
   return useInfiniteQuery({
     queryKey: [ResourceQueryKey.getInfiniteResources, params],
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      return lastPageParam + 1
-    },
-    initialData: {
-      pageParams: [params.page],
-      pages: [],
-    },
     initialPageParam: params.page,
-    queryFn: () => {
-      return ResourceService.getResources(params);
-    }
+    queryFn: ({ pageParam }) => {
+      return ResourceService.getResources({ ...params, page: pageParam as number });
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data;
+      const next = page + 1;
+      return next <= totalPages ? next : undefined;
+    },
   });
 };

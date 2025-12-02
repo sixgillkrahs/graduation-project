@@ -49,7 +49,7 @@ interface IProTableProps<T extends { id: string | number }> {
   onSort?: (sorter: SorterResult<T>) => void;
   useGetDetail?: (id: T["id"]) => UseQueryResult<IResp<T>, Error>;
   size?: SizeType;
-  extraAction?: ItemType[];
+  extraAction?: (record: T) => ItemType[];
   extraButtonTop?: ReactNode;
   filter?: ReactNode;
   search?: {
@@ -90,8 +90,9 @@ const ProTable = <T extends { id: string | number }>({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<T | null>(null);
   const [formMode, setFormMode] = useState<"ADD" | "EDIT" | "VIEW" | undefined>();
-  const { data, isLoading } = useGetDetail?.(currentRecord?.id as T["id"]) || {};
+  const { data, isLoading, refetch } = useGetDetail?.(currentRecord?.id as T["id"]) || {};
   const searchRef = useRef<InputRef>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSetFormValues = useCallback(
     (data: T) => {
@@ -103,13 +104,19 @@ const ProTable = <T extends { id: string | number }>({
   );
 
   useEffect(() => {
+    if (!isModalOpen || isSubmitting) return;
     if (data?.data) {
-      handleSetFormValues(data.data);
+      if (!formInstance.isFieldsTouched(true)) {
+        handleSetFormValues(data.data);
+      }
     }
-    return () => {
-      console.log("Unmounted!");
-    };
-  }, [data?.data, handleSetFormValues]);
+  }, [isModalOpen, isSubmitting, data?.data, handleSetFormValues, formInstance]);
+
+  useEffect(() => {
+    if (isModalOpen && currentRecord?.id && typeof refetch === "function") {
+      refetch();
+    }
+  }, [isModalOpen, currentRecord?.id, refetch]);
 
   const columnWithSttAndAction = () => {
     return [
@@ -118,7 +125,12 @@ const ProTable = <T extends { id: string | number }>({
         dataIndex: "stt",
         key: "stt",
         width: 60,
-        render: (_: T, __: any, index: number) => index + 1,
+        render: (_: T, __: any, index: number) =>
+          index +
+          1 +
+          (pagination?.current && pagination?.pageSize
+            ? (pagination?.current - 1) * pagination?.pageSize
+            : 0),
       },
       ...columns,
       {
@@ -131,7 +143,7 @@ const ProTable = <T extends { id: string | number }>({
             <Dropdown
               menu={{
                 items: [
-                  ...(extraAction || []),
+                  ...(extraAction?.(record) || []),
                   ...(isView
                     ? [
                         {
@@ -190,6 +202,11 @@ const ProTable = <T extends { id: string | number }>({
   const handleAdd = () => {
     setCurrentRecord(null);
     setFormMode("ADD");
+    if (form?.initialValues) {
+      formInstance.setFieldsValue(form.initialValues);
+    } else {
+      formInstance.resetFields();
+    }
     setIsModalOpen(true);
   };
 
@@ -221,32 +238,38 @@ const ProTable = <T extends { id: string | number }>({
     setIsModalOpen(false);
     setCurrentRecord(null);
     setFormMode(undefined);
-    formInstance.resetFields();
     form?.onCancel?.();
-  }, [formInstance, form]);
+  }, [form]);
 
   const handleSubmit = () => {
     formInstance.validateFields().then(async (values) => {
-      if (formMode === "ADD" && onAdd) {
-        const result = onAdd(values);
-        if (result && typeof (result as any).then === "function") {
-          await result;
+      try {
+        setIsSubmitting(true);
+        if (formMode === "ADD" && onAdd) {
+          const result = onAdd(values);
+          if (result && typeof (result as any).then === "function") {
+            await result;
+          }
+          handleClose();
+          if (onReload) {
+            onReload();
+          }
+        } else if (formMode === "EDIT" && onEdit) {
+          const result = onEdit({ ...currentRecord, ...values });
+          if (result && typeof (result as any).then === "function") {
+            await result;
+          }
+          handleClose();
+          if (onReload) {
+            onReload();
+          }
+        } else {
+          MessageService.error(`${formMode === "ADD" ? "onAdd" : "onEdit"} is not defined`);
         }
-        handleClose();
-        if (onReload) {
-          onReload();
-        }
-      } else if (formMode === "EDIT" && onEdit) {
-        const result = onEdit({ ...currentRecord, ...values });
-        if (result && typeof (result as any).then === "function") {
-          await result;
-        }
-        handleClose();
-        if (onReload) {
-          onReload();
-        }
-      } else {
-        MessageService.error(`${formMode === "ADD" ? "onAdd" : "onEdit"} is not defined`);
+      } catch (error: any) {
+        MessageService.error(error?.message || "Submit failed");
+      } finally {
+        setIsSubmitting(false);
       }
     });
   };
@@ -317,7 +340,7 @@ const ProTable = <T extends { id: string | number }>({
         onCancel={handleClose}
         form={formInstance}
         onOk={handleSubmit}
-        initialValues={data || {}}
+        initialValues={formMode === "ADD" ? form?.initialValues || {} : data?.data || {}}
         title={
           formMode === "ADD"
             ? `Add New ${form?.title || "Record"}`

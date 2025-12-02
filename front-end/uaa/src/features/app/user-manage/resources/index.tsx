@@ -37,6 +37,7 @@ const Resources = () => {
       title: "Path",
       dataIndex: "path",
       key: "path",
+      render: (value) => <>/{value || "-"}</>,
     },
     {
       title: "Created At",
@@ -106,7 +107,6 @@ const Resources = () => {
   );
 
   const onSearch = (values: { search: string }) => {
-    console.log("first");
     setPagination({
       ...pagination,
       page: 1,
