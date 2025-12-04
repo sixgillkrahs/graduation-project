@@ -171,7 +171,32 @@ const Permissions = () => {
           },
           buttonLoading: isCreating || isUpdating || isUpdatingStatus,
         }}
-        // filter={filter}
+        filter={[
+          {
+            name: "operation",
+            type: "select",
+            options: PermissionService.OPERATION.map((item) => ({
+              label: item.label,
+              value: item.value,
+            })),
+            placeholder: "Select operation",
+          },
+          {
+            name: "isActive",
+            type: "select",
+            options: [
+              {
+                label: "Active",
+                value: true,
+              },
+              {
+                label: "Inactive",
+                value: false,
+              },
+            ],
+            placeholder: "Select active status",
+          },
+        ]}
       />
     </>
   );

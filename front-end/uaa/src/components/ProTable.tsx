@@ -9,6 +9,7 @@ import {
   Input,
   Modal,
   Pagination,
+  Select,
   Table,
   type InputRef,
   type PaginationProps,
@@ -51,7 +52,15 @@ interface IProTableProps<T extends { id: string | number }> {
   size?: SizeType;
   extraAction?: (record: T) => ItemType[];
   extraButtonTop?: ReactNode;
-  filter?: ReactNode;
+  filter?: {
+    name: keyof T;
+    type: "input" | "select";
+    options?: {
+      label: string;
+      value: string | number | boolean;
+    }[];
+    placeholder?: string;
+  }[];
   search?: {
     placeholder?: string;
     name?: string;
@@ -218,6 +227,13 @@ const ProTable = <T extends { id: string | number }>({
     }
   };
 
+  const handleFilterChange = (values: { [key in keyof T]: string | number | boolean }) => {
+    // if (onSearch) {
+    onSearch?.(values);
+    // }
+    console.log(values);
+  };
+
   const handleDelete = (id: T["id"]) => {
     modal.confirm({
       title: "Confirm Delete",
@@ -287,7 +303,27 @@ const ProTable = <T extends { id: string | number }>({
           )}
         </div>
         <div className="flex gap-2">
-          {filter}
+          <div>
+            {filter && (
+              <div className="flex gap-2">
+                {filter.map((item) => (
+                  <div key={String(item.name)}>
+                    {item.type === "input" ? (
+                      <Input placeholder={item.placeholder || `Search ${String(item.name)}`} />
+                    ) : (
+                      <Select
+                        placeholder={item.placeholder || `Search ${String(item.name)}`}
+                        options={item.options}
+                        className="w-full min-w-[180px]"
+                        allowClear={true}
+                        onChange={handleFilterChange}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           {extraButtonTop}
           {isExport && (
             <Button

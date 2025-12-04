@@ -115,11 +115,6 @@ const permissionController = new PermissionController(
  *           default: 1
  *         description: Number of items to skip
  *       - in: query
- *         name: query
- *         schema:
- *           type: string
- *         description: Search term for filtering results
- *       - in: query
  *         name: sortField
  *         schema:
  *           type: string
@@ -130,6 +125,19 @@ const permissionController = new PermissionController(
  *           type: string
  *           enum: [asc, desc]
  *         description: Sort order (ascending or descending)
+ *       - in: query
+ *         name: filter
+ *         style: deepObject
+ *         explode: true
+ *         schema:
+ *           type: object
+ *           additionalProperties: true
+ *         description: |
+ *           Dynamic filters.
+ *           Example:
+ *             - filter[name]=Admin
+ *             - filter[status]=active
+ *             - filter[type]=system
  *     responses:
  *       200:
  *         description: A list of permissions
