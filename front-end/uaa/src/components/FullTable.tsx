@@ -1,6 +1,6 @@
 import ModalForm from "./ModalForm";
 import MessageService from "@shared/message";
-import type { IParamsPagination, IResp } from "@shared/types/service";
+import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 import type { UseQueryResult } from "@tanstack/react-query";
 import {
   Button,
@@ -12,7 +12,6 @@ import {
   Select,
   Table,
   type InputRef,
-  type PaginationProps,
 } from "antd";
 import type { SizeType } from "antd/es/config-provider/SizeContext";
 import type { ItemType } from "antd/es/menu/interface";
@@ -21,16 +20,10 @@ import type { SorterResult } from "antd/es/table/interface";
 import { EllipsisVertical, Eye, FileDown, Pencil, Plus, Trash } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState, type JSX, type ReactNode } from "react";
 
-interface PaginationPropsExtend extends PaginationProps {
-  total?: number;
-  [key: string]: any;
-}
-
 interface IProTableProps<T extends { id: string | number }> {
   titleTable?: string;
   bordered?: boolean;
   columns: ColumnsType<T>;
-  dataSource: T[];
   loading?: boolean;
   isAdd?: boolean;
   onAdd?: (values: any) => Promise<any> | void;
@@ -41,7 +34,6 @@ interface IProTableProps<T extends { id: string | number }> {
   isView?: boolean;
   isExport?: boolean;
   onExport?: () => void;
-  pagination?: PaginationPropsExtend;
   form?: {
     title?: string;
     children?: ReactNode;
@@ -54,7 +46,7 @@ interface IProTableProps<T extends { id: string | number }> {
   onReload?: () => void;
   onSort?: (sorter: SorterResult<T>) => void;
   useGetDetail?: (id: T["id"]) => UseQueryResult<IResp<T>, Error>;
-  useGetList?: (params: IParamsPagination) => UseQueryResult<IResp<T[]>, Error>;
+  useGetList?: (params: IParamsPagination) => UseQueryResult<IPaginationResp<T>, Error>;
   size?: SizeType;
   extraAction?: (record: T) => ItemType[];
   extraButtonTop?: ReactNode;
@@ -74,10 +66,9 @@ interface IProTableProps<T extends { id: string | number }> {
   onSearch?: (values: { search: string }) => void;
 }
 
-const ProTable = <T extends { id: string | number }>({
+const FullTable = <T extends { id: string | number }>({
   bordered = false,
   columns,
-  dataSource,
   loading,
   isAdd = true,
   onAdd,
@@ -88,7 +79,6 @@ const ProTable = <T extends { id: string | number }>({
   isView = true,
   isExport = true,
   onExport,
-  pagination,
   form,
   onReload,
   onSort,
@@ -99,6 +89,7 @@ const ProTable = <T extends { id: string | number }>({
   filter,
   search,
   onSearch,
+  useGetList,
 }: IProTableProps<T>): JSX.Element => {
   const [modal, contextHolder] = Modal.useModal();
   const [formInstance] = Form.useForm();
@@ -109,6 +100,16 @@ const ProTable = <T extends { id: string | number }>({
   const { data, isLoading, refetch } = useGetDetail?.(currentRecord?.id as T["id"]) || {};
   const searchRef = useRef<InputRef>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pagination, setPagination] = useState<IParamsPagination>({
+    page: 1,
+    limit: 10,
+    total: 0,
+  });
+  const {
+    data: listData,
+    isLoading: listLoading,
+    refetch: refetchList,
+  } = useGetList?.(pagination) || {};
 
   const handleSetFormValues = useCallback(
     (data: T) => {
@@ -155,56 +156,44 @@ const ProTable = <T extends { id: string | number }>({
         key: "action",
         width: 100,
         render: (_: any, record: T) => {
-          const extraItems = extraAction?.(record) || [];
-          const items: ItemType[] = [
-            ...extraItems,
-            ...(isView
-              ? [
-                  {
-                    key: "view",
-                    label: "View",
-                    icon: <Eye className="h-4 w-4" />,
-                    onClick: () => handleView(record),
-                  },
-                ]
-              : []),
-            ...(isEdit
-              ? [
-                  {
-                    key: "edit",
-                    label: "Edit",
-                    icon: <Pencil className="h-4 w-4" />,
-                    onClick: () => handleEdit(record),
-                  },
-                ]
-              : []),
-            ...(isDelete ? [{ type: "divider" as const }] : []),
-            ...(isDelete
-              ? [
-                  {
-                    key: "delete",
-                    label: "Delete",
-                    icon: <Trash className="h-4 w-4" />,
-                    danger: true,
-                    onClick: () => handleDelete(record.id),
-                  },
-                ]
-              : []),
-          ];
-
           return (
             <Dropdown
               menu={{
-                items,
-                onClick: ({ key }) => {
-                  const match = extraItems.find((i: any) => i?.key === key);
-                  const fn = (match as any)?.onClick;
-                  if (typeof fn === "function") {
-                    Promise.resolve(fn(record as any))
-                      .then(() => {})
-                      .catch(() => {});
-                  }
-                },
+                items: [
+                  ...(extraAction?.(record) || []),
+                  ...(isView
+                    ? [
+                        {
+                          key: "view",
+                          label: "View",
+                          icon: <Eye className="h-4 w-4" />,
+                          onClick: () => handleView(record),
+                        },
+                      ]
+                    : []),
+                  ...(isEdit
+                    ? [
+                        {
+                          key: "edit",
+                          label: "Edit",
+                          icon: <Pencil className="h-4 w-4" />,
+                          onClick: () => handleEdit(record),
+                        },
+                      ]
+                    : []),
+                  ...(isDelete ? [{ type: "divider" as const }] : []),
+                  ...(isDelete
+                    ? [
+                        {
+                          key: "delete",
+                          label: "Delete",
+                          icon: <Trash className="h-4 w-4" />,
+                          danger: true,
+                          onClick: () => handleDelete(record.id),
+                        },
+                      ]
+                    : []),
+                ],
               }}
             >
               <EllipsisVertical className="cursor-pointer" />
@@ -256,7 +245,9 @@ const ProTable = <T extends { id: string | number }>({
       okType: "danger",
       onOk: () => {
         if (onDelete) {
-          return onDelete(id).then(() => {});
+          return onDelete(id).then(() => {
+            refetchList();
+          });
         } else {
           MessageService.error("onDelete is not defined");
         }
@@ -363,8 +354,8 @@ const ProTable = <T extends { id: string | number }>({
       </div>
       <Table
         columns={columnWithSttAndAction()}
-        dataSource={dataSource}
-        loading={loading}
+        dataSource={listData?.data.results || []}
+        loading={listLoading}
         key={"pro-table"}
         className="h-[500px] overflow-auto"
         rowKey={(record) => record.id}
@@ -382,8 +373,20 @@ const ProTable = <T extends { id: string | number }>({
       />
       {pagination && (
         <div className="flex justify-between">
-          <div>Total {pagination.total} records</div>
-          <Pagination {...pagination} />
+          <div>Total {listData?.data.totalResults || pagination.total} records</div>
+          <Pagination
+            total={listData?.data.totalResults || pagination.total}
+            current={listData?.data.page || pagination.page}
+            pageSize={listData?.data.limit || pagination.limit}
+            onChange={(page, pageSize) => {
+              setPagination((prev) => ({
+                ...prev,
+                total: listData?.data.totalResults || prev.total,
+                page: page,
+                limit: pageSize,
+              }));
+            }}
+          />
           <div></div>
         </div>
       )}
@@ -416,6 +419,6 @@ const ProTable = <T extends { id: string | number }>({
   );
 };
 
-export default memo(ProTable) as <T extends { id: string | number }>(
+export default memo(FullTable) as <T extends { id: string | number }>(
   props: IProTableProps<T>,
 ) => React.JSX.Element;

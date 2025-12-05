@@ -31,6 +31,7 @@ export interface IParamsPagination {
   sortField?: Key | readonly Key[];
   sortOrder?: "asc" | "desc" | "descend";
   total?: number;
+  [key: string]: any;
 }
 
 export interface IColumn {

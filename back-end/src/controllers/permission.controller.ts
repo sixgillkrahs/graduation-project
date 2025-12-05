@@ -21,14 +21,27 @@ export class PermissionController extends BaseController {
   getPermissions = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       try {
-        const { limit, page, sortField, sortOrder, ...filter } = req.query as {
-          limit?: string;
-          page?: string;
-          sortField?: string;
-          sortOrder?: string;
-          [key: string]: any;
-        };
-        console.log(filter);
+        const { limit, page, sortField, sortOrder, name, isActive, operation } =
+          req.query as {
+            limit?: string;
+            page?: string;
+            sortField?: string;
+            sortOrder?: string;
+            name?: string;
+            isActive?: boolean;
+            operation?: Operation;
+          };
+
+        let filter: Record<string, any> = {};
+        if (name) {
+          filter.name = { $regex: name, $options: "i" };
+        }
+        if (isActive !== undefined) {
+          filter.isActive = isActive;
+        }
+        if (operation) {
+          filter.operation = operation;
+        }
 
         const permission = await this.permissionService.getPermissionsPaginated(
           {
@@ -37,7 +50,7 @@ export class PermissionController extends BaseController {
             sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
             populate: "resourceId:id name",
           },
-          filter.filter,
+          filter,
         );
         return permission;
       } catch (error) {
