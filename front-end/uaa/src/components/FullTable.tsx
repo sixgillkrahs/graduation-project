@@ -18,7 +18,26 @@ import type { ItemType } from "antd/es/menu/interface";
 import type { ColumnsType } from "antd/es/table";
 import type { SorterResult } from "antd/es/table/interface";
 import { EllipsisVertical, Eye, FileDown, Pencil, Plus, Trash } from "lucide-react";
-import { memo, useCallback, useEffect, useRef, useState, type JSX, type ReactNode } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type JSX,
+  type ReactNode,
+} from "react";
+
+export interface IFilter<T extends { id: string | number }> {
+  name: keyof T;
+  type: "input" | "select";
+  options?: {
+    label: string;
+    value: string | number | boolean;
+  }[];
+  placeholder?: string;
+}
 
 interface IProTableProps<T extends { id: string | number }> {
   titleTable?: string;
@@ -44,32 +63,22 @@ interface IProTableProps<T extends { id: string | number }> {
     buttonLoading?: boolean;
   };
   onReload?: () => void;
-  onSort?: (sorter: SorterResult<T>) => void;
   useGetDetail?: (id: T["id"]) => UseQueryResult<IResp<T>, Error>;
   useGetList?: (params: IParamsPagination) => UseQueryResult<IPaginationResp<T>, Error>;
   size?: SizeType;
   extraAction?: (record: T) => ItemType[];
   extraButtonTop?: ReactNode;
-  filter?: {
-    name: keyof T;
-    type: "input" | "select";
-    options?: {
-      label: string;
-      value: string | number | boolean;
-    }[];
-    placeholder?: string;
-  }[];
+  filter?: IFilter<T>[];
   search?: {
     placeholder?: string;
     name?: string;
+    onSearch?: (values: { search: string }) => void;
   };
-  onSearch?: (values: { search: string }) => void;
 }
 
 const FullTable = <T extends { id: string | number }>({
   bordered = false,
   columns,
-  loading,
   isAdd = true,
   onAdd,
   isEdit = true,
@@ -81,15 +90,14 @@ const FullTable = <T extends { id: string | number }>({
   onExport,
   form,
   onReload,
-  onSort,
   size,
   useGetDetail,
   extraAction,
   extraButtonTop,
   filter,
   search,
-  onSearch,
   useGetList,
+  loading,
 }: IProTableProps<T>): JSX.Element => {
   const [modal, contextHolder] = Modal.useModal();
   const [formInstance] = Form.useForm();
@@ -135,7 +143,74 @@ const FullTable = <T extends { id: string | number }>({
     }
   }, [isModalOpen, currentRecord?.id, refetch]);
 
-  const columnWithSttAndAction = () => {
+  const handleEdit = useCallback((record: T) => {
+    setCurrentRecord(record);
+    setFormMode("EDIT");
+    setIsModalOpen(true);
+  }, []);
+
+  const handleView = useCallback((record: T) => {
+    setCurrentRecord(record);
+    setFormMode("VIEW");
+    setIsModalOpen(true);
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    setCurrentRecord(null);
+    setFormMode("ADD");
+    if (form?.initialValues) {
+      formInstance.setFieldsValue(form.initialValues);
+    } else {
+      formInstance.resetFields();
+    }
+    setIsModalOpen(true);
+  }, [form, formInstance]);
+
+  const handleSearch = useCallback(() => {
+    if (searchRef.current) {
+      if (search?.onSearch) {
+        search.onSearch({ search: searchRef.current?.input?.value || "" });
+      }
+    }
+  }, [search]);
+
+  const handleFilterChange = () => {
+    const formValues = formFilter.getFieldsValue();
+    setPagination({
+      ...pagination,
+      ...formValues,
+      page: 1,
+      limit: 10,
+    });
+  };
+
+  const handleDelete = useCallback(
+    (id: T["id"]) => {
+      modal.confirm({
+        title: "Confirm Delete",
+        content: "Are you sure you want to delete this record?",
+        okText: "Delete",
+        okType: "danger",
+        onOk: () => {
+          if (onDelete) {
+            return onDelete(id);
+          } else {
+            MessageService.error("onDelete is not defined");
+          }
+        },
+      });
+    },
+    [modal, onDelete],
+  );
+
+  const handleClose = useCallback(() => {
+    setIsModalOpen(false);
+    setCurrentRecord(null);
+    setFormMode(undefined);
+    form?.onCancel?.();
+  }, [form]);
+
+  const columnWithSttAndAction = useMemo(() => {
     return [
       {
         title: "STT",
@@ -143,11 +218,7 @@ const FullTable = <T extends { id: string | number }>({
         key: "stt",
         width: 60,
         render: (_: T, __: any, index: number) =>
-          index +
-          1 +
-          (pagination?.current && pagination?.pageSize
-            ? (pagination?.current - 1) * pagination?.pageSize
-            : 0),
+          index + 1 + ((listData?.data.page || 1) - 1) * (listData?.data.limit || 10),
       },
       ...columns,
       {
@@ -202,67 +273,20 @@ const FullTable = <T extends { id: string | number }>({
         },
       },
     ];
-  };
+  }, [
+    columns,
+    listData?.data.page,
+    listData?.data.limit,
+    isView,
+    isEdit,
+    isDelete,
+    extraAction,
+    handleDelete,
+    handleEdit,
+    handleView,
+  ]);
 
-  const handleEdit = (record: T) => {
-    setCurrentRecord(record);
-    setFormMode("EDIT");
-    setIsModalOpen(true);
-  };
-
-  const handleView = (record: T) => {
-    setCurrentRecord(record);
-    setFormMode("VIEW");
-    setIsModalOpen(true);
-  };
-
-  const handleAdd = () => {
-    setCurrentRecord(null);
-    setFormMode("ADD");
-    if (form?.initialValues) {
-      formInstance.setFieldsValue(form.initialValues);
-    } else {
-      formInstance.resetFields();
-    }
-    setIsModalOpen(true);
-  };
-
-  const handleSearch = () => {
-    if (searchRef.current) {
-      if (onSearch) {
-        onSearch({ search: searchRef.current?.input?.value || "" });
-      }
-    }
-  };
-
-  const handleFilterChange = (values: string) => {};
-
-  const handleDelete = (id: T["id"]) => {
-    modal.confirm({
-      title: "Confirm Delete",
-      content: "Are you sure you want to delete this record?",
-      okText: "Delete",
-      okType: "danger",
-      onOk: () => {
-        if (onDelete) {
-          return onDelete(id).then(() => {
-            refetchList();
-          });
-        } else {
-          MessageService.error("onDelete is not defined");
-        }
-      },
-    });
-  };
-
-  const handleClose = useCallback(() => {
-    setIsModalOpen(false);
-    setCurrentRecord(null);
-    setFormMode(undefined);
-    form?.onCancel?.();
-  }, [form]);
-
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     formInstance.validateFields().then(async (values) => {
       try {
         setIsSubmitting(true);
@@ -272,6 +296,7 @@ const FullTable = <T extends { id: string | number }>({
             await result;
           }
           handleClose();
+          await refetchList?.();
           if (onReload) {
             onReload();
           }
@@ -281,6 +306,7 @@ const FullTable = <T extends { id: string | number }>({
             await result;
           }
           handleClose();
+          refetchList?.();
           if (onReload) {
             onReload();
           }
@@ -293,7 +319,16 @@ const FullTable = <T extends { id: string | number }>({
         setIsSubmitting(false);
       }
     });
+  }, [formInstance, formMode, onAdd, onEdit, currentRecord, handleClose, onReload, refetchList]);
+
+  const onSort = (sorter: SorterResult<T>) => {
+    setPagination({
+      ...pagination,
+      sortBy: sorter.field,
+      sortOrder: sorter.order === "ascend" ? "asc" : "desc",
+    });
   };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between">
@@ -317,7 +352,7 @@ const FullTable = <T extends { id: string | number }>({
                       {item.type === "input" ? (
                         <Input placeholder={item.placeholder || `Search ${String(item.name)}`} />
                       ) : (
-                        <Form.Item name={String(item.name)}>
+                        <Form.Item name={String(item.name)} className="mb-0!">
                           <Select
                             placeholder={item.placeholder || `Search ${String(item.name)}`}
                             options={item.options}
@@ -353,9 +388,9 @@ const FullTable = <T extends { id: string | number }>({
         </div>
       </div>
       <Table
-        columns={columnWithSttAndAction()}
-        dataSource={listData?.data.results || []}
-        loading={listLoading}
+        columns={columnWithSttAndAction}
+        dataSource={useMemo(() => listData?.data.results || [], [listData?.data.results])}
+        loading={listLoading || loading}
         key={"pro-table"}
         className="h-[500px] overflow-auto"
         rowKey={(record) => record.id}
@@ -364,9 +399,7 @@ const FullTable = <T extends { id: string | number }>({
           x: 1000,
         }}
         onChange={(_, __, sorter) => {
-          if (onSort) {
-            onSort(sorter as SorterResult<T>);
-          }
+          onSort(sorter as SorterResult<T>);
         }}
         bordered={bordered}
         size={size}

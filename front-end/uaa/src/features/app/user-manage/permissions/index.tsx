@@ -1,24 +1,29 @@
-import { useUpdatePermissionStatus } from "./services/mutation";
-import { useGetPermissions } from "./services/query";
+import FormPermission from "./components/FormPermission";
+import {
+  useCreatePermission,
+  useDeletePermission,
+  useUpdatePermission,
+  useUpdatePermissionStatus,
+} from "./services/mutation";
+import { useGetPermission, useGetPermissions } from "./services/query";
 import PermissionService from "./services/service";
-import FullTable from "@/components/FullTable";
+import FullTable, { type IFilter } from "@/components/FullTable";
 import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
+import type { IResp } from "@shared/types/service";
 import { Checkbox } from "antd";
 import type { ItemType } from "antd/es/menu/interface";
 import type { ColumnsType } from "antd/es/table";
 import { Ban, CircleCheckBig } from "lucide-react";
+import { useCallback } from "react";
 
 const Permissions = () => {
-  // const [pagination, setPagination] = useState<IParamsPagination>({
-  //   page: 1,
-  //   limit: 10,
-  // });
-  // const { mutateAsync: deletePermission } = useDeletePermission();
-  // const { mutateAsync: createPermission, isPending: isCreating } = useCreatePermission();
-  // const { mutateAsync: updatePermission, isPending: isUpdating } = useUpdatePermission();
+  const { mutateAsync: deletePermission, isPending: isDeleting } = useDeletePermission();
+  const { mutateAsync: createPermission, isPending: isCreating } = useCreatePermission();
+  const { mutateAsync: updatePermission, isPending: isUpdating } = useUpdatePermission();
   const { mutateAsync: updatePermissionStatus, isPending: isUpdatingStatus } =
     useUpdatePermissionStatus();
+  console.log("main");
 
   const columns: ColumnsType<IPermissionService.PermissionDTO> = [
     {
@@ -62,58 +67,78 @@ const Permissions = () => {
     },
   ];
 
-  // const onChangePage = useCallback(
-  //   (paginationAntd: TablePaginationConfig) => {
-  //     paginationAntd.current = paginationAntd?.current || 1;
-  //     paginationAntd.pageSize = paginationAntd?.pageSize || 10;
-  //     setPagination({
-  //       ...pagination,
-  //       total: data?.data.totalResults || pagination.total, // xét cái này để pagination không bị giật, vì khi đổi page, totalResults có thể không có
-  //       page: paginationAntd?.current || pagination.page,
-  //       limit: paginationAntd?.pageSize || pagination.limit,
-  //     });
-  //   },
-  //   [pagination, data?.data.totalResults],
-  // );
+  const onDelete = useCallback(
+    (id: string): Promise<IResp<void>> => {
+      return deletePermission(id.toString());
+    },
+    [deletePermission],
+  );
 
-  // const onDelete = (id: string): Promise<IResp<void>> => {
-  //   return deletePermission(id.toString(), {
-  //     onSuccess: () => {
-  //       refetch();
-  //     },
-  //   });
-  // };
+  const onAdd = useCallback(
+    (values: IPermissionService.CreatePermissionDTO): Promise<any> => {
+      return createPermission(values);
+    },
+    [createPermission],
+  );
 
-  // const onAdd = (values: IPermissionService.CreatePermissionDTO): Promise<any> => {
-  //   return createPermission(values, {
-  //     onSuccess: () => {
-  //       refetch();
-  //     },
-  //   });
-  // };
+  const onEdit = useCallback(
+    (values: IPermissionService.UpdatePermissionDTO): Promise<any> => {
+      return updatePermission(values);
+    },
+    [updatePermission],
+  );
 
-  // const onEdit = (values: IPermissionService.UpdatePermissionDTO): Promise<any> => {
-  //   return updatePermission(values, {
-  //     onSuccess: () => {
-  //       refetch();
-  //     },
-  //   });
-  // };
+  const onUpdateStatus = useCallback(
+    (values: IPermissionService.UpdatePermissionStatusDTO): Promise<any> => {
+      return updatePermissionStatus(values);
+    },
+    [updatePermissionStatus],
+  );
 
-  const onUpdateStatus = (values: IPermissionService.UpdatePermissionStatusDTO): Promise<any> => {
-    return updatePermissionStatus(values);
-  };
+  const extraButton = useCallback(
+    (record: IPermissionService.PermissionDTO): ItemType[] => [
+      {
+        key: "changeStatus",
+        label: record.isActive ? "Inactivate" : "Activate",
+        icon: record.isActive ? (
+          <Ban className="h-4 w-4" />
+        ) : (
+          <CircleCheckBig className="h-4 w-4" />
+        ),
+        onClick: () =>
+          onUpdateStatus({
+            id: record.id,
+            isActive: !record.isActive,
+          }),
+      },
+    ],
+    [onUpdateStatus],
+  );
 
-  const extraButton = (record: IPermissionService.PermissionDTO): ItemType[] => [
+  const filter: IFilter<IPermissionService.PermissionDTO>[] = [
     {
-      key: "changeStatus",
-      label: record.isActive ? "Inactivate" : "Activate",
-      icon: record.isActive ? <Ban className="h-4 w-4" /> : <CircleCheckBig className="h-4 w-4" />,
-      onClick: () =>
-        onUpdateStatus({
-          id: record.id,
-          isActive: !record.isActive,
-        }),
+      name: "operation",
+      type: "select",
+      placeholder: "Search by operation",
+      options: PermissionService.OPERATION.map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+    },
+    {
+      name: "isActive",
+      type: "select",
+      placeholder: "Search by active status",
+      options: [
+        {
+          label: "Active",
+          value: true,
+        },
+        {
+          label: "Inactive",
+          value: false,
+        },
+      ],
     },
   ];
 
@@ -125,6 +150,21 @@ const Permissions = () => {
         isExport={false}
         useGetList={useGetPermissions}
         extraAction={extraButton}
+        form={{
+          children: <FormPermission />,
+          title: "Permission",
+          buttonLoading: isCreating || isUpdating,
+        }}
+        onAdd={onAdd}
+        onDelete={onDelete}
+        onEdit={onEdit}
+        useGetDetail={useGetPermission}
+        loading={isUpdatingStatus || isDeleting}
+        filter={filter}
+        search={{
+          placeholder: "Search by name",
+          name: "search",
+        }}
       />
     </>
   );

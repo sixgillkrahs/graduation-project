@@ -13,6 +13,9 @@ export const useDeletePermission = (): UseMutationResult<IResp<void>, Error, str
       queryClient.invalidateQueries({
         queryKey: [PermissionQueryKey.getPermissions],
       });
+      queryClient.removeQueries({
+        queryKey: [PermissionQueryKey.getPermissions],
+      });
     },
     meta: {
       ERROR_SOURCE: "[Delete permission failed]",
@@ -30,6 +33,14 @@ export const useCreatePermission = (): UseMutationResult<
   return useMutation({
     mutationFn: (permission: IPermissionService.CreatePermissionDTO) => {
       return PermissionService.CreatePermission(permission);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [PermissionQueryKey.getPermissions],
+      });
+      queryClient.removeQueries({
+        queryKey: [PermissionQueryKey.getPermissions],
+      });
     },
     meta: {
       ERROR_SOURCE: "[Create permission failed]",
@@ -64,6 +75,11 @@ export const useUpdatePermissionStatus = (): UseMutationResult<
   return useMutation({
     mutationFn: (permission: IPermissionService.UpdatePermissionStatusDTO) => {
       return PermissionService.ChangeStatusPermission(permission);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [PermissionQueryKey.getPermissions],
+      });
     },
     meta: {
       ERROR_SOURCE: "[Update permission status failed]",

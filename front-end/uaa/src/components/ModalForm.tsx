@@ -14,6 +14,7 @@ interface IModalFormProps {
   cancelButtonProps?: ButtonProps;
   okButtonProps?: ButtonProps;
   cancelText?: string;
+  destroyOnHidden?: boolean;
 }
 
 const ModalForm = ({
@@ -34,6 +35,7 @@ const ModalForm = ({
     loading: false,
   },
   cancelText = "Cancel",
+  destroyOnHidden = false,
 }: IModalFormProps) => {
   return (
     <Modal
@@ -42,6 +44,7 @@ const ModalForm = ({
       onCancel={onCancel}
       onOk={onOk}
       width={600}
+      destroyOnHidden={destroyOnHidden}
       afterClose={() => {
         form?.resetFields();
       }}
