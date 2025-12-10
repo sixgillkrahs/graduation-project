@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import collections from "./config/collections";
 import paginate from "./plugins/paginate.plugin";
 import toJSON from "./plugins/toJSON.plugin";
-import ResourceModel from "./resource.model";
 
 export enum Operation {
   Read = "read",
@@ -14,6 +13,7 @@ export enum Operation {
 }
 
 export interface IPermission {
+  _id?: mongoose.Schema.Types.ObjectId;
   name: string;
   description: string;
   resourceId: mongoose.Schema.Types.ObjectId;

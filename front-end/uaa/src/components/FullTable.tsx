@@ -168,11 +168,14 @@ const FullTable = <T extends { id: string | number }>({
 
   const handleSearch = useCallback(() => {
     if (searchRef.current) {
-      if (search?.onSearch) {
-        search.onSearch({ search: searchRef.current?.input?.value || "" });
-      }
+      setPagination({
+        ...pagination,
+        page: 1,
+        limit: 10,
+        query: searchRef.current?.input?.value,
+      });
     }
-  }, [search]);
+  }, [pagination]);
 
   const handleFilterChange = () => {
     const formValues = formFilter.getFieldsValue();
@@ -350,7 +353,13 @@ const FullTable = <T extends { id: string | number }>({
                   <div key={String(item.name)}>
                     <Form form={formFilter}>
                       {item.type === "input" ? (
-                        <Input placeholder={item.placeholder || `Search ${String(item.name)}`} />
+                        <Form.Item name={String(item.name)} className="mb-0!">
+                          <Input
+                            placeholder={item.placeholder || `Search ${String(item.name)}`}
+                            ref={searchRef}
+                            onPressEnter={handleFilterChange}
+                          />
+                        </Form.Item>
                       ) : (
                         <Form.Item name={String(item.name)} className="mb-0!">
                           <Select

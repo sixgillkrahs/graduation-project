@@ -1,4 +1,3 @@
-import { HeroService } from "@/services/hero.service";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { ResourcesService } from "@/services/resources.service";

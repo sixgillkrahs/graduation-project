@@ -23,7 +23,6 @@ const Permissions = () => {
   const { mutateAsync: updatePermission, isPending: isUpdating } = useUpdatePermission();
   const { mutateAsync: updatePermissionStatus, isPending: isUpdatingStatus } =
     useUpdatePermissionStatus();
-  console.log("main");
 
   const columns: ColumnsType<IPermissionService.PermissionDTO> = [
     {
@@ -117,6 +116,11 @@ const Permissions = () => {
 
   const filter: IFilter<IPermissionService.PermissionDTO>[] = [
     {
+      name: "name",
+      type: "input",
+      placeholder: "Search by name",
+    },
+    {
       name: "operation",
       type: "select",
       placeholder: "Search by operation",
@@ -161,10 +165,6 @@ const Permissions = () => {
         useGetDetail={useGetPermission}
         loading={isUpdatingStatus || isDeleting}
         filter={filter}
-        search={{
-          placeholder: "Search by name",
-          name: "search",
-        }}
       />
     </>
   );

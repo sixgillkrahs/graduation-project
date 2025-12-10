@@ -20,6 +20,7 @@ import authRoutes from "./routes/auth.routes";
 import resourcesRoutes from "./routes/resource.routes";
 
 import uploadRoutes from "./routes/upload.routes";
+import roleRoutes from "./routes/role.routes";
 
 const app = express();
 
@@ -64,7 +65,7 @@ app.get("/health", (req, res) => {
 
 // app.use("/api/users", userRoutes);
 // app.use("/api/auth", authRoutes);
-// app.use("/api/hero", heroRoutes);
+app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/resources", resourcesRoutes);
 

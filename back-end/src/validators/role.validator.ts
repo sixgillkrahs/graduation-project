@@ -1,0 +1,20 @@
+import { validationMessages } from "@/i18n/validationMessages";
+import { z } from "zod";
+import { createObjectIdSchema } from "./base.validator";
+
+export const createUpdateRoleSchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+  return z.object({
+    body: z.object({
+      name: z
+        .string({ message: t.invalidName })
+        .min(1, { message: t.invalidName }),
+      permissions: z.array(createObjectIdSchema(lang)),
+      description: z.optional(z.string({ message: t.invalidDescription })),
+      isActive: z.optional(z.boolean()),
+      isDefault: z.optional(z.boolean()),
+    }),
+  });
+};

@@ -34,4 +34,12 @@ export class PermissionService {
   updatePermission = async (id: string, permission: Partial<IPermission>) => {
     return await PermissionModel.findByIdAndUpdate(id, permission);
   };
+
+  checkPermissionList = async (permissionIds: string[]) => {
+    return await PermissionModel.find({
+      _id: {
+        $in: permissionIds,
+      },
+    });
+  };
 }

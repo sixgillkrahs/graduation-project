@@ -91,9 +91,6 @@ export class PermissionController extends BaseController {
             operation: Operation;
             isActive: boolean;
           };
-        if (!name || !resourceId || !operation || isActive === undefined) {
-          throw new Error("Missing required fields");
-        }
         const resource =
           await this.resourcesService.getResourceById(resourceId);
         if (!resource) {
@@ -131,9 +128,6 @@ export class PermissionController extends BaseController {
           resourceId: string;
           operation: Operation;
         };
-        if (!id || !name || !resourceId || !operation) {
-          throw new Error("Missing required fields");
-        }
         const resource =
           await this.resourcesService.getResourceById(resourceId);
         if (!resource) {
@@ -184,9 +178,6 @@ export class PermissionController extends BaseController {
         const { isActive } = req.body as {
           isActive: boolean;
         };
-        if (!id || isActive === undefined) {
-          throw new Error("Missing required fields");
-        }
         const permission = await this.permissionService.updatePermission(id, {
           isActive,
         });
