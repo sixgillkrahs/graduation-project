@@ -3,7 +3,11 @@ import { RoleService } from "@/services/role.service";
 import { PermissionService } from "@/services/permission.service";
 import { Router } from "express";
 import { validateRequest } from "@/middleware/validateRequest";
-import { createUpdateRoleSchema } from "@/validators/role.validator";
+import {
+  createUpdateRoleSchema,
+  deleteRoleSchema,
+  updateRoleSchema,
+} from "@/validators/role.validator";
 
 const roleService = new RoleService();
 const permissionService = new PermissionService();
@@ -171,5 +175,181 @@ router.post(
  *                 $ref: '#/components/schemas/ResponsePaginated'
  */
 router.get("/", roleController.getRoles);
+
+/**
+ * @swagger
+ * /roles/{id}:
+ *   put:
+ *     summary: Update a role
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The role ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *          schema:
+ *               type: object
+ *               required:
+ *                 - name
+ *                 - permissions
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 permissions:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     format: uuid
+ *                 description:
+ *                   type: string
+ *                 isActive:
+ *                   type: boolean
+ *                 isDefault:
+ *                   type: boolean
+ *     responses:
+ *       201:
+ *         description: Role created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Response'
+ */
+router.put(
+  "/:id",
+  validateRequest((lang) => updateRoleSchema(lang)),
+  roleController.updateRole,
+);
+
+/**
+ * @swagger
+ * /roles/{id}:
+ *   delete:
+ *     summary: Delete a role
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The role ID to delete
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *          schema:
+ *               type: object
+ *               required:
+ *                 - name
+ *                 - permissions
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 permissions:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     format: uuid
+ *                 description:
+ *                   type: string
+ *                 isActive:
+ *                   type: boolean
+ *                 isDefault:
+ *                   type: boolean
+ *     responses:
+ *       204:
+ *         description: Role deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Response'
+ */
+router.delete(
+  "/:id",
+  validateRequest((lang) => deleteRoleSchema(lang)),
+  roleController.deleteRole,
+);
+
+/**
+ * @swagger
+ * /roles/{id}/status:
+ *   patch:
+ *     summary: Change role status
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The role ID to change status
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *          schema:
+ *               type: object
+ *               required:
+ *                 - isActive
+ *               properties:
+ *                 isActive:
+ *                   type: boolean
+ *     responses:
+ *       204:
+ *         description: Role status changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Response'
+ */
+router.patch("/:id/status", roleController.changeStatus);
+
+/**
+ * @swagger
+ * /roles/{id}/default-status:
+ *   patch:
+ *     summary: Change role default status
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The role ID to change default status
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *          schema:
+ *               type: object
+ *               required:
+ *                 - isDefault
+ *               properties:
+ *                 isDefault:
+ *                   type: boolean
+ *     responses:
+ *       204:
+ *         description: Role default status changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Response'
+ */
+router.patch("/:id/default-status", roleController.changeDefaultStatus);
 
 export default router;

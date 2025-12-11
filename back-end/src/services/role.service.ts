@@ -21,4 +21,20 @@ export class RoleService {
     filter = filter || {};
     return await RoleModel.paginate?.(options, filter);
   };
+
+  updateRole = async (id: string, role: IRole) => {
+    return await RoleModel.updateRole(id, role);
+  };
+
+  deleteRole = async (id: string) => {
+    return await RoleModel.deleteRole(id);
+  };
+
+  changeStatus = async (id: string, status: boolean) => {
+    return await RoleModel.findByIdAndUpdate(id, { isActive: status });
+  };
+
+  changeDefaultStatus = async (id: string, status: boolean) => {
+    return await RoleModel.findByIdAndUpdate(id, { isDefault: status });
+  };
 }

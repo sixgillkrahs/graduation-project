@@ -77,4 +77,70 @@ export class RoleController extends BaseController {
       }
     });
   };
+
+  updateRole = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.query as {
+        id: string;
+      };
+      const { name, permissions, description, isActive, isDefault } =
+        req.body as {
+          name: string;
+          permissions: string[];
+          description?: string;
+          isActive?: boolean;
+          isDefault?: boolean;
+        };
+      const permissionIds: IPermission[] =
+        await this.permissionService.checkPermissionList(permissions);
+      if (permissionIds.length !== permissions.length) {
+        throw new Error("Some permissions are not found");
+      }
+      const roleModel: IRole = {
+        name,
+        permissionIds: permissionIds.map((item) => item._id!),
+        description,
+        isActive: isActive ?? true,
+        isDefault: isDefault ?? false,
+      };
+      return await this.roleService.updateRole(id, roleModel);
+    });
+  };
+
+  deleteRole = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.query as {
+        id: string;
+      };
+      return await this.roleService.deleteRole(id);
+    });
+  };
+
+  changeStatus = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.query as {
+        id: string;
+      };
+      const { isActive } = req.body as {
+        isActive?: boolean;
+      };
+      return await this.roleService.changeStatus(id, isActive ?? true);
+    });
+  };
+
+  changeDefaultStatus = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.query as {
+        id: string;
+      };
+      const { isDefault } = req.body as {
+        isDefault?: boolean;
+      };
+      return await this.roleService.changeDefaultStatus(id, isDefault ?? false);
+    });
+  };
 }

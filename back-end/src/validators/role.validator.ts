@@ -18,3 +18,29 @@ export const createUpdateRoleSchema = (
     }),
   });
 };
+
+export const updateRoleSchema = (lang: keyof typeof validationMessages) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+  return z.object({
+    params: z.object({
+      id: createObjectIdSchema(lang),
+    }),
+    body: z.object({
+      name: z
+        .string({ message: t.invalidName })
+        .min(1, { message: t.invalidName }),
+      permissions: z.array(createObjectIdSchema(lang)),
+      description: z.optional(z.string({ message: t.invalidDescription })),
+      isActive: z.optional(z.boolean()),
+      isDefault: z.optional(z.boolean()),
+    }),
+  });
+};
+
+export const deleteRoleSchema = (lang: keyof typeof validationMessages) => {
+  return z.object({
+    params: z.object({
+      id: createObjectIdSchema(lang),
+    }),
+  });
+};
