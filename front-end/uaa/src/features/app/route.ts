@@ -10,7 +10,7 @@ const router: RouterConfig = {
     {
       path: "/user-manage",
       component: lazy(() => import("./user-manage")),
-      name: "User Management",
+      name: "menu.user-management",
       icon: Users,
       // childRoutes: [
       //   {
@@ -23,7 +23,7 @@ const router: RouterConfig = {
     {
       path: "/setting",
       component: lazy(() => import("./settings/setting")),
-      name: "Setting",
+      name: "menu.setting",
       icon: Settings,
     },
   ],

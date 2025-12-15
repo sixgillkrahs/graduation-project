@@ -15,12 +15,22 @@
       "createdAt": "Created At",
       "updatedAt": "Updated At",
       "activate": "Activate",
-      "inactivate": "Inactivate"
+      "inactivate": "Inactivate",
+      "description": "Description"
     },
     "placeholder": {
       "name": "Search by name",
       "operation": "Search by operation",
-      "activeStatus": "Search by active status"
+      "activeStatus": "Search by active status",
+      "enterPermissionName": "Enter permission name",
+      "enterDescription": "Enter description",
+      "resource": "Select resource",
+      "enterOperation": "Select operation"
+    },
+    "validate": {
+      "name": "Permission name is required",
+      "operation": "Operation is required",
+      "resource": "Resource is required"
     }
   },
   "tabs": {
@@ -39,12 +49,31 @@
     "edit": "Edit",
     "delete": "Delete",
     "view": "View",
-    "export": "Export"
+    "export": "Export",
+    "close": "Close",
+    "confirm": "Confirm",
+    "update": "Update"
   },
   "confirm": {
     "delete": {
       "title": "Confirm Delete",
       "content": "Are you sure you want to delete this item?"
     }
+  },
+  "menu": {
+    "user-management": "User Management",
+    "setting": "Setting"
+  },
+  "pagination": {
+    "totalRecords": "Total records",
+    "records": "records"
+  },
+  "roles": {
+    "title": "Role",
+    "name": "Role Name",
+    "active": "Active",
+    "default": "Default",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
   }
 }

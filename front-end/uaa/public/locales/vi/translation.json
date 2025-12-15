@@ -17,12 +17,23 @@
       "createdAt": "Ngày tạo",
       "updatedAt": "Ngày cập nhật",
       "activate": "Kích hoạt",
-      "inactivate": "Vô hiệu hóa"
+      "inactivate": "Vô hiệu hóa",
+      "description": "Mô tả"
     },
     "placeholder": {
       "name": "Tìm kiếm theo tên quyền",
-      "operation": "Tìm kiếm theo hành động",
-      "activeStatus": "Tìm kiếm theo trạng thái kích hoạt"
+      "operation": "Tìm kiếm theo phương thức",
+      "activeStatus": "Tìm kiếm theo trạng thái kích hoạt",
+      "enterPermissionName": "Nhập tên quyền",
+      "enterDescription": "Nhập mô tả",
+      "resource": "Chọn tài nguyên",
+      "enterOperation": "Chọn phương thức"
+      
+    },
+    "validate": {
+      "name": "Tên quyền không được để trống",
+      "operation": "Vui lòng nhập phương thức",
+      "resource": "Vui lòng chọn tài nguyên"
     }
   },
   "tabs": {
@@ -41,12 +52,31 @@
     "edit": "Chỉnh sửa",
     "delete": "Xóa",
     "view": "Xem chi tiết",
-    "export": "Xuất tệp"
+    "export": "Xuất tệp",
+    "close": "Đóng",
+    "confirm": "Xác nhận",
+    "update": "Cập nhật"
   },
   "confirm": {
     "delete": {
       "title": "Xác nhận xóa",
       "content": "Bạn có chắc chắn muốn xóa không?"
     }
+  },
+  "menu": {
+    "user-management": "Quản lý người dùng",
+    "setting": "Cài đặt"
+  },
+  "pagination": {
+    "totalRecords": "Tổng số bản ghi",
+    "records": "bản ghi"
+  },
+  "roles": {
+    "title": "vai trò",
+    "name": "Tên vai trò",
+    "active": "Kích hoạt",
+    "default": "Mặc định",
+    "createdAt": "Ngày tạo",
+    "updatedAt": "Ngày cập nhật"
   }
 }

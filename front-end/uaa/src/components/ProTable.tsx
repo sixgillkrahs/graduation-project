@@ -246,7 +246,9 @@ const ProTable = <T extends { id: string | number }>({
     }
   };
 
-  const handleFilterChange = (values: string) => {};
+  const handleFilterChange = (values: string) => {
+    console.log(values);
+  };
 
   const handleDelete = (id: T["id"]) => {
     modal.confirm({

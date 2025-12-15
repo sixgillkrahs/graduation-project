@@ -51,8 +51,9 @@ export const queryClient = new QueryClient({
       if (error instanceof Error && mutation.meta?.ERROR_SOURCE) {
         MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.message}`);
       }
-      //@ts-ignore
+      //@ts-expect-error  Error type 'AxiosError' is not assignable to type 'Error'.
       if (error.code === "ERR_BAD_REQUEST" && mutation.meta?.ERROR_SOURCE) {
+        //@ts-expect-error  Object is of type 'unknown'.
         MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.response.data.message}`);
       }
     },

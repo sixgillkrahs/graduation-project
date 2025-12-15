@@ -1,3 +1,5 @@
+import EnglandFlag from "@/assets/images/icons/EnglandFlag.svg";
+import VietNamFlag from "@/assets/images/icons/VietNamFlag.svg";
 import { Badge, Dropdown, Select } from "antd";
 import { Bell, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -9,7 +11,7 @@ const Header = ({
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
 }) => {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const currentLang = i18n.language?.startsWith("vi") ? "vi" : "en";
   return (
     <div className="flex h-[70px] items-center justify-between bg-white px-[31px] py-[13px]">
@@ -22,12 +24,30 @@ const Header = ({
         </Badge>
         <Select
           value={currentLang}
+          style={{ width: 120 }}
+          onChange={(value) => {
+            i18n.changeLanguage(value);
+          }}
           options={[
-            { value: "vi", label: "VI" },
-            { value: "en", label: "EN" },
+            {
+              value: "vi",
+              label: (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <img src={VietNamFlag} alt="VN" width={20} />
+                  <span>VI</span>
+                </div>
+              ),
+            },
+            {
+              value: "en",
+              label: (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <img src={EnglandFlag} alt="EN" width={20} />
+                  <span>EN</span>
+                </div>
+              ),
+            },
           ]}
-          onChange={(lng) => i18n.changeLanguage(lng)}
-          style={{ width: 90 }}
         />
         <Dropdown>
           {/* <DropdownTrigger>

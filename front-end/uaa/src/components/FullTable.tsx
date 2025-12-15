@@ -419,7 +419,10 @@ const FullTable = <T extends { id: string | number }>({
       />
       {pagination && (
         <div className="flex justify-between">
-          <div>Total {listData?.data.totalResults || pagination.total} records</div>
+          <div>
+            {t("pagination.totalRecords")}: {listData?.data.totalResults || pagination.total}{" "}
+            {t("pagination.records")}
+          </div>
           <Pagination
             total={listData?.data.totalResults || pagination.total}
             current={listData?.data.page || pagination.page}
@@ -446,18 +449,20 @@ const FullTable = <T extends { id: string | number }>({
         initialValues={formMode === "ADD" ? form?.initialValues || {} : data?.data || {}}
         title={
           formMode === "ADD"
-            ? `Add New ${form?.title || "Record"}`
+            ? `${t("button.add")} ${form?.title || "Record"}`
             : formMode === "VIEW"
-              ? `View ${form?.title || "Record"}`
-              : `Edit ${form?.title || "Record"}`
+              ? `${t("button.view")} ${form?.title || "Record"}`
+              : `${t("button.edit")} ${form?.title || "Record"}`
         }
-        submitButtonText={form?.submitButtonText || (formMode === "ADD" ? "Add" : "Update")}
+        submitButtonText={
+          form?.submitButtonText || (formMode === "ADD" ? t("button.add") : t("button.update"))
+        }
         okButtonProps={{
           type: "primary",
           hidden: formMode === "VIEW",
           loading: form?.buttonLoading || false,
         }}
-        cancelText={formMode === "VIEW" ? "Close" : "Cancel"}
+        cancelText={formMode === "VIEW" ? t("button.close") : t("button.cancel")}
       >
         {form?.children ? form.children : null}
       </ModalForm>

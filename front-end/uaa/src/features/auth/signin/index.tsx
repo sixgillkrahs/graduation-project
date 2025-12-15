@@ -1,39 +1,35 @@
-import { useSignIn } from "./services/mutation";
-import logo from "@assets/logo.svg";
 // import { Button } from "@heroui/button";
 // import { Form } from "@heroui/form";
 // import { Input } from "@heroui/input";
 // import { Divider, Image, Link, Switch } from "@heroui/react";
-import { getEmailError, getPasswordError } from "@shared/validators/form";
-import { useState, type FormEvent } from "react";
 
 const SignIn = () => {
-  const { mutate: signIn } = useSignIn();
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // const { mutate: signIn } = useSignIn();
+  // const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
-    const newErrors: Record<string, string> = {};
-    const passwordError = getPasswordError(data.password);
-    const emailError = getEmailError(data.email);
-    if (emailError) {
-      newErrors.email = emailError;
-    }
-    if (passwordError) {
-      newErrors.password = passwordError;
-    }
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    signIn({
-      email: data.email,
-      password: data.password,
-      rememberMe: !!data.rememberMe,
-    });
-    setErrors({});
-  };
+  // const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   const data = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
+  //   const newErrors: Record<string, string> = {};
+  //   const passwordError = getPasswordError(data.password);
+  //   const emailError = getEmailError(data.email);
+  //   if (emailError) {
+  //     newErrors.email = emailError;
+  //   }
+  //   if (passwordError) {
+  //     newErrors.password = passwordError;
+  //   }
+  //   if (Object.keys(newErrors).length > 0) {
+  //     setErrors(newErrors);
+  //     return;
+  //   }
+  //   signIn({
+  //     email: data.email,
+  //     password: data.password,
+  //     rememberMe: !!data.rememberMe,
+  //   });
+  //   setErrors({});
+  // };
   return (
     <div className="flex h-full flex-col justify-between px-4 py-5 sm:p-12">
       {/* <div className="flex flex-col-reverse gap-12 sm:flex-col">

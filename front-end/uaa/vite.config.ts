@@ -3,11 +3,19 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { visualizer } from 'rollup-plugin-visualizer';
+
+
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    visualizer({
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }) as any,
     tailwindcss(),
     VitePWA({
       devOptions: {
@@ -64,6 +72,34 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("antd") || id.includes("@ant-design") || id.includes("rc-")) {
+              return "antd-vendor";
+            }
+            if (id.includes("framer-motion")) {
+              return "framer-motion-vendor";
+            }
+            if (id.includes("react-hook-form")) {
+              return "form-vendor";
+            }
+            if (id.includes("lucide-react")) {
+              return "icons-vendor";
+            }
+            if (id.includes("lodash") || id.includes("axios") || id.includes("i18next")) {
+              return "utils-vendor";
+            }
+            if (id.includes("@tanstack")) {
+              return "tanstack-vendor";
+            }
+            if (id.includes("react-router") || id.includes("react-dom") || id.includes("react")) {
+              return "react-vendor";
+            }
+            if (id.includes("scheduler")) {
+              return "react-vendor-1";
+            }
+            return "vendor";
+          }
+
           if (id.includes("/src/shared/")) {
             return "shared";
           }

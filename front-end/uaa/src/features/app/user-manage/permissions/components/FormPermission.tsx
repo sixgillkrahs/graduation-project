@@ -2,11 +2,13 @@ import { useGetInfiniteResources } from "../../resources/services/query";
 import PermissionService from "../services/service";
 import { Col, Form, Input, Row, Select, Switch } from "antd";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const { Item } = Form;
 const { TextArea } = Input;
 
 const FormPermission = () => {
+  const { t } = useTranslation();
   const [params, setParams] = useState({
     limit: 10,
     page: 1,
@@ -23,30 +25,34 @@ const FormPermission = () => {
 
   return (
     <>
-      <Item label="Name" name="name" rules={[{ required: true, message: "Please input name!" }]}>
-        <Input placeholder="Enter name" />
+      <Item
+        label={t("permission.column.name")}
+        name="name"
+        rules={[{ required: true, message: t("permission.validate.name") }]}
+      >
+        <Input placeholder={t("permission.placeholder.enterPermissionName")} />
       </Item>
       <Row gutter={12}>
         <Col span={12}>
           <Item
-            label="Operation"
+            label={t("permission.column.operation")}
             name="operation"
-            rules={[{ required: true, message: "Please select operation!" }]}
+            rules={[{ required: true, message: t("permission.validate.operation") }]}
           >
             <Select
-              placeholder="Select operation"
+              placeholder={t("permission.placeholder.enterOperation")}
               options={PermissionService.OPERATION.map((o) => ({ label: o.label, value: o.value }))}
             />
           </Item>
         </Col>
         <Col span={12}>
           <Item
-            label="Resource"
+            label={t("permission.column.resource")}
             name="resourceId"
-            rules={[{ required: true, message: "Please select resource!" }]}
+            rules={[{ required: true, message: t("permission.validate.resource") }]}
           >
             <Select
-              placeholder="Select resource"
+              placeholder={t("permission.placeholder.resource")}
               options={resourceOptions}
               loading={isLoading || isFetchingNextPage}
               showSearch={{
@@ -66,10 +72,10 @@ const FormPermission = () => {
           </Item>
         </Col>
       </Row>
-      <Item label="Description" name="description">
-        <TextArea placeholder="Enter description" />
+      <Item label={t("permission.column.description")} name="description">
+        <TextArea placeholder={t("permission.placeholder.enterDescription")} />
       </Item>
-      <Item label="Active" name="isActive">
+      <Item label={t("permission.column.active")} name="isActive">
         <Switch />
       </Item>
     </>

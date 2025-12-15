@@ -1,5 +1,5 @@
 import { useGetPermissions } from "../../permissions/services/query";
-import { Form, Input, Row, Switch, Transfer } from "antd";
+import { Form, Input, Switch, Transfer } from "antd";
 import type { TransferItem } from "antd/es/transfer";
 import { useMemo, useState } from "react";
 
@@ -7,12 +7,12 @@ const { Item } = Form;
 const { TextArea } = Input;
 
 const FormRole = () => {
-  const [params, setParams] = useState({
+  const [params] = useState({
     limit: 10,
     page: 1,
     isActive: true,
   });
-  const { data, isLoading } = useGetPermissions(params);
+  const { data } = useGetPermissions(params);
 
   const dataSource = useMemo<TransferItem[]>(() => {
     const results = data?.data?.results || [];

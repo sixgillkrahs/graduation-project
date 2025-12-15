@@ -2,6 +2,7 @@ import logo from "@/assets/logo.svg";
 import routes from "@/shared/routeConfig";
 import { Image } from "antd";
 import React, { type ComponentType } from "react";
+import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
 const MenuItem = ({ to, icon, text }: { to: string; icon?: ComponentType<any>; text: string }) => (
@@ -68,6 +69,7 @@ const filterMenuRoutes = (routes: any[]): any[] => {
 };
 
 const Menu = ({ isOpen }: { isOpen: boolean }) => {
+  const { t } = useTranslation();
   const root = routes[0].childRoutes;
   const menuItems = filterMenuRoutes(root!)[0]?.children;
 
@@ -96,7 +98,7 @@ const Menu = ({ isOpen }: { isOpen: boolean }) => {
                 animationDelay: `${index * 100}ms`,
               }}
             >
-              <MenuItem to={item.path} icon={item.icon} text={item.name} />
+              <MenuItem to={item.path} icon={item.icon} text={t(item.name)} />
             </div>
           ))}
         </div>
