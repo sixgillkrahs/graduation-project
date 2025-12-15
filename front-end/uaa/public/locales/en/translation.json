@@ -1,0 +1,50 @@
+{
+  "welcome": "Welcome to React + Vite + i18n!",
+  "resource": {
+    "name": "Name",
+    "path": "Path",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
+  },
+  "permission": {
+    "column": {
+      "name": "Name",
+      "resource": "Resource",
+      "operation": "Operation",
+      "active": "Active",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "activate": "Activate",
+      "inactivate": "Inactivate"
+    },
+    "placeholder": {
+      "name": "Search by name",
+      "operation": "Search by operation",
+      "activeStatus": "Search by active status"
+    }
+  },
+  "tabs": {
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "resources": "Resources"
+  },
+  "columns": {
+     "action": "Action",
+     "stt": "No."
+  },
+  "button": {
+    "add": "Add New",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "export": "Export"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Confirm Delete",
+      "content": "Are you sure you want to delete this item?"
+    }
+  }
+}

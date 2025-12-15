@@ -1,8 +1,7 @@
-import Loading from "@/components/Loading";
 import MessageService from "@shared/message";
 import routeConfig from "@shared/routeConfig";
 import type { RouterConfig } from "@shared/types/router";
-import { message } from "antd";
+import { message, Spin } from "antd";
 import { Suspense, useEffect } from "react";
 import { Outlet, Route, Routes } from "react-router-dom";
 
@@ -64,7 +63,7 @@ function App() {
   return (
     <>
       {contextHolder}
-      <Routes>{renderRouteConfig(routeConfig, <Loading />)}</Routes>
+      <Routes>{renderRouteConfig(routeConfig, <Spin fullscreen size="large" />)}</Routes>
     </>
   );
 }

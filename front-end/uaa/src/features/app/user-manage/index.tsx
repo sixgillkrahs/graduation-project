@@ -3,11 +3,13 @@ import Resources from "./resources";
 import Roles from "./roles";
 import { Tabs } from "antd";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 
 const UserManager = () => {
   const [selected, setSelected] = useState("roles");
   const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   const handleSelectionChange = (key: string) => {
     setSelected(key);
     setSearchParams({ tab: key });
@@ -34,17 +36,17 @@ const UserManager = () => {
         items={[
           {
             key: "roles",
-            label: "Roles",
+            label: t("tabs.roles"),
             children: <Roles />,
           },
           {
             key: "permissions",
-            label: "Permissions",
+            label: t("tabs.permissions"),
             children: <Permissions />,
           },
           {
             key: "resources",
-            label: "Resources",
+            label: t("tabs.resources"),
             children: <Resources />,
           },
         ]}

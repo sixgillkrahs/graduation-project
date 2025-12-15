@@ -1,5 +1,6 @@
-import { Badge, Dropdown } from "antd";
+import { Badge, Dropdown, Select } from "antd";
 import { Bell, Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Header = ({
   isMenuOpen,
@@ -8,6 +9,8 @@ const Header = ({
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
 }) => {
+  const { i18n, t } = useTranslation();
+  const currentLang = i18n.language?.startsWith("vi") ? "vi" : "en";
   return (
     <div className="flex h-[70px] items-center justify-between bg-white px-[31px] py-[13px]">
       <div className="cursor-pointer">
@@ -17,6 +20,15 @@ const Header = ({
         <Badge color="danger" content="3">
           <Bell />
         </Badge>
+        <Select
+          value={currentLang}
+          options={[
+            { value: "vi", label: "VI" },
+            { value: "en", label: "EN" },
+          ]}
+          onChange={(lng) => i18n.changeLanguage(lng)}
+          style={{ width: 90 }}
+        />
         <Dropdown>
           {/* <DropdownTrigger>
             <User

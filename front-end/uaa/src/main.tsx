@@ -1,4 +1,5 @@
 import App from "./App.tsx";
+import "./i18n";
 import { store } from "./store";
 import { queryClient } from "@shared/queryClient.ts";
 import "@styles/index.css";

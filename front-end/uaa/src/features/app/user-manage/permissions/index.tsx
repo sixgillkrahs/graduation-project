@@ -16,8 +16,10 @@ import type { ItemType } from "antd/es/menu/interface";
 import type { ColumnsType } from "antd/es/table";
 import { Ban, CircleCheckBig } from "lucide-react";
 import { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 
 const Permissions = () => {
+  const { t } = useTranslation();
   const { mutateAsync: deletePermission, isPending: isDeleting } = useDeletePermission();
   const { mutateAsync: createPermission, isPending: isCreating } = useCreatePermission();
   const { mutateAsync: updatePermission, isPending: isUpdating } = useUpdatePermission();
@@ -26,30 +28,30 @@ const Permissions = () => {
 
   const columns: ColumnsType<IPermissionService.PermissionDTO> = [
     {
-      title: "Name",
+      title: t("permission.column.name"),
       dataIndex: "name",
       key: "name",
     },
     {
-      title: "Resource",
+      title: t("permission.column.resource"),
       dataIndex: "resourceId",
       key: "resourceId",
       render: (value) => value?.name || "-",
     },
     {
-      title: "Operation",
+      title: t("permission.column.operation"),
       dataIndex: "operation",
       key: "operation",
       render: (value) => renderConstant(value, PermissionService.OPERATION),
     },
     {
-      title: "Active",
+      title: t("permission.column.active"),
       dataIndex: "isActive",
       key: "active",
       render: (value) => <Checkbox checked={value} />,
     },
     {
-      title: "Created At",
+      title: t("permission.column.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       render: (value) => toVietnamTime(value),
@@ -57,7 +59,7 @@ const Permissions = () => {
       width: 230,
     },
     {
-      title: "Updated At",
+      title: t("permission.column.updatedAt"),
       dataIndex: "updatedAt",
       key: "updatedAt",
       render: (value) => toVietnamTime(value),
@@ -98,7 +100,9 @@ const Permissions = () => {
     (record: IPermissionService.PermissionDTO): ItemType[] => [
       {
         key: "changeStatus",
-        label: record.isActive ? "Inactivate" : "Activate",
+        label: record.isActive
+          ? t("permission.column.inactivate")
+          : t("permission.column.activate"),
         icon: record.isActive ? (
           <Ban className="h-4 w-4" />
         ) : (
@@ -111,19 +115,19 @@ const Permissions = () => {
           }),
       },
     ],
-    [onUpdateStatus],
+    [onUpdateStatus, t],
   );
 
   const filter: IFilter<IPermissionService.PermissionDTO>[] = [
     {
       name: "name",
       type: "input",
-      placeholder: "Search by name",
+      placeholder: t("permission.placeholder.name"),
     },
     {
       name: "operation",
       type: "select",
-      placeholder: "Search by operation",
+      placeholder: t("permission.placeholder.operation"),
       options: PermissionService.OPERATION.map((item) => ({
         label: item.label,
         value: item.value,
@@ -132,14 +136,14 @@ const Permissions = () => {
     {
       name: "isActive",
       type: "select",
-      placeholder: "Search by active status",
+      placeholder: t("permission.placeholder.activeStatus"),
       options: [
         {
-          label: "Active",
+          label: t("permission.column.active"),
           value: true,
         },
         {
-          label: "Inactive",
+          label: t("permission.column.inactivate"),
           value: false,
         },
       ],

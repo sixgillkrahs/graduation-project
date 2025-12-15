@@ -28,6 +28,7 @@ import {
   type JSX,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface IFilter<T extends { id: string | number }> {
   name: keyof T;
@@ -99,6 +100,7 @@ const FullTable = <T extends { id: string | number }>({
   useGetList,
   loading,
 }: IProTableProps<T>): JSX.Element => {
+  const { t } = useTranslation();
   const [modal, contextHolder] = Modal.useModal();
   const [formInstance] = Form.useForm();
   const [formFilter] = Form.useForm();
@@ -190,9 +192,9 @@ const FullTable = <T extends { id: string | number }>({
   const handleDelete = useCallback(
     (id: T["id"]) => {
       modal.confirm({
-        title: "Confirm Delete",
-        content: "Are you sure you want to delete this record?",
-        okText: "Delete",
+        title: t("confirm.delete.title"),
+        content: t("confirm.delete.content"),
+        okText: t("button.delete"),
         okType: "danger",
         onOk: () => {
           if (onDelete) {
@@ -201,9 +203,10 @@ const FullTable = <T extends { id: string | number }>({
             MessageService.error("onDelete is not defined");
           }
         },
+        cancelText: t("button.cancel"),
       });
     },
-    [modal, onDelete],
+    [modal, onDelete, t],
   );
 
   const handleClose = useCallback(() => {
@@ -216,7 +219,7 @@ const FullTable = <T extends { id: string | number }>({
   const columnWithSttAndAction = useMemo(() => {
     return [
       {
-        title: "STT",
+        title: t("columns.stt"),
         dataIndex: "stt",
         key: "stt",
         width: 60,
@@ -225,10 +228,10 @@ const FullTable = <T extends { id: string | number }>({
       },
       ...columns,
       {
-        title: "Action",
+        title: t("columns.action"),
         dataIndex: "action",
         key: "action",
-        width: 100,
+        width: 120,
         render: (_: any, record: T) => {
           return (
             <Dropdown
@@ -239,7 +242,7 @@ const FullTable = <T extends { id: string | number }>({
                     ? [
                         {
                           key: "view",
-                          label: "View",
+                          label: t("button.view"),
                           icon: <Eye className="h-4 w-4" />,
                           onClick: () => handleView(record),
                         },
@@ -249,7 +252,7 @@ const FullTable = <T extends { id: string | number }>({
                     ? [
                         {
                           key: "edit",
-                          label: "Edit",
+                          label: t("button.edit"),
                           icon: <Pencil className="h-4 w-4" />,
                           onClick: () => handleEdit(record),
                         },
@@ -260,7 +263,7 @@ const FullTable = <T extends { id: string | number }>({
                     ? [
                         {
                           key: "delete",
-                          label: "Delete",
+                          label: t("button.delete"),
                           icon: <Trash className="h-4 w-4" />,
                           danger: true,
                           onClick: () => handleDelete(record.id),
@@ -287,6 +290,7 @@ const FullTable = <T extends { id: string | number }>({
     handleDelete,
     handleEdit,
     handleView,
+    t,
   ]);
 
   const handleSubmit = useCallback(() => {
@@ -386,12 +390,12 @@ const FullTable = <T extends { id: string | number }>({
               icon={<FileDown />}
               onClick={onExport}
             >
-              Export
+              {t("button.export")}
             </Button>
           )}
           {isAdd && (
             <Button type="primary" icon={<Plus />} onClick={handleAdd}>
-              Add New
+              {t("button.add")}
             </Button>
           )}
         </div>

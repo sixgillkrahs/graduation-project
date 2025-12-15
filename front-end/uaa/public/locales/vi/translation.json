@@ -1,0 +1,52 @@
+{
+  "welcome": "Chào mừng bạn đến với React + Vite + i18n!",
+  "resource": {
+    "placeholder": "Tìm kiếm theo tên hoặc đường dẫn",
+    "title": "Tài nguyên",
+    "name": "Tên",
+    "path": "Đường dẫn",
+    "createdAt": "Ngày tạo",
+    "updatedAt": "Ngày cập nhật"
+  },
+  "permission": {
+    "column": {
+      "name": "Tên",
+      "resource": "Tài nguyên",
+      "operation": "Hành động",
+      "active": "Kích hoạt",
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Ngày cập nhật",
+      "activate": "Kích hoạt",
+      "inactivate": "Vô hiệu hóa"
+    },
+    "placeholder": {
+      "name": "Tìm kiếm theo tên quyền",
+      "operation": "Tìm kiếm theo hành động",
+      "activeStatus": "Tìm kiếm theo trạng thái kích hoạt"
+    }
+  },
+  "tabs": {
+    "roles": "Vai trò",
+    "permissions": "Quyền",
+    "resources": "Tài nguyên"
+  },
+  "columns": {
+     "action": "Hành động",
+     "stt": "STT"
+  },
+  "button": {
+    "add": "Thêm mới",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "view": "Xem chi tiết",
+    "export": "Xuất tệp"
+  },
+  "confirm": {
+    "delete": {
+      "title": "Xác nhận xóa",
+      "content": "Bạn có chắc chắn muốn xóa không?"
+    }
+  }
+}
