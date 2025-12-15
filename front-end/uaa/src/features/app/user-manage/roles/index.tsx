@@ -61,6 +61,7 @@ const Roles = () => {
         children: <FormRole />,
         title: t("roles.title"),
         buttonLoading: isCreating,
+        width: 800,
       }}
       onAdd={onAdd}
       // onDelete={onDelete}

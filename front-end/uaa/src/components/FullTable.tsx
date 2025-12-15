@@ -62,6 +62,7 @@ interface IProTableProps<T extends { id: string | number }> {
     onCancel?: () => void;
     submitButtonText?: string;
     buttonLoading?: boolean;
+    width?: number;
   };
   onReload?: () => void;
   useGetDetail?: (id: T["id"]) => UseQueryResult<IResp<T>, Error>;
@@ -441,6 +442,7 @@ const FullTable = <T extends { id: string | number }>({
       )}
       {contextHolder}
       <ModalForm
+        width={form?.width}
         loading={isLoading}
         isOpen={isModalOpen}
         onCancel={handleClose}

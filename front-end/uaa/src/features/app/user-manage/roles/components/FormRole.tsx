@@ -16,7 +16,6 @@ const FormRole = () => {
 
   const dataSource = useMemo<TransferItem[]>(() => {
     const results = data?.data?.results || [];
-    console.log(results);
     return results.map((r) => ({
       key: r.id,
       title: r.name,
@@ -24,14 +23,20 @@ const FormRole = () => {
     }));
   }, [data]);
 
+  const onChange = (targetKeys: string[], direction: "left" | "right", moveKeys: string[]) => {};
+
   return (
     <>
       <Item label="Name" name="name" rules={[{ required: true, message: "Please input name!" }]}>
         <Input placeholder="Enter name" />
       </Item>
-      <Item>
+      <Item label="Permissions" name="permissions" wrapperCol={{ span: 24 }}>
         <Transfer
           className="min-w-full"
+          listStyle={{
+            width: "100%",
+            height: 300,
+          }}
           rowKey={(item) => item.key!}
           dataSource={dataSource}
           // targetKeys={dataSource.map((item) => item.key!)}
@@ -49,9 +54,9 @@ const FormRole = () => {
       <Item label="Active" name="isActive">
         <Switch />
       </Item>
-      <Item label="Default" name="isDefault">
+      {/* <Item label="Default" name="isDefault">
         <Switch />
-      </Item>
+      </Item> */}
     </>
   );
 };
