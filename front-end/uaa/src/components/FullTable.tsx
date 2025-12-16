@@ -54,6 +54,7 @@ interface IProTableProps<T extends { id: string | number }> {
   isView?: boolean;
   isExport?: boolean;
   onExport?: () => void;
+  disableAction?: boolean;
   form?: {
     title?: string;
     children?: ReactNode;
@@ -100,6 +101,7 @@ const FullTable = <T extends { id: string | number }>({
   search,
   useGetList,
   loading,
+  disableAction = false,
 }: IProTableProps<T>): JSX.Element => {
   const { t } = useTranslation();
   const [modal, contextHolder] = Modal.useModal();
@@ -227,60 +229,69 @@ const FullTable = <T extends { id: string | number }>({
         render: (_: T, __: any, index: number) =>
           index + 1 + ((listData?.data.page || 1) - 1) * (listData?.data.limit || 10),
       },
+
       ...columns,
-      {
-        title: t("columns.action"),
-        dataIndex: "action",
-        key: "action",
-        width: 120,
-        render: (_: any, record: T) => {
-          return (
-            <Dropdown
-              menu={{
-                items: [
-                  ...(extraAction?.(record) || []),
-                  ...(isView
-                    ? [
-                        {
-                          key: "view",
-                          label: t("button.view"),
-                          icon: <Eye className="h-4 w-4" />,
-                          onClick: () => handleView(record),
-                        },
-                      ]
-                    : []),
-                  ...(isEdit
-                    ? [
-                        {
-                          key: "edit",
-                          label: t("button.edit"),
-                          icon: <Pencil className="h-4 w-4" />,
-                          onClick: () => handleEdit(record),
-                        },
-                      ]
-                    : []),
-                  ...(isDelete ? [{ type: "divider" as const }] : []),
-                  ...(isDelete
-                    ? [
-                        {
-                          key: "delete",
-                          label: t("button.delete"),
-                          icon: <Trash className="h-4 w-4" />,
-                          danger: true,
-                          onClick: () => handleDelete(record.id),
-                        },
-                      ]
-                    : []),
-                ],
-              }}
-            >
-              <EllipsisVertical className="cursor-pointer" />
-            </Dropdown>
-          );
-        },
-      },
+
+      ...(disableAction
+        ? []
+        : [
+            {
+              title: t("columns.action"),
+              dataIndex: "action",
+              key: "action",
+              width: 120,
+              render: (_: any, record: T) => (
+                <Dropdown
+                  menu={{
+                    items: [
+                      ...(extraAction?.(record) || []),
+
+                      ...(isView
+                        ? [
+                            {
+                              key: "view",
+                              label: t("button.view"),
+                              icon: <Eye className="h-4 w-4" />,
+                              onClick: () => handleView(record),
+                            },
+                          ]
+                        : []),
+
+                      ...(isEdit
+                        ? [
+                            {
+                              key: "edit",
+                              label: t("button.edit"),
+                              icon: <Pencil className="h-4 w-4" />,
+                              onClick: () => handleEdit(record),
+                            },
+                          ]
+                        : []),
+
+                      ...(isDelete ? [{ type: "divider" as const }] : []),
+
+                      ...(isDelete
+                        ? [
+                            {
+                              key: "delete",
+                              label: t("button.delete"),
+                              icon: <Trash className="h-4 w-4" />,
+                              danger: true,
+                              onClick: () => handleDelete(record.id),
+                            },
+                          ]
+                        : []),
+                    ],
+                  }}
+                >
+                  <EllipsisVertical className="cursor-pointer" />
+                </Dropdown>
+              ),
+            },
+          ]),
     ];
   }, [
+    disableAction,
     columns,
     listData?.data.page,
     listData?.data.limit,
