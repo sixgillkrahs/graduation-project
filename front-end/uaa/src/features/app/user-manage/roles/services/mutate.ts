@@ -28,3 +28,20 @@ export const useCreateRole = (): UseMutationResult<
     },
   });
 };
+
+export const useDeleteRole = (): UseMutationResult<IResp<void>, Error, string, void> => {
+  return useMutation({
+    mutationFn: (id: string) => {
+      return RoleService.DeleteRole(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [RoleQueryKey.getRoles],
+      });
+    },
+    meta: {
+      ERROR_SOURCE: "[Delete resource failed]",
+      SUCCESS_MESSAGE: "The resource has been successfully deleted",
+    },
+  });
+};

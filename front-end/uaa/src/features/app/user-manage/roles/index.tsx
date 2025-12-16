@@ -1,18 +1,19 @@
 import FormRole, { type FormRef } from "./components/FormRole";
-import { useCreateRole } from "./services/mutate";
+import { useDeleteRole } from "./services/mutate";
 import { useGetRoles } from "./services/query";
 import FullTable from "@/components/FullTable";
 import { toVietnamTime } from "@shared/render/time";
-import { Button, Checkbox, Dropdown, Flex } from "antd";
+import { Button, Checkbox, Dropdown, Flex, Modal } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EllipsisVertical, Eye, Pencil, PlusIcon, Trash } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 const Roles = () => {
+  const { mutateAsync: deleteRole } = useDeleteRole();
+  const [modal, contextHolder] = Modal.useModal();
   const { t } = useTranslation();
   const ref = useRef<FormRef>(null);
-  const { mutateAsync: createRole, isPending: isCreating } = useCreateRole();
   const columns: ColumnsType<IRoleService.RoleDTO> = [
     {
       title: t("roles.name"),
@@ -49,7 +50,7 @@ const Roles = () => {
       dataIndex: "action",
       key: "action",
       width: 120,
-      render: (value, record) => (
+      render: (_, record) => (
         <Dropdown
           menu={{
             items: [
@@ -71,7 +72,7 @@ const Roles = () => {
                 label: t("button.delete"),
                 icon: <Trash className="h-4 w-4" />,
                 danger: true,
-                // onClick: () => handleDelete(record.id),
+                onClick: () => handleDelete(record.id),
               },
             ],
           }}
@@ -85,11 +86,10 @@ const Roles = () => {
   console.log("home");
 
   const onAdd = () => {
-    // console.log(first)
     ref.current?.open();
   };
 
-  function handleView(record: IRoleService.RoleDTO) {}
+  function handleView(_: IRoleService.RoleDTO) {}
 
   // const onAdd = useCallback(
   //   (values: IRoleService.CreateRoleDTO): Promise<any> => {
@@ -98,13 +98,26 @@ const Roles = () => {
   //   [createRole],
   // );
 
+  function handleDelete(id: string) {
+    modal.confirm({
+      title: t("confirm.delete.title"),
+      content: t("confirm.delete.content"),
+      okText: t("button.delete"),
+      okType: "danger",
+      onOk: () => {
+        return deleteRole(id);
+      },
+      cancelText: t("button.cancel"),
+    });
+  }
+
   return (
     <div>
       <Flex justify="flex-end">
         <Button
           type="primary"
           htmlType="submit"
-          loading={isCreating}
+          loading={false}
           icon={<PlusIcon />}
           onClick={onAdd}
         >
@@ -132,12 +145,8 @@ const Roles = () => {
         disableAction={true}
         isAdd={false}
       />
-      {/* {state.open && ( */}
-      <FormRole
-        // onOk={() => dispatch({ type: "close" })}
-        ref={ref}
-      />
-      {/* )} */}
+      <FormRole ref={ref} />
+      {contextHolder}
     </div>
   );
 };

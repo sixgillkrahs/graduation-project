@@ -109,7 +109,7 @@ export class RoleController extends BaseController {
 
   deleteRole = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const { id } = req.query as {
+      const { id } = req.params as {
         id: string;
       };
       return await this.roleService.deleteRole(id);

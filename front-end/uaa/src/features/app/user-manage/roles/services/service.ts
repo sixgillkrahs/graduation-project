@@ -14,12 +14,12 @@ export default class RoleService {
     });
   };
 
-  //   public static readonly DeletePermission = (id: string | number): Promise<IResp<void>> => {
-  //     return request({
-  //       url: PermissionEndpoint.DeletePermission(id),
-  //       method: AxiosMethod.DELETE,
-  //     });
-  //   };
+  public static readonly DeleteRole = (id: string | number): Promise<IResp<void>> => {
+    return request({
+      url: RoleEndpoint.DeleteRole(id),
+      method: AxiosMethod.DELETE,
+    });
+  };
 
   public static readonly CreateRole = (role: IRoleService.CreateRoleDTO): Promise<IResp<void>> => {
     return request({

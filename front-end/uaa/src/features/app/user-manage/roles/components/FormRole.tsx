@@ -1,4 +1,5 @@
-import { useGetPermissions } from "../../permissions/services/query";
+import { useGetInfinitePermissions } from "../../permissions/services/query";
+import { useCreateRole } from "../services/mutate";
 import { Col, Form, Input, Modal, Row, Switch, Transfer } from "antd";
 import type { TransferDirection, TransferItem, TransferProps } from "antd/es/transfer";
 import type { TransferKey } from "antd/es/transfer/interface";
@@ -14,7 +15,7 @@ export type FormRef = {
 const FormRole = forwardRef<FormRef>((_, ref) => {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
-  const [selectedKeys, setSelectedKeys] = useState<TransferProps["targetKeys"]>([]);
+  const { mutateAsync: createRole, isPending: isCreating } = useCreateRole();
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
   }));
@@ -23,38 +24,26 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
     page: 1,
     isActive: true,
   });
-  const { data } = useGetPermissions(params);
-  const [targetKeys, setTargetKeys] = useState<TransferProps["targetKeys"]>(
-    data?.data?.results?.map((r) => r.id) || [],
-  );
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useGetInfinitePermissions(params);
+  const [targetKeys, setTargetKeys] = useState<TransferProps["targetKeys"]>();
 
   const dataSource = useMemo<TransferItem[]>(() => {
-    const results = data?.data?.results || [];
-    return results.map((r) => ({
-      key: r.id,
-      title: r.name,
-      description: r.name,
-    }));
+    const pages = data?.pages || [];
+    return pages.flatMap((p: any) =>
+      (p?.data?.results || []).map((r: any) => ({ key: r.id, title: r.name, description: r.name })),
+    );
   }, [data]);
 
-  const onChange: TransferProps["onChange"] = (
-    targetKeys: Key[],
-    direction: TransferDirection,
-    moveKeys: TransferKey[],
-  ) => {
-    console.log(targetKeys, direction, moveKeys);
+  const onChange: TransferProps["onChange"] = (targetKeys: Key[]) => {
     setTargetKeys(targetKeys);
   };
 
   const onSubmit = (values: IRoleService.CreateRoleDTO) => {
-    console.log(values);
-  };
-
-  const onSelectChange: TransferProps["onSelectChange"] = (
-    sourceSelectedKeys,
-    targetSelectedKeys,
-  ) => {
-    setSelectedKeys([...sourceSelectedKeys, ...targetSelectedKeys]);
+    createRole(values).then((res) => {
+      console.log(res);
+      setOpen(false);
+    });
   };
 
   console.log("first");
@@ -63,8 +52,15 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
     setOpen(false);
   };
 
+  const onScroll = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
   return (
     <Modal
+      loading={isLoading}
       open={open}
       onCancel={onCancel}
       title="Create Role"
@@ -72,6 +68,7 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
       width={800}
       okButtonProps={{
         htmlType: "submit",
+        loading: isCreating,
       }}
       onOk={() => form.submit()}
     >
@@ -90,12 +87,12 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
         <Row>
           <Col span={12}>
             <Item name="isActive">
-              <Switch /> Active
+              <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
             </Item>
           </Col>
           <Col span={12}>
             <Item name="isDefault">
-              <Switch /> <span>Default</span>
+              <Switch checkedChildren="Default" unCheckedChildren="Not Default" />
             </Item>
           </Col>
         </Row>
@@ -111,13 +108,15 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
             dataSource={dataSource}
             onChange={onChange}
             targetKeys={targetKeys}
-            selectedKeys={selectedKeys}
-            onSelectChange={onSelectChange}
-            // onScroll={onScroll}
             render={(item) => item.title || ""}
+            onScroll={onScroll}
+            showSelectAll={true}
+            onSelectChange={(sourceSelectedKeys, targetSelectedKeys) => {
+              console.log(sourceSelectedKeys, targetSelectedKeys);
+            }}
             selectAllLabels={[
               <>
-                <span>Tổng: {data?.data?.totalResults || 0} quyền hoạt động</span>
+                <span>Tổng: {data?.pages[0].data.totalResults || 0} quyền hoạt động</span>
               </>,
             ]}
           />

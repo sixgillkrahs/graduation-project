@@ -16,4 +16,5 @@ export const PermissionQueryKey = {
   getPermission: "getPermission",
   updatePermission: "updatePermission",
   updatePermissionStatus: "updatePermissionStatus",
+  getInfinitePermissions: "getInfinitePermissions",
 } as const;
