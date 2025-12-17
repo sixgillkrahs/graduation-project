@@ -1,7 +1,7 @@
 namespace IRoleService {
   export interface RoleDTO {
     name: string;
-    permissions: PermissionDTO[];
+    permissionIds: PermissionDTO[];
     description: string;
     createdAt: string;
     updatedAt: string;
@@ -12,7 +12,16 @@ namespace IRoleService {
 
   export interface CreateRoleDTO {
     name: string;
-    permissions: string[];
+    permissionIds: string[];
+    description: string;
+    isActive: boolean;
+    isDefault: boolean;
+  }
+
+  export interface UpdateRoleDTO {
+    id: string;
+    name: string;
+    permissionIds: string[];
     description: string;
     isActive: boolean;
     isDefault: boolean;

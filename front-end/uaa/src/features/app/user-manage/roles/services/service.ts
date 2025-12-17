@@ -29,24 +29,22 @@ export default class RoleService {
     });
   };
 
-  //   public static readonly GetPermissionById = (
-  //     id: string | number,
-  //   ): Promise<IResp<IPermissionService.PermissionDTO>> => {
-  //     return request({
-  //       url: PermissionEndpoint.GetPermissionById(id),
-  //       method: AxiosMethod.GET,
-  //     });
-  //   };
+  public static readonly GetRoleById = (
+    id: string | number,
+  ): Promise<IResp<IRoleService.RoleDTO>> => {
+    return request({
+      url: RoleEndpoint.GetRoleById(id),
+      method: AxiosMethod.GET,
+    });
+  };
 
-  //   public static readonly UpdatePermission = (
-  //     permission: IPermissionService.UpdatePermissionDTO,
-  //   ): Promise<IResp<void>> => {
-  //     return request({
-  //       url: PermissionEndpoint.UpdatePermission(permission.id),
-  //       method: AxiosMethod.PUT,
-  //       data: permission,
-  //     });
-  //   };
+  public static readonly UpdateRole = (role: IRoleService.UpdateRoleDTO): Promise<IResp<void>> => {
+    return request({
+      url: RoleEndpoint.UpdateRole(role.id),
+      method: AxiosMethod.PUT,
+      data: role,
+    });
+  };
 
   //   public static readonly ChangeStatusPermission = (
   //     permission: IPermissionService.UpdatePermissionStatusDTO,

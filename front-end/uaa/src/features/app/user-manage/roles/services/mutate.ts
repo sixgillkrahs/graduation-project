@@ -18,8 +18,9 @@ export const useCreateRole = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [RoleQueryKey.getRoles],
       });
-      queryClient.removeQueries({
+      queryClient.refetchQueries({
         queryKey: [RoleQueryKey.getRoles],
+        type: "active",
       });
     },
     meta: {
@@ -42,6 +43,32 @@ export const useDeleteRole = (): UseMutationResult<IResp<void>, Error, string, v
     meta: {
       ERROR_SOURCE: "[Delete resource failed]",
       SUCCESS_MESSAGE: "The resource has been successfully deleted",
+    },
+  });
+};
+
+export const useUpdateRole = (): UseMutationResult<
+  IResp<void>,
+  Error,
+  IRoleService.UpdateRoleDTO,
+  void
+> => {
+  return useMutation({
+    mutationFn: (role: IRoleService.UpdateRoleDTO) => {
+      return RoleService.UpdateRole(role);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [RoleQueryKey.getRoles],
+      });
+      queryClient.refetchQueries({
+        queryKey: [RoleQueryKey.getRoles],
+        type: "active",
+      });
+    },
+    meta: {
+      ERROR_SOURCE: "[Update role failed]",
+      SUCCESS_MESSAGE: "The role has been successfully updated",
     },
   });
 };

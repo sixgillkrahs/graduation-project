@@ -17,9 +17,10 @@ export class RoleService {
       populate?: string;
     },
     filter?: Record<string, any>,
+    select?: string,
   ) => {
     filter = filter || {};
-    return await RoleModel.paginate?.(options, filter);
+    return await RoleModel.paginate?.(options, filter, select);
   };
 
   updateRole = async (id: string, role: IRole) => {
@@ -36,5 +37,13 @@ export class RoleService {
 
   changeDefaultStatus = async (id: string, status: boolean) => {
     return await RoleModel.findByIdAndUpdate(id, { isDefault: status });
+  };
+
+  getRoleById = async (id: string) => {
+    return await RoleModel.findById(id);
+  };
+
+  getRoleDefault = async () => {
+    return await RoleModel.findOne({ isDefault: true });
   };
 }

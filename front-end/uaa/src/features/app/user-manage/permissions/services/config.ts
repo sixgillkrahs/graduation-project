@@ -1,12 +1,12 @@
-import type { ServiceEndpoint } from "@shared/types/service";
+import type { Id, ServiceEndpoint } from "@shared/types/service";
 
 export const PermissionEndpoint: ServiceEndpoint = {
   GetPermissions: () => "/permissions",
-  DeletePermission: (id: string | number) => `/permissions/${id}`,
+  DeletePermission: (id: Id) => `/permissions/${id}`,
   CreatePermission: () => "/permissions",
-  GetPermissionById: (id: string | number) => `/permissions/${id}`,
-  UpdatePermission: (id: string | number) => `/permissions/${id}`,
-  UpdatePermissionStatus: (id: string | number) => `/permissions/${id}/status`,
+  GetPermissionById: (id: Id) => `/permissions/${id}`,
+  UpdatePermission: (id: Id) => `/permissions/${id}`,
+  UpdatePermissionStatus: (id: Id) => `/permissions/${id}/status`,
 } as const;
 
 export const PermissionQueryKey = {

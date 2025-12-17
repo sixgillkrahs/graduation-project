@@ -1,32 +1,38 @@
 import { useGetInfinitePermissions } from "../../permissions/services/query";
-import { useCreateRole } from "../services/mutate";
+import { useCreateRole, useUpdateRole } from "../services/mutate";
+import { useGetRole } from "../services/query";
+import type { Id } from "@shared/types/service";
 import { Col, Form, Input, Modal, Row, Switch, Transfer } from "antd";
-import type { TransferDirection, TransferItem, TransferProps } from "antd/es/transfer";
-import type { TransferKey } from "antd/es/transfer/interface";
-import { forwardRef, memo, useImperativeHandle, useMemo, useState, type Key } from "react";
+import type { TransferItem } from "antd/es/transfer";
+import { forwardRef, memo, useEffect, useImperativeHandle, useMemo, useState } from "react";
 
 const { Item } = Form;
 const { TextArea } = Input;
 
 export type FormRef = {
-  open: () => void;
+  open: (id?: Id) => void;
 };
 
 const FormRole = forwardRef<FormRef>((_, ref) => {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
+  const [id, setId] = useState<Id>("");
+  const { data: role, isLoading: isLoadingRole } = useGetRole(id);
   const { mutateAsync: createRole, isPending: isCreating } = useCreateRole();
+  const { mutateAsync: updateRole, isPending: isUpdating } = useUpdateRole();
   useImperativeHandle(ref, () => ({
-    open: () => setOpen(true),
+    open: (id?: Id) => {
+      setId(id || "");
+      setOpen(true);
+    },
   }));
-  const [params] = useState({
+  const params = {
     limit: 10,
     page: 1,
     isActive: true,
-  });
+  };
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useGetInfinitePermissions(params);
-  const [targetKeys, setTargetKeys] = useState<TransferProps["targetKeys"]>();
 
   const dataSource = useMemo<TransferItem[]>(() => {
     const pages = data?.pages || [];
@@ -35,16 +41,26 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
     );
   }, [data]);
 
-  const onChange: TransferProps["onChange"] = (targetKeys: Key[]) => {
-    setTargetKeys(targetKeys);
+  const onSubmit = (values: IRoleService.CreateRoleDTO) => {
+    if (id) {
+      updateRole({ ...values, id: String(id) }).then(() => {
+        setOpen(false);
+      });
+    } else {
+      createRole(values).then(() => {
+        setOpen(false);
+      });
+    }
   };
 
-  const onSubmit = (values: IRoleService.CreateRoleDTO) => {
-    createRole(values).then((res) => {
-      console.log(res);
-      setOpen(false);
-    });
-  };
+  useEffect(() => {
+    if (id && role?.data) {
+      const permissionIds = Array.isArray((role.data as any).permissionIds)
+        ? (role.data as any).permissionIds.map((item: any) => item?.id ?? item)
+        : [];
+      form.setFieldsValue({ ...role.data, permissionIds });
+    }
+  }, [id, role, form]);
 
   console.log("first");
 
@@ -60,7 +76,7 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
 
   return (
     <Modal
-      loading={isLoading}
+      loading={isLoading || isLoadingRole}
       open={open}
       onCancel={onCancel}
       title="Create Role"
@@ -68,7 +84,7 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
       width={800}
       okButtonProps={{
         htmlType: "submit",
-        loading: isCreating,
+        loading: isCreating || isUpdating,
       }}
       onOk={() => form.submit()}
     >
@@ -96,7 +112,12 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
             </Item>
           </Col>
         </Row>
-        <Item label="Permissions" name="permissions" wrapperCol={{ span: 24 }}>
+        <Item
+          label="Permissions"
+          name="permissionIds"
+          valuePropName="targetKeys"
+          wrapperCol={{ span: 24 }}
+        >
           <Transfer
             styles={{
               section: {
@@ -106,19 +127,20 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
             }}
             rowKey={(item) => item.key!}
             dataSource={dataSource}
-            onChange={onChange}
-            targetKeys={targetKeys}
+            onChange={(keys) => {
+              form.setFieldValue("permissionIds", keys);
+            }}
             render={(item) => item.title || ""}
             onScroll={onScroll}
             showSelectAll={true}
             onSelectChange={(sourceSelectedKeys, targetSelectedKeys) => {
               console.log(sourceSelectedKeys, targetSelectedKeys);
             }}
-            selectAllLabels={[
-              <>
-                <span>Tổng: {data?.pages[0].data.totalResults || 0} quyền hoạt động</span>
-              </>,
-            ]}
+            // selectAllLabels={[
+            //   <>
+            //     <span>Tổng: {data?.pages[0].data.totalResults || 0} quyền hoạt động</span>
+            //   </>,
+            // ]}
           />
         </Item>
       </Form>

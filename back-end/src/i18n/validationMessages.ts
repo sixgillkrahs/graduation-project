@@ -2,6 +2,7 @@ export const validationMessages = {
   vi: {
     required: (field: string) => `${field} là bắt buộc`,
     email: "Email không hợp lệ",
+    passwordNotMatch: "Mật khẩu không trùng khớp",
     emailMax: "Email không được dài quá 99 ký tự",
     firstnameMax: "Họ không được dài quá 16 ký tự",
     invalidFirstName: "Vui lòng nhập họ",
@@ -32,6 +33,7 @@ export const validationMessages = {
   en: {
     required: (field: string) => `${field} is required`,
     email: "Invalid email address",
+    passwordNotMatch: "Passwords do not match",
     emailMax: "Email must be less than 99 characters",
     firstnameMax: "Firstname must be less than 16 characters",
     lastnameMax: "Lastname must be less than 16 characters",

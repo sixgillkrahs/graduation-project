@@ -5,14 +5,18 @@ import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { loginSchema, signupSchema } from "@/validators/auth.validator";
 import { UserService } from "@/services/user.service";
+import { RoleService } from "@/services/role.service";
 
 const router = Router();
 
 const authService = new AuthService();
 const userService = new UserService();
-const authController = new AuthController(authService, userService);
-
-
+const roleService = new RoleService();
+const authController = new AuthController(
+  authService,
+  userService,
+  roleService,
+);
 
 /**
  * @swagger
@@ -57,7 +61,11 @@ const authController = new AuthController(authService, userService);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", validateRequest((lang) => loginSchema(lang)), authController.login);
+router.post(
+  "/login",
+  validateRequest((lang) => loginSchema(lang)),
+  authController.login,
+);
 
 /**
  * @swagger
@@ -92,6 +100,10 @@ router.post("/login", validateRequest((lang) => loginSchema(lang)), authControll
  *       400:
  *         description: Invalid input
  */
-router.post("/signup", validateRequest((lang) => signupSchema(lang)), authController.signup);
+router.post(
+  "/signup",
+  validateRequest((lang) => signupSchema(lang)),
+  authController.signup,
+);
 
 export default router;

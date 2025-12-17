@@ -24,6 +24,7 @@ interface RoleModel extends mongoose.Model<IRole, {}, IRoleMethods> {
       populate?: string;
     },
     filter: Record<string, any>,
+    select?: string,
   ) => Promise<mongoose.HydratedDocument<IRole, IRoleMethods>[]>;
   createRole(
     role: IRole,

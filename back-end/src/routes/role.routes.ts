@@ -4,9 +4,8 @@ import { PermissionService } from "@/services/permission.service";
 import { Router } from "express";
 import { validateRequest } from "@/middleware/validateRequest";
 import {
-  createUpdateRoleSchema,
-  deleteRoleSchema,
-  updateRoleSchema,
+  validateIdHeaderSchema,
+  validateBodyRoleSchema,
 } from "@/validators/role.validator";
 
 const roleService = new RoleService();
@@ -128,7 +127,7 @@ const router = Router();
  */
 router.post(
   "/",
-  validateRequest((lang) => createUpdateRoleSchema(lang)),
+  validateRequest((lang) => validateBodyRoleSchema(lang)),
   roleController.createRole,
 );
 
@@ -179,6 +178,37 @@ router.get("/", roleController.getRoles);
 /**
  * @swagger
  * /roles/{id}:
+ *   get:
+ *     summary: Get a role by ID
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The role ID to get
+ *     responses:
+ *       200:
+ *         description: A list of roles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Response'
+ */
+router.get(
+  "/:id",
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  roleController.getRole,
+);
+
+/**
+ * @swagger
+ * /roles/{id}:
  *   put:
  *     summary: Update a role
  *     tags: [Roles]
@@ -224,7 +254,8 @@ router.get("/", roleController.getRoles);
  */
 router.put(
   "/:id",
-  validateRequest((lang) => updateRoleSchema(lang)),
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  validateRequest((lang) => validateBodyRoleSchema(lang)),
   roleController.updateRole,
 );
 
@@ -276,7 +307,7 @@ router.put(
  */
 router.delete(
   "/:id",
-  validateRequest((lang) => deleteRoleSchema(lang)),
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
   roleController.deleteRole,
 );
 

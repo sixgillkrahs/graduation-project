@@ -16,22 +16,22 @@ export class RoleController extends BaseController {
 
   createRole = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const { name, permissions, description, isActive, isDefault } =
+      const { name, permissionIds, description, isActive, isDefault } =
         req.body as {
           name: string;
-          permissions: string[];
+          permissionIds: string[];
           description?: string;
           isActive?: boolean;
           isDefault?: boolean;
         };
-      const permissionIds: IPermission[] =
-        await this.permissionService.checkPermissionList(permissions);
-      if (permissionIds.length !== permissions.length) {
+      const permissionList: IPermission[] =
+        await this.permissionService.checkPermissionList(permissionIds);
+      if (permissionList.length !== permissionIds.length) {
         throw new Error("Some permissions are not found");
       }
       const roleModel: IRole = {
         name,
-        permissionIds: permissionIds.map((item) => item._id!),
+        permissionIds: permissionList.map((item) => item._id!),
         description,
         isActive: isActive ?? true,
         isDefault: isDefault ?? false,
@@ -66,9 +66,10 @@ export class RoleController extends BaseController {
             page: page ? Number(page) : 1,
             limit: limit ? Number(limit) : 10,
             sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
-            populate: "permissionIds:id name",
+            // populate: "permissionIds:id name",
           },
           filter,
+          "id name isActive isDefault createdAt updatedAt",
         );
         return role;
       } catch (error) {
@@ -80,29 +81,30 @@ export class RoleController extends BaseController {
 
   updateRole = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const { id } = req.query as {
+      const { id } = req.params as {
         id: string;
       };
-      const { name, permissions, description, isActive, isDefault } =
+      const { name, permissionIds, description, isActive, isDefault } =
         req.body as {
           name: string;
-          permissions: string[];
+          permissionIds: string[];
           description?: string;
           isActive?: boolean;
           isDefault?: boolean;
         };
-      const permissionIds: IPermission[] =
-        await this.permissionService.checkPermissionList(permissions);
-      if (permissionIds.length !== permissions.length) {
+      const permissionList: IPermission[] =
+        await this.permissionService.checkPermissionList(permissionIds);
+      if (permissionList.length !== permissionIds.length) {
         throw new Error("Some permissions are not found");
       }
       const roleModel: IRole = {
         name,
-        permissionIds: permissionIds.map((item) => item._id!),
+        permissionIds: permissionList.map((item) => item._id!),
         description,
         isActive: isActive ?? true,
         isDefault: isDefault ?? false,
       };
+      console.log(roleModel);
       return await this.roleService.updateRole(id, roleModel);
     });
   };
@@ -141,6 +143,19 @@ export class RoleController extends BaseController {
         isDefault?: boolean;
       };
       return await this.roleService.changeDefaultStatus(id, isDefault ?? false);
+    });
+  };
+
+  getRole = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params as {
+        id: string;
+      };
+      const role = await this.roleService.getRoleById(id);
+      if (!role) {
+        throw new Error("Role not found");
+      }
+      return role;
     });
   };
 }

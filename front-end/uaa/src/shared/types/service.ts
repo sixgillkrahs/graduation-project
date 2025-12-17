@@ -39,3 +39,5 @@ export interface IColumn {
   uid: string;
   sortable?: boolean;
 }
+
+export type Id = string | number;

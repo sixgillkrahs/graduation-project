@@ -64,7 +64,7 @@ const Roles = () => {
                 key: "edit",
                 label: t("button.edit"),
                 icon: <Pencil className="h-4 w-4" />,
-                // onClick: () => handleEdit(record),
+                onClick: () => handleEdit(record),
               },
               { type: "divider" as const },
               {
@@ -109,6 +109,9 @@ const Roles = () => {
       },
       cancelText: t("button.cancel"),
     });
+  }
+  function handleEdit(record: IRoleService.RoleDTO) {
+    ref.current?.open(record.id);
   }
 
   return (
