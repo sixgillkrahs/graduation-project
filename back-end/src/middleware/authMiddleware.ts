@@ -5,83 +5,86 @@ import { ErrorCode } from "@/utils/errorCodes";
 import { logger } from "@/config/logger";
 import { ENV } from "@/config/env";
 import { parse } from "cookie";
+import { UserService } from "@/services/user.service";
 
 interface JwtPayload {
-    userId: string;
-    role: string;
+  userId: string;
+  role: string;
 }
 
 declare global {
-    namespace Express {
-        interface Request {
-            user: JwtPayload;
-        }
+  namespace Express {
+    interface Request {
+      user: JwtPayload & { detail?: any };
     }
+  }
 }
 
-
-
-export const requireAuth = (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): void => {
-    try {
-        const cookieHeader = req.headers.cookie;
-        if (!cookieHeader) {
-            throw new AppError(
-                "Unauthorized - Invalid token",
-                401,
-                ErrorCode.INVALID_TOKEN
-            );
-        }
-        const cookies = parse(cookieHeader);
-        const token = cookies.accessToken;
-        if (!token) {
-            throw new AppError("No token provided", 401, ErrorCode.UNAUTHORIZED);
-        }
-        try {
-            console.log(ENV.JWT_SECRET)
-            const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
-            req.user = decoded;
-            next();
-        } catch (error) {
-            logger.warn({
-                message: "Invalid token",
-                context: "AuthMiddleware.requireAuth",
-                error: error instanceof Error ? error.message : "Unknown error",
-            });
-            throw new AppError(
-                "Unauthorized - Invalid token",
-                401,
-                ErrorCode.INVALID_TOKEN
-            );
-        }
-    } catch (error) {
-        next(error);
+export const requireAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const cookieHeader = req.headers.cookie;
+    if (!cookieHeader) {
+      throw new AppError(
+        "Unauthorized - Invalid token",
+        401,
+        ErrorCode.INVALID_TOKEN,
+      );
     }
+    const cookies = parse(cookieHeader);
+    const token = cookies.accessToken;
+    if (!token) {
+      throw new AppError("No token provided", 401, ErrorCode.UNAUTHORIZED);
+    }
+    try {
+      const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
+      const userService = new UserService();
+      const user = await userService.getUserById(decoded.userId);
+      if (!user) {
+        throw new AppError("User not found", 404, ErrorCode.NOT_FOUND);
+      }
+      req.user = { ...decoded, detail: user };
+      next();
+    } catch (error) {
+      logger.warn({
+        message: "Invalid token",
+        context: "AuthMiddleware.requireAuth",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw new AppError(
+        "Unauthorized - Invalid token",
+        401,
+        ErrorCode.INVALID_TOKEN,
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const requireRole = (roles: string[]) => {
-    return (req: Request, res: Response, next: NextFunction): void => {
-        try {
-            if (!req.user?.role || !roles.includes(req.user.role)) {
-                logger.warn({
-                    message: "Insufficient permissions",
-                    context: "AuthMiddleware.requireRole",
-                    requiredRoles: roles,
-                    userRole: req.user?.role,
-                    userId: req.user?.userId,
-                });
-                throw new AppError(
-                    "Forbidden - Insufficient permissions",
-                    403,
-                    ErrorCode.FORBIDDEN
-                );
-            }
-            next();
-        } catch (error) {
-            next(error);
-        }
-    };
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      if (!req.user?.role || !roles.includes(req.user.role)) {
+        logger.warn({
+          message: "Insufficient permissions",
+          context: "AuthMiddleware.requireRole",
+          requiredRoles: roles,
+          userRole: req.user?.role,
+          userId: req.user?.userId,
+        });
+        throw new AppError(
+          "Forbidden - Insufficient permissions",
+          403,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
 };

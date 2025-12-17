@@ -14,4 +14,8 @@ export class AuthService {
   async createAuth(auth: IAuth) {
     return AuthModel.create(auth);
   }
+
+  async getAuthById(id: string) {
+    return AuthModel.findById(id);
+  }
 }

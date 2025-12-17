@@ -4,7 +4,9 @@ import UserModel, { IUser } from "@/models/user.model";
 
 @singleton
 export class UserService {
-  constructor() {}
+  constructor() {
+    console.log("UserService constructor");
+  }
 
   createUser = async (user: IUser) => {
     return UserModel.create(user);
