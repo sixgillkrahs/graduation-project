@@ -1,0 +1,42 @@
+.heading1 {
+  font-family: var(--font-prompt);
+  font-size: 90px;
+}
+
+.heading2 {
+    font-family: var(--font-prompt);
+    font-size: 70px;
+}
+
+.heading3 {
+    font-family: var(--font-prompt);
+    font-size: 40px;
+}
+
+.text-descriptor {
+    font-family: var(--font-poppins);
+    font-size: 24px;
+}
+
+.text {
+    font-family: var(--font-poppins);
+    font-size: 18px;
+}
+
+.text-button-title {
+    font-family: var(--font-poppins);
+    font-size: 18px;
+}
+
+.text-card {
+    font-family: var(--font-poppins);
+    font-size: 14px;
+}
+
+.text-white {
+    color: #F7F7F7;
+}
+
+.text-gray {
+    color: #CCE9DF;
+}
