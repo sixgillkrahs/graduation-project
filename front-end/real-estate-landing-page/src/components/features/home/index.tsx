@@ -1,4 +1,5 @@
 import Banner from "./Banner";
+import FeaturedProperties from "./FeaturedProperties";
 import WhyUs from "./WhyUs";
 
 const Home = () => {
@@ -6,6 +7,7 @@ const Home = () => {
     <>
       <Banner />
       <WhyUs />
+      <FeaturedProperties />
     </>
   );
 };

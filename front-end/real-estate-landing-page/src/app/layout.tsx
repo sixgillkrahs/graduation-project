@@ -8,8 +8,8 @@ export const satoshi = localFont({
   src: [
     {
       path: "../../public/fonts/Satoshi-Italic.woff2",
-      weight: "200",
-      style: "normal",
+      weight: "400",
+      style: "italic",
     },
     {
       path: "../../public/fonts/Satoshi-Regular.woff2",
@@ -42,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={satoshi.variable}>
       <body className={`${satoshi.variable} antialiased`}>
         <Header />
         {children}

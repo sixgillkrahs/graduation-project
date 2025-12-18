@@ -54,9 +54,11 @@
 }
 
 .cs-outline-gray {
-    outline-color: var(--color-gray);
     outline-width: 1px;
-    outline-style: var(--tw-outline-style);
+    outline-style: solid;
+    outline-color: color-mix(in oklab,
+            var(--color-black) 10%,
+            transparent);
 }
 
 .cs-outline-red {

@@ -28,7 +28,7 @@ const Header = () => {
           </ul>
         </nav>
       </div>
-      <div className="flex items-center rounded-full  outline-1 outline-[#7f8b89]">
+      <div className="flex items-center rounded-full  cs-outline-gray">
         <Icon.User className="bg-black w-full h-full p-2 rounded-full text-white" />
         <Button type="button" className="text-black pl-2!">
           Login

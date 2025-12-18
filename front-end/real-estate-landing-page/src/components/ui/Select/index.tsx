@@ -44,7 +44,7 @@ export default function Select({
         className="
           flex h-10.5 w-full items-center justify-between
           rounded-full border border-black/10
-            px-4 text-sm
+            px-4 text-sm cursor-pointer
         "
       >
         <span className={value ? "text-gray-800" : "text-gray-400"}>
