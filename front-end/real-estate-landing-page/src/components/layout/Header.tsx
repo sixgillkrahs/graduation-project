@@ -1,26 +1,37 @@
-import React from "react";
-import { Icon } from "../ui/Icon/Icon";
+import Logo from "@/assets/Logo.svg";
+import Image from "next/image";
 import Button from "../ui/Button";
+import { Icon } from "../ui/Icon/Icon";
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center bg-[#ffffff] px-5">
-      <div className="text-2xl font-bold">ProPerTy12</div>
-      <div>
+    <header className="flex justify-between items-center bg-[#ffffff] px-20 ">
+      <div className=" flex items-center justify-center gap-25">
+        <div className="flex items-start gap-2 text-2xl font-semibold">
+          <Image src={Logo} alt="logo" width={24} height={24} />
+          <span className="text-[#222222]">Havenly</span>
+        </div>
         <nav>
           <ul className="flex gap-6 p-6 ">
-            <li className="text-[#7f8b89] cursor-pointer">Buy</li>
-            <li className="text-[#7f8b89] cursor-pointer">Rent</li>
-            <li className="text-[#7f8b89] cursor-pointer">Sold</li>
+            <li className="cs-typography text-[16px]! cursor-pointer flex items-center gap-1 cs-outline-gray p-2 rounded-full px-4">
+              Search for properties <Icon.ArrowDown />
+            </li>
+            <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full px-4  cs-outline-gray">
+              List for sale
+            </li>
+            <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full px-4  cs-outline-gray">
+              List for rent
+            </li>
+            <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full  cs-outline-gray size-[40px] ">
+              <Icon.ExpandUpDown />
+            </li>
           </ul>
         </nav>
       </div>
-      <div className="flex items-center gap-4">
-        <Button type="button" className="bg-white ">
-          SignIn
-        </Button>
-        <Button outline type="button" className="bg-white text-black ">
-          Register
+      <div className="flex items-center rounded-full  outline-1 outline-[#7f8b89]">
+        <Icon.User className="bg-black w-full h-full p-2 rounded-full text-white" />
+        <Button type="button" className="text-black pl-2!">
+          Login
         </Button>
       </div>
     </header>

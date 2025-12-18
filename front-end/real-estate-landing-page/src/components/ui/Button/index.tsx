@@ -17,7 +17,7 @@ const Button = ({
 }) => {
   return (
     <button
-      className={`px-4 py-2 rounded-[8px] cursor-pointer hover:scale-105 active:scale-95 ${
+      className={`px-4 py-2 rounded-full cursor-pointer hover:scale-105 active:scale-95 ${
         variant === "secondary" ? "bg-[#5a6260]" : ""
       } ${
         outline ? "bg-transparent text-[#7f8b89] border border-[#7f8b89]" : ""

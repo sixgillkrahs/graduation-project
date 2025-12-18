@@ -1,19 +1,34 @@
-import type { Metadata } from "next";
-import { Poppins, Prompt } from "next/font/google";
-import "../styles/globals.css";
-import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import "../styles/globals.css";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-});
-
-const geistMono = Prompt({
-  variable: "--font-prompt",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+export const satoshi = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Satoshi-Italic.woff2",
+      weight: "200",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Satoshi-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Satoshi-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Satoshi-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  variable: "--font-satoshi",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${satoshi.variable} antialiased`}>
         <Header />
         {children}
         <Footer />

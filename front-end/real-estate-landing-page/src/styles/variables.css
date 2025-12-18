@@ -1,42 +1,78 @@
-.heading1 {
-  font-family: var(--font-prompt);
-  font-size: 90px;
+.main-color-red {
+  color: var(--color-red);
 }
 
-.heading2 {
-    font-family: var(--font-prompt);
-    font-size: 70px;
+.main-color-black {
+    color: var(--color-black);
+}
+.main-color-gray {
+    color: var(--color-gray);
+}
+.main-color-white {
+    color: var(--color-white);
 }
 
-.heading3 {
-    font-family: var(--font-prompt);
-    font-size: 40px;
-}
-
-.text-descriptor {
-    font-family: var(--font-poppins);
+.cs-typography {
+    color: var(--color-black);
     font-size: 24px;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: 0%;
 }
 
-.text {
-    font-family: var(--font-poppins);
-    font-size: 18px;
+.cs-typography-gray {
+    color: var(--color-gray);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 120%;
+    letter-spacing: 0%;
 }
 
-.text-button-title {
-    font-family: var(--font-poppins);
-    font-size: 18px;
+
+.cs-paragraph {
+    color: var(--color-black);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 160%;
+    letter-spacing: 0%;
 }
 
-.text-card {
-    font-family: var(--font-poppins);
-    font-size: 14px;
+.cs-paragraph-gray {
+    color: var(--color-gray);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 160%;
+    letter-spacing: 0%;
 }
 
-.text-white {
-    color: #F7F7F7;
+.cs-paragraph-white {
+    color: var(--color-white);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 160%;
+    letter-spacing: 0%;
 }
 
-.text-gray {
-    color: #CCE9DF;
+.cs-outline-gray {
+    outline-color: var(--color-gray);
+    outline-width: 1px;
+    outline-style: var(--tw-outline-style);
+}
+
+.cs-outline-red {
+    outline-color: var(--color-red);
+    outline-width: 1px;
+    outline-style: var(--tw-outline-style);
+}
+
+.cs-bg-black {
+    background: var(--color-black);
+}
+
+.cs-bg-gray {
+    background: var(--color-gray);
+}
+
+.cs-bg-red {
+    background: var(--color-red);
 }
