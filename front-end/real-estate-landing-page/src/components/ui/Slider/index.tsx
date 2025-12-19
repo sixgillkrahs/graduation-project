@@ -45,4 +45,4 @@ const Slider = ({ min = 0, max = 10000, step = 10 }) => {
   );
 };
 
-export default Slider;
+export { Slider };

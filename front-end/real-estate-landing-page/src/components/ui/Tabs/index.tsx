@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 
 interface ItemTabs {
@@ -29,4 +31,4 @@ const Tabs = ({ items }: { items: ItemTabs[] }) => {
   );
 };
 
-export default Tabs;
+export { Tabs };

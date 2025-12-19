@@ -1,5 +1,7 @@
 import Banner from "./Banner";
+import Benefit from "./Benefit";
 import FeaturedProperties from "./FeaturedProperties";
+import HearCustom from "./HearCustom";
 import WhyUs from "./WhyUs";
 
 const Home = () => {
@@ -8,6 +10,8 @@ const Home = () => {
       <Banner />
       <WhyUs />
       <FeaturedProperties />
+      <Benefit />
+      <HearCustom />
     </>
   );
 };

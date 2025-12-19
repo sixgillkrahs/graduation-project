@@ -1,0 +1,25 @@
+{
+  "HomePage": {
+    "title": "Hello world!"
+  },
+  "Footer": {
+    "description": "Every Home Has A Story.",
+    "help": "We Help You Write Yours.",
+    "titlebrowser":"Browser {name}",
+    "menu": {
+        "ListForRent": "List for rent",
+        "PublishForSell": "Publish for sell",
+        "Invest": "Invest"
+    },
+    "workAt":"Work At {name}",
+    "menuWorkAt": {
+        "BecomeAgent": "Become a {name} agent",
+        "BePhotographer": "Be a {name} photographer"
+    },
+    "About":"About {name}",
+    "menuAbout": {
+        "FrequentlyAskedQuestions": "Frequently Asked Questions",
+        "PrivacyPolicy": "Privacy Policy"
+    }
+  }
+}

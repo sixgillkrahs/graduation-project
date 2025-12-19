@@ -1,9 +1,9 @@
-import Card from "@/components/ui/Card";
+import { Card } from "@/components/ui";
 import React from "react";
 
 const WhyUs = () => {
   return (
-    <section className="w-full h-full flex flex-col items-center justify-center px-20 py-20">
+    <section className="w-full h-full flex flex-col items-center justify-center px-20 py-20 container mx-auto">
       <h2 className="cs-typography text-[40px]! font-bold! mb-4">
         Why Choose <span className="italic font-semibold">Havenly?</span>
       </h2>

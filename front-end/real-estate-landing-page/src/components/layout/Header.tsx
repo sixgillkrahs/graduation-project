@@ -1,11 +1,10 @@
 import Logo from "@/assets/Logo.svg";
 import Image from "next/image";
-import Button from "../ui/Button";
-import { Icon } from "../ui/Icon/Icon";
+import { Button, Icon } from "../ui";
 
 const Header = () => {
   return (
-    <header className="flex justify-between items-center bg-[#ffffff] px-20 ">
+    <header className="flex justify-between items-center bg-[#ffffff] px-20 container mx-auto">
       <div className=" flex items-center justify-center gap-25">
         <div className="flex items-start gap-2 text-2xl font-semibold">
           <Image src={Logo} alt="logo" width={24} height={24} />

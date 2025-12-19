@@ -1,0 +1,25 @@
+{
+  "HomePage": {
+    "title": "Chào mừng bạn đến với Real Estate Landing Page!"
+  },
+  "Footer": {
+    "description": "Mỗi ngôi nhà có một câu chuyện.",
+    "help": "Chúng tôi giúp bạn viết câu chuyện của mình.",
+    "titlebrowser": "Trình duyệt {name}",
+    "menu": {
+        "ListForRent": "Danh sách cho thuê",
+        "PublishForSell": "Đăng bán",
+        "Invest": "Đầu tư"
+    },
+    "workAt": "Làm việc tại {name}",
+    "menuWorkAt": {
+        "BecomeAgent": "Trở thành đại lý của {name}",
+        "BePhotographer": "Trở thành nhiếp ảnh gia của {name}"
+    },
+    "About": "Về {name}",
+    "menuAbout": {
+        "FrequentlyAskedQuestions": "Câu hỏi thường gặp",
+        "PrivacyPolicy": "Chính sách bảo mật"
+    }
+  }
+}

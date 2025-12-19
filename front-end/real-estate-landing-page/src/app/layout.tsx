@@ -2,6 +2,7 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { NextIntlClientProvider } from "next-intl";
 import "../styles/globals.css";
 
 export const satoshi = localFont({
@@ -44,9 +45,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={satoshi.variable}>
       <body className={`${satoshi.variable} antialiased`}>
-        <Header />
-        {children}
-        <Footer />
+        <NextIntlClientProvider>
+          <Header />
+          {children}
+          <Footer />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

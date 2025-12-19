@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "../Icon/Icon";
+import { Icon } from "../Icon";
 
 export interface SelectProps {
   placeholder?: string;
@@ -11,10 +11,7 @@ export interface SelectProps {
   }[];
 }
 
-export default function Select({
-  placeholder = "Select",
-  options = [],
-}: SelectProps) {
+export function Select({ placeholder = "Select", options = [] }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 

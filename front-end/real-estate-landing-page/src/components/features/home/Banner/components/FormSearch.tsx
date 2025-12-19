@@ -1,10 +1,12 @@
-import Button from "@/components/ui/Button";
-import { Icon } from "@/components/ui/Icon/Icon";
-import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import Slider from "@/components/ui/Slider";
-import Tabs from "@/components/ui/Tabs";
-import Tag from "@/components/ui/Tag";
+import {
+  Button,
+  Icon,
+  Input,
+  Select,
+  Slider,
+  Tabs,
+  Tag,
+} from "@/components/ui";
 import { memo } from "react";
 
 const optionsType = [

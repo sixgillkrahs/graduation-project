@@ -3,12 +3,6 @@
 import bg1 from "@/assets/images/bg.jpg";
 import bg from "@/assets/images/bg1.jpg";
 import bg2 from "@/assets/images/bg2.jpg";
-import Button from "@/components/ui/Button";
-import { Icon } from "@/components/ui/Icon/Icon";
-import Input from "@/components/ui/Input";
-import Select from "@/components/ui/Select";
-import Slider from "@/components/ui/Slider";
-import Tabs from "@/components/ui/Tabs";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import FormSearch from "./components/FormSearch";
@@ -35,7 +29,7 @@ const Banner = () => {
   }, [active, images.length]);
 
   return (
-    <section className="relative h-[100vh] overflow-hidden px-20">
+    <section className="relative h-[100vh] overflow-hidden px-20 ">
       <div
         className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${active * 100}%)` }}
