@@ -1,12 +1,19 @@
+"use client";
+
 import Logo from "@/assets/Logo.svg";
 import Image from "next/image";
 import { Button, Icon } from "../ui";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const navigate = useRouter();
   return (
     <header className="flex justify-between items-center bg-[#ffffff] px-20 container mx-auto">
       <div className=" flex items-center justify-center gap-25">
-        <div className="flex items-start gap-2 text-2xl font-semibold">
+        <div
+          className="flex items-start gap-2 text-2xl font-semibold cursor-pointer"
+          onClick={() => navigate.push("/")}
+        >
           <Image src={Logo} alt="logo" width={24} height={24} />
           <span className="text-[#222222]">Havenly</span>
         </div>

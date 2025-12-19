@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Icon } from "../ui/Icon";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 const LocaleSwitcher = () => {
   const router = useRouter();
@@ -63,7 +64,7 @@ const Footer = () => {
   const classLi = "text-sm! cs-paragraph-gray grid grid-cols-1 gap-3 mt-4";
 
   return (
-    <footer className="cs-bg-black  ">
+    <footer className="cs-bg-black">
       <footer className="p-20 grid grid-cols-1 container mx-auto">
         <div className="flex gap-12 justify-between">
           <div className="cs-paragraph-white">
@@ -72,7 +73,7 @@ const Footer = () => {
             {t("help")}
           </div>
           <div className="flex gap-15">
-            <div className="grid grid-cols-3 gap-20">
+            <div className="grid grid-cols-3 gap-10">
               <div>
                 <span className={classText}>
                   {t("titlebrowser", { name: "Havenly" })}
@@ -88,7 +89,11 @@ const Footer = () => {
                   {t("workAt", { name: "Havenly" })}
                 </span>
                 <ul className={classLi}>
-                  <li>{t("menuWorkAt.BecomeAgent", { name: "Havenly" })}</li>
+                  <li>
+                    <Link href={"/work/become-agent"}>
+                      {t("menuWorkAt.BecomeAgent", { name: "Havenly" })}
+                    </Link>
+                  </li>
                   <li>{t("menuWorkAt.BePhotographer", { name: "Havenly" })}</li>
                 </ul>
               </div>
