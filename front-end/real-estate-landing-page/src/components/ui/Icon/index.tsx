@@ -9,10 +9,13 @@ import { CheckMark } from "./CheckMark";
 import { Circle } from "./Circle";
 import { ExpandUpDown } from "./ExpandUpDown";
 import { Facebook } from "./Facebook";
+import { FileUpload } from "./FileUpload";
 import { HeadGear } from "./HeadGear";
 import { HotelBed } from "./HotelBed";
 import { Instagram } from "./Instagram";
+import { Mail } from "./Mail";
 import MapPin from "./MapPin";
+import { Phone } from "./Phone";
 import { Rocket2 } from "./Rocket2";
 import { Safe2 } from "./Safe2";
 import Shape from "./Shape";
@@ -46,4 +49,7 @@ export const Icon = {
   ShieldCheck,
   Rocket2,
   Star,
+  Mail,
+  Phone,
+  FileUpload,
 };

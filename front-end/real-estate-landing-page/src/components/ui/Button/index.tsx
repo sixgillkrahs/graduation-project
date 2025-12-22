@@ -11,6 +11,8 @@ const Button = ({
   style = {},
   icon = null,
   onClick = () => {},
+  disabled = false,
+  loading = false,
 }: {
   children?: React.ReactNode;
   variant?: "primary" | "secondary";
@@ -20,12 +22,15 @@ const Button = ({
   style?: React.CSSProperties;
   icon?: React.ReactNode;
   onClick?: () => void;
+  disabled?: boolean;
+  loading?: boolean;
 }) => {
   const hasText = React.Children.count(children) > 0;
   const paddingClass = icon && !hasText ? "px-2" : "px-4";
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={[
         "py-2 rounded-full cursor-pointer flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95",
         paddingClass,
@@ -38,8 +43,14 @@ const Button = ({
       type={type}
       style={style}
     >
-      {icon && icon}
-      {children}
+      {loading ? (
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+      ) : (
+        <>
+          {icon && icon}
+          {children}
+        </>
+      )}
     </button>
   );
 };
