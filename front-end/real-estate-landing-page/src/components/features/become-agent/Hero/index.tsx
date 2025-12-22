@@ -1,9 +1,18 @@
+"use client";
+
 import { Button, Icon } from "@/components/ui";
 import { Avatar } from "@/components/ui/Icon/Avatar";
 import bg from "@/assets/images/become-agent/bg.png";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const Hero = () => {
+  const router = useRouter();
+
+  const handleApplyNow = () => {
+    router.push("/work/become-agent/recruitment");
+  };
+
   return (
     <section className="flex items-start justify-between px-20 container mx-auto py-20">
       <div className="flex flex-col items-start justify-start gap-6 flex-1">
@@ -19,7 +28,10 @@ const Hero = () => {
           details faster, price accurately, and manage clients effortlessly
         </div>
         <div className="flex items-center justify-start gap-4">
-          <Button className="cs-bg-red text-white font-semibold">
+          <Button
+            className="cs-bg-red text-white font-semibold"
+            onClick={handleApplyNow}
+          >
             Join Now
           </Button>
           <Button className="cs-bg-black text-white font-semibold">
