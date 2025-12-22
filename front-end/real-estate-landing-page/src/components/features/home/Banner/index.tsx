@@ -29,7 +29,7 @@ const Banner = () => {
   }, [active, images.length]);
 
   return (
-    <section className="relative h-[100vh] overflow-hidden px-20 ">
+    <section className="relative h-screen overflow-hidden px-20">
       <div
         className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${active * 100}%)` }}

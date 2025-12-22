@@ -1,10 +1,45 @@
+import { Button, Icon } from "@/components/ui";
+import { Avatar } from "@/components/ui/Icon/Avatar";
+import bg from "@/assets/images/become-agent/bg.png";
+import Image from "next/image";
+
 const Hero = () => {
   return (
-    <section>
-      <span>Become a Havenly Agent</span>
-      <span>
-        Grow your real estate career │ │ with trusted leads & technology{" "}
-      </span>
+    <section className="flex items-start justify-between px-20 container mx-auto py-20">
+      <div className="flex flex-col items-start justify-start gap-6 flex-1">
+        <div className="bg-[#F7F7F7] main-color-red font-bold text-center px-4 py-2 rounded-full flex items-center gap-2 text-sm">
+          <Icon.Circle className="w-3" /> New AI Features Live
+        </div>
+        <span className="text-6xl! cs-typography font-extrabold! text-[#000000] max-w-[600px]">
+          Supercharge Your Real Estate Career with{" "}
+          <span className="main-color-red">AI</span>
+        </span>
+        <div className="cs-paragraph-gray max-w-[600px]">
+          Join the fastest-growing network. Access exclusive AI tools to close
+          details faster, price accurately, and manage clients effortlessly
+        </div>
+        <div className="flex items-center justify-start gap-4">
+          <Button className="cs-bg-red text-white font-semibold">
+            Join Now
+          </Button>
+          <Button className="cs-bg-black text-white font-semibold">
+            Learn More
+          </Button>
+        </div>
+        <div className="flex items-center justify-start gap-4">
+          <Avatar />
+          <span className="cs-paragraph-gray text-sm! font-medium!">
+            Trusted by over{" "}
+            <span className="main-color-black font-bold!">1000+ agents</span>{" "}
+            like you
+          </span>
+        </div>
+      </div>
+      <div className="flex-1 h-[80%]">
+        <div className="relative h-[500px] w-full rounded-2xl overflow-hidden">
+          <Image src={bg} alt="bg" fill className="object-cover scale-105" />
+        </div>
+      </div>
     </section>
   );
 };

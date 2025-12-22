@@ -6,6 +6,8 @@ export const Avatar = (props: React.SVGProps<SVGSVGElement>) => {
       xmlns="http://www.w3.org/2000/svg"
       xmlSpace="preserve"
       viewBox="0 0 100 125"
+      width="24"
+      height="24"
       {...props}
     >
       <switch>
