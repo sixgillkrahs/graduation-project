@@ -10,7 +10,7 @@ from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 
 import sources.Controllers.config as cfg
-from sources import app, templates 
+from sources import app 
 from sources.Controllers import utils
 
 """ ---- Setup ---- """
@@ -30,11 +30,6 @@ config["cnn"]["pretrained"] = False
 config["device"] = cfg.DEVICE
 config["predictor"]["beamsearch"] = False
 detector = Predictor(config)
-
-
-@app.get("/")
-async def root(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
 
 
 @app.post("/uploader")

@@ -11,9 +11,4 @@ app.add_middleware(CORSMiddleware,
     allow_headers=["*"],   
 )
 
-app.mount("/static", StaticFiles(directory="./sources/static"), name="static")
-
-
-templates = Jinja2Templates(directory="./sources/Views/templates")
-
 from sources.Controllers import main
