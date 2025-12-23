@@ -3,6 +3,7 @@ import { AppDispatch, RootState } from "@/store";
 import { updateBusinessInfo } from "@/store/store";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useExtractID } from "../../services/mutation";
 
 interface BusinessInfoForm {
   agentName: string;
@@ -11,6 +12,7 @@ interface BusinessInfoForm {
 }
 
 const BusinessInfo = () => {
+  const { mutateAsync: extractID } = useExtractID();
   const dispatch = useDispatch<AppDispatch>();
   const businessInfo = useSelector(
     (state: RootState) => state.form.businessInfo
@@ -26,6 +28,18 @@ const BusinessInfo = () => {
   });
   const onSubmit = (data: BusinessInfoForm) => {
     dispatch(updateBusinessInfo(data));
+  };
+
+  const onFileChange = (files: File[]) => {
+    const formData = new FormData();
+    if (files.length > 0) {
+      formData.append("file", files[0]);
+      extractID(formData).then((res) => {
+        if (res) {
+          console.log(res);
+        }
+      });
+    }
   };
 
   return (
@@ -58,7 +72,12 @@ const BusinessInfo = () => {
             })}
           />
         </div>
-        <Upload label="Identity Card" accept="image/*" multiple />
+        <Upload
+          label="Identity Card"
+          accept="image/*"
+          multiple
+          onFileChange={onFileChange}
+        />
       </form>
     </div>
   );

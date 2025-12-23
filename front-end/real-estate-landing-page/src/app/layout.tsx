@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import "../styles/globals.css";
 import { ReduxProvider } from "./providers";
+import Wrapper from "./wrapper";
 
 export const satoshi = localFont({
   src: [
@@ -47,11 +48,11 @@ export default function RootLayout({
     <html lang="en" className={satoshi.variable}>
       <body className={`${satoshi.variable} antialiased`}>
         <NextIntlClientProvider>
-          <ReduxProvider>
+          <Wrapper>
             <Header />
             {children}
             <Footer />
-          </ReduxProvider>
+          </Wrapper>
         </NextIntlClientProvider>
       </body>
     </html>

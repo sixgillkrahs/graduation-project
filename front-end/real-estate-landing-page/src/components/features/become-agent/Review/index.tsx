@@ -3,8 +3,8 @@ import React from "react";
 
 const Review = () => {
   return (
-    <section className="container mx-auto px-20 py-30 bg-black/10 grid grid-cols-1 gap-4">
-      <div className="flex gap-1 justify-center">
+    <section className=" px-20 py-30 bg-black/10 grid grid-cols-1 gap-4">
+      <div className="flex gap-1 justify-center container mx-auto">
         <Icon.Star className="size-5 text-yellow-500" />
         <Icon.Star className="size-5 text-yellow-500" />
         <Icon.Star className="size-5 text-yellow-500" />

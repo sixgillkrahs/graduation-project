@@ -1,14 +1,13 @@
 "use client";
 
 import { Button, Icon } from "@/components/ui";
-import { useState } from "react";
-import BasicInfo from "./BasicInfo";
-import BusinessInfo from "./BusinessInfo";
-import Verification from "./Verification";
-import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { nextStep, prevStep } from "@/store/store";
 import { submitForm } from "@/store/thunks/formThunks";
+import { useDispatch, useSelector } from "react-redux";
+import BasicInfo from "./components/BasicInfo";
+import BusinessInfo from "./components/BusinessInfo";
+import Verification from "./components/Verification";
 
 const steps = [
   {
@@ -30,7 +29,6 @@ const steps = [
 
 const Recruitment = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [activeStep, setActiveStep] = useState(0);
   const { currentStep, isSubmitting, submitError } = useSelector(
     (state: RootState) => state.form
   );
@@ -47,7 +45,6 @@ const Recruitment = () => {
     try {
       await dispatch(submitForm()).unwrap();
       console.log("Form submitted successfully!");
-      // Redirect or show success message
     } catch (error) {
       console.error("Failed to submit form:", error);
     }

@@ -10,7 +10,10 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@next/env": "^16.1.1",
     "@reduxjs/toolkit": "^2.11.2",
+    "@tanstack/react-query": "^5.90.12",
+    "axios": "^1.13.2",
     "next": "16.0.10",
     "next-intl": "^4.6.1",
     "react": "19.2.1",

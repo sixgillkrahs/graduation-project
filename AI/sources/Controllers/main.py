@@ -10,23 +10,19 @@ from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 
 import sources.Controllers.config as cfg
-from sources import app, templates # Keeping app and templates for basic rendering
+from sources import app, templates 
 from sources.Controllers import utils
 
 """ ---- Setup ---- """
 
-# Init yolov5 model (Only models relevant to image extraction)
 CORNER_MODEL = yolov5.load(cfg.CORNER_MODEL_PATH)
 CONTENT_MODEL = yolov5.load(cfg.CONTENT_MODEL_PATH)
 
-# Set conf and iou threshold -> Remove overlap and low confident bounding boxes
 CONTENT_MODEL.conf = cfg.CONF_CONTENT_THRESHOLD
 CONTENT_MODEL.iou = cfg.IOU_CONTENT_THRESHOLD
 
-# Config directory
 UPLOAD_FOLDER = cfg.UPLOAD_FOLDER
 SAVE_DIR = cfg.SAVE_DIR
-# FACE_CROP_DIR is removed as ekyc is removed
 
 """ ---- OCR Setup ---- """
 config = Cfg.load_config_from_name("vgg_seq2seq")
@@ -43,7 +39,6 @@ async def root(request: Request):
 
 @app.post("/uploader")
 async def upload(file: UploadFile = File(...)):
-    # Create upload folder if it doesn't exist
     if not os.path.isdir(UPLOAD_FOLDER):
         os.mkdir(UPLOAD_FOLDER)
     
@@ -53,7 +48,6 @@ async def upload(file: UploadFile = File(...)):
     with open(file_location, "wb") as f:
         f.write(contents)
 
-    # Validating file for image extraction
     if not file_location.lower().endswith((".png", ".jpg", ".jpeg")):
         os.remove(file_location)
         error = "This file is not supported! Only PNG, JPG, JPEG are allowed."
@@ -68,7 +62,6 @@ async def extract_info(image_path: str = None):
         error = "No image to process!"
         return JSONResponse(status_code=400, content={"message": error})
 
-    # Clear previous results
     if os.path.isdir(SAVE_DIR):
         for f in os.listdir(SAVE_DIR):
             os.remove(os.path.join(SAVE_DIR, f))
@@ -79,11 +72,11 @@ async def extract_info(image_path: str = None):
 
     CORNER = CORNER_MODEL(img)
     predictions = CORNER.pred[0]
-    categories = predictions[:, 5].tolist()  # Class
+    categories = predictions[:, 5].tolist()  
     if len(categories) != 4:
         error = "Detecting corner failed! Please ensure the image shows a clear ID card."
         return JSONResponse(status_code=401, content={"message": error})
-    boxes = utils.class_Order(predictions[:, :4].tolist(), categories)  # x1, x2, y1, y2
+    boxes = utils.class_Order(predictions[:, :4].tolist(), categories)  
     IMG = Image.open(img)
     center_points = list(map(utils.get_center_point, boxes))
 
@@ -93,12 +86,11 @@ async def extract_info(image_path: str = None):
     center_points = [center_points[0], center_points[1], c2_fix, c3_fix]
     center_points = np.asarray(center_points)
     aligned = utils.four_point_transform(IMG, center_points)
-    # Convert from OpenCV to PIL format
     aligned = Image.fromarray(aligned)
 
     CONTENT = CONTENT_MODEL(aligned)
     predictions = CONTENT.pred[0]
-    categories = predictions[:, 5].tolist()  # Class
+    categories = predictions[:, 5].tolist()  
     if 7 not in categories:
         if len(categories) < 9:
             error = "Missing fields! Detecting content failed! Please ensure the ID card is fully visible."
@@ -112,25 +104,23 @@ async def extract_info(image_path: str = None):
 
     """ Non Maximum Suppression """
     boxes, categories = utils.non_max_suppression_fast(np.array(boxes), categories, 0.7)
-    boxes = utils.class_Order(boxes, categories)  # x1, x2, y1, y2
+    boxes = utils.class_Order(boxes, categories) 
     
-    # Ensure SAVE_DIR exists before saving cropped images
     if not os.path.isdir(SAVE_DIR):
         os.mkdir(SAVE_DIR)
     else:
         for f in os.listdir(SAVE_DIR):
-            os.remove(os.path.join(SAVE_DIR, f)) # Clear previous cropped images
+            os.remove(os.path.join(SAVE_DIR, f)) 
 
     for index, box in enumerate(boxes):
         left, top, right, bottom = box
         if 5 < index < 9:
-            right = right + 100 # Original temporary fix
+            right = right + 100 
         cropped_image = aligned.crop((left, top, right, bottom))
         cropped_image.save(os.path.join(SAVE_DIR, f"{index}.jpg"))
 
-    FIELDS_DETECTED = []  # Collecting all detected parts
+    FIELDS_DETECTED = []  
     for idx, img_crop in enumerate(sorted(os.listdir(SAVE_DIR))):
-        # Only process if file exists and is an image
         current_img_path = os.path.join(SAVE_DIR, img_crop)
         if os.path.isfile(current_img_path) and current_img_path.lower().endswith((".png", ".jpg", ".jpeg")):
             img_ = Image.open(current_img_path)
@@ -138,14 +128,13 @@ async def extract_info(image_path: str = None):
             FIELDS_DETECTED.append(s)
 
     if 7 in categories:
-        # Assuming specific fields are combined, adjust if necessary
         if len(FIELDS_DETECTED) > 7:
             FIELDS_DETECTED = (
                 FIELDS_DETECTED[:6]
                 + [FIELDS_DETECTED[6] + ", " + FIELDS_DETECTED[7]]
                 + [FIELDS_DETECTED[8]]
             )
-        elif len(FIELDS_DETECTED) == 7 and 7 in categories: # This case might need careful review if it implies combining from a shorter list
+        elif len(FIELDS_DETECTED) == 7 and 7 in categories: 
             pass 
 
     response = {"data": FIELDS_DETECTED}

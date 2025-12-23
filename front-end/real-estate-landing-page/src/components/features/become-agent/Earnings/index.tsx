@@ -2,8 +2,8 @@ import { Card, Slider } from "@/components/ui";
 
 const Earnings = () => {
   return (
-    <section className="container mx-auto bg-black/10 py-20">
-      <div className="max-w-4xl mx-auto relative overflow-hidden">
+    <section className=" bg-black/10 py-20">
+      <div className="max-w-4xl mx-auto relative overflow-hidden container mx-auto">
         <div
           className="absolute -top-[20px] -right-[20px] size-40 
                  border-4 border-black/10 

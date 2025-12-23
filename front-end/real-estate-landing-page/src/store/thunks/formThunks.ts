@@ -28,7 +28,6 @@ export const submitForm = createAsyncThunk(
         ...formData.verification,
       };
 
-      // Simulate API call
       const response = await fetch("/api/agent-application", {
         method: "POST",
         headers: {

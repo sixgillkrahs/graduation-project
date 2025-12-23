@@ -11,8 +11,8 @@ const StatItem = ({ number, text }: { number: string; text: string }) => {
 
 const Stats = () => {
   return (
-    <section className="container mx-auto py-20 bg-black/10">
-      <div className="grid grid-cols-3 gap-10">
+    <section className=" py-20 bg-black/10">
+      <div className="grid grid-cols-3 gap-10 container mx-auto">
         <StatItem number="1000+" text="ACTIVE AGENTS" />
         <StatItem number="$10M+" text="PAID IN COMMISSIONS" />
         <StatItem number="24/7" text="AGENT SUPPORT" />
