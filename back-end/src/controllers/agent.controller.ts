@@ -80,4 +80,30 @@ export class AgentController extends BaseController {
       return createdAgent;
     });
   };
+
+  agentRegistrations = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { limit, page, sortField, sortOrder } =
+        req.query as {
+          limit?: string;
+          page?: string;
+          sortField?: string;
+          sortOrder?: string;
+        };
+      let filter: Record<string, any> = {
+        status: AgentStatusEnum.PENDING,
+      };
+      const agentRegistrations =
+        await this.agentService.getAgentRegistrations(
+          {
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 10,
+            sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+          },
+          filter,
+        );
+      return agentRegistrations;
+    });
+  };
 }
