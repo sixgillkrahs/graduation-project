@@ -1,3 +1,4 @@
+//#region import
 import { AddUser } from "./AddUser";
 import { ArrowDown } from "./ArrowDown";
 import { ArrowLeft } from "./ArrowLeft";
@@ -7,6 +8,7 @@ import { BarChatBox } from "./BarChartBox";
 import { BathRoom } from "./BathRoom";
 import { CheckMark } from "./CheckMark";
 import { Circle } from "./Circle";
+import { Close } from "./Close";
 import { ExpandUpDown } from "./ExpandUpDown";
 import { Facebook } from "./Facebook";
 import { FileUpload } from "./FileUpload";
@@ -24,6 +26,7 @@ import { Star } from "./Star";
 import { TwitterX } from "./TwitterX";
 import { User } from "./User";
 import { Youtube } from "./Youtube";
+//#endregion
 
 export const Icon = {
   Avatar,
@@ -52,4 +55,5 @@ export const Icon = {
   Mail,
   Phone,
   FileUpload,
+  Close,
 };

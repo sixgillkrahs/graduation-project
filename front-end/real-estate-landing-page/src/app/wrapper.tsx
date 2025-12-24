@@ -1,5 +1,6 @@
 "use client";
 
+import { ToastProvider } from "@/lib/react-hot-toast/ToastProvider";
 import { queryClient } from "@/lib/react-query/queryClient";
 import { store } from "@/store";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -9,7 +10,10 @@ import { Provider } from "react-redux";
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>
+        <ToastProvider />
+        {children}
+      </Provider>
     </QueryClientProvider>
   );
 };

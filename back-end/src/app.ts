@@ -21,6 +21,7 @@ import resourcesRoutes from "./routes/resource.routes";
 
 import uploadRoutes from "./routes/upload.routes";
 import roleRoutes from "./routes/role.routes";
+import agentRoutes from "./routes/agent.routes";
 
 const app = express();
 
@@ -28,7 +29,12 @@ const setupMiddleware = (app: express.Application) => {
   // Security
   app.use(requestId);
   setupSecurityHeaders(app as express.Express);
-  app.use(cors({ origin: ENV.FRONTEND_URL, credentials: true }));
+  app.use(
+    cors({
+      origin: [ENV.FRONTEND_URL, ENV.FRONTEND_URLLANDINGPAGE],
+      credentials: true,
+    }),
+  );
 
   // Performance
   app.use(compressionMiddleware);
@@ -68,6 +74,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/resources", resourcesRoutes);
+app.use("/api/agents", agentRoutes);
 
 const swaggerOptions = {
   explorer: true,

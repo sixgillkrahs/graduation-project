@@ -12,7 +12,7 @@ interface BusinessInfoForm {
 }
 
 const BusinessInfo = () => {
-  const { mutateAsync: extractID } = useExtractID();
+  const { mutateAsync: extractID, isPending } = useExtractID();
   const dispatch = useDispatch<AppDispatch>();
   const businessInfo = useSelector(
     (state: RootState) => state.form.businessInfo
@@ -23,11 +23,15 @@ const BusinessInfo = () => {
     formState: { errors, isValid },
     watch,
   } = useForm<BusinessInfoForm>({
-    defaultValues: businessInfo,
+    defaultValues: {
+      agentName: businessInfo.agentName,
+      area: businessInfo.area.join(", "),
+      businessName: businessInfo.businessName,
+    },
     mode: "onChange",
   });
   const onSubmit = (data: BusinessInfoForm) => {
-    dispatch(updateBusinessInfo(data));
+    // dispatch(updateBusinessInfo(data));
   };
 
   const onFileChange = (files: File[]) => {
@@ -36,7 +40,16 @@ const BusinessInfo = () => {
       formData.append("file", files[0]);
       extractID(formData).then((res) => {
         if (res) {
-          console.log(res);
+          dispatch(
+            updateBusinessInfo({
+              IDNumber: res.data[1],
+              agentName: res.data[2],
+              dateOfBirth: res.data[3],
+              gender: res.data[4],
+              nationality: res.data[5],
+              address: res.data[6],
+            })
+          );
         }
       });
     }
@@ -74,8 +87,7 @@ const BusinessInfo = () => {
         </div>
         <Upload
           label="Identity Card"
-          accept="image/*"
-          multiple
+          accept="image/jpeg,image/png"
           onFileChange={onFileChange}
         />
       </form>

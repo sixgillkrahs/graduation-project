@@ -14,20 +14,23 @@ export const selectAllFormData = createSelector([selectFormData], (form) => ({
 export const selectIsStepValid = (step: number) =>
   createSelector([selectFormData], (form) => {
     switch (step) {
-      case 0: // Basic Info
+      case 0:
         return !!(
           form.basicInfo.fullName &&
           form.basicInfo.email &&
           form.basicInfo.phoneNumber
         );
-      case 1: // Business Info
+      case 1:
         return !!(
           form.businessInfo.agentName &&
           form.businessInfo.area &&
-          form.businessInfo.businessName
+          form.businessInfo.businessName &&
+          form.businessInfo.IDNumber &&
+          form.businessInfo.dateOfBirth &&
+          form.businessInfo.gender &&
+          form.businessInfo.address &&
+          form.businessInfo.nationality
         );
-      case 2: // Verification
-        return !!(form.verification.idNumber && form.verification.agreeToTerms);
       default:
         return false;
     }

@@ -4,6 +4,7 @@ const collections = {
   roles: "roles",
   users: "users",
   auths: "auths",
+  agents: "agents",
 };
 
 export default collections;

@@ -18,3 +18,20 @@ export const useExtractID = (): UseMutationResult<
     },
   });
 };
+
+export const useRegistration = (): UseMutationResult<
+  IResp<string>,
+  Error,
+  IExtractService.IRegistrationRequest,
+  void
+> => {
+  return useMutation({
+    mutationFn: (data: IExtractService.IRegistrationRequest) => {
+      return ExtractService.registration(data);
+    },
+    meta: {
+      ERROR_SOURCE: "[Registration failed]",
+      SUCCESS_MESSAGE: "The agent has been successfully registered",
+    },
+  });
+};

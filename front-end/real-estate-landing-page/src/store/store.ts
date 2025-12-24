@@ -1,4 +1,3 @@
-import { configureStore } from "@reduxjs/toolkit";
 import {
   BasicInfo,
   BusinessInfo,
@@ -16,13 +15,15 @@ const initialState: FormState = {
   },
   businessInfo: {
     agentName: "",
-    area: "",
+    area: [],
     businessName: "",
+    IDNumber: "",
+    dateOfBirth: "",
+    gender: "",
+    address: "",
+    nationality: "",
   },
   verification: {
-    idType: "",
-    idNumber: "",
-    documentUrl: "",
     agreeToTerms: false,
   },
   isSubmitting: false,

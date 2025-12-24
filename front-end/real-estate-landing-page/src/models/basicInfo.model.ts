@@ -6,14 +6,16 @@ export interface BasicInfo {
 
 export interface BusinessInfo {
   agentName: string;
-  area: string;
+  area: string[];
+  IDNumber: string;
   businessName: string;
+  dateOfBirth: string;
+  gender: string;
+  address: string;
+  nationality: string;
 }
 
 export interface Verification {
-  idType: string;
-  idNumber: string;
-  documentUrl: string;
   agreeToTerms: boolean;
 }
 

@@ -7,3 +7,4 @@ export * from "./Slider";
 export * from "./Tabs";
 export * from "./Tag";
 export * from "./Upload";
+export * from "./Checkbox";

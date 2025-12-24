@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import "../styles/globals.css";
-import { ReduxProvider } from "./providers";
 import Wrapper from "./wrapper";
 
 export const satoshi = localFont({

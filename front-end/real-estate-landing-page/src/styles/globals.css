@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./variables.css";
+@import "./toast.css";
 
 :root {
   --background: #FFFFFF;

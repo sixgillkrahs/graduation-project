@@ -6,7 +6,7 @@ import axios, {
 
 export const client = (() => {
   return axios.create({
-    baseURL: process.env.BASEURL,
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
     headers: {
       Accept: "application/json, text/plain, */*",
     },

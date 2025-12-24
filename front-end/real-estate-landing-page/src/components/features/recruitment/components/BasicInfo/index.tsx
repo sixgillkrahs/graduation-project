@@ -1,11 +1,11 @@
 "use client";
 
 import { Icon, Input } from "@/components/ui";
-import { useForm } from "react-hook-form";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "@/store";
-import React from "react";
+import { AppDispatch, RootState } from "@/store";
 import { updateBasicInfo } from "@/store/store";
+import { useEffect, useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 
 type BasicInfoForm = {
   fullName: string;
@@ -27,9 +27,8 @@ const BasicInfo = () => {
     mode: "onChange",
   });
 
-  // Auto-save form data to Redux
   const formValues = watch();
-  const debouncedUpdate = React.useMemo(
+  const debouncedUpdate = useMemo(
     () =>
       debounce((data: BasicInfoForm) => {
         dispatch(updateBasicInfo(data));
@@ -37,7 +36,7 @@ const BasicInfo = () => {
     [dispatch]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     debouncedUpdate(formValues);
     return () => debouncedUpdate.cancel();
   }, [formValues, debouncedUpdate]);
@@ -105,7 +104,6 @@ const BasicInfo = () => {
   );
 };
 
-// Debounce utility function
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
