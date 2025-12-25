@@ -11,6 +11,10 @@ const router: RouterConfig = {
       path: "/sign-in",
       component: lazy(() => import("./signin")),
     },
+    {
+      path: "/sign-up",
+      component: lazy(() => import("./signup")),
+    },
   ],
 };
 

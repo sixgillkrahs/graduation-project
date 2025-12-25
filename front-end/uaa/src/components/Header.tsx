@@ -1,6 +1,7 @@
 import EnglandFlag from "@/assets/images/icons/EnglandFlag.svg";
 import VietNamFlag from "@/assets/images/icons/VietNamFlag.svg";
-import { Badge, Dropdown, Select } from "antd";
+import { useGetMe } from "@/hooks/useMe";
+import { Avatar, Badge, Dropdown, Select } from "antd";
 import { Bell, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +14,8 @@ const Header = ({
 }) => {
   const { i18n } = useTranslation();
   const currentLang = i18n.language?.startsWith("vi") ? "vi" : "en";
+  const { data: me } = useGetMe();
+
   return (
     <div className="flex h-[70px] items-center justify-between bg-white px-[31px] py-[13px]">
       <div className="cursor-pointer">
@@ -50,6 +53,7 @@ const Header = ({
           ]}
         />
         <Dropdown>
+          <Avatar>{me?.data?.user?.fullName}</Avatar>
           {/* <DropdownTrigger>
             <User
               as="button"

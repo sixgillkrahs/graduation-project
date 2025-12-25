@@ -8,7 +8,11 @@ import { parse } from "cookie";
 import { UserService } from "@/services/user.service";
 
 interface JwtPayload {
-  userId: string;
+  user: {
+    email: string;
+    id: string;
+    [k: string]: any;
+  };
   role: string;
 }
 
@@ -42,11 +46,11 @@ export const requireAuth = async (
     try {
       const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
       const userService = new UserService();
-      const user = await userService.getUserById(decoded.userId);
+      const user = await userService.getUserById(decoded.user.id);
       if (!user) {
         throw new AppError("User not found", 404, ErrorCode.NOT_FOUND);
       }
-      req.user = { ...decoded, detail: user };
+      req.user = { ...decoded };
       next();
     } catch (error) {
       logger.warn({
@@ -74,7 +78,7 @@ export const requireRole = (roles: string[]) => {
           context: "AuthMiddleware.requireRole",
           requiredRoles: roles,
           userRole: req.user?.role,
-          userId: req.user?.userId,
+          userId: req.user?.user.id,
         });
         throw new AppError(
           "Forbidden - Insufficient permissions",

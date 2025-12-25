@@ -10,6 +10,7 @@ import { UserService } from "@/services/user.service";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { ENV } from "@/config/env";
 import { RoleService } from "@/services/role.service";
+import { parse } from "cookie";
 
 export class AuthController extends BaseController {
   private userService: UserService;
@@ -79,7 +80,7 @@ export class AuthController extends BaseController {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 30 * 60 * 1000,
+        maxAge: 30 * 60,
       });
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -166,6 +167,99 @@ export class AuthController extends BaseController {
         });
       }
       return { success: true, message: "Đăng xuất thành công" };
+    });
+  };
+
+  refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const cookieHeader = req.headers.cookie;
+      if (!cookieHeader) {
+        throw new AppError(
+          "Unauthorized - Invalid token",
+          401,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+      const cookies = parse(cookieHeader);
+      const token = cookies.refreshToken;
+      if (!token) {
+        throw new AppError(
+          validationMessages[lang].refreshTokenNotExist ||
+            "Refresh token not exist",
+          400,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+      const decoded = await this.authService.refreshToken(token);
+      if (!decoded) {
+        throw new AppError(
+          validationMessages[lang].refreshTokenNotExist ||
+            "Refresh token not exist",
+          400,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+      const user = await this.userService.getUserById(
+        decoded.userId.toString(),
+      );
+      if (!user) {
+        throw new AppError(
+          validationMessages[lang].userNotFound || "User not found",
+          401,
+          ErrorCode.USER_NOT_FOUND,
+        );
+      }
+      if (!user.isActive) {
+        throw new AppError(
+          validationMessages[lang].userNotActive || "User not active",
+          401,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+      const userAuth = await this.authService.getAuthByUserId(
+        decoded.userId.toString(),
+      );
+      if (!userAuth) {
+        throw new AppError(
+          validationMessages[lang].userNotFound || "User not found",
+          401,
+          ErrorCode.USER_NOT_FOUND,
+        );
+      }
+      const accessToken = this.generateAccessToken(
+        {
+          user: user,
+          roleId: userAuth.roleId,
+        },
+        15 * 1000 * 60,
+      );
+      const refreshToken = this.generateRefreshToken(
+        {
+          userId: user.id,
+        },
+        15 * 1000 * 60 * 24,
+      );
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 30,
+      });
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 60 * 60 * 1000 * 24 * 7,
+      });
+      return user;
+    });
+  };
+
+  me = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const user = req.user;
+      return user;
     });
   };
 

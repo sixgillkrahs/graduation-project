@@ -9,11 +9,7 @@ export const loginSchema = (lang: keyof typeof validationMessages) => {
       username: z.string({ error: t.required("Tên đăng nhập") }),
       password: z
         .string({ error: t.required("Mật khẩu") })
-        .min(6, { message: t.passwordMin })
-        .regex(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
-          { message: t.passwordInvalid },
-        ),
+        .min(6, { message: t.passwordMin }),
       rememberMe: z.boolean().optional(),
     }),
   });

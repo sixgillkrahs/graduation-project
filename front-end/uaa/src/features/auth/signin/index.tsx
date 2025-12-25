@@ -1,38 +1,27 @@
-// import { Button } from "@heroui/button";
-// import { Form } from "@heroui/form";
-// import { Input } from "@heroui/input";
-// import { Divider, Image, Link, Switch } from "@heroui/react";
+import { useSignIn } from "./services/mutation";
+import logo from "@/assets/logo.svg";
+import { Button, Divider, Form, Image, Input, Switch } from "antd";
+import { useForm } from "antd/es/form/Form";
+import { Link, useNavigate } from "react-router-dom";
+
+const { Item } = Form;
+const { Password } = Input;
 
 const SignIn = () => {
-  // const { mutate: signIn } = useSignIn();
-  // const [errors, setErrors] = useState<Record<string, string>>({});
+  const { mutateAsync: signIn, isPending } = useSignIn();
+  const navigate = useNavigate();
+  const [form] = useForm<ISignInService.SignInRequest>();
 
-  // const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   const data = Object.fromEntries(new FormData(e.currentTarget)) as Record<string, string>;
-  //   const newErrors: Record<string, string> = {};
-  //   const passwordError = getPasswordError(data.password);
-  //   const emailError = getEmailError(data.email);
-  //   if (emailError) {
-  //     newErrors.email = emailError;
-  //   }
-  //   if (passwordError) {
-  //     newErrors.password = passwordError;
-  //   }
-  //   if (Object.keys(newErrors).length > 0) {
-  //     setErrors(newErrors);
-  //     return;
-  //   }
-  //   signIn({
-  //     email: data.email,
-  //     password: data.password,
-  //     rememberMe: !!data.rememberMe,
-  //   });
-  //   setErrors({});
-  // };
+  const onSubmit = async (values: ISignInService.SignInRequest) => {
+    const resp = await signIn(values);
+    if (resp.success) {
+      navigate("/dashboard", { replace: true });
+    }
+  };
+
   return (
     <div className="flex h-full flex-col justify-between px-4 py-5 sm:p-12">
-      {/* <div className="flex flex-col-reverse gap-12 sm:flex-col">
+      <div className="flex flex-col-reverse gap-12 sm:flex-col">
         <div className="text-black-900 flex items-center justify-center gap-2 text-2xl font-bold sm:justify-start">
           <Image src={logo} alt="logo" />
           <span>UAA Portal</span>
@@ -41,42 +30,63 @@ const SignIn = () => {
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-6">
               <h1 className="text-black-900 text-3xl font-bold">Nice to see you again</h1>
-              <Form className="gap-3!" validationErrors={errors} onSubmit={onSubmit}>
-                <Input
-                  label="Login"
-                  name="email"
-                  type="email"
-                  size="sm"
-                  errorMessage={errors.email}
-                />
-                <Input
-                  label="Password"
+              <Form
+                onFinish={onSubmit}
+                className="gap-3!"
+                layout="vertical"
+                form={form}
+                autoComplete="off"
+                initialValues={{
+                  rememberMe: false,
+                }}
+              >
+                <Item
+                  name="username"
+                  rules={[{ required: true, message: "Please input your email!", type: "email" }]}
+                  label="Email"
+                >
+                  <Input type="email" size="large" />
+                </Item>
+                <Item
                   name="password"
-                  type="password"
-                  size="sm"
-                  errorMessage={errors.password}
-                />
-                <div className="flex w-full items-center justify-between">
-                  <Switch name="rememberMe" size="sm">
-                    Remember me
-                  </Switch>
-                  <Link href="/auth/signup" className="text-primary">
+                  label="Password"
+                  rules={[{ required: true, message: "Please input your password!" }]}
+                >
+                  <Password size="large" />
+                </Item>
+                <div className="mb-6 flex w-full items-center justify-between">
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Form.Item name="rememberMe" valuePropName="checked" noStyle>
+                      <Switch size="default" />
+                    </Form.Item>
+
+                    <span style={{ cursor: "pointer" }} onClick={() => {}}>
+                      Remember me
+                    </span>
+                  </div>
+                  <Link to="/auth/signup" className="text-primary">
                     Forgot password?
                   </Link>
                 </div>
-                <Button type="submit" size="md" className="w-full" color="primary">
+                <Button
+                  className="w-full"
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  loading={isPending}
+                >
                   Sign In
                 </Button>
               </Form>
             </div>
             <Divider />
-            <Button size="md" className="bg-black-800 w-full text-white">
+            <Button className="bg-black-800 w-full text-white" size="large">
               Sign Site On
             </Button>
           </div>
           <div className="text-black-900 text-center text-sm">
             Don't have an account?{" "}
-            <Link href="/auth/signup" className="text-primary">
+            <Link to="/auth/sign-up" className="text-primary">
               Sign up now
             </Link>
           </div>
@@ -88,7 +98,7 @@ const SignIn = () => {
           <span className="text-black-900 text-center text-sm">UAA Portal</span>
         </div>
         <span className="text-black-900 text-center text-sm">© 2023 UAA Portal</span>
-      </div> */}
+      </div>
     </div>
   );
 };

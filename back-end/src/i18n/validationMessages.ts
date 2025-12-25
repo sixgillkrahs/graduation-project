@@ -1,5 +1,6 @@
 export const validationMessages = {
   vi: {
+    refreshTokenNotExist: "Refresh token không tồn tại",
     required: (field: string) => `${field} là bắt buộc`,
     email: "Email không hợp lệ",
     passwordNotMatch: "Mật khẩu không trùng khớp",
@@ -31,6 +32,7 @@ export const validationMessages = {
     userNotActive: "Người dùng đã bị khóa",
   },
   en: {
+    refreshTokenNotExist: "Refresh token not exist",
     required: (field: string) => `${field} is required`,
     email: "Invalid email address",
     passwordNotMatch: "Passwords do not match",

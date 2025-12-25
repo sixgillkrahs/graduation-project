@@ -1,6 +1,6 @@
 namespace ISignInService {
   export interface SignInRequest {
-    email: string;
+    username: string;
     password: string;
     rememberMe: boolean;
   }

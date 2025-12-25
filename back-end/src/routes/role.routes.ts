@@ -7,12 +7,15 @@ import {
   validateIdHeaderSchema,
   validateBodyRoleSchema,
 } from "@/validators/role.validator";
+import { requireAuth } from "@/middleware/authMiddleware";
 
 const roleService = new RoleService();
 const permissionService = new PermissionService();
 
 const roleController = new RoleController(roleService, permissionService);
 const router = Router();
+
+router.use(requireAuth);
 
 /**
  * @swagger

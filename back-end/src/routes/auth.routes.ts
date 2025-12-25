@@ -106,4 +106,32 @@ router.post(
   authController.signup,
 );
 
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Get current user
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Signup successful
+ *       400:
+ *         description: Invalid input
+ */
+router.get("/me", requireAuth, authController.me);
+
+/**
+ * @swagger
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh token
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Refresh token successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/refresh-token", authController.refreshToken);
+
 export default router;

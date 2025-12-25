@@ -1,3 +1,4 @@
+import AuthService from "@shared/auth/AuthService";
 import axios, { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
 
 export const client = (() => {
@@ -6,7 +7,7 @@ export const client = (() => {
     headers: {
       Accept: "application/json, text/plain, */*",
     },
-    // withCredentials: true, // bật cái này nếu ở backend có bật cờ Access-Control-Allow-Credentials: true
+    withCredentials: true, // bật cái này nếu ở backend có bật cờ Access-Control-Allow-Credentials: true
   });
 })();
 
@@ -32,11 +33,13 @@ client.interceptors.response.use(
 
     if (status === 401) {
       try {
-        // const refreshTokenFromStorage = localStorage.getItem(STORAGE_TOKEN.REFRESH_TOKEN);
-        // const { accessToken, refreshToken } = await AuthService.refresh(refreshTokenFromStorage);
-        // LocalStorageService.setTokens(accessToken, refreshToken);
-        // client.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-        // return await client(originalConfig);
+        const resp = await AuthService.refresh();
+        if (!resp.success) {
+          return Promise.reject(resp);
+        }
+        return await client({
+          ...err.config,
+        });
       } catch (error: any) {
         return Promise.reject(error);
       }

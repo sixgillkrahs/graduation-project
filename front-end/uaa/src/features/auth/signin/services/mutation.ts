@@ -1,11 +1,12 @@
 import SignInService from "./service";
+import type { IResp } from "@shared/types/service";
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 
 export const useSignIn = (): UseMutationResult<
-  ISignInService.SignInResponse,
+  IResp<ISignInService.SignInResponse>,
   Error,
   ISignInService.SignInRequest,
-  void
+  Promise<IResp<ISignInService.SignInResponse>>
 > => {
   return useMutation({
     mutationFn: (data: ISignInService.SignInRequest) => {
