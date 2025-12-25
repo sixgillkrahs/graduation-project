@@ -1,10 +1,10 @@
 "use client";
 
-import { Icon, Input } from "@/components/ui";
+import { Button, Icon, Input } from "@/components/ui";
 import { AppDispatch, RootState } from "@/store";
-import { updateBasicInfo } from "@/store/store";
-import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { nextStep, updateBasicInfo } from "@/store/store";
+import { memo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 
 type BasicInfoForm = {
@@ -13,111 +13,120 @@ type BasicInfoForm = {
   phoneNumber: string;
 };
 
+const validateBasicInfo = (data: BasicInfoForm) => {
+  const errors: Record<string, string> = {};
+  if (!data.fullName) {
+    errors.fullName = "Full name is required";
+  }
+  if (!data.email) {
+    errors.email = "Email is required";
+  }
+  if (!data.phoneNumber) {
+    errors.phoneNumber = "Phone number is required";
+  }
+  return errors;
+};
+
 const BasicInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { basicInfo } = useSelector((state: RootState) => state.form);
 
   const {
-    register,
     handleSubmit,
-    formState: { errors, isValid },
-    watch,
+    formState: { errors },
+    control,
   } = useForm<BasicInfoForm>({
     defaultValues: basicInfo,
     mode: "onChange",
   });
 
-  const formValues = watch();
-  const debouncedUpdate = useMemo(
-    () =>
-      debounce((data: BasicInfoForm) => {
-        dispatch(updateBasicInfo(data));
-      }, 300),
-    [dispatch]
-  );
-
-  useEffect(() => {
-    debouncedUpdate(formValues);
-    return () => debouncedUpdate.cancel();
-  }, [formValues, debouncedUpdate]);
-
   const onSubmit = (data: BasicInfoForm) => {
     dispatch(updateBasicInfo(data));
+    const errorsList = validateBasicInfo(data);
+    if (Object.keys(errorsList).length > 0) {
+      return;
+    }
+    dispatch(nextStep());
   };
 
   return (
     <div className="flex flex-col gap-4 pt-3">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          label="Full Name"
-          preIcon={<Icon.User className="main-color-gray w-5 h-5" />}
-          placeholder="e.g. John Doe"
-          error={errors.fullName?.message}
-          {...register("fullName", {
-            required: "Full name is required",
-            minLength: {
-              value: 2,
-              message: "Full name must be at least 2 characters",
-            },
-          })}
+        <Controller
+          name="fullName"
+          control={control}
+          rules={{ required: "Full name is required" }}
+          render={({ field }) => (
+            <Input
+              preIcon={<Icon.User className="main-color-gray w-5 h-5" />}
+              label="Full Name"
+              placeholder="e.g. 123 Main St"
+              error={errors.fullName?.message}
+              {...field}
+            />
+          )}
         />
 
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <Input
-            label="Email Address"
-            placeholder="john.doe@example.com"
-            preIcon={<Icon.Mail className="main-color-gray w-5 h-5" />}
-            error={errors.email?.message}
-            {...register("email", {
+          <Controller
+            name="email"
+            control={control}
+            rules={{
               required: "Email is required",
               pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Invalid email address",
+                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                message: "Please enter a valid email address",
               },
-            })}
+            }}
+            render={({ field }) => (
+              <Input
+                label="Email Address"
+                placeholder="john.doe@example.com"
+                preIcon={<Icon.Mail className="main-color-gray w-5 h-5" />}
+                error={errors.email?.message}
+                {...field}
+              />
+            )}
           />
-
-          <Input
-            label="Phone Number"
-            placeholder="0123456789"
-            preIcon={<Icon.Phone className="main-color-gray w-5 h-5" />}
-            error={errors.phoneNumber?.message}
-            {...register("phoneNumber", {
-              required: "Phone number is required",
-              pattern: {
-                value: /^[0-9]+$/,
-                message: "Phone number must contain only numbers",
-              },
-              minLength: {
-                value: 10,
-                message: "Phone number must be at least 10 digits",
-              },
-            })}
+          <Controller
+            name="phoneNumber"
+            control={control}
+            rules={{ required: "Phone number is required" }}
+            render={({ field }) => (
+              <Input
+                label="Phone Number"
+                placeholder="0123456789"
+                preIcon={<Icon.Phone className="main-color-gray w-5 h-5" />}
+                error={errors.phoneNumber?.message}
+                {...field}
+              />
+            )}
           />
         </div>
 
         <div className="mt-4 text-sm text-gray-500">
           Your information is automatically saved as you type.
         </div>
+        <div className="flex justify-between pt-6">
+          <Button
+            className="text-black px-6 py-2 rounded-full"
+            // onClick={handlePrev}
+            type="button"
+            icon={<Icon.ArrowLeft className="w-5 h-5" />}
+            // disabled={isSubmitting}
+          >
+            Back
+          </Button>
+          <Button
+            className="cs-bg-black text-white px-6 py-2 rounded-full"
+            type="submit"
+          >
+            Next
+          </Button>
+        </div>
       </form>
     </div>
   );
 };
 
-function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): T & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
-
-  const debounced = (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-
-  debounced.cancel = () => clearTimeout(timeout);
-
-  return debounced as T & { cancel: () => void };
-}
-
-export default BasicInfo;
+export default memo(BasicInfo);

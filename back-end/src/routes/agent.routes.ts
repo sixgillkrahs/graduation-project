@@ -87,73 +87,81 @@ router.post(
   agentController.application,
 );
 
-
 /**
  * @swagger
- * /agents/application:
- *   post:
- *     summary: Application
+ * /agents/agent-registrations:
+ *   get:
+ *     summary: Get agent registrations
  *     tags: [Agent]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               fullName:
- *                 type: string
- *               email:
- *                 type: string
- *               phoneNumber:
- *                 type: string
- *               agentName:
- *                 type: string
- *               area:
- *                 type: array
- *                 items:
- *                   type: string
- *               businessName:
- *                 type: string
- *               IDNumber:
- *                 type: string
- *               dateOfBirth:
- *                 type: string
- *               gender:
- *                 type: string
- *               address:
- *                 type: string
- *               nationality:
- *                 type: string
- *               agreeToTerms:
- *                 type: boolean
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items to return
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Number of items to skip
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *         description: Field to sort by
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *         description: Sort order (ascending or descending)
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: A list of agent registrations
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   fullName:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   phoneNumber:
+ *                     type: string
+ *                   agentName:
+ *                     type: string
+ *                   area:
+ *                     type: array
+ *                     items:
  *                       type: string
- *                     email:
- *                       type: string
- *                     name:
- *                       type: string
- *                     role:
- *                       type: string
- *       401:
- *         description: Invalid credentials
+ *                   businessName:
+ *                     type: string
+ *                   IDNumber:
+ *                     type: string
+ *                   dateOfBirth:
+ *                     type: string
+ *                   gender:
+ *                     type: string
+ *                   address:
+ *                     type: string
+ *                   nationality:
+ *                     type: string
+ *                   agreeToTerms:
+ *                     type: boolean
+ *                   status:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                   updatedAt:
+ *                     type: string
  */
-router.get(
-  "/agent-registrations",
-  agentController.agentRegistrations,
-);
+router.get("/agent-registrations", agentController.agentRegistrations);
 
 export default router;

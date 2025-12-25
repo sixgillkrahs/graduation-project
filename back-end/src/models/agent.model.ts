@@ -4,10 +4,10 @@ import paginate from "./plugins/paginate.plugin";
 import toJSON from "./plugins/toJSON.plugin";
 
 export enum AgentStatusEnum {
-  PENDING = "pending",
-  APPROVED = "approved",
-  REJECTED = "rejected",
-  EXPIRED = "expired",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  EXPIRED = "EXPIRED",
 }
 
 export interface IAgent {
@@ -25,6 +25,7 @@ export interface IAgent {
   businessInfo: {
     phoneNumber: string;
     area: string[];
+    email: string;
   };
   expirationDate?: Date;
   registrationLink?: string;
@@ -111,6 +112,11 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
       },
       area: {
         type: [String],
+        required: true,
+        trim: true,
+      },
+      email: {
+        type: String,
         required: true,
         trim: true,
       },

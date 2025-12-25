@@ -28,7 +28,11 @@ const Input = ({
         <label className="cs-paragraph text-sm! font-medium!">{label}</label>
       )}
       <div
-        className={`flex items-center border border-black/10 rounded-full px-4 py-2 ${className}`}
+        className={`flex items-center justify-between w-full
+            border border-black/10 rounded-full px-4 py-2
+            bg-white outline-none transition-all ${className}  ${
+          error ? "border-red-500" : ""
+        }`}
       >
         {preIcon && <div className="mr-2">{preIcon}</div>}
         <input

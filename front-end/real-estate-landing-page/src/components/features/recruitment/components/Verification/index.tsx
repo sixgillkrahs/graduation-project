@@ -1,117 +1,208 @@
-import { Checkbox, Input, Select } from "@/components/ui";
+"use client";
+
+import { Button, Checkbox, Icon, Input, Select } from "@/components/ui";
 import {
   BusinessInfo,
   Verification as VerificationType,
 } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
-import { updateVerification } from "@/store/store";
-import { useForm } from "react-hook-form";
+import {
+  prevStep,
+  updateBusinessInfo,
+  updateVerification,
+} from "@/store/store";
+import { useForm, Controller } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import ExtractService from "../../services/service";
+import { memo, useEffect } from "react";
+import { submitForm } from "@/store/thunks/formThunks";
+import { showToast } from "@/components/ui/Toast";
 
 const Verification = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { businessInfo, verification } = useSelector(
+
+  const { businessInfo, verification, isSubmitting } = useSelector(
     (state: RootState) => state.form
   );
 
   const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-    watch,
+    control,
+    reset,
+    formState: { errors },
   } = useForm<BusinessInfo & VerificationType>({
-    defaultValues: businessInfo,
+    defaultValues: {
+      ...businessInfo,
+      ...verification,
+    },
     mode: "onChange",
   });
 
-  const onSubmit = (agreeToTerms: boolean) => {
-    console.log(agreeToTerms);
-    dispatch(updateVerification({ agreeToTerms }));
-    console.log(verification);
+  useEffect(() => {
+    reset({
+      ...businessInfo,
+      ...verification,
+    });
+  }, [businessInfo, verification, reset]);
+
+  const handlePrev = () => {
+    dispatch(prevStep());
+  };
+
+  const handleSubmitData = async () => {
+    try {
+      await dispatch(submitForm()).unwrap();
+      showToast.success("Đăng ký thành công", "Cảm ơn bạn đã đăng ký!");
+    } catch (error) {
+      console.error("Failed to submit form:", error);
+    }
   };
 
   return (
     <form>
       <div className="grid grid-cols-2 gap-4 my-4 ">
-        <Input
-          label="Full Name"
-          placeholder="e.g. John Doe"
-          value={businessInfo.agentName}
-          error={errors.agentName?.message}
-          {...register("agentName", {
+        <Controller
+          name="agentName"
+          control={control}
+          rules={{
             required: "Agent name is required",
             minLength: {
               value: 2,
               message: "Agent name must be at least 2 characters",
             },
-          })}
+          }}
+          render={({ field }) => (
+            <Input
+              label="Full Name"
+              placeholder="e.g. John Doe"
+              error={errors.agentName?.message}
+              {...field}
+            />
+          )}
         />
-        <Input
-          label="ID Number"
-          placeholder="e.g. 124xxxxxxxx"
-          value={businessInfo.IDNumber}
-          error={errors.IDNumber?.message}
-          {...register("IDNumber", {
+
+        <Controller
+          name="IDNumber"
+          control={control}
+          rules={{
             required: "ID Number is required",
             minLength: {
               value: 12,
               message: "ID Number must be 12 characters",
             },
-          })}
+          }}
+          render={({ field }) => (
+            <Input
+              label="ID Number"
+              placeholder="e.g. 124xxxxxxxx"
+              error={errors.IDNumber?.message}
+              {...field}
+            />
+          )}
         />
-        <Select
-          label="Gender"
-          placeholder="Select gender"
-          options={ExtractService.options}
-          value={businessInfo.gender}
-          error={errors.gender?.message}
-          {...register("gender", { required: "Please select gender" })}
+
+        <Controller
+          name="gender"
+          control={control}
+          rules={{ required: "Please select gender" }}
+          render={({ field }) => (
+            <Select
+              label="Gender"
+              placeholder="Select gender"
+              options={ExtractService.options}
+              error={errors.gender?.message}
+              {...field}
+            />
+          )}
         />
-        <Input
-          label="Birthday"
-          placeholder="e.g. 01/01/2000"
-          value={businessInfo.dateOfBirth}
-          error={errors.dateOfBirth?.message}
-          {...register("dateOfBirth", {
-            required: "Birthday is required",
-          })}
+
+        <Controller
+          name="dateOfBirth"
+          control={control}
+          rules={{ required: "Birthday is required" }}
+          render={({ field }) => (
+            <Input
+              label="Birthday"
+              placeholder="e.g. 01/01/2000"
+              error={errors.dateOfBirth?.message}
+              {...field}
+            />
+          )}
         />
-        <Input
-          label="Nationality"
-          placeholder="e.g. Vietnamese"
-          value={businessInfo.nationality}
-          error={errors.nationality?.message}
-          {...register("nationality", {
-            required: "Nationality is required",
-          })}
+
+        <Controller
+          name="nationality"
+          control={control}
+          rules={{ required: "Nationality is required" }}
+          render={({ field }) => (
+            <Input
+              label="Nationality"
+              placeholder="e.g. Vietnamese"
+              error={errors.nationality?.message}
+              {...field}
+            />
+          )}
         />
-        <Input
-          label="Address"
-          placeholder="e.g. 123 Main St"
-          value={businessInfo.address}
-          error={errors.address?.message}
-          {...register("address", {
-            required: "Address is required",
-          })}
+
+        <Controller
+          name="address"
+          control={control}
+          rules={{ required: "Address is required" }}
+          render={({ field }) => (
+            <Input
+              label="Address"
+              placeholder="e.g. 123 Main St"
+              error={errors.address?.message}
+              {...field}
+            />
+          )}
         />
       </div>
+
       <div className="p-4 bg-black/5 w-full rounded-lg border border-black/10 mt-8">
-        <Checkbox
-          label="I agree to the Terms and Conditions and Privacy Policy"
-          subtext="I certify that all information I have provided is true and correct. 
-          I authorize the company to contact me regarding my application and verify my real estate license status."
-          {...register("agreeToTerms", {
+        <Controller
+          name="agreeToTerms"
+          control={control}
+          rules={{
             required:
               "You must agree to the Terms and Conditions and Privacy Policy",
-          })}
-          onChange={(e) => {
-            onSubmit(e.target.checked);
           }}
+          render={({ field: { value, onChange, ...restField } }) => (
+            <Checkbox
+              label="I agree to the Terms and Conditions and Privacy Policy"
+              subtext="I certify that all information I have provided is true and correct..."
+              error={errors.agreeToTerms?.message}
+              checked={value}
+              {...restField}
+              onChange={(e) => {
+                const isChecked = e.target.checked;
+                onChange(isChecked);
+                dispatch(updateVerification({ agreeToTerms: isChecked }));
+              }}
+            />
+          )}
         />
+      </div>
+      <div className="flex justify-between pt-6">
+        <Button
+          className="text-black px-6 py-2 rounded-full"
+          onClick={handlePrev}
+          type="button"
+          icon={<Icon.ArrowLeft className="w-5 h-5" />}
+          disabled={isSubmitting}
+        >
+          Back
+        </Button>
+        <Button
+          className="cs-bg-black text-white px-6 py-2 rounded-full"
+          onClick={handleSubmitData}
+          disabled={isSubmitting}
+          // loading={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Submit Application"}
+        </Button>
       </div>
     </form>
   );
 };
 
-export default Verification;
+export default memo(Verification);

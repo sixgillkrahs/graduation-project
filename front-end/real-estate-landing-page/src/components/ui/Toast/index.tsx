@@ -33,7 +33,7 @@ const ToastCard = ({
     <div
       className={`
         ${t.visible ? "animate-enter" : "animate-leave"}
-        group pointer-events-auto flex w-[200px] max-w-sm items-start gap-4 
+        group pointer-events-auto flex w-100 max-w-sm items-start gap-4 
         rounded-xl bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)] 
         border border-gray-100 ring-1 ring-black/5
         transition-all duration-300 hover:shadow-md

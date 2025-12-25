@@ -26,4 +26,5 @@ export interface FormState {
   verification: Verification;
   isSubmitting: boolean;
   submitError: string | null;
+  isSubmitSuccess: boolean;
 }

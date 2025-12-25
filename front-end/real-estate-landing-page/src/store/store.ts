@@ -28,6 +28,7 @@ const initialState: FormState = {
   },
   isSubmitting: false,
   submitError: null,
+  isSubmitSuccess: false,
 };
 
 const formSlice = createSlice({
@@ -72,10 +73,12 @@ const formSlice = createSlice({
     submitFormSuccess: (state) => {
       state.isSubmitting = false;
       state.submitError = null;
+      state.isSubmitSuccess = true;
     },
     submitFormFailure: (state, action: PayloadAction<string>) => {
       state.isSubmitting = false;
       state.submitError = action.payload;
+      state.isSubmitSuccess = false;
     },
   },
 });

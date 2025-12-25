@@ -1,16 +1,12 @@
 "use client";
 
-import { Button, Icon } from "@/components/ui";
-import { AppDispatch, RootState } from "@/store";
-import { nextStep, prevStep } from "@/store/store";
-import { submitForm } from "@/store/thunks/formThunks";
-import { useDispatch, useSelector } from "react-redux";
+import { Icon } from "@/components/ui";
+import { RootState } from "@/store";
+import Link from "next/link";
+import { useSelector } from "react-redux";
 import BasicInfo from "./components/BasicInfo";
 import BusinessInfo from "./components/BusinessInfo";
 import Verification from "./components/Verification";
-import { showToast } from "@/components/ui/Toast";
-import { useState } from "react";
-import Link from "next/link";
 
 const steps = [
   {
@@ -31,29 +27,9 @@ const steps = [
 ];
 
 const Recruitment = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const [isSuccess, setIsSuccess] = useState(false);
-  const { currentStep, isSubmitting } = useSelector(
+  const { currentStep, isSubmitSuccess } = useSelector(
     (state: RootState) => state.form
   );
-
-  const handleNext = () => {
-    dispatch(nextStep());
-  };
-
-  const handlePrev = () => {
-    dispatch(prevStep());
-  };
-
-  const handleSubmit = async () => {
-    try {
-      await dispatch(submitForm()).unwrap();
-      showToast.success("Đăng ký thành công", "Cảm ơn bạn đã đăng ký!");
-      setIsSuccess(true);
-    } catch (error) {
-      console.error("Failed to submit form:", error);
-    }
-  };
 
   return (
     <section className="relative bg-black/10 py-10">
@@ -84,7 +60,7 @@ const Recruitment = () => {
           </div>
         </div>
         <div className="max-w-[700px] w-full h-auto bg-white rounded-3xl shadow-20 px-10 pt-10 pb-4! mx-auto">
-          {isSuccess ? (
+          {isSubmitSuccess ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8 animate-in fade-in zoom-in duration-500">
               <div className="relative mb-6 group">
                 <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-20 duration-1000"></div>
@@ -93,18 +69,18 @@ const Recruitment = () => {
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">
-                Gửi hồ sơ thành công!
+                Application Successful!
               </h2>
 
               <div className="max-w-md mx-auto space-y-2 text-gray-500 mb-8">
                 <p>
-                  Cảm ơn bạn đã đăng ký trở thành đối tác. Chúng tôi đã nhận
-                  được thông tin và sẽ tiến hành xét duyệt.
+                  Thank you for applying to become an agent. We have received
+                  your information and will review it.
                 </p>
                 <p className="text-sm">
-                  Kết quả sẽ được gửi đến email của bạn trong vòng{" "}
-                  <span className="font-medium text-gray-900">24-48 giờ</span>{" "}
-                  làm việc.
+                  The results will be sent to your email within{" "}
+                  <span className="font-medium text-gray-900">24-48 hours</span>{" "}
+                  working hours.
                 </p>
               </div>
 
@@ -118,7 +94,7 @@ const Recruitment = () => {
             active:scale-95
           "
                 >
-                  Gửi đơn đăng ký khác
+                  Apply for Another Agent
                 </button>
 
                 <Link
@@ -130,7 +106,7 @@ const Recruitment = () => {
             flex items-center justify-center
           "
                 >
-                  Về trang chủ
+                  Go to Home Page
                 </Link>
               </div>
             </div>
@@ -158,39 +134,6 @@ const Recruitment = () => {
                   {step.component}
                 </div>
               ))}
-              <div className="flex justify-between pt-6">
-                <div>
-                  {currentStep !== 0 && (
-                    <Button
-                      className="text-black px-6 py-2 rounded-full"
-                      onClick={handlePrev}
-                      icon={<Icon.ArrowLeft className="w-5 h-5" />}
-                      disabled={isSubmitting}
-                    >
-                      Back
-                    </Button>
-                  )}
-                </div>
-
-                {currentStep !== steps.length - 1 ? (
-                  <Button
-                    className="cs-bg-black text-white px-6 py-2 rounded-full"
-                    onClick={handleNext}
-                    disabled={isSubmitting}
-                  >
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    className="cs-bg-black text-white px-6 py-2 rounded-full"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    loading={isSubmitting}
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Application"}
-                  </Button>
-                )}
-              </div>
             </>
           )}
         </div>

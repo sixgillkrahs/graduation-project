@@ -27,7 +27,7 @@ export const submitForm = createAsyncThunk(
         ...formData.businessInfo,
         ...formData.verification,
       };
-
+      console.log(payload);
       const response = await request({
         method: "POST",
         url: "/agents/application",
