@@ -1,6 +1,20 @@
 import AuthService from "@shared/auth/AuthService";
 import axios, { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
 
+let isRefreshing = false;
+let failedQueue: {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}[] = [];
+
+const processQueue = (error: any) => {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve(true);
+  });
+  failedQueue = [];
+};
+
 export const client = (() => {
   return axios.create({
     baseURL: import.meta.env.VITE_BASEURL,
@@ -13,42 +27,58 @@ export const client = (() => {
 
 client.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // const accessToken = localStorage.getItem(STORAGE_TOKEN.ACCESS_TOKEN);
-    // if (accessToken) {
-    //   config.headers.Authorization = `Bearer ${accessToken}`;
-    // }
     return config;
   },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  },
+  (error: AxiosError) => Promise.reject(error),
 );
 
 client.interceptors.response.use(
-  (res: AxiosResponse) => {
-    return res;
-  },
-  async (err: AxiosError) => {
-    const status = err.response ? err.response.status : null;
+  (res: AxiosResponse) => res,
+  async (error: AxiosError) => {
+    const originalRequest: any = error.config;
+    const status = error.response?.status;
 
-    if (status === 401) {
+    if (originalRequest?.url?.includes("/auth/refresh")) {
+      return Promise.reject(error);
+    }
+
+    if (status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: () => resolve(client(originalRequest)),
+            reject,
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
         const resp = await AuthService.refresh();
-        if (!resp.success) {
-          return Promise.reject(resp);
+
+        if (!resp?.success) {
+          throw new Error("Refresh token failed");
         }
-        return await client({
-          ...err.config,
-        });
-      } catch (error: any) {
-        return Promise.reject(error);
+
+        processQueue(null);
+        return client(originalRequest);
+      } catch (err) {
+        processQueue(err);
+        // await AuthService.logout?.();
+        window.location.href = "/login";
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
 
-    if (status === 403 && err?.response?.data) {
-      return Promise.reject(err.response.data);
+    if (status === 403 && error.response?.data) {
+      return Promise.reject(error.response.data);
     }
 
-    return Promise.reject(err);
+    return Promise.reject(error);
   },
 );
