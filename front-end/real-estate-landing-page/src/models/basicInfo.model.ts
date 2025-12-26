@@ -17,9 +17,10 @@ export interface BasicInfo {
 export interface BusinessInfo {
   certificateNumber: string;
   taxCode: string;
-  yearsOfExperience: number;
-  workingArea: [string];
-  specialization: [string];
+  yearsOfExperience: string | undefined;
+  workingArea: [string] | undefined;
+  specialization: [string] | undefined;
+  certificateImage: File[];
 }
 
 export interface Verification {

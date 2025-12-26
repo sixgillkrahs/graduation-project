@@ -37,6 +37,8 @@ const Verification = () => {
     mode: "onChange",
   });
 
+  console.log(businessInfo);
+
   useEffect(() => {
     reset({
       ...businessInfo,

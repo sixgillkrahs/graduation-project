@@ -1,4 +1,4 @@
-import React from "react";
+import { ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
 
 const Input = ({
   placeholder,
@@ -10,18 +10,20 @@ const Input = ({
   onChange,
   value,
   register,
+  suffix,
   ...rest
 }: {
   placeholder?: string;
   className?: string;
-  preIcon?: React.ReactNode;
+  preIcon?: ReactNode;
   name?: string;
   label?: string;
   error?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   value?: string;
   register?: any;
-} & React.InputHTMLAttributes<HTMLInputElement>) => {
+  suffix?: ReactNode;
+} & InputHTMLAttributes<HTMLInputElement>) => {
   return (
     <div className="flex flex-col gap-1">
       {label && (
@@ -44,6 +46,7 @@ const Input = ({
           value={value}
           {...rest}
         />
+        {suffix && <div className="ml-2">{suffix}</div>}
       </div>
       {error && <p className="text-red-500 text-sm! font-medium!">{error}</p>}
     </div>

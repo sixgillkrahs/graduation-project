@@ -51,10 +51,10 @@ const BasicInfo = () => {
       identityInfo: currentIdentityInfo,
     };
     dispatch(updateBasicInfo(finalData));
-    // const errorsList = validateBasicInfo(finalData);
-    // if (Object.keys(errorsList).length > 0) {
-    //   return;
-    // }
+    const errorsList = validateBasicInfo(finalData);
+    if (Object.keys(errorsList).length > 0) {
+      return;
+    }
     dispatch(nextStep());
   };
 

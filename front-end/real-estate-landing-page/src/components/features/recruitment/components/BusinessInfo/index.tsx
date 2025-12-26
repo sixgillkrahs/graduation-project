@@ -1,14 +1,15 @@
-import { Button, Icon, Upload } from "@/components/ui";
+import { Button, Icon, Input, Select, Upload } from "@/components/ui";
+import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
 import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
 import { memo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useExtractID } from "../../services/mutation";
-import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
+import ExtractService from "../../services/service";
+import { useUploadImage } from "../../services/mutation";
 
 const validateBusinessInfo = (values: BusinessInfoType) => {
-  const errors: Partial<BusinessInfoType & { identityCard: string[] }> = {};
+  const errors: Partial<BusinessInfoType> = {};
   // if (!values.identityCard || values.identityCard.length === 0) {
   //   errors.identityCard = ["Identity card is required"];
   // }
@@ -16,15 +17,14 @@ const validateBusinessInfo = (values: BusinessInfoType) => {
 };
 
 const BusinessInfo = () => {
-  const { mutateAsync: extractID } = useExtractID();
   const dispatch = useDispatch<AppDispatch>();
-  const { basicInfo, businessInfo, isSubmitting } = useSelector(
+  const { mutate: uploadImage } = useUploadImage();
+  const { businessInfo, isSubmitting } = useSelector(
     (state: RootState) => state.form
   );
   const {
     control,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<BusinessInfoType & { identityCard: File[] }>({
     defaultValues: businessInfo,
@@ -38,10 +38,17 @@ const BusinessInfo = () => {
     if (Object.keys(errors).length > 0) {
       return;
     }
+    console.log(data);
     dispatch(nextStep());
   };
 
-  console.log(basicInfo);
+  const handleUploadImage = (files: File[]) => {
+    const formData = new FormData();
+    if (files.length > 0) {
+      formData.append("file", files[0]);
+      uploadImage(formData);
+    }
+  };
 
   const handlePrev = () => {
     dispatch(prevStep());
@@ -50,31 +57,130 @@ const BusinessInfo = () => {
   return (
     <div className="flex flex-col gap-4 pt-3">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="identityCard"
-          control={control}
-          rules={{
-            required: "Identity card is required",
-            validate: (val) =>
-              (val && val.length > 0) || "Identity card is required",
-          }}
-          render={({
-            field: { onChange, value, ...restField },
-            fieldState: { error },
-          }) => (
-            <Upload
-              label="Identity Card"
-              accept="image/jpeg,image/png"
-              {...restField}
-              value={value || []}
-              onChange={(files) => {
-                onChange(files);
-                // handleOCRLogic(files);
-              }}
-              error={error?.message}
-            />
-          )}
-        />
+        <div className="grid grid-cols-2 gap-3">
+          <Controller
+            name="certificateNumber"
+            control={control}
+            rules={{
+              required: "Certificate number is required",
+            }}
+            render={({ field }) => (
+              <Input
+                label="Certificate Number"
+                placeholder="CCHN-HN-123456"
+                error={errors.certificateNumber?.message}
+                {...field}
+              />
+            )}
+          />
+          <Controller
+            name="taxCode"
+            control={control}
+            rules={{
+              required: "Tax code is required",
+            }}
+            render={({ field }) => (
+              <Input
+                label="Tax code"
+                placeholder="8888888888"
+                error={errors.taxCode?.message}
+                {...field}
+              />
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-3 mt-3">
+          <Controller
+            name="yearsOfExperience"
+            control={control}
+            rules={{
+              required: "Year of experience is required",
+              pattern: {
+                value: /^[0-9]{0,}$/,
+                message: "Please enter number",
+              },
+            }}
+            render={({ field }) => (
+              <Input
+                label="Years Of Experience"
+                placeholder="8888888888"
+                suffix="Year"
+                error={errors.yearsOfExperience?.message}
+                {...field}
+              />
+            )}
+          />
+          <Controller
+            name="specialization"
+            control={control}
+            rules={{
+              required: "Specialization is required",
+            }}
+            render={({ field }) => (
+              <Select
+                label="Specialization"
+                error={errors.specialization?.message}
+                multiple
+                options={[
+                  {
+                    value: "APARTMENT",
+                    label: "APARTMENT",
+                  },
+                  {
+                    value: "LAND",
+                    label: "LAND",
+                  },
+                ]}
+                {...field}
+              />
+            )}
+          />
+        </div>
+        <div className="grid mt-3">
+          <Controller
+            name="workingArea"
+            control={control}
+            rules={{
+              required: "Working area is required",
+            }}
+            render={({ field }) => (
+              <Select
+                multiple
+                label="Specialization"
+                error={errors.workingArea?.message}
+                options={ExtractService.vietnamProvinces}
+                {...field}
+              />
+            )}
+          />
+        </div>
+        <div className="mt-3">
+          <Controller
+            name="certificateImage"
+            control={control}
+            rules={{
+              required: "Certificate image is required",
+              validate: (val) =>
+                (val && val.length > 0) || "Certificate image is required",
+            }}
+            render={({
+              field: { onChange, value, ...restField },
+              fieldState: { error },
+            }) => (
+              <Upload
+                label="Certificate Image"
+                accept="image/jpeg,image/png"
+                {...restField}
+                value={value || []}
+                onChange={(files) => {
+                  onChange(files);
+                  handleUploadImage(files);
+                }}
+                error={error?.message}
+              />
+            )}
+          />
+        </div>
         <div className="flex justify-between pt-6">
           <Button
             className="text-black px-6 py-2 rounded-full"

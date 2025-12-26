@@ -25,10 +25,11 @@ const initialState: FormState = {
   },
   businessInfo: {
     certificateNumber: "",
-    specialization: [""],
+    specialization: undefined,
     taxCode: "",
-    workingArea: [""],
-    yearsOfExperience: 0,
+    workingArea: undefined,
+    yearsOfExperience: "",
+    certificateImage: [],
   },
   verification: {
     agreeToTerms: false,
