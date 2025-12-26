@@ -105,4 +105,27 @@ export class AgentController extends BaseController {
       return agentRegistrations;
     });
   };
+
+  agentRegistrationDetail = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { id } = req.params as { id: string };
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+      if (!agentRegistration) {
+        throw new AppError(
+          lang === "vi"
+            ? "Yêu cầu không tồn tại"
+            : "Agent registration not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+      return agentRegistration;
+    });
+  };
 }

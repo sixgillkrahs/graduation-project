@@ -14,14 +14,20 @@ const router: RouterConfig = {
       component: lazy(() => import("./dashboard")),
     },
     {
-      path: "/agent",
+      path: "/agents",
       name: "Agent",
       icon: Users,
       childRoutes: [
         {
-          path: "/agent-registration",
+          path: "/registration",
           component: lazy(() => import("./agents/agent-registration")),
           name: "Agent Registration",
+        },
+        {
+          path: "/registration/:id",
+          component: lazy(() => import("./agents/agent-registration-detail")),
+          name: "Agent Registration Detail",
+          hideInMenu: true,
         },
       ],
     },
@@ -30,13 +36,6 @@ const router: RouterConfig = {
       component: lazy(() => import("./user-manage")),
       name: "menu.user-management",
       icon: Users,
-      // childRoutes: [
-      //   {
-      //     path: "/resources",
-      //     component: lazy(() => import("./user-manage/resources")),
-      //     name: "Resources",
-      //   },
-      // ],
     },
     {
       path: "/setting",

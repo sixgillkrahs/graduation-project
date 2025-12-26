@@ -35,3 +35,20 @@ export const useRegistration = (): UseMutationResult<
     },
   });
 };
+
+export const useUploadImage = (): UseMutationResult<
+  IResp<string>,
+  Error,
+  FormData,
+  void
+> => {
+  return useMutation({
+    mutationFn: (file: FormData) => {
+      return ExtractService.UploadImage(file);
+    },
+    meta: {
+      ERROR_SOURCE: "[Extract ID failed]",
+      SUCCESS_MESSAGE: "The ID has been successfully extracted",
+    },
+  });
+};

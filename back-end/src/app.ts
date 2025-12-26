@@ -74,7 +74,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/resources", resourcesRoutes);
-app.use("/api/agents", agentRoutes);
+app.use("/api/agents-registrations", agentRoutes);
 
 const swaggerOptions = {
   explorer: true,

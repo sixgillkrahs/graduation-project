@@ -14,4 +14,12 @@ const createObjectIdSchema = (lang: keyof typeof validationMessages) => {
   );
 };
 
-export { createObjectIdSchema };
+const validateIdHeaderSchema = (lang: keyof typeof validationMessages) => {
+  return z.object({
+    params: z.object({
+      id: createObjectIdSchema(lang),
+    }),
+  });
+};
+
+export { createObjectIdSchema, validateIdHeaderSchema };

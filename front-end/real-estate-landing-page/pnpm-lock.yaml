@@ -38,6 +38,9 @@ importers:
       react-hot-toast:
         specifier: ^2.6.0
         version: 2.6.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      react-photo-view:
+        specifier: ^1.2.7
+        version: 1.2.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react-redux:
         specifier: ^9.2.0
         version: 9.2.0(@types/react@19.2.7)(react@19.2.1)(redux@5.0.1)
@@ -956,6 +959,12 @@ packages:
       react: '>=16'
       react-dom: '>=16'
 
+  react-photo-view@1.2.7:
+    resolution: {integrity: sha512-MfOWVPxuibncRLaycZUNxqYU8D9IA+rbGDDaq6GM8RIoGJal592hEJoRAyRSI7ZxyyJNJTLMUWWL3UIXHJJOpw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
   react-redux@9.2.0:
     resolution: {integrity: sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==}
     peerDependencies:
@@ -1766,6 +1775,11 @@ snapshots:
     dependencies:
       csstype: 3.2.3
       goober: 2.1.18(csstype@3.2.3)
+      react: 19.2.1
+      react-dom: 19.2.1(react@19.2.1)
+
+  react-photo-view@1.2.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+    dependencies:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 

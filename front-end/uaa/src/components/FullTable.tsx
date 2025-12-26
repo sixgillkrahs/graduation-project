@@ -51,7 +51,9 @@ interface IProTableProps<T extends { id: string | number }> {
   onEdit?: (record: T) => Promise<any> | void;
   isDelete?: boolean;
   onDelete?: (id: T["id"]) => Promise<any>;
-  isView?: boolean;
+  isView?: boolean; // show view button
+  isDetail?: boolean; // change path to /:id
+  onDetail?: (record: T) => void;
   isExport?: boolean;
   onExport?: () => void;
   disableAction?: boolean;
@@ -89,6 +91,8 @@ const FullTable = <T extends { id: string | number }>({
   isDelete = true,
   onDelete,
   isView = true,
+  isDetail = false,
+  onDetail,
   isExport = true,
   onExport,
   form,
@@ -154,11 +158,18 @@ const FullTable = <T extends { id: string | number }>({
     setIsModalOpen(true);
   }, []);
 
-  const handleView = useCallback((record: T) => {
-    setCurrentRecord(record);
-    setFormMode("VIEW");
-    setIsModalOpen(true);
-  }, []);
+  const handleView = useCallback(
+    (record: T) => {
+      if (isView && !isDetail) {
+        setCurrentRecord(record);
+        setFormMode("VIEW");
+        setIsModalOpen(true);
+      } else if (isDetail) {
+        onDetail?.(record);
+      }
+    },
+    [isDetail, isView, onDetail],
+  );
 
   const handleAdd = useCallback(() => {
     setCurrentRecord(null);
@@ -246,7 +257,7 @@ const FullTable = <T extends { id: string | number }>({
                     items: [
                       ...(extraAction?.(record) || []),
 
-                      ...(isView
+                      ...(isView || isDetail
                         ? [
                             {
                               key: "view",
@@ -298,6 +309,7 @@ const FullTable = <T extends { id: string | number }>({
     isView,
     isEdit,
     isDelete,
+    isDetail,
     extraAction,
     handleDelete,
     handleEdit,

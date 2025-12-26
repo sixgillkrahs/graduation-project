@@ -1,10 +1,12 @@
 import os
 
 import numpy as np
+import uuid
+import shutil
 import yolov5
 from fastapi import File, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse,FileResponse
 from PIL import Image
 from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
@@ -50,6 +52,44 @@ async def upload(file: UploadFile = File(...)):
 
     return await extract_info(image_path=file_location)
 
+@app.get("/images/{filename}")
+async def get_image(filename: str):
+    file_path = os.path.join(cfg.UPLOAD_FOLDER, filename)
+    
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    print(file_path)
+    return JSONResponse(status_code=404, content={"message": "Image not found"})
+
+
+@app.post("/upload-single")
+async def upload_single_image(file: UploadFile = File(...)):
+    if not os.path.isdir(cfg.UPLOAD_FOLDER):
+        os.mkdir(cfg.UPLOAD_FOLDER)
+
+    if not file.filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+        return JSONResponse(status_code=400, content={"message": "Chỉ hỗ trợ file ảnh (png, jpg, jpeg, webp)"})
+
+    try:
+        file_extension = file.filename.split(".")[-1]
+        new_filename = f"{file.filename}-v-{uuid.uuid4()}.{file_extension}"
+        
+        file_location = os.path.join(cfg.UPLOAD_FOLDER, new_filename)
+
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        image_url = f"/images/{new_filename}"
+
+        return {
+            "success": True,
+            "filename": new_filename,
+            "url": image_url,
+            "message": "Upload thành công"
+        }
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"message": f"Lỗi server: {str(e)}"})
 
 async def extract_info(image_path: str = None):
     """Extract information from the uploaded image."""

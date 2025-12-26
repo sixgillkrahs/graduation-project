@@ -1,9 +1,30 @@
 import EnglandFlag from "@/assets/images/icons/EnglandFlag.svg";
 import VietNamFlag from "@/assets/images/icons/VietNamFlag.svg";
-import { useGetMe } from "@/hooks/useMe";
-import { Avatar, Badge, Dropdown, Select } from "antd";
+import { useGetMe } from "@shared/auth/query";
+import { Avatar, Badge, Select } from "antd";
 import { Bell, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+const LangOptions = [
+  {
+    value: "vi",
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <img src={VietNamFlag} alt="VN" width={20} />
+        <span>VI</span>
+      </div>
+    ),
+  },
+  {
+    value: "en",
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <img src={EnglandFlag} alt="EN" width={20} />
+        <span>EN</span>
+      </div>
+    ),
+  },
+];
 
 const Header = ({
   isMenuOpen,
@@ -31,47 +52,14 @@ const Header = ({
           onChange={(value) => {
             i18n.changeLanguage(value);
           }}
-          options={[
-            {
-              value: "vi",
-              label: (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <img src={VietNamFlag} alt="VN" width={20} />
-                  <span>VI</span>
-                </div>
-              ),
-            },
-            {
-              value: "en",
-              label: (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <img src={EnglandFlag} alt="EN" width={20} />
-                  <span>EN</span>
-                </div>
-              ),
-            },
-          ]}
+          options={LangOptions}
         />
-        <Dropdown>
-          <Avatar>{me?.data?.user?.fullName}</Avatar>
-          {/* <DropdownTrigger>
-            <User
-              as="button"
-              avatarProps={{
-                isBordered: true,
-                src: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-              }}
-              className="gap-5 transition-transform"
-              description="Admin"
-              name="Quân Đỗ"
-            />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="logout" color="danger">
-              Log Out
-            </DropdownItem>
-          </DropdownMenu> */}
-        </Dropdown>
+        <Avatar>
+          {me?.data?.user?.fullName
+            .split(" ")
+            .map((item) => item[0])
+            .join("")}
+        </Avatar>
       </div>
     </div>
   );

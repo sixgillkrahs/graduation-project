@@ -1,9 +1,11 @@
 import { AgentController } from "@/controllers/agent.controller";
+import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { AgentService } from "@/services/agent.service";
 import { EmailService } from "@/services/email.service";
 import { UserService } from "@/services/user.service";
 import { applicationSchema } from "@/validators/agent.validator";
+import { validateIdHeaderSchema } from "@/validators/base.validator";
 import { Router } from "express";
 
 const router = Router();
@@ -20,7 +22,7 @@ const agentController = new AgentController(
 
 /**
  * @swagger
- * /agents/application:
+ * /agents-registrations/application:
  *   post:
  *     summary: Application
  *     tags: [Agent]
@@ -87,9 +89,11 @@ router.post(
   agentController.application,
 );
 
+router.use(requireAuth);
+
 /**
  * @swagger
- * /agents/agent-registrations:
+ * /agents-registrations:
  *   get:
  *     summary: Get agent registrations
  *     tags: [Agent]
@@ -162,6 +166,73 @@ router.post(
  *                   updatedAt:
  *                     type: string
  */
-router.get("/agent-registrations", agentController.agentRegistrations);
+router.get("/", requireAuth, agentController.agentRegistrations);
+
+/**
+ * @swagger
+ * /agents-registrations/{id}:
+ *   get:
+ *     summary: Get agent registration by ID
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the agent registration
+ *     responses:
+ *       200:
+ *         description: Agent registration details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 fullName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 phoneNumber:
+ *                   type: string
+ *                 agentName:
+ *                   type: string
+ *                 area:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 businessName:
+ *                   type: string
+ *                 IDNumber:
+ *                   type: string
+ *                 dateOfBirth:
+ *                   type: string
+ *                 gender:
+ *                   type: string
+ *                 address:
+ *                   type: string
+ *                 nationality:
+ *                   type: string
+ *                 agreeToTerms:
+ *                   type: boolean
+ *                 status:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                 updatedAt:
+ *                   type: string
+ *       404:
+ *         description: Agent registration not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/:id",
+  requireAuth,
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  agentController.agentRegistrationDetail,
+);
 
 export default router;

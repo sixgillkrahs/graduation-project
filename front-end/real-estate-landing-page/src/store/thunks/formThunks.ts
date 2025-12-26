@@ -30,7 +30,7 @@ export const submitForm = createAsyncThunk(
       console.log(payload);
       const response = await request({
         method: "POST",
-        url: "/agents/application",
+        url: "/agents-registrations/application",
         headers: {
           "Content-Type": "application/json",
         },

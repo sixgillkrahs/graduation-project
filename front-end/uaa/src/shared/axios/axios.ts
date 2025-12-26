@@ -41,7 +41,6 @@ client.interceptors.response.use(
     if (originalRequest?.url?.includes("/auth/refresh")) {
       return Promise.reject(error);
     }
-
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -53,9 +52,7 @@ client.interceptors.response.use(
           });
         });
       }
-
       isRefreshing = true;
-
       try {
         const resp = await AuthService.refresh();
 
@@ -67,8 +64,8 @@ client.interceptors.response.use(
         return client(originalRequest);
       } catch (err) {
         processQueue(err);
-        // await AuthService.logout?.();
-        window.location.href = "/login";
+        await AuthService.logout();
+        window.location.href = "/auth/sign-in";
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

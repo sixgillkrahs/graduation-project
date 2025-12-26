@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import "../styles/globals.css";
+import "react-photo-view/dist/react-photo-view.css";
 import Wrapper from "./wrapper";
 
 export const satoshi = localFont({

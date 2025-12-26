@@ -134,4 +134,18 @@ router.get("/me", requireAuth, authController.me);
  */
 router.post("/refresh-token", authController.refreshToken);
 
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/logout", authController.logout);
+
 export default router;

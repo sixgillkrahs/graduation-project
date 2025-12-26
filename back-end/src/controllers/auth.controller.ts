@@ -68,19 +68,19 @@ export class AuthController extends BaseController {
           user: user,
           roleId: auth.roleId,
         },
-        15 * 1000 * 60,
+        15 * 1000 * 60, // 15 phút
       );
       const refreshToken = this.generateRefreshToken(
         {
           userId: user.id,
         },
-        15 * 1000 * 60 * 24,
+        15 * 1000 * 60 * 24, // 15 ngày
       );
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 30 * 60,
+        maxAge: 15 * 1000 * 60,
       });
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -156,16 +156,13 @@ export class AuthController extends BaseController {
         expires: new Date(0),
         path: "/",
       });
-
-      if (req.cookies && req.cookies.refreshToken) {
-        res.cookie("refreshToken", "", {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-          expires: new Date(0),
-          path: "/",
-        });
-      }
+      res.cookie("refreshToken", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        expires: new Date(0),
+        path: "/",
+      });
       return { success: true, message: "Đăng xuất thành công" };
     });
   };
@@ -238,19 +235,19 @@ export class AuthController extends BaseController {
         {
           userId: user.id,
         },
-        15 * 1000 * 60 * 24,
+        15 * 1000 * 60 * 24, // 15 ngày
       );
       res.cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 30,
+        maxAge: 15 * 1000 * 60,
       });
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 60 * 60 * 1000 * 24 * 7,
+        maxAge: 15 * 1000 * 60 * 24, // 15 ngày
       });
       return user;
     });

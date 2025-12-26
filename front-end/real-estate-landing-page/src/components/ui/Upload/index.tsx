@@ -10,8 +10,10 @@ import {
   useImperativeHandle,
 } from "react";
 import { Icon } from "../Icon";
+import { PhotoView } from "react-photo-view";
+import Image from "next/image";
+import { Button } from "../Button";
 
-// Interface cho trạng thái nội bộ của File
 interface FileWithStatus {
   id: string;
   file: File;
@@ -19,13 +21,11 @@ interface FileWithStatus {
   previewUrl: string;
 }
 
-// Interface Props cập nhật để tương thích RHF
 interface UploadProps {
   label: string;
   accept?: InputHTMLAttributes<HTMLInputElement>["accept"];
   multiple?: boolean;
   maxSizeMB?: number;
-  // Các props từ Controller
   value?: File[];
   onChange?: (files: File[]) => void;
   error?: string;
@@ -41,9 +41,9 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       accept = "image/*",
       multiple = false,
       maxSizeMB = 5,
-      value, // Giá trị từ React Hook Form
-      onChange, // Hàm cập nhật của React Hook Form
-      error, // Lỗi từ React Hook Form
+      value,
+      onChange,
+      error,
       name,
       onBlur,
       disabled,
@@ -51,20 +51,17 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
     ref
   ) => {
     const [fileList, setFileList] = useState<FileWithStatus[]>([]);
-    const [internalError, setInternalError] = useState<string>(""); // Lỗi do validate size/type
+    const [internalError, setInternalError] = useState<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Kết nối ref từ bên ngoài vào input thật
     useImperativeHandle(ref, () => fileInputRef.current as HTMLInputElement);
 
-    // Cleanup URL preview
     useEffect(() => {
       return () => {
         fileList.forEach((item) => URL.revokeObjectURL(item.previewUrl));
       };
     }, []);
 
-    // Sync: Khi form reset (value = empty/undefined), clear list hiển thị
     useEffect(() => {
       if (!value || value.length === 0) {
         setFileList([]);
@@ -94,16 +91,14 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
 
       const newFilesItems: FileWithStatus[] = [];
       const errors: string[] = [];
-      const validFiles: File[] = []; // Mảng chứa các file hợp lệ để gửi ra ngoài
+      const validFiles: File[] = [];
 
       Array.from(selectedFiles).forEach((file) => {
-        // Validate Size
         if (file.size > maxSizeMB * 1024 * 1024) {
           errors.push(`${file.name} exceeds ${maxSizeMB}MB size limit`);
           return;
         }
 
-        // Validate Type
         if (accept && !accept.includes("*")) {
           const acceptedTypes = accept.split(",").map((type) => type.trim());
           const fileType = file.type;
@@ -136,14 +131,12 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       }
 
       if (newFilesItems.length > 0) {
-        // Cập nhật UI List
         const updatedList = multiple
           ? [...fileList, ...newFilesItems]
-          : newFilesItems; // Nếu không multiple thì thay thế luôn
+          : newFilesItems;
 
         setFileList(updatedList);
 
-        // Giả lập upload cho từng file
         newFilesItems.forEach((item) => {
           uploadFile(item.id)
             .then(() => {
@@ -161,10 +154,6 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
               );
             });
         });
-
-        // QUAN TRỌNG: Gọi onChange để báo cho React Hook Form
-        // Nếu multiple: gộp file cũ + mới. Nếu single: lấy file mới.
-        // Lưu ý: Logic này cần khớp với logic updatedList ở trên.
         if (onChange) {
           const allFiles = updatedList.map((item) => item.file);
           onChange(allFiles);
@@ -183,7 +172,6 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       const updatedList = fileList.filter((item) => item.id !== id);
       setFileList(updatedList);
 
-      // Update React Hook Form
       if (onChange) {
         onChange(updatedList.map((item) => item.file));
       }
@@ -194,7 +182,6 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       setFileList([]);
       setInternalError("");
 
-      // Update React Hook Form về rỗng
       if (onChange) {
         onChange([]);
       }
@@ -226,7 +213,6 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    // Ưu tiên hiển thị lỗi từ RHF, sau đó mới đến lỗi nội bộ
     const displayError = error || internalError;
 
     return (
@@ -251,7 +237,9 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
               <Icon.FileUpload className="w-[40px] h-[40px] text-gray-400" />
               <p className="text-[14px] font-medium text-[#999999] text-center">
                 Drag & drop file here{" "}
-                <span className="text-blue-500 font-semibold">chọn file</span>
+                <span className="text-black font-semibold">
+                  or click to select
+                </span>
               </p>
               <p className="text-[12px] text-gray-400">
                 {accept} (maximum {maxSizeMB}MB)
@@ -261,11 +249,11 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
           <input
             ref={fileInputRef}
             type="file"
-            name={name} // Name từ RHF
+            name={name}
             accept={accept}
             multiple={multiple}
             onChange={handleFileChange}
-            onBlur={onBlur} // Blur từ RHF
+            onBlur={onBlur}
             disabled={disabled}
             className="w-full h-full cursor-pointer absolute top-0 left-0 opacity-0 disabled:cursor-not-allowed"
           />
@@ -279,20 +267,22 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
 
         {fileList.length > 0 && (
           <div className="space-y-3 mt-4">
-            <div className="flex justify-between items-center">
-              <p className="font-medium text-gray-700">
-                You have selected {fileList.length} file
-                {fileList.length > 1 ? "s" : ""}
-              </p>
-              <button
-                type="button"
-                onClick={handleClearAll}
-                disabled={disabled}
-                className="text-sm text-red-500 hover:text-red-700 font-medium disabled:opacity-50"
-              >
-                Clear all
-              </button>
-            </div>
+            {multiple && (
+              <div className="flex justify-between items-center">
+                <p className="font-medium text-gray-700">
+                  You have selected {fileList.length} file
+                  {fileList.length > 1 ? "s" : ""}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleClearAll}
+                  disabled={disabled}
+                  className="text-sm text-red-500 hover:text-red-700 font-medium disabled:opacity-50"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
 
             <div className="border rounded-lg p-3 bg-gray-50">
               <p className="font-medium text-gray-700 mb-2">Danh sách file:</p>
@@ -307,20 +297,23 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                     <div className="flex items-center gap-2">
                       <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
                         {item.file.type.startsWith("image/") ? (
-                          <img
-                            src={item.previewUrl}
-                            alt={item.file.name}
-                            className={`w-full h-full object-cover ${
-                              item.status === "uploading" ? "opacity-50" : ""
-                            }`}
-                          />
+                          <PhotoView src={item.previewUrl} key={item.id}>
+                            <Image
+                              src={item.previewUrl}
+                              alt={item.file.name}
+                              width={40}
+                              height={40}
+                              className={`w-full h-full object-cover cursor-pointer ${
+                                item.status === "uploading" ? "opacity-50" : ""
+                              }`}
+                            />
+                          </PhotoView>
                         ) : (
                           <Icon.FileUpload className="w-5 h-5 text-gray-400 m-auto mt-2" />
                         )}
 
                         {item.status === "uploading" && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                            {/* Spinner SVG */}
                             <svg
                               className="animate-spin h-5 w-5 text-white"
                               xmlns="http://www.w3.org/2000/svg"
@@ -353,7 +346,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                       </div>
 
                       <div className="flex flex-col min-w-0">
-                        <span className="text-sm truncate max-w-xs font-medium">
+                        <span className="text-sm truncate max-w-[170px] font-medium ul">
                           {item.file.name}
                         </span>
                         <span className="text-xs text-gray-500">
@@ -372,14 +365,13 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                       </div>
                     </div>
 
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handleRemoveFile(item.id)}
                       disabled={item.status === "uploading" || disabled}
                       className="text-red-500 hover:text-red-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Remove
-                    </button>
+                      icon={<Icon.DeleteBin />}
+                    />
                   </li>
                 ))}
               </ul>

@@ -20,7 +20,7 @@ const permissionController = new PermissionController(
   resourcesService,
 );
 
-// router.use(requireAuth);
+router.use(requireAuth);
 
 /**
  * @swagger

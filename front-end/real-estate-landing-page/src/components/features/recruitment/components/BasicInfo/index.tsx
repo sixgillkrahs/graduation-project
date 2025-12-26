@@ -1,22 +1,18 @@
 "use client";
 
-import { Button, Icon, Input } from "@/components/ui";
+import { Button, Icon, Input, Upload } from "@/components/ui";
 import { AppDispatch, RootState } from "@/store";
 import { nextStep, updateBasicInfo } from "@/store/store";
 import { memo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useExtractID, useUploadImage } from "../../services/mutation";
+import { BasicInfo as BasicInfoType } from "@/models/basicInfo.model";
 
-type BasicInfoForm = {
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-};
-
-const validateBasicInfo = (data: BasicInfoForm) => {
+const validateBasicInfo = (data: BasicInfoType) => {
   const errors: Record<string, string> = {};
-  if (!data.fullName) {
-    errors.fullName = "Full name is required";
+  if (!data.nameRegister) {
+    errors.nameRegister = "Name register is required";
   }
   if (!data.email) {
     errors.email = "Email is required";
@@ -24,36 +20,81 @@ const validateBasicInfo = (data: BasicInfoForm) => {
   if (!data.phoneNumber) {
     errors.phoneNumber = "Phone number is required";
   }
+  if (!data.identityFront || data.identityFront.length === 0) {
+    errors.identityFront = "Identity front is required";
+  }
+  if (!data.identityBack || data.identityBack.length === 0) {
+    errors.identityBack = "Identity back is required";
+  }
   return errors;
 };
 
 const BasicInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const { mutate: uploadImage } = useUploadImage();
+  const { mutateAsync: extractID } = useExtractID();
   const { basicInfo } = useSelector((state: RootState) => state.form);
 
   const {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<BasicInfoForm>({
+  } = useForm<BasicInfoType>({
     defaultValues: basicInfo,
     mode: "onChange",
   });
 
-  const onSubmit = (data: BasicInfoForm) => {
-    dispatch(updateBasicInfo(data));
-    const errorsList = validateBasicInfo(data);
-    if (Object.keys(errorsList).length > 0) {
-      return;
-    }
+  const onSubmit = (data: BasicInfoType) => {
+    const currentIdentityInfo = basicInfo?.identityInfo || {};
+    const finalData = {
+      ...data,
+      identityInfo: currentIdentityInfo,
+    };
+    dispatch(updateBasicInfo(finalData));
+    // const errorsList = validateBasicInfo(finalData);
+    // if (Object.keys(errorsList).length > 0) {
+    //   return;
+    // }
     dispatch(nextStep());
+  };
+
+  const handleOCRLogic = (files: File[]) => {
+    const formData = new FormData();
+    if (files.length > 0) {
+      formData.append("file", files[0]);
+      extractID(formData).then((res) => {
+        if (res && res.data) {
+          dispatch(
+            updateBasicInfo({
+              ...basicInfo,
+              identityInfo: {
+                IDNumber: res.data[1],
+                fullName: res.data[2],
+                dateOfBirth: res.data[3],
+                gender: res.data[4],
+                nationality: res.data[5],
+                placeOfBirth: res.data[6],
+              },
+            })
+          );
+        }
+      });
+    }
+  };
+
+  const handleUploadImage = (files: File[]) => {
+    const formData = new FormData();
+    if (files.length > 0) {
+      formData.append("file", files[0]);
+      uploadImage(formData);
+    }
   };
 
   return (
     <div className="flex flex-col gap-4 pt-3">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Controller
-          name="fullName"
+          name="nameRegister"
           control={control}
           rules={{ required: "Full name is required" }}
           render={({ field }) => (
@@ -61,7 +102,7 @@ const BasicInfo = () => {
               preIcon={<Icon.User className="main-color-gray w-5 h-5" />}
               label="Full Name"
               placeholder="e.g. 123 Main St"
-              error={errors.fullName?.message}
+              error={errors.nameRegister?.message}
               {...field}
             />
           )}
@@ -99,6 +140,59 @@ const BasicInfo = () => {
                 preIcon={<Icon.Phone className="main-color-gray w-5 h-5" />}
                 error={errors.phoneNumber?.message}
                 {...field}
+              />
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <Controller
+            name="identityFront"
+            control={control}
+            rules={{
+              required: "Identity front is required",
+              validate: (val) =>
+                (val && val.length > 0) || "Identity front is required",
+            }}
+            render={({
+              field: { onChange, value, ...restField },
+              fieldState: { error },
+            }) => (
+              <Upload
+                label="Identity Front"
+                accept="image/jpeg,image/png"
+                {...restField}
+                value={value || []}
+                onChange={(files) => {
+                  onChange(files);
+                  handleOCRLogic(files);
+                  handleUploadImage(files);
+                }}
+                error={error?.message}
+              />
+            )}
+          />
+          <Controller
+            name="identityBack"
+            control={control}
+            rules={{
+              required: "Identity back is required",
+              validate: (val) =>
+                (val && val.length > 0) || "Identity back is required",
+            }}
+            render={({
+              field: { onChange, value, ...restField },
+              fieldState: { error },
+            }) => (
+              <Upload
+                label="Identity Back"
+                accept="image/jpeg,image/png"
+                {...restField}
+                value={value || []}
+                onChange={(files) => {
+                  onChange(files);
+                  handleUploadImage(files);
+                }}
+                error={error?.message}
               />
             )}
           />

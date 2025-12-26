@@ -1,18 +1,25 @@
 export interface BasicInfo {
-  fullName: string;
+  nameRegister: string;
   email: string;
   phoneNumber: string;
+  identityFront: File[];
+  identityBack: File[];
+  identityInfo: {
+    fullName: string;
+    IDNumber: string;
+    dateOfBirth: string;
+    gender: string;
+    placeOfBirth: string;
+    nationality: string;
+  };
 }
 
 export interface BusinessInfo {
-  agentName: string;
-  area: string[];
-  IDNumber: string;
-  businessName: string;
-  dateOfBirth: string;
-  gender: string;
-  address: string;
-  nationality: string;
+  certificateNumber: string;
+  taxCode: string;
+  yearsOfExperience: number;
+  workingArea: [string];
+  specialization: [string];
 }
 
 export interface Verification {

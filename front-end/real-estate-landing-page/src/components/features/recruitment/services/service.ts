@@ -86,6 +86,16 @@ export default class ExtractService {
     });
   };
 
+  public static readonly UploadImage = (
+    file: FormData
+  ): Promise<IResp<string>> => {
+    return fetchAI({
+      url: ExtractEndpoint.uploadImage(),
+      method: AxiosMethod.POST,
+      data: file,
+    });
+  };
+
   public static readonly registration = (
     data: IExtractService.IRegistrationRequest
   ): Promise<IResp<string>> => {

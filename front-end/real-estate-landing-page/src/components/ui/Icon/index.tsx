@@ -9,6 +9,7 @@ import { BathRoom } from "./BathRoom";
 import { CheckMark } from "./CheckMark";
 import { Circle } from "./Circle";
 import { Close } from "./Close";
+import { DeleteBin } from "./DeleteBin";
 import { ExpandUpDown } from "./ExpandUpDown";
 import { Facebook } from "./Facebook";
 import { FileUpload } from "./FileUpload";
@@ -56,4 +57,5 @@ export const Icon = {
   Phone,
   FileUpload,
   Close,
+  DeleteBin,
 };
