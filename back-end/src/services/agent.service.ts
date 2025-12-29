@@ -10,11 +10,17 @@ export class AgentService {
   };
 
   getAgentByIdNumber = async (idNumber: string) => {
-    return await AgentModel.findOne({ "identityInfo.IDNumber": idNumber });
+    return await AgentModel.findOne({
+      "basicInfo.identityInfo.IDNumber": idNumber,
+    });
   };
 
   createAgentRegistration = async (agentData: IAgent) => {
     return await AgentModel.createAgent(agentData);
+  };
+
+  updateAgentRegistration = async (id: string, agentData: Partial<IAgent>) => {
+    return await AgentModel.updateAgent(id, agentData);
   };
 
   getAgentRegistrations = async (
@@ -31,6 +37,6 @@ export class AgentService {
   };
 
   getAgentRegistrationById = async (id: string) => {
-    return await AgentModel.findById(id);
+    return await AgentModel.findById(id).lean().exec();
   };
 }

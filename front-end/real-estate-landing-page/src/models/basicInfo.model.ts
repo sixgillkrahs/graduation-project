@@ -2,8 +2,8 @@ export interface BasicInfo {
   nameRegister: string;
   email: string;
   phoneNumber: string;
-  identityFront: File[];
-  identityBack: File[];
+  identityFront: string[];
+  identityBack: string[];
   identityInfo: {
     fullName: string;
     IDNumber: string;
@@ -20,7 +20,7 @@ export interface BusinessInfo {
   yearsOfExperience: string | undefined;
   workingArea: [string] | undefined;
   specialization: [string] | undefined;
-  certificateImage: File[];
+  certificateImage: string[];
 }
 
 export interface Verification {

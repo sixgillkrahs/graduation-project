@@ -21,29 +21,50 @@ export class AgentController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
       const {
-        fullName,
+        nameRegister,
         email,
         phoneNumber,
-        agentName,
-        area,
-        IDNumber,
-        dateOfBirth,
-        gender,
-        address,
-        nationality,
+
+        identityFront,
+        identityBack,
+        identityInfo,
+
+        certificateNumber,
+        certificateImage,
+        specialization,
+        workingArea,
+        taxCode,
+        yearsOfExperience,
       } = req.body as {
-        fullName: string;
+        nameRegister: string;
         email: string;
         phoneNumber: string;
-        agentName: string;
-        area: string[];
-        IDNumber: string;
-        dateOfBirth: string;
-        gender: string;
-        address: string;
-        nationality: string;
+
+        identityFront: string;
+        identityBack: string;
+        identityInfo: {
+          IDNumber: string;
+          fullName: string;
+          dateOfBirth: string;
+          gender: string;
+          nationality: string;
+          placeOfBirth: string;
+        };
+
+        certificateNumber: string;
+        certificateImage: string[];
+
+        specialization: string[];
+        workingArea: string[];
+
+        taxCode: string;
+        yearsOfExperience: string;
+
+        agreeToTerms: boolean;
       };
-      const agent = await this.agentService.getAgentByIdNumber(IDNumber);
+      const agent = await this.agentService.getAgentByIdNumber(
+        identityInfo.IDNumber,
+      );
       if (agent) {
         throw new AppError(
           lang === "vi" ? "Số CMND đã tồn tại" : "IDNumber already exists",
@@ -60,18 +81,23 @@ export class AgentController extends BaseController {
         );
       }
       const agentData: IAgent = {
-        identityInfo: {
-          agentName,
-          IDNumber,
-          dateOfBirth,
-          gender,
-          address,
-          nationality,
+        basicInfo: {
+          email,
+          identityInfo,
+          nameRegister,
+          phoneNumber,
         },
         businessInfo: {
-          phoneNumber,
-          area,
-          email,
+          certificateNumber,
+          specialization,
+          taxCode,
+          workingArea,
+          yearsOfExperience,
+        },
+        imageInfo: {
+          certificateImage,
+          identityBack,
+          identityFront,
         },
         registrationLink: "",
         status: AgentStatusEnum.PENDING,
@@ -92,7 +118,9 @@ export class AgentController extends BaseController {
         sortOrder?: string;
       };
       let filter: Record<string, any> = {
-        status: AgentStatusEnum.PENDING,
+        status: {
+          $in: [AgentStatusEnum.PENDING, AgentStatusEnum.REJECTED],
+        },
       };
       const agentRegistrations = await this.agentService.getAgentRegistrations(
         {
@@ -107,13 +135,13 @@ export class AgentController extends BaseController {
   };
 
   agentRegistrationDetail = (
-    req: Request,
+    req: Request<{ id: string }>,
     res: Response,
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const agentRegistration =
         await this.agentService.getAgentRegistrationById(id);
       if (!agentRegistration) {
@@ -126,6 +154,59 @@ export class AgentController extends BaseController {
         );
       }
       return agentRegistration;
+    });
+  };
+
+  rejectAgentRegistration = (
+    req: Request<{ id: string }, null, { reason: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { id } = req.params;
+      const { reason } = req.body;
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+      if (
+        !agentRegistration ||
+        agentRegistration?.status != AgentStatusEnum.PENDING
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          405,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      const agentRegistrationUpdated: Partial<IAgent> = {
+        ...agentRegistration,
+        status: AgentStatusEnum.REJECTED,
+        reasonReject: reason,
+      };
+      console.log(agentRegistrationUpdated);
+
+      const resp = await this.agentService.updateAgentRegistration(
+        id,
+        agentRegistrationUpdated,
+      );
+      this.emailService.sendRejectEmail(
+        agentRegistrationUpdated.basicInfo?.email!,
+        agentRegistrationUpdated.basicInfo?.nameRegister!,
+        reason,
+      );
+      return resp;
+    });
+  };
+
+  acceptAgentRegistration = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { id } = req.params as { id: string };
+      return "";
     });
   };
 }

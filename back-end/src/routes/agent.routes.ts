@@ -24,7 +24,7 @@ const agentController = new AgentController(
  * @swagger
  * /agents-registrations/application:
  *   post:
- *     summary: Application
+ *     summary: Agent application registration
  *     tags: [Agent]
  *     requestBody:
  *       required: true
@@ -32,56 +32,125 @@ const agentController = new AgentController(
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - nameRegister
+ *               - email
+ *               - phoneNumber
+ *               - identityFront
+ *               - identityBack
+ *               - identityInfo
+ *               - certificateNumber
+ *               - certificateImage
+ *               - specialization
+ *               - workingArea
+ *               - taxCode
+ *               - yearsOfExperience
+ *               - agreeToTerms
  *             properties:
- *               fullName:
+ *               nameRegister:
  *                 type: string
+ *                 example: "Quân Đỗ"
+ *
  *               email:
  *                 type: string
+ *                 example: "dovanquan28041999@gmail.com"
+ *
  *               phoneNumber:
  *                 type: string
- *               agentName:
+ *                 example: "8496670287"
+ *
+ *               identityFront:
  *                 type: string
- *               area:
+ *                 description: Uploaded filename of identity front image
+ *                 example: "front.jpg-v-uuid.jpg"
+ *
+ *               identityBack:
+ *                 type: string
+ *                 description: Uploaded filename of identity back image
+ *                 example: "back.jpg-v-uuid.jpg"
+ *
+ *               identityInfo:
+ *                 type: object
+ *                 required:
+ *                   - IDNumber
+ *                   - fullName
+ *                   - dateOfBirth
+ *                   - gender
+ *                   - nationality
+ *                 properties:
+ *                   IDNumber:
+ *                     type: string
+ *                     example: "001203038427"
+ *                   fullName:
+ *                     type: string
+ *                     example: "ĐỖ VĂN QUÂN"
+ *                   dateOfBirth:
+ *                     type: string
+ *                     example: "28/04/2003"
+ *                   gender:
+ *                     type: string
+ *                     example: "Nam"
+ *                   nationality:
+ *                     type: string
+ *                     example: "Việt Nam"
+ *
+ *               certificateNumber:
+ *                 type: string
+ *                 example: "CCC-GAD"
+ *
+ *               certificateImage:
  *                 type: array
  *                 items:
  *                   type: string
- *               businessName:
+ *                 example:
+ *                   - "certificate.jpg-v-uuid.jpg"
+ *
+ *               specialization:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example:
+ *                   - "APARTMENT"
+ *                   - "LAND"
+ *
+ *               workingArea:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example:
+ *                   - "Ha Noi"
+ *                   - "Ho Chi Minh"
+ *
+ *               taxCode:
  *                 type: string
- *               IDNumber:
+ *                 example: "6323"
+ *
+ *               yearsOfExperience:
  *                 type: string
- *               dateOfBirth:
- *                 type: string
- *               gender:
- *                 type: string
- *               address:
- *                 type: string
- *               nationality:
- *                 type: string
+ *                 example: "2"
+ *
  *               agreeToTerms:
  *                 type: boolean
+ *                 example: true
+ *
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Application submitted successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
  *                   type: string
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     email:
- *                       type: string
- *                     name:
- *                       type: string
- *                     role:
- *                       type: string
+ *                   example: "Application submitted successfully"
+ *       400:
+ *         description: Validation error
  *       401:
- *         description: Invalid credentials
+ *         description: Unauthorized
  */
 router.post(
   "/application",
@@ -181,6 +250,12 @@ router.get("/", requireAuth, agentController.agentRegistrations);
  *           type: string
  *         required: true
  *         description: ID of the agent registration
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *
  *     responses:
  *       200:
  *         description: Agent registration details
@@ -230,9 +305,100 @@ router.get("/", requireAuth, agentController.agentRegistrations);
  */
 router.get(
   "/:id",
-  requireAuth,
   validateRequest((lang) => validateIdHeaderSchema(lang)),
   agentController.agentRegistrationDetail,
+);
+
+/**
+ * @swagger
+ * /agents-registrations/{id}/reject:
+ *   patch:
+ *     summary: Reject agent registration by ID
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the agent registration
+ *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reason
+ *             properties:
+ *               reason:
+ *                 type: string
+ *                 example: "Invalid certificate information"
+ *
+ *     responses:
+ *       200:
+ *         description: Agent registration rejected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Agent registration rejected"
+ *       404:
+ *         description: Agent registration not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch(
+  "/:id/reject",
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  agentController.rejectAgentRegistration,
+);
+
+/**
+ * @swagger
+ * /agents-registrations/{id}/accept:
+ *   put:
+ *     summary: Accept agent registration by ID
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the agent registration
+ *
+ *     responses:
+ *       200:
+ *         description: Agent registration Accepted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Agent registration accepted"
+ *       404:
+ *         description: Agent registration not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/:id/accept",
+  requireAuth,
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  agentController.acceptAgentRegistration,
 );
 
 export default router;

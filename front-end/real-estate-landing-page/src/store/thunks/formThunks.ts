@@ -13,10 +13,8 @@ export const submitForm = createAsyncThunk(
   async (_, { getState, dispatch, rejectWithValue }) => {
     const state = getState() as RootState;
     const formData = state.form;
-
     try {
       dispatch(submitFormStart());
-
       const errors = validateForm(formData);
       if (errors.length > 0) {
         throw new Error(errors.join(", "));
@@ -27,7 +25,6 @@ export const submitForm = createAsyncThunk(
         ...formData.businessInfo,
         ...formData.verification,
       };
-      console.log(payload);
       const response = await request({
         method: "POST",
         url: "/agents-registrations/application",
@@ -43,7 +40,7 @@ export const submitForm = createAsyncThunk(
 
       dispatch(submitFormSuccess());
 
-      return response;
+      return "";
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
@@ -62,22 +59,61 @@ export const submitForm = createAsyncThunk(
 function validateForm(formData: any): string[] {
   const errors: string[] = [];
 
-  if (!formData.basicInfo.fullName) errors.push("Full name is required");
-  if (!formData.basicInfo.email) errors.push("Email is required");
-  if (!formData.basicInfo.phoneNumber) errors.push("Phone number is required");
+  if (!formData.basicInfo?.nameRegister) {
+    errors.push("Full name is required");
+  }
 
-  if (!formData.businessInfo.agentName) errors.push("Agent name is required");
-  if (!formData.businessInfo.area) errors.push("Area is required");
-  if (!formData.businessInfo.IDNumber) errors.push("ID number is required");
-  if (!formData.businessInfo.dateOfBirth)
-    errors.push("Date of birth is required");
-  if (!formData.businessInfo.gender) errors.push("Gender is required");
-  if (!formData.businessInfo.address) errors.push("Address is required");
-  if (!formData.businessInfo.nationality)
-    errors.push("Nationality is required");
+  if (!formData.basicInfo?.email) {
+    errors.push("Email is required");
+  }
 
-  if (!formData.verification.agreeToTerms)
+  if (!formData.basicInfo?.phoneNumber) {
+    errors.push("Phone number is required");
+  }
+
+  if (
+    !formData.basicInfo?.identityFront ||
+    formData.basicInfo.identityFront.length === 0
+  ) {
+    errors.push("Identity front image is required");
+  }
+
+  if (
+    !formData.basicInfo?.identityBack ||
+    formData.basicInfo.identityBack.length === 0
+  ) {
+    errors.push("Identity back image is required");
+  }
+
+  if (!formData.businessInfo?.certificateNumber) {
+    errors.push("Certificate number is required");
+  }
+
+  if (
+    !formData.businessInfo?.specialization ||
+    formData.businessInfo.specialization.length === 0
+  ) {
+    errors.push("Specialization is required");
+  }
+
+  if (!formData.businessInfo?.taxCode) {
+    errors.push("Tax code is required");
+  }
+
+  if (
+    !formData.businessInfo?.workingArea ||
+    formData.businessInfo.workingArea.length === 0
+  ) {
+    errors.push("Working area is required");
+  }
+
+  if (!formData.businessInfo?.yearsOfExperience) {
+    errors.push("Years of experience is required");
+  }
+
+  if (!formData.verification?.agreeToTerms) {
     errors.push("You must agree to the terms");
+  }
 
   return errors;
 }

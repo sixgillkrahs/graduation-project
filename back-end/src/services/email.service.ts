@@ -4,6 +4,7 @@ import { logger } from "@/config/logger";
 import {
   getVerificationEmailTemplate,
   getPasswordResetEmailTemplate,
+  getRejectApplicationEmailTemplate,
 } from "@/templates/email";
 
 export class EmailService {
@@ -106,6 +107,33 @@ export class EmailService {
     } catch (error) {
       logger.error("Failed to send password reset email", {
         context: "EmailService.sendPasswordResetEmail",
+        error: error instanceof Error ? error.message : "Unknown error",
+        to,
+      });
+      throw error;
+    }
+  }
+
+  async sendRejectEmail(
+    to: string,
+    name: string,
+    reason: string,
+  ): Promise<void> {
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to,
+        subject: "Verify your email address",
+        html: getRejectApplicationEmailTemplate(name, reason),
+      });
+      logger.info("Verification email sent", {
+        context: "EmailService.sendVerificationEmail",
+        to,
+        messageId: info.messageId,
+      });
+    } catch (error) {
+      logger.error("Failed to send verification email", {
+        context: "EmailService.sendVerificationEmail",
         error: error instanceof Error ? error.message : "Unknown error",
         to,
       });

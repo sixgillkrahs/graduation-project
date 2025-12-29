@@ -31,7 +31,7 @@ const validateBasicInfo = (data: BasicInfoType) => {
 
 const BasicInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { mutate: uploadImage } = useUploadImage();
+  const { mutateAsync: uploadImage } = useUploadImage();
   const { mutateAsync: extractID } = useExtractID();
   const { basicInfo } = useSelector((state: RootState) => state.form);
 
@@ -39,54 +39,68 @@ const BasicInfo = () => {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<BasicInfoType>({
-    defaultValues: basicInfo,
+  } = useForm<BasicInfoType & { identityFront: File[]; identityBack: File[] }>({
+    defaultValues: {
+      ...basicInfo,
+      identityBack: [],
+      identityFront: [],
+    },
     mode: "onChange",
   });
 
-  const onSubmit = (data: BasicInfoType) => {
-    const currentIdentityInfo = basicInfo?.identityInfo || {};
-    const finalData = {
+  const onSubmit = (
+    data: BasicInfoType & { identityFront: File[]; identityBack: File[] }
+  ) => {
+    const errorsList = validateBasicInfo(data);
+    if (Object.keys(errorsList).length > 0) return;
+
+    const reduxPayload = {
       ...data,
-      identityInfo: currentIdentityInfo,
+      identityFront: basicInfo.identityFront,
+      identityBack: basicInfo.identityBack,
+      identityInfo: basicInfo?.identityInfo || {},
     };
-    dispatch(updateBasicInfo(finalData));
-    const errorsList = validateBasicInfo(finalData);
-    if (Object.keys(errorsList).length > 0) {
-      return;
-    }
+    console.log(reduxPayload);
+    dispatch(updateBasicInfo(reduxPayload));
     dispatch(nextStep());
   };
 
-  const handleOCRLogic = (files: File[]) => {
+  const handleOCRLogic = async (files: File[]) => {
+    if (!files.length) return;
+
     const formData = new FormData();
-    if (files.length > 0) {
-      formData.append("file", files[0]);
-      extractID(formData).then((res) => {
-        if (res && res.data) {
-          dispatch(
-            updateBasicInfo({
-              ...basicInfo,
-              identityInfo: {
-                IDNumber: res.data[1],
-                fullName: res.data[2],
-                dateOfBirth: res.data[3],
-                gender: res.data[4],
-                nationality: res.data[5],
-                placeOfBirth: res.data[6],
-              },
-            })
-          );
-        }
-      });
+    formData.append("file", files[0]);
+
+    const res = await extractID(formData);
+
+    if (res?.data) {
+      dispatch(
+        updateBasicInfo({
+          identityInfo: {
+            IDNumber: res.data[1],
+            fullName: res.data[2],
+            dateOfBirth: res.data[3],
+            gender: res.data[4],
+            nationality: res.data[5],
+            placeOfBirth: res.data[6],
+          },
+        })
+      );
     }
   };
 
-  const handleUploadImage = (files: File[]) => {
+  const handleUploadImage = async (files: File[], name: string) => {
     const formData = new FormData();
     if (files.length > 0) {
       formData.append("file", files[0]);
-      uploadImage(formData);
+      const resp = await uploadImage(formData);
+      if (resp && resp.success) {
+        dispatch(
+          updateBasicInfo({
+            [name]: resp.filename,
+          })
+        );
+      }
     }
   };
 
@@ -165,7 +179,7 @@ const BasicInfo = () => {
                 onChange={(files) => {
                   onChange(files);
                   handleOCRLogic(files);
-                  handleUploadImage(files);
+                  handleUploadImage(files, "identityFront");
                 }}
                 error={error?.message}
               />
@@ -190,7 +204,7 @@ const BasicInfo = () => {
                 value={value || []}
                 onChange={(files) => {
                   onChange(files);
-                  handleUploadImage(files);
+                  handleUploadImage(files, "identityBack");
                 }}
                 error={error?.message}
               />

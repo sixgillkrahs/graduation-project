@@ -37,14 +37,19 @@ export const useRegistration = (): UseMutationResult<
 };
 
 export const useUploadImage = (): UseMutationResult<
-  IResp<string>,
+  {
+    filename: string;
+    message: string;
+    success: boolean;
+    url: string;
+  },
   Error,
   FormData,
   void
 > => {
   return useMutation({
     mutationFn: (file: FormData) => {
-      return ExtractService.UploadImage(file);
+      return ExtractService.UploadImage(file) as any;
     },
     meta: {
       ERROR_SOURCE: "[Extract ID failed]",

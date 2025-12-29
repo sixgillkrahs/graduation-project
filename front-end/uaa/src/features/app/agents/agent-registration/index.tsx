@@ -10,19 +10,48 @@ const AgentRegistration = () => {
   const navigate = useNavigate();
   const columns: ColumnsType<IAgentRegistrationService.AgentRegistration> = [
     {
-      title: "Họ và tên",
-      dataIndex: ["identityInfo", "agentName"],
-      key: "identityInfo.agentName",
+      title: "Tên Đăng Ký",
+      dataIndex: ["basicInfo", "nameRegister"],
+      key: "businessInfo.nameRegister",
     },
     {
       title: "Email",
-      dataIndex: ["businessInfo", "email"],
-      key: "businessInfo.email",
+      dataIndex: ["basicInfo", "email"],
+      key: "basicInfo.email",
     },
     {
       title: "Số điện thoại",
-      dataIndex: ["businessInfo", "phoneNumber"],
-      key: "businessInfo.phone",
+      dataIndex: ["basicInfo", "phoneNumber"],
+      key: "basicInfo.phoneNumber",
+    },
+    {
+      title: "Số năm KN",
+      dataIndex: ["businessInfo", "yearsOfExperience"],
+      key: "businessInfo.yearsOfExperience",
+    },
+    {
+      title: "Khu vực",
+      dataIndex: ["businessInfo", "workingArea"],
+      key: "businessInfo.workingArea",
+      render: (value: string[]) => {
+        if (!value || value.length === 0) return "-";
+
+        const MAX = 3;
+        const displayItems = value.slice(0, MAX);
+        const hasMore = value.length > MAX;
+
+        return (
+          <>
+            {displayItems.map((item, index) => (
+              <span key={index}>
+                {renderConstant(item, AgentRegistrationService.VietNamProvide)}
+                {index < displayItems.length - 1 && ", "}
+              </span>
+            ))}
+            {hasMore && " ..."}
+          </>
+        );
+      },
     },
     {
       title: "Trạng thái",

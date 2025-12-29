@@ -104,9 +104,9 @@ const Permissions = () => {
           ? t("permission.column.inactivate")
           : t("permission.column.activate"),
         icon: record.isActive ? (
-          <Ban className="h-4 w-4" />
+          <Ban className="h-3 w-3" />
         ) : (
-          <CircleCheckBig className="h-4 w-4" />
+          <CircleCheckBig className="h-3 w-3" />
         ),
         onClick: () =>
           onUpdateStatus({

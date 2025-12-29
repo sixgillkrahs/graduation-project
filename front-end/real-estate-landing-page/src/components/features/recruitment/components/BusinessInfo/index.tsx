@@ -2,23 +2,29 @@ import { Button, Icon, Input, Select, Upload } from "@/components/ui";
 import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
 import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import ExtractService from "../../services/service";
 import { useUploadImage } from "../../services/mutation";
+import { showToast } from "@/components/ui/Toast";
 
-const validateBusinessInfo = (values: BusinessInfoType) => {
-  const errors: Partial<BusinessInfoType> = {};
-  // if (!values.identityCard || values.identityCard.length === 0) {
-  //   errors.identityCard = ["Identity card is required"];
-  // }
+type BusinessInfoFormType = BusinessInfoType & {
+  certificateImage: File[];
+};
+
+const validateBusinessInfo = (values: BusinessInfoFormType) => {
+  const errors: Record<string, string> = {};
+  if (!values.certificateImage?.length) {
+    errors.certificateImage = "Certificate image is required";
+  }
   return errors;
 };
 
 const BusinessInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { mutate: uploadImage } = useUploadImage();
+  const [uploading, setUploading] = useState(false);
+  const { mutateAsync: uploadImage } = useUploadImage();
   const { businessInfo, isSubmitting } = useSelector(
     (state: RootState) => state.form
   );
@@ -26,27 +32,50 @@ const BusinessInfo = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<BusinessInfoType & { identityCard: File[] }>({
-    defaultValues: businessInfo,
+  } = useForm<BusinessInfoFormType>({
+    defaultValues: {
+      ...businessInfo,
+      certificateImage: [],
+    },
     mode: "onChange",
   });
-  const onSubmit = (data: BusinessInfoType) => {
-    dispatch(updateBusinessInfo(data));
-    const errors = validateBusinessInfo({
+
+  const onSubmit = (data: BusinessInfoFormType) => {
+    const errors = validateBusinessInfo(data);
+    if (Object.keys(errors).length > 0) return;
+    debugger;
+    const payload = {
       ...data,
-    });
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    console.log(data);
+      certificateImage: businessInfo.certificateImage,
+    };
+
+    dispatch(updateBusinessInfo(payload));
     dispatch(nextStep());
   };
 
-  const handleUploadImage = (files: File[]) => {
+  const handleUploadImage = async (files: File[]) => {
+    if (!files.length) return;
+
+    setUploading(true);
     const formData = new FormData();
-    if (files.length > 0) {
-      formData.append("file", files[0]);
-      uploadImage(formData);
+    formData.append("file", files[0]);
+
+    try {
+      const resp = await uploadImage(formData);
+
+      if (resp?.success) {
+        dispatch(
+          updateBusinessInfo({
+            certificateImage: [resp.filename],
+          })
+        );
+      } else {
+        showToast.error("Upload error");
+      }
+    } catch (err) {
+      showToast.error("Upload failed");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -194,7 +223,8 @@ const BusinessInfo = () => {
           <Button
             className="cs-bg-black text-white px-6 py-2 rounded-full"
             type="submit"
-            disabled={isSubmitting}
+            loading={uploading}
+            disabled={uploading || isSubmitting}
           >
             Next
           </Button>

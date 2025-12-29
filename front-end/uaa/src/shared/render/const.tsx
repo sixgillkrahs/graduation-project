@@ -2,7 +2,7 @@ import { Tag } from "antd";
 
 function renderConstant(
   value: string,
-  constant: { value: string; label: string; color: string }[],
+  constant: { value: string; label: string; color?: string }[],
 ) {
   return (
     <Tag color={constant.find((item) => item.value === value)?.color || "default"} variant="solid">

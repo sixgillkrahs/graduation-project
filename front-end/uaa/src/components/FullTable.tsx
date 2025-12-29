@@ -1,4 +1,5 @@
 import ModalForm from "./ModalForm";
+import { DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import MessageService from "@shared/message";
 import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 import type { UseQueryResult } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ import type { SizeType } from "antd/es/config-provider/SizeContext";
 import type { ItemType } from "antd/es/menu/interface";
 import type { ColumnsType } from "antd/es/table";
 import type { SorterResult } from "antd/es/table/interface";
-import { EllipsisVertical, Eye, FileDown, Pencil, Plus, Trash } from "lucide-react";
+import { EllipsisVertical, FileDown, Plus } from "lucide-react";
 import {
   memo,
   useCallback,
@@ -262,7 +263,7 @@ const FullTable = <T extends { id: string | number }>({
                             {
                               key: "view",
                               label: t("button.view"),
-                              icon: <Eye className="h-4 w-4" />,
+                              icon: <EyeOutlined />,
                               onClick: () => handleView(record),
                             },
                           ]
@@ -273,7 +274,7 @@ const FullTable = <T extends { id: string | number }>({
                             {
                               key: "edit",
                               label: t("button.edit"),
-                              icon: <Pencil className="h-4 w-4" />,
+                              icon: <EditOutlined />,
                               onClick: () => handleEdit(record),
                             },
                           ]
@@ -286,7 +287,7 @@ const FullTable = <T extends { id: string | number }>({
                             {
                               key: "delete",
                               label: t("button.delete"),
-                              icon: <Trash className="h-4 w-4" />,
+                              icon: <DeleteOutlined />,
                               danger: true,
                               onClick: () => handleDelete(record.id),
                             },

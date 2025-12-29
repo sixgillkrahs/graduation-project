@@ -2,6 +2,7 @@
 
 import { Button, Checkbox, Icon, Input, Select } from "@/components/ui";
 import {
+  BasicInfo,
   BusinessInfo,
   Verification as VerificationType,
 } from "@/models/basicInfo.model";
@@ -21,30 +22,30 @@ import { showToast } from "@/components/ui/Toast";
 const Verification = () => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const { businessInfo, verification, isSubmitting } = useSelector(
+  const { basicInfo, verification, businessInfo, isSubmitting } = useSelector(
     (state: RootState) => state.form
   );
-
+  console.log(businessInfo);
   const {
     control,
     reset,
     formState: { errors },
-  } = useForm<BusinessInfo & VerificationType>({
+  } = useForm<BasicInfo & VerificationType>({
     defaultValues: {
-      ...businessInfo,
+      ...basicInfo,
       ...verification,
     },
     mode: "onChange",
   });
 
-  console.log(businessInfo);
+  console.log(basicInfo);
 
   useEffect(() => {
     reset({
-      ...businessInfo,
+      ...basicInfo,
       ...verification,
     });
-  }, [businessInfo, verification, reset]);
+  }, [basicInfo, verification, reset]);
 
   const handlePrev = () => {
     dispatch(prevStep());
@@ -63,7 +64,7 @@ const Verification = () => {
     <form>
       <div className="grid grid-cols-2 gap-4 my-4 ">
         <Controller
-          name="agentName"
+          name="identityInfo.fullName"
           control={control}
           rules={{
             required: "Agent name is required",
@@ -76,14 +77,14 @@ const Verification = () => {
             <Input
               label="Full Name"
               placeholder="e.g. John Doe"
-              error={errors.agentName?.message}
+              error={errors.identityInfo?.fullName?.message}
               {...field}
             />
           )}
         />
 
         <Controller
-          name="IDNumber"
+          name="identityInfo.IDNumber"
           control={control}
           rules={{
             required: "ID Number is required",
@@ -96,14 +97,14 @@ const Verification = () => {
             <Input
               label="ID Number"
               placeholder="e.g. 124xxxxxxxx"
-              error={errors.IDNumber?.message}
+              error={errors.identityInfo?.IDNumber?.message}
               {...field}
             />
           )}
         />
 
         <Controller
-          name="gender"
+          name="identityInfo.gender"
           control={control}
           rules={{ required: "Please select gender" }}
           render={({ field }) => (
@@ -111,49 +112,49 @@ const Verification = () => {
               label="Gender"
               placeholder="Select gender"
               options={ExtractService.options}
-              error={errors.gender?.message}
+              error={errors.identityInfo?.gender?.message}
               {...field}
             />
           )}
         />
 
         <Controller
-          name="dateOfBirth"
+          name="identityInfo.dateOfBirth"
           control={control}
           rules={{ required: "Birthday is required" }}
           render={({ field }) => (
             <Input
               label="Birthday"
               placeholder="e.g. 01/01/2000"
-              error={errors.dateOfBirth?.message}
+              error={errors.identityInfo?.dateOfBirth?.message}
               {...field}
             />
           )}
         />
 
         <Controller
-          name="nationality"
+          name="identityInfo.nationality"
           control={control}
           rules={{ required: "Nationality is required" }}
           render={({ field }) => (
             <Input
               label="Nationality"
               placeholder="e.g. Vietnamese"
-              error={errors.nationality?.message}
+              error={errors.identityInfo?.nationality?.message}
               {...field}
             />
           )}
         />
 
         <Controller
-          name="address"
+          name="identityInfo.placeOfBirth"
           control={control}
           rules={{ required: "Address is required" }}
           render={({ field }) => (
             <Input
               label="Address"
               placeholder="e.g. 123 Main St"
-              error={errors.address?.message}
+              error={errors.identityInfo?.placeOfBirth?.message}
               {...field}
             />
           )}

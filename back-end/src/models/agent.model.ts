@@ -14,21 +14,34 @@ export interface IAgent {
   userId?: mongoose.Schema.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
-  identityInfo: {
-    agentName: string;
-    IDNumber: string;
-    dateOfBirth: string;
-    gender: string;
-    address: string;
-    nationality: string;
+  basicInfo: {
+    nameRegister: string;
+    email: string;
+    phoneNumber: string;
+    identityInfo: {
+      IDNumber: string;
+      fullName: string;
+      dateOfBirth: string;
+      gender: string;
+      nationality: string;
+      placeOfBirth: string;
+    };
   };
   businessInfo: {
-    phoneNumber: string;
-    area: string[];
-    email: string;
+    specialization: string[];
+    workingArea: string[];
+    taxCode: string;
+    yearsOfExperience: string;
+    certificateNumber: string;
+  };
+  imageInfo: {
+    certificateImage: string[];
+    identityFront: string;
+    identityBack: string;
   };
   expirationDate?: Date;
   registrationLink?: string;
+  reasonReject?: string;
   status: AgentStatusEnum;
 }
 
@@ -72,46 +85,10 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
       ref: collections.users,
       required: false,
     },
-    identityInfo: {
-      agentName: {
+
+    basicInfo: {
+      nameRegister: {
         type: String,
-        required: true,
-        trim: true,
-      },
-      IDNumber: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      dateOfBirth: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      gender: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      address: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      nationality: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-    },
-    businessInfo: {
-      phoneNumber: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-      area: {
-        type: [String],
         required: true,
         trim: true,
       },
@@ -120,20 +97,106 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
         required: true,
         trim: true,
       },
+      phoneNumber: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      identityInfo: {
+        IDNumber: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        fullName: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        dateOfBirth: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        gender: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        nationality: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        placeOfBirth: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
     },
+
+    businessInfo: {
+      specialization: {
+        type: [String],
+        required: true,
+      },
+      workingArea: {
+        type: [String],
+        required: true,
+      },
+      taxCode: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      yearsOfExperience: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      certificateNumber: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    },
+
+    imageInfo: {
+      certificateImage: {
+        type: [String],
+        required: true,
+      },
+      identityFront: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      identityBack: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    },
+
     expirationDate: {
       type: Date,
     },
+
     registrationLink: {
       type: String,
       trim: true,
     },
+    reasonReject: {
+      type: String,
+      trim: true,
+    },
+
     status: {
       type: String,
-      required: true,
-      trim: true,
       enum: AgentStatusEnum,
       default: AgentStatusEnum.PENDING,
+      required: true,
     },
   },
   {
