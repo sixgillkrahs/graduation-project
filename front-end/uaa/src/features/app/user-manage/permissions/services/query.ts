@@ -1,6 +1,6 @@
 import { PermissionQueryKey } from "./config";
 import PermissionService from "./service";
-import type { IParamsPagination } from "@shared/types/service";
+import type { Id, IParamsPagination } from "@shared/types/service";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export const useGetPermissions = (params: IParamsPagination) => {
@@ -10,7 +10,7 @@ export const useGetPermissions = (params: IParamsPagination) => {
   });
 };
 
-export const useGetPermission = (id: string | number) => {
+export const useGetPermission = (id: Id) => {
   return useQuery({
     queryKey: [PermissionQueryKey.getPermission, id],
     queryFn: () => PermissionService.GetPermissionById(id),

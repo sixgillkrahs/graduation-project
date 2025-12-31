@@ -1,7 +1,7 @@
 import { RoleQueryKey } from "./config";
 import RoleService from "./service";
 import { queryClient } from "@shared/queryClient";
-import type { IResp } from "@shared/types/service";
+import type { Id, IResp } from "@shared/types/service";
 import { useMutation, type UseMutationResult } from "@tanstack/react-query";
 
 export const useCreateRole = (): UseMutationResult<
@@ -30,9 +30,9 @@ export const useCreateRole = (): UseMutationResult<
   });
 };
 
-export const useDeleteRole = (): UseMutationResult<IResp<void>, Error, string, void> => {
+export const useDeleteRole = (): UseMutationResult<IResp<void>, Error, Id, void> => {
   return useMutation({
-    mutationFn: (id: string) => {
+    mutationFn: (id: Id) => {
       return RoleService.DeleteRole(id);
     },
     onSuccess: () => {

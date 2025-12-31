@@ -1,7 +1,7 @@
 import { AgentRegistrationEndpoint } from "./config";
 import { AxiosMethod } from "@shared/axios/method";
 import request from "@shared/axios/request";
-import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
+import type { Id, IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 
 export default class AgentRegistrationService {
   public static readonly STATUS = [
@@ -100,7 +100,7 @@ export default class AgentRegistrationService {
   };
 
   public static readonly GetAgentsRegistration = (
-    id: string,
+    id: Id,
   ): Promise<IResp<IAgentRegistrationService.AgentRegistration>> => {
     return request({
       url: AgentRegistrationEndpoint.GetAgentsRegistration(id),
@@ -109,7 +109,7 @@ export default class AgentRegistrationService {
   };
 
   public static readonly RejectAgentsRegistration = (
-    id: string,
+    id: Id,
     data: {
       reason?: string;
     },
@@ -118,6 +118,13 @@ export default class AgentRegistrationService {
       url: AgentRegistrationEndpoint.RejectAgentsRegistration(id),
       method: AxiosMethod.PATCH,
       data: data,
+    });
+  };
+
+  public static readonly AcceptAgentsRegistration = (id: Id): Promise<IResp<void>> => {
+    return request({
+      url: AgentRegistrationEndpoint.AcceptAgentsRegistration(id),
+      method: AxiosMethod.PATCH,
     });
   };
 }

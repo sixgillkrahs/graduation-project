@@ -1,7 +1,7 @@
 import { PermissionEndpoint } from "./config";
 import { AxiosMethod } from "@shared/axios/method";
 import request from "@shared/axios/request";
-import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
+import type { Id, IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 
 export default class PermissionService {
   public static readonly OPERATION: IPermissionService.IOperation[] = [
@@ -27,7 +27,7 @@ export default class PermissionService {
     });
   };
 
-  public static readonly DeletePermission = (id: string | number): Promise<IResp<void>> => {
+  public static readonly DeletePermission = (id: Id): Promise<IResp<void>> => {
     return request({
       url: PermissionEndpoint.DeletePermission(id),
       method: AxiosMethod.DELETE,
@@ -45,7 +45,7 @@ export default class PermissionService {
   };
 
   public static readonly GetPermissionById = (
-    id: string | number,
+    id: Id,
   ): Promise<IResp<IPermissionService.PermissionDTO>> => {
     return request({
       url: PermissionEndpoint.GetPermissionById(id),

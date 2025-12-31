@@ -1,7 +1,7 @@
 import { RoleEndpoint } from "./config";
 import { AxiosMethod } from "@shared/axios/method";
 import request from "@shared/axios/request";
-import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
+import type { Id, IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 
 export default class RoleService {
   public static readonly GetRoles = (
@@ -14,7 +14,7 @@ export default class RoleService {
     });
   };
 
-  public static readonly DeleteRole = (id: string | number): Promise<IResp<void>> => {
+  public static readonly DeleteRole = (id: Id): Promise<IResp<void>> => {
     return request({
       url: RoleEndpoint.DeleteRole(id),
       method: AxiosMethod.DELETE,
@@ -29,9 +29,7 @@ export default class RoleService {
     });
   };
 
-  public static readonly GetRoleById = (
-    id: string | number,
-  ): Promise<IResp<IRoleService.RoleDTO>> => {
+  public static readonly GetRoleById = (id: Id): Promise<IResp<IRoleService.RoleDTO>> => {
     return request({
       url: RoleEndpoint.GetRoleById(id),
       method: AxiosMethod.GET,

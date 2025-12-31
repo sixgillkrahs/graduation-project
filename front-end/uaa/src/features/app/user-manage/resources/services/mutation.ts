@@ -1,10 +1,10 @@
 import ResourceService from "./service";
-import type { IResp } from "@shared/types/service";
+import type { Id, IResp } from "@shared/types/service";
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 
-export const useDeleteResource = (): UseMutationResult<IResp<void>, Error, string, void> => {
+export const useDeleteResource = (): UseMutationResult<IResp<void>, Error, Id, void> => {
   return useMutation({
-    mutationFn: (id: string) => {
+    mutationFn: (id: Id) => {
       return ResourceService.deleteResource(id);
     },
     meta: {

@@ -1,6 +1,4 @@
-import { ServiceEndpoint } from "@/@types/service";
-
-export const ExtractEndpoint: ServiceEndpoint = {
+export const ExtractEndpoint = {
   extractID: () => "/uploader",
   registration: () => "/agents-registrations/registration",
   uploadImage: () => "/upload-single",

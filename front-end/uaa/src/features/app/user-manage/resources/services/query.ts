@@ -1,6 +1,6 @@
 import { ResourceQueryKey } from "./config";
 import ResourceService from "./service";
-import type { IParamsPagination } from "@shared/types/service";
+import type { Id, IParamsPagination } from "@shared/types/service";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export const useGetResources = (params: IParamsPagination) => {
@@ -18,7 +18,7 @@ export const useGetResourcesByFilter = (params: IParamsPagination) => {
   });
 };
 
-export const useGetResource = (id: string) => {
+export const useGetResource = (id: Id) => {
   return useQuery({
     queryKey: [ResourceQueryKey.getResource, id],
     queryFn: () => ResourceService.getResource(id),

@@ -1,6 +1,6 @@
-import type { Id, ServiceEndpoint } from "@shared/types/service";
+import type { Id } from "@shared/types/service";
 
-export const ResourceEndpoint: ServiceEndpoint = {
+export const ResourceEndpoint = {
   GetResources: () => "/resources",
   GetResourcesByFilter: () => "/resources/search",
   DeleteResource: (id: Id) => `/resources/${id}`,

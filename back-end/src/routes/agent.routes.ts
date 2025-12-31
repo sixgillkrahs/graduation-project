@@ -235,7 +235,7 @@ router.use(requireAuth);
  *                   updatedAt:
  *                     type: string
  */
-router.get("/", requireAuth, agentController.agentRegistrations);
+router.get("/", agentController.agentRegistrations);
 
 /**
  * @swagger
@@ -364,7 +364,7 @@ router.patch(
 /**
  * @swagger
  * /agents-registrations/{id}/accept:
- *   put:
+ *   patch:
  *     summary: Accept agent registration by ID
  *     tags: [Agent]
  *     parameters:
@@ -394,9 +394,8 @@ router.patch(
  *       500:
  *         description: Internal server error
  */
-router.put(
+router.patch(
   "/:id/accept",
-  requireAuth,
   validateRequest((lang) => validateIdHeaderSchema(lang)),
   agentController.acceptAgentRegistration,
 );

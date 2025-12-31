@@ -1,12 +1,12 @@
 import { PermissionQueryKey } from "./config";
 import PermissionService from "./service";
 import { queryClient } from "@shared/queryClient";
-import type { IResp } from "@shared/types/service";
+import type { Id, IResp } from "@shared/types/service";
 import { type UseMutationResult, useMutation } from "@tanstack/react-query";
 
-export const useDeletePermission = (): UseMutationResult<IResp<void>, Error, string, void> => {
+export const useDeletePermission = (): UseMutationResult<IResp<void>, Error, Id, void> => {
   return useMutation({
-    mutationFn: (id: string) => {
+    mutationFn: (id: Id) => {
       return PermissionService.DeletePermission(id);
     },
     onSuccess: () => {

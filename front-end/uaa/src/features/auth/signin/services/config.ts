@@ -1,5 +1,3 @@
-import type { ServiceEndpoint } from "@shared/types/service";
-
-export const SignInEndpoint: ServiceEndpoint = {
+export const SignInEndpoint = {
   SignIn: () => "/auth/login",
 } as const;

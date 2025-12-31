@@ -1,6 +1,6 @@
-import type { Id, ServiceEndpoint } from "@shared/types/service";
+import type { Id } from "@shared/types/service";
 
-export const PermissionEndpoint: ServiceEndpoint = {
+export const PermissionEndpoint = {
   GetPermissions: () => "/permissions",
   DeletePermission: (id: Id) => `/permissions/${id}`,
   CreatePermission: () => "/permissions",

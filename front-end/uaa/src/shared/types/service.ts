@@ -1,9 +1,5 @@
 import type { Key } from "react";
 
-export interface ServiceEndpoint {
-  [key: string]: (...args: any[]) => string;
-}
-
 export interface IResp<T> {
   success: boolean;
   message: string;
