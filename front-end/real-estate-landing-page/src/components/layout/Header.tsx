@@ -9,6 +9,11 @@ import { useState } from "react";
 const Header = () => {
   const navigate = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogin = () => {
+    navigate.push("/sign-in");
+  };
+
   return (
     <header className="flex justify-between items-center bg-[#ffffff] px-4 md:px-20 container mx-auto py-4">
       <div className="flex items-center justify-between w-full md:w-auto">
@@ -88,7 +93,11 @@ const Header = () => {
               </li>
               <li className="flex items-center rounded-full cs-outline-gray mt-4">
                 <Icon.User className="bg-black w-full h-full p-2 rounded-full text-white" />
-                <Button type="button" className="text-black pl-2!">
+                <Button
+                  type="button"
+                  className="text-black pl-2!"
+                  onClick={handleLogin}
+                >
                   Login
                 </Button>
               </li>

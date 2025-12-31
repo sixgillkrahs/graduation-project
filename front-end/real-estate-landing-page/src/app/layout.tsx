@@ -1,10 +1,8 @@
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
-import "../styles/globals.css";
+import localFont from "next/font/local";
 import "react-photo-view/dist/react-photo-view.css";
+import "../styles/globals.css";
 import Wrapper from "./wrapper";
 
 export const satoshi = localFont({
@@ -48,11 +46,7 @@ export default function RootLayout({
     <html lang="en" className={satoshi.variable}>
       <body className={`${satoshi.variable} antialiased`}>
         <NextIntlClientProvider>
-          <Wrapper>
-            <Header />
-            {children}
-            <Footer />
-          </Wrapper>
+          <Wrapper>{children}</Wrapper>
         </NextIntlClientProvider>
       </body>
     </html>
