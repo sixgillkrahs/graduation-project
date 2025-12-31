@@ -75,7 +75,7 @@ const resourceSchema = new mongoose.Schema<
 );
 
 resourceSchema.plugin(toJSON);
-resourceSchema.plugin(paginate);
+resourceSchema.plugin(paginate as any);
 
 class ResourceClass {
   static async createResource(this: ResourceModel, resourceData: IResource) {

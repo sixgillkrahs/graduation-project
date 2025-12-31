@@ -3,6 +3,9 @@ import "dotenv/config";
 
 const envSchema = z.object({
   DATABASE_URL: z.string(),
+  REDIS_URL: z.string(),
+  REDIS_PORT: z.string(),
+  REDIS_HOST: z.string(),
   PORT: z
     .string()
     .transform(Number)

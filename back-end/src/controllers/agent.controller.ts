@@ -7,35 +7,28 @@ import { AgentStatusEnum, IAgent } from "@/models/agent.model";
 import { AppError } from "@/utils/appError";
 import { ApiRequest } from "@/utils/apiRequest";
 import { ErrorCode } from "@/utils/errorCodes";
+import { AuthService } from "@/services/auth.service";
+import { RoleService } from "@/services/role.service";
+import { ENV } from "@/config/env";
+import { EmailQueue } from "@/queues/email.queue";
 
 export class AgentController extends BaseController {
   constructor(
     private agentService: AgentService,
     private userService: UserService,
     private emailService: EmailService,
+    private authService: AuthService,
+    private roleService: RoleService,
+    private emailQueue: EmailQueue,
   ) {
     super();
   }
 
-  application = (req: Request, res: Response, next: NextFunction) => {
-    this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
-      const {
-        nameRegister,
-        email,
-        phoneNumber,
-
-        identityFront,
-        identityBack,
-        identityInfo,
-
-        certificateNumber,
-        certificateImage,
-        specialization,
-        workingArea,
-        taxCode,
-        yearsOfExperience,
-      } = req.body as {
+  application = (
+    req: Request<
+      {},
+      {},
+      {
         nameRegister: string;
         email: string;
         phoneNumber: string;
@@ -61,7 +54,29 @@ export class AgentController extends BaseController {
         yearsOfExperience: string;
 
         agreeToTerms: boolean;
-      };
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const {
+        nameRegister,
+        email,
+        phoneNumber,
+
+        identityFront,
+        identityBack,
+        identityInfo,
+
+        certificateNumber,
+        certificateImage,
+        specialization,
+        workingArea,
+        taxCode,
+        yearsOfExperience,
+      } = req.body;
       const agent = await this.agentService.getAgentByIdNumber(
         identityInfo.IDNumber,
       );
@@ -108,15 +123,24 @@ export class AgentController extends BaseController {
     });
   };
 
-  agentRegistrations = (req: Request, res: Response, next: NextFunction) => {
-    this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
-      const { limit, page, sortField, sortOrder } = req.query as {
+  agentRegistrations = (
+    req: Request<
+      {},
+      {},
+      {},
+      {
         limit?: string;
         page?: string;
         sortField?: string;
         sortOrder?: string;
-      };
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { limit, page, sortField, sortOrder } = req.query;
       let filter: Record<string, any> = {
         status: {
           $in: [AgentStatusEnum.PENDING, AgentStatusEnum.REJECTED],
@@ -183,7 +207,6 @@ export class AgentController extends BaseController {
         status: AgentStatusEnum.REJECTED,
         reasonReject: reason,
       };
-      console.log(agentRegistrationUpdated);
 
       const resp = await this.agentService.updateAgentRegistration(
         id,
@@ -198,15 +221,71 @@ export class AgentController extends BaseController {
     });
   };
 
-  acceptAgentRegistration = (
-    req: Request,
+  approveAgentRegistration = (
+    req: Request<{ id: string }, {}, { note?: string }>,
     res: Response,
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
-      const { id } = req.params as { id: string };
-      return "";
+      const { id } = req.params;
+      const { note } = req.body;
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+      if (
+        !agentRegistration ||
+        agentRegistration?.status != AgentStatusEnum.PENDING
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          405,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      let role = await this.roleService.getRoleByCode("AGENT");
+      if (role == null) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          401,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      const user = await this.userService.createUser({
+        email: agentRegistration.basicInfo?.email!,
+        fullName: agentRegistration.basicInfo?.nameRegister!,
+        phone: agentRegistration.basicInfo?.phoneNumber,
+        prefixPhone: "+84",
+        isActive: false,
+        isDeleted: false,
+      });
+      const auth = await this.authService.createAuth({
+        userId: user.id,
+        password: "",
+        username: agentRegistration.basicInfo?.email!,
+        roleId: role.id,
+      });
+      const verifyToken = this.authService.generateAccessToken(
+        {},
+        1000 * 60 * 15,
+      );
+      const updated = await this.agentService.updateAgentRegistration(id, {
+        status: AgentStatusEnum.APPROVED,
+        note: note,
+        registrationLink: `${ENV.SERVER_URL}/api/auth/verify-email/${verifyToken}`,
+      });
+      if (!updated) {
+        throw new AppError(
+          "Already processed",
+          409,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      await this.emailQueue.enqueueVerifyEmail({
+        email: agentRegistration.basicInfo?.email!,
+        name: agentRegistration.basicInfo?.nameRegister,
+        token: verifyToken,
+      });
+      return true;
     });
   };
 }

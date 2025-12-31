@@ -121,10 +121,16 @@ export default class AgentRegistrationService {
     });
   };
 
-  public static readonly AcceptAgentsRegistration = (id: Id): Promise<IResp<void>> => {
+  public static readonly ApproveAgentsRegistration = (
+    id: Id,
+    data: {
+      note?: string;
+    },
+  ): Promise<IResp<void>> => {
     return request({
-      url: AgentRegistrationEndpoint.AcceptAgentsRegistration(id),
+      url: AgentRegistrationEndpoint.ApproveAgentsRegistration(id),
       method: AxiosMethod.PATCH,
+      data,
     });
   };
 }

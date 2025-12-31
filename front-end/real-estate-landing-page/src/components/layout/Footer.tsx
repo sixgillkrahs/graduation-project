@@ -1,39 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Icon } from "../ui/Icon";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-
-const LocaleSwitcher = () => {
-  const router = useRouter();
-
-  const setLocale = async (locale: "en" | "vi") => {
-    await fetch("/api/locale", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ locale }),
-    });
-
-    router.refresh();
-  };
-  return (
-    <div className="flex gap-2 items-center">
-      <div
-        className="underline text-[20px]! cs-paragraph-white cursor-pointer"
-        onClick={() => setLocale("vi")}
-      >
-        vi
-      </div>
-      <div
-        className="underline text-[20px]! cs-paragraph-white cursor-pointer"
-        onClick={() => setLocale("en")}
-      >
-        en
-      </div>
-    </div>
-  );
-};
+import LocaleSwitcher from "../ui/LocaleSwitcher";
 
 const Label = ({
   label,
@@ -126,7 +96,7 @@ const Footer = () => {
           <div className="sm:text-[120px]! lg:text-[220px]! cs-typography-gray font-semibold!">
             Havenly
           </div>
-          <LocaleSwitcher />
+          <LocaleSwitcher className="cs-paragraph-white" />
         </div>
       </footer>
     </footer>

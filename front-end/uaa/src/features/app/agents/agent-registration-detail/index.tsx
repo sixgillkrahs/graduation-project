@@ -1,7 +1,7 @@
-import { useRejectAgentsRegistration } from "../services/mutate";
+import { useAcceptAgentsRegistration, useRejectAgentsRegistration } from "../services/mutate";
 import { useGetAgentsRegistration } from "../services/query";
 import AgentRegistrationService from "../services/service";
-import { ArrowLeftOutlined, ExclamationCircleFilled } from "@ant-design/icons";
+import { ArrowLeftOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
 import message from "@shared/message";
 import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
@@ -46,6 +46,36 @@ const showRejectConfirm = (onSubmit: (reason: string) => void) => {
   });
 };
 
+const showApproveConfirm = (onSubmit: (note: string) => void) => {
+  let note = "";
+
+  confirm({
+    title: "Bạn có chắc chắn muốn chấp nhận đơn này?",
+    icon: <CheckCircleFilled style={{ color: "#52c41a" }} />,
+    content: (
+      <div>
+        <p>Ghi chú (không bắt buộc):</p>
+        <TextArea
+          rows={4}
+          placeholder="Nhập ghi chú khi chấp nhận đơn"
+          onChange={(e) => {
+            note = e.target.value;
+          }}
+        />
+      </div>
+    ),
+    okText: "Chấp nhận",
+    cancelText: "Hủy",
+    okButtonProps: {
+      type: "primary",
+    },
+    onOk() {
+      onSubmit(note.trim());
+      return Promise.resolve();
+    },
+  });
+};
+
 const InfoField = ({ label, value }: InfoFieldProps) => {
   const isReactNode = typeof value === "object" && value !== null;
   return (
@@ -64,7 +94,8 @@ const AgentRegistrationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: agentRegistrationDetail } = useGetAgentsRegistration(id!);
-  const { mutateAsync: reject } = useRejectAgentsRegistration();
+  const { mutateAsync: reject, isPending: rejectLoading } = useRejectAgentsRegistration();
+  const { mutateAsync: approve, isPending: approveLoading } = useAcceptAgentsRegistration();
 
   const onReject = () => {
     showRejectConfirm(async (reason) => {
@@ -81,7 +112,16 @@ const AgentRegistrationDetail = () => {
     });
   };
 
-  const onAccept = () => {};
+  const onApprove = () => {
+    showApproveConfirm(async (note) => {
+      await approve({
+        id: id!,
+        body: {
+          note: note,
+        },
+      });
+    });
+  };
 
   const onBack = () => {
     navigate(-1);
@@ -100,10 +140,10 @@ const AgentRegistrationDetail = () => {
         <Space>
           {agentRegistrationDetail?.data.status == AgentRegistrationService.STATUS[0].value && (
             <>
-              <Button type="primary" onClick={onAccept}>
+              <Button type="primary" onClick={onApprove} loading={approveLoading}>
                 Accept
               </Button>
-              <Button danger onClick={onReject}>
+              <Button danger onClick={onReject} loading={rejectLoading}>
                 Reject
               </Button>
             </>
@@ -143,6 +183,15 @@ const AgentRegistrationDetail = () => {
                   label="Reject Date"
                   value={toVietnamTime(agentRegistrationDetail?.data?.updatedAt)}
                 />
+              </>
+            )}
+            {agentRegistrationDetail?.data.status == AgentRegistrationService.STATUS[1].value && (
+              <>
+                <InfoField
+                  label="Approve Date"
+                  value={toVietnamTime(agentRegistrationDetail?.data?.updatedAt)}
+                />
+                <InfoField label="Note" value={agentRegistrationDetail?.data.note || "-"} />
               </>
             )}
           </Card>

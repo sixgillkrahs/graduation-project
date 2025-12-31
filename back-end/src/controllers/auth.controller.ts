@@ -63,14 +63,14 @@ export class AuthController extends BaseController {
           ErrorCode.INVALID_TOKEN,
         );
       }
-      const accessToken = this.generateAccessToken(
+      const accessToken = this.authService.generateAccessToken(
         {
           user: user,
           roleId: auth.roleId,
         },
         15 * 1000 * 60, // 15 phút
       );
-      const refreshToken = this.generateRefreshToken(
+      const refreshToken = this.authService.generateRefreshToken(
         {
           userId: user.id,
         },
@@ -224,14 +224,14 @@ export class AuthController extends BaseController {
           ErrorCode.USER_NOT_FOUND,
         );
       }
-      const accessToken = this.generateAccessToken(
+      const accessToken = this.authService.generateAccessToken(
         {
           user: user,
           roleId: userAuth.roleId,
         },
         15 * 1000 * 60,
       );
-      const refreshToken = this.generateRefreshToken(
+      const refreshToken = this.authService.generateRefreshToken(
         {
           userId: user.id,
         },
@@ -259,28 +259,4 @@ export class AuthController extends BaseController {
       return user;
     });
   };
-
-  private generateAccessToken(payload: object, expiresTime: number): string {
-    const secret = ENV.JWT_SECRET;
-    if (!secret) {
-      throw new Error("JWT_SECRET is not defined");
-    }
-    const options: SignOptions = {
-      algorithm: "HS256",
-      expiresIn: expiresTime,
-    };
-    return jwt.sign(payload, secret, options);
-  }
-
-  private generateRefreshToken(payload: object, expiresTime: number): string {
-    const secret = ENV.REFRESH_TOKEN_SECRET;
-    if (!secret) {
-      throw new Error("REFRESH_TOKEN_SECRET is not defined");
-    }
-    const options: SignOptions = {
-      algorithm: "HS256",
-      expiresIn: expiresTime,
-    };
-    return jwt.sign(payload, secret, options);
-  }
 }

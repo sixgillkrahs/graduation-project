@@ -1,8 +1,11 @@
 import { AgentController } from "@/controllers/agent.controller";
 import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
+import { EmailQueue } from "@/queues/email.queue";
 import { AgentService } from "@/services/agent.service";
+import { AuthService } from "@/services/auth.service";
 import { EmailService } from "@/services/email.service";
+import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
 import { applicationSchema } from "@/validators/agent.validator";
 import { validateIdHeaderSchema } from "@/validators/base.validator";
@@ -13,11 +16,17 @@ const router = Router();
 const agentService = new AgentService();
 const userService = new UserService();
 const emailService = new EmailService();
+const authService = new AuthService();
+const roleService = new RoleService();
+const emailQueue = new EmailQueue();
 
 const agentController = new AgentController(
   agentService,
   userService,
   emailService,
+  authService,
+  roleService,
+  emailQueue,
 );
 
 /**
@@ -363,9 +372,9 @@ router.patch(
 
 /**
  * @swagger
- * /agents-registrations/{id}/accept:
+ * /agents-registrations/{id}/approve:
  *   patch:
- *     summary: Accept agent registration by ID
+ *     summary: Approve agent registration by ID
  *     tags: [Agent]
  *     parameters:
  *       - in: path
@@ -375,9 +384,20 @@ router.patch(
  *           type: string
  *         description: ID of the agent registration
  *
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               note:
+ *                 type: string
+ *                 example: "Note"
+ *
  *     responses:
  *       200:
- *         description: Agent registration Accepted successfully
+ *         description: Agent registration approved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -388,16 +408,16 @@ router.patch(
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: "Agent registration accepted"
+ *                   example: "Agent registration approved"
  *       404:
  *         description: Agent registration not found
  *       500:
  *         description: Internal server error
  */
 router.patch(
-  "/:id/accept",
+  "/:id/approve",
   validateRequest((lang) => validateIdHeaderSchema(lang)),
-  agentController.acceptAgentRegistration,
+  agentController.approveAgentRegistration,
 );
 
 export default router;

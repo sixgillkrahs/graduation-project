@@ -28,3 +28,28 @@ export const useRejectAgentsRegistration = (): UseMutationResult<
     },
   });
 };
+
+export const useAcceptAgentsRegistration = (): UseMutationResult<
+  IResp<void>,
+  Error,
+  { id: string; body: IAgentRegistrationService.ApproveBody },
+  void
+> => {
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: IAgentRegistrationService.ApproveBody }) => {
+      return AgentRegistrationService.ApproveAgentsRegistration(id, body);
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({
+        queryKey: [AgentRegistrationQueryKey.GetAgentsRegistration, id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [AgentRegistrationQueryKey.GetAgentsRegistrations],
+      });
+    },
+    meta: {
+      ERROR_SOURCE: "[Delete permission failed]",
+      SUCCESS_MESSAGE: "The permission has been successfully deleted",
+    },
+  });
+};

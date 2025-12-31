@@ -5,10 +5,12 @@ import collections from "./config/collections";
 
 export interface IRole {
   name: string;
+  code: string;
   permissionIds: mongoose.Schema.Types.ObjectId[];
   description?: string;
   isActive?: boolean;
   isDefault?: boolean;
+  isSystem?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -53,6 +55,12 @@ const roleSchema = new mongoose.Schema<IRole, RoleModel, IRoleMethods>(
       required: true,
       trim: true,
     },
+    code: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     permissionIds: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: collections.permissions,
@@ -67,6 +75,10 @@ const roleSchema = new mongoose.Schema<IRole, RoleModel, IRoleMethods>(
       default: true,
     },
     isDefault: {
+      type: Boolean,
+      default: false,
+    },
+    isSystem: {
       type: Boolean,
       default: false,
     },

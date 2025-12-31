@@ -11,6 +11,9 @@ export const validateBodyRoleSchema = (
       name: z
         .string({ message: t.invalidName })
         .min(1, { message: t.invalidName }),
+      code: z
+        .string({ message: t.invalidName })
+        .min(1, { message: t.invalidName }),
       permissionIds: z.array(createObjectIdSchema(lang)),
       description: z.optional(z.string({ message: t.invalidDescription })),
       isActive: z.optional(z.boolean()),

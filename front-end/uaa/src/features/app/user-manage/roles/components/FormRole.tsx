@@ -62,8 +62,6 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
     }
   }, [id, role, form]);
 
-  console.log("first");
-
   const onCancel = () => {
     setOpen(false);
   };
@@ -96,6 +94,9 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
       >
         <Item label="Name" name="name" rules={[{ required: true, message: "Please input name!" }]}>
           <Input placeholder="Enter name" />
+        </Item>
+        <Item label="Code" name="code" rules={[{ required: true, message: "Please input code!" }]}>
+          <Input placeholder="Enter code" disabled={!!id} />
         </Item>
         <Item label="Description" name="description">
           <TextArea placeholder="Enter description" />

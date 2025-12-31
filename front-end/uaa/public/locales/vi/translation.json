@@ -74,6 +74,7 @@
   "roles": {
     "title": "vai trò",
     "name": "Tên vai trò",
+    "code": "Mã vai trò",
     "active": "Kích hoạt",
     "default": "Mặc định",
     "createdAt": "Ngày tạo",

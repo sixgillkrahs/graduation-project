@@ -1,6 +1,14 @@
 version: "3.9"
 
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -46,3 +54,4 @@ services:
 volumes:
   api_node_modules:
   api_dist:
+  redis_data:

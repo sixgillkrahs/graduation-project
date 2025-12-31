@@ -8,6 +8,7 @@ declare namespace IAgentRegistrationService {
     createdAt: string;
     updatedAt: string;
     reasonReject?: string;
+    note?: string;
     id: string;
   }
 
@@ -43,5 +44,9 @@ declare namespace IAgentRegistrationService {
 
   export interface RejectBody {
     reason?: string;
+  }
+
+  export interface ApproveBody {
+    note?: string;
   }
 }

@@ -42,6 +42,7 @@ export interface IAgent {
   expirationDate?: Date;
   registrationLink?: string;
   reasonReject?: string;
+  note?: string;
   status: AgentStatusEnum;
 }
 
@@ -188,6 +189,10 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
       trim: true,
     },
     reasonReject: {
+      type: String,
+      trim: true,
+    },
+    note: {
       type: String,
       trim: true,
     },

@@ -40,10 +40,14 @@ export class RoleService {
   };
 
   getRoleById = async (id: string) => {
-    return await RoleModel.findById(id);
+    return await RoleModel.findById(id).lean().exec();
   };
 
   getRoleDefault = async () => {
     return await RoleModel.findOne({ isDefault: true });
+  };
+
+  getRoleByCode = async (code: string) => {
+    return await RoleModel.findOne({ code: code });
   };
 }

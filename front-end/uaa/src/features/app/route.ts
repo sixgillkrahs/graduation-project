@@ -29,6 +29,11 @@ const router: RouterConfig = {
           name: "Agent Registration Detail",
           hideInMenu: true,
         },
+        {
+          path: "/manage",
+          component: lazy(() => import("./agents/agent-manage")),
+          name: "Agent Management",
+        },
       ],
     },
     {

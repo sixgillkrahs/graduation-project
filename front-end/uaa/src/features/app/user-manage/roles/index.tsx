@@ -21,6 +21,11 @@ const Roles = () => {
       key: "name",
     },
     {
+      title: t("roles.code"),
+      dataIndex: "code",
+      key: "code",
+    },
+    {
       title: t("roles.active"),
       dataIndex: "isActive",
       key: "isActive",
@@ -72,6 +77,7 @@ const Roles = () => {
                 label: t("button.delete"),
                 icon: <Trash className="h-4 w-4" />,
                 danger: true,
+                disabled: record.isSystem,
                 onClick: () => handleDelete(record.id),
               },
             ],
@@ -89,7 +95,9 @@ const Roles = () => {
     ref.current?.open();
   };
 
-  function handleView(_: IRoleService.RoleDTO) {}
+  function handleView(item: IRoleService.RoleDTO) {
+    console.log(item);
+  }
 
   // const onAdd = useCallback(
   //   (values: IRoleService.CreateRoleDTO): Promise<any> => {

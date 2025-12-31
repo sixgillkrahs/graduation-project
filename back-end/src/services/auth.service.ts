@@ -1,7 +1,7 @@
 import { ENV } from "@/config/env";
 import { singleton } from "@/decorators/singleton";
 import AuthModel, { IAuth } from "@/models/auth.model";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 @singleton
 export class AuthService {
@@ -32,5 +32,29 @@ export class AuthService {
       userId: string;
     };
     return decoded;
+  }
+
+  generateAccessToken(payload: object, expiresTime: number): string {
+    const secret = ENV.JWT_SECRET;
+    if (!secret) {
+      throw new Error("JWT_SECRET is not defined");
+    }
+    const options: SignOptions = {
+      algorithm: "HS256",
+      expiresIn: expiresTime,
+    };
+    return jwt.sign(payload, secret, options);
+  }
+
+  generateRefreshToken(payload: object, expiresTime: number): string {
+    const secret = ENV.REFRESH_TOKEN_SECRET;
+    if (!secret) {
+      throw new Error("REFRESH_TOKEN_SECRET is not defined");
+    }
+    const options: SignOptions = {
+      algorithm: "HS256",
+      expiresIn: expiresTime,
+    };
+    return jwt.sign(payload, secret, options);
   }
 }
