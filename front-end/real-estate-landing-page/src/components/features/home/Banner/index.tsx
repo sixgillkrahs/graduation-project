@@ -29,7 +29,7 @@ const Banner = () => {
   }, [active, images.length]);
 
   return (
-    <section className="relative h-screen overflow-hidden px-20">
+    <section className="relative h-screen overflow-hidden px-4 md:px-20">
       <div
         className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${active * 100}%)` }}
@@ -50,7 +50,7 @@ const Banner = () => {
 
       <FormSearch />
 
-      <div className="absolute top-2 right-20 z-10 grid grid-cols-1 gap-4">
+      <div className="absolute top-4 right-4 md:right-20 z-10 grid grid-cols-1 gap-4">
         {images.map((item, index) => (
           <div
             key={index}

@@ -16,7 +16,7 @@ export const selectIsStepValid = (step: number) =>
     switch (step) {
       case 0:
         return !!(
-          form.basicInfo.fullName &&
+          form.basicInfo.identityInfo.fullName &&
           form.basicInfo.email &&
           form.basicInfo.phoneNumber
         );

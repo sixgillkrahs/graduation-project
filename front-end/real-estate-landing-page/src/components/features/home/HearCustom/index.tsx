@@ -2,8 +2,8 @@ import React from "react";
 
 const HearCustom = () => {
   return (
-    <section className="container p-20 mx-auto">
-      <div className="cs-typography text-[40px]! font-semibold! mb-4 mx-auto text-center">
+    <section className="container p-4 md:p-20 mx-auto">
+      <div className="cs-typography text-2xl md:text-[40px]! font-semibold! mb-4 mx-auto text-center">
         Hear From Our{" "}
         <span className="italic font-medium">Happy Customers</span>
       </div>

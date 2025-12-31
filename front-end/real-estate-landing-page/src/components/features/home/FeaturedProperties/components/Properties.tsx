@@ -75,8 +75,8 @@ const Properties = () => {
   const [isActive, setIsActive] = useState(1);
   return (
     <>
-      <div className="flex justify-between items-center">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
           {categories.map((category) => (
             <Tag
               key={category.name}
@@ -103,7 +103,7 @@ const Properties = () => {
           ></Button>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
         <Card name="Apartments" location="Hanoi" price="1,000" />
         <Card name="Villa" location="Hanoi" price="2,000" />
         <Card name="Resort" location="Hanoi" price="1,000" />

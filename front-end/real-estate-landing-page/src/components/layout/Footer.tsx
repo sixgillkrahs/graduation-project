@@ -35,15 +35,15 @@ const Footer = () => {
 
   return (
     <footer className="cs-bg-black">
-      <footer className="p-20 grid grid-cols-1 container mx-auto">
-        <div className="flex gap-12 justify-between">
-          <div className="cs-paragraph-white">
+      <footer className="p-4 md:p-20 grid grid-cols-1 container mx-auto">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12 justify-between">
+          <div className="cs-paragraph-white md:max-w-md">
             {t("description")}
             <br />
             {t("help")}
           </div>
-          <div className="flex gap-15">
-            <div className="grid grid-cols-3 gap-10">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-15">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
               <div>
                 <span className={classText}>
                   {t("titlebrowser", { name: "Havenly" })}
@@ -77,7 +77,7 @@ const Footer = () => {
                 </ul>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-2 min-w-[300px]">
+            <div className="grid grid-cols-1 gap-2 min-w-0 md:min-w-[300px]">
               <Label label="Email" value="contact@realestate.com" />
               <Label label="Phone" value="0966999999" />
               <div className="mt-8">
@@ -92,11 +92,11 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-end">
-          <div className="sm:text-[120px]! lg:text-[220px]! cs-typography-gray font-semibold!">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mt-8">
+          <div className="text-4xl md:text-[120px] lg:text-[220px] cs-typography-gray font-semibold!">
             Havenly
           </div>
-          <LocaleSwitcher className="cs-paragraph-white" />
+          <LocaleSwitcher className="cs-paragraph-white mt-4 md:mt-0" />
         </div>
       </footer>
     </footer>

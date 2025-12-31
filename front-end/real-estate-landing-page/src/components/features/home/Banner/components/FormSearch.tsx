@@ -41,8 +41,8 @@ const optionsBedrooms = [
 
 const FormSearch = () => {
   return (
-    <div className="absolute bottom-2 right-20 z-10 max-w-md bg-white/90 backdrop-blur-md p-7 rounded-xl shadow-lg">
-      <h2 className="text-3xl font-bold text-black leading-tight mb-4">
+    <div className="absolute bottom-4 left-4 right-4 md:bottom-2 md:right-20 md:left-auto z-10 max-w-sm md:max-w-md bg-white/90 backdrop-blur-md p-4 md:p-7 rounded-xl shadow-lg">
+      <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight mb-4">
         Start Your Search Today
       </h2>
       <Tabs
@@ -71,7 +71,7 @@ const FormSearch = () => {
       <div className="h-px bg-black/10 my-4"></div>
       <div className="flex  flex-col items-center gap-2">
         <span className="cs-paragraph-gray text-[16px]!">Popular Searches</span>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-center">
           <Tag title="Pet Friendly" />
           <Tag title="House" />
           <Tag title="Pool" />

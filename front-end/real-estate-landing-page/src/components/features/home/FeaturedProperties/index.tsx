@@ -5,13 +5,13 @@ import { useTranslations } from "next-intl";
 const FeaturedProperties = () => {
   const t = useTranslations("HomePage");
   return (
-    <section className="px-20 container mx-auto">
-      <div className="flex justify-between items-center">
-        <div className="flex flex-col">
-          <span className="cs-typography text-[40px]! font-semibold! mb-3">
+    <section className="px-4 md:px-20 container mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex flex-col mb-4 md:mb-0">
+          <span className="cs-typography text-2xl md:text-[40px]! font-semibold! mb-3">
             Featured <span className="italic font-normal">Properties</span>
           </span>
-          <span className="cs-paragraph-gray max-w-[800px] text-center text-[16px]!">
+          <span className="cs-paragraph-gray max-w-[800px] text-center md:text-left text-[16px]!">
             Discover our hand-picked selection of premium rentals.
           </span>
         </div>

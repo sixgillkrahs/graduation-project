@@ -27,16 +27,16 @@ const Step = ({
 
 const HowToJoin = () => {
   return (
-    <section className="container mx-auto px-20 py-30">
+    <section className="container mx-auto px-4 md:px-20 py-10 md:py-30">
       <div className="text-center">
-        <div className="cs-typography font-black! text-4xl! mb-2">
+        <div className="cs-typography font-black! text-2xl md:text-4xl! mb-2">
           How to Join Havenly
         </div>
         <div className="cs-typography-gray text-base! max-w-lg mx-auto font-medium!">
           Three simple steps to launch your upgraded agent.
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-10 mt-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 mt-10 md:mt-20">
         <Step
           icon={<Icon.AddUser className="size-8 main-color-red" />}
           title="1. Create Account"

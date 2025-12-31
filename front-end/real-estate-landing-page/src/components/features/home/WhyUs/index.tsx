@@ -3,8 +3,8 @@ import React from "react";
 
 const WhyUs = () => {
   return (
-    <section className="w-full h-full flex flex-col items-center justify-center px-20 py-20 container mx-auto">
-      <h2 className="cs-typography text-[40px]! font-bold! mb-4">
+    <section className="w-full h-full flex flex-col items-center justify-center px-4 md:px-20 py-10 md:py-20 container mx-auto">
+      <h2 className="cs-typography text-2xl md:text-[40px]! font-bold! mb-4">
         Why Choose <span className="italic font-semibold">Havenly?</span>
       </h2>
       <span className="cs-paragraph-gray font-medium! max-w-[800px] text-center mb-10">
@@ -12,7 +12,7 @@ const WhyUs = () => {
         no uncertainty, and thin the support of a team that's with you every
         step of the way
       </span>
-      <div className="w-full h-[300px] grid grid-cols-3 gap-4 rounded-[16px] ">
+      <div className="w-full md:h-auto lg:h-[300px] grid grid-cols-1 md:grid-cols-3 gap-4 rounded-[16px] ">
         <Card
           image="/icons/clock.svg"
           title="Everything In One Place"
