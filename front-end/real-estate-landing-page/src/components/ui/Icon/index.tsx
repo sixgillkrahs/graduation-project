@@ -27,6 +27,8 @@ import { Star } from "./Star";
 import { TwitterX } from "./TwitterX";
 import { User } from "./User";
 import { Youtube } from "./Youtube";
+import { Eye } from "./Eye";
+import { EyeClose } from "./EyeClose";
 //#endregion
 
 export const Icon = {
@@ -58,4 +60,6 @@ export const Icon = {
   FileUpload,
   Close,
   DeleteBin,
+  Eye,
+  EyeClose,
 };

@@ -1,0 +1,140 @@
+"use client";
+
+import Image from "next/image";
+import Logo from "@/assets/Logo.svg";
+import { Controller, useForm } from "react-hook-form";
+import { Button, Checkbox, Icon, Input } from "@/components/ui";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const SignIn = () => {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<{
+    email: string;
+    password: string;
+    rememberMe: boolean;
+  }>({
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+    mode: "onChange",
+  });
+
+  const onSubmit = (data: { email: string; password: string }) => {};
+
+  const handleToHome = () => {
+    router.push("/");
+  };
+
+  const handleTogglePassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  return (
+    <div className="px-10 py-5 h-full">
+      <div
+        className="flex items-start gap-2 text-xl md:text-2xl font-semibold cursor-pointer mb-6"
+        onClick={handleToHome}
+      >
+        <Image src={Logo} alt="logo" width={24} height={24} />
+        <span className="text-black">Havenly</span>
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold text-black">Welcome Back</h2>
+        <span className="cs-typography-gray text-sm!">
+          Please enter your details.
+        </span>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 grid gap-4">
+        <Controller
+          name="email"
+          control={control}
+          rules={{
+            required: "Email is required",
+            pattern: {
+              value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+              message: "Please enter a valid email address",
+            },
+          }}
+          render={({ field }) => (
+            <Input
+              label="Email Address"
+              placeholder="john.doe@example.com"
+              suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
+              error={errors.email?.message}
+              {...field}
+            />
+          )}
+        />
+        <Controller
+          name="password"
+          control={control}
+          rules={{
+            required: "Password is required",
+          }}
+          render={({ field }) => (
+            <Input
+              label="Password"
+              placeholder="Password"
+              suffix={
+                showPassword ? (
+                  <Icon.Eye
+                    className="main-color-gray w-5 h-5"
+                    onClick={handleTogglePassword}
+                  />
+                ) : (
+                  <Icon.EyeClose
+                    className="main-color-gray w-5 h-5"
+                    onClick={handleTogglePassword}
+                  />
+                )
+              }
+              type={showPassword ? "text" : "password"}
+              error={errors.password?.message}
+              {...field}
+            />
+          )}
+        />
+        <div className="flex justify-between items-center">
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field: { value, onChange, ...restField } }) => (
+              <Checkbox
+                label="Remember me"
+                checked={value}
+                {...restField}
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  onChange(isChecked);
+                }}
+              />
+            )}
+          />
+          <span className="cs-typography-gray text-sm!">Forgot password?</span>
+        </div>
+        <Button type="submit" className="w-full cs-bg-red text-white">
+          Sign In
+        </Button>
+      </form>
+      <div className="mt-4 text-center">
+        <span className="cs-typography-gray text-sm!">
+          Don't have an account?{" "}
+          <Link href="/sign-up" className="text-red-500">
+            Sign Up
+          </Link>
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default SignIn;

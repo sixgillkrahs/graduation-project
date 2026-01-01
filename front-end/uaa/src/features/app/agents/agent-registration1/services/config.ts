@@ -7,6 +7,7 @@ export const AgentRegistrationEndpoint = {
   ApproveAgentsRegistration: (id: Id) => `/agents-registrations/${id}/approve`,
 } as const;
 
+
 export const AgentRegistrationQueryKey = {
   GetAgentsRegistrations: "GetAgentsRegistrations",
   GetAgentsRegistration: "GetAgentsRegistration",

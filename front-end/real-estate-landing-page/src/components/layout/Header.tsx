@@ -7,11 +7,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const Header = () => {
-  const navigate = useRouter();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogin = () => {
-    navigate.push("/sign-in");
+    router.push("/sign-in");
   };
 
   return (
@@ -19,7 +19,7 @@ const Header = () => {
       <div className="flex items-center justify-between w-full md:w-auto">
         <div
           className="flex items-start gap-2 text-xl md:text-2xl font-semibold cursor-pointer"
-          onClick={() => navigate.push("/")}
+          onClick={() => router.push("/")}
         >
           <Image src={Logo} alt="logo" width={24} height={24} />
           <span className="text-[#222222]">Havenly</span>
@@ -96,7 +96,7 @@ const Header = () => {
                 <Button
                   type="button"
                   className="text-black pl-2!"
-                  onClick={handleLogin}
+                  onClick={() => handleLogin()}
                 >
                   Login
                 </Button>

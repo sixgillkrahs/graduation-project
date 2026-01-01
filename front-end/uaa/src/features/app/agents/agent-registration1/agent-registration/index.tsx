@@ -81,6 +81,29 @@ const AgentRegistration = () => {
       isEdit={false}
       isDetail={true}
       onDetail={handleDetail}
+      filter={[
+        {
+          type: "input",
+          placeholder: "Tên đăng ký",
+          name: ["basicInfo", "nameRegister"],
+        },
+        {
+          type: "input",
+          placeholder: "Email",
+          name: ["basicInfo", "email"],
+        },
+        {
+          name: "status",
+          type: "select",
+          options: AgentRegistrationService.STATUS,
+          placeholder: "Trạng thái",
+        },
+        {
+          type: "date",
+          placeholder: "Ngày đăng ký",
+          name: ["createdAt"],
+        },
+      ]}
     />
   );
 };

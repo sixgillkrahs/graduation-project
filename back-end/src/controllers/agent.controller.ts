@@ -123,7 +123,7 @@ export class AgentController extends BaseController {
     });
   };
 
-  agentRegistrations = (
+  getAgentRegistrations = (
     req: Request<
       {},
       {},
@@ -133,6 +133,9 @@ export class AgentController extends BaseController {
         page?: string;
         sortField?: string;
         sortOrder?: string;
+        status?: AgentStatusEnum;
+        nameRegister?: string;
+        email?: string;
       }
     >,
     res: Response,
@@ -140,12 +143,25 @@ export class AgentController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
-      const { limit, page, sortField, sortOrder } = req.query;
+      const { limit, page, sortField, sortOrder, status, nameRegister, email } = req.query;
       let filter: Record<string, any> = {
-        status: {
-          $in: [AgentStatusEnum.PENDING, AgentStatusEnum.REJECTED],
-        },
+        // status: status
       };
+      if (status) {
+        filter.status = status;
+      }
+      if (nameRegister) {
+        filter["basicInfo.nameRegister"] = {
+          $regex: nameRegister,
+          $options: "i",
+        };
+      }
+      if (email) {
+        filter["basicInfo.email"] = {
+          $regex: email,
+          $options: "i",
+        };
+      }
       const agentRegistrations = await this.agentService.getAgentRegistrations(
         {
           page: page ? Number(page) : 1,
@@ -258,20 +274,20 @@ export class AgentController extends BaseController {
         isActive: false,
         isDeleted: false,
       });
-      const auth = await this.authService.createAuth({
+      await this.authService.createAuth({
         userId: user.id,
-        password: "",
+        password: "no-password",
         username: agentRegistration.basicInfo?.email!,
         roleId: role.id,
       });
       const verifyToken = this.authService.generateAccessToken(
-        {},
+        { userId: user.id },
         1000 * 60 * 15,
       );
       const updated = await this.agentService.updateAgentRegistration(id, {
         status: AgentStatusEnum.APPROVED,
         note: note,
-        registrationLink: `${ENV.SERVER_URL}/api/auth/verify-email/${verifyToken}`,
+        registrationLink: `${ENV.FRONTEND_URLLANDINGPAGE}/api/auth/verify-email/${verifyToken}`,
       });
       if (!updated) {
         throw new AppError(
@@ -286,6 +302,42 @@ export class AgentController extends BaseController {
         token: verifyToken,
       });
       return true;
+    });
+  };
+
+  getAgents = (
+    req: Request<
+      {},
+      {},
+      {},
+      {
+        limit?: string;
+        page?: string;
+        sortField?: string;
+        sortOrder?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { limit, page, sortField, sortOrder } = req.query;
+      let filter: Record<string, any> = {
+        status: {
+          $in: [AgentStatusEnum.APPROVED],
+        },
+      };
+      const agentRegistrations = await this.agentService.getAgentRegistrations(
+        {
+          page: page ? Number(page) : 1,
+          limit: limit ? Number(limit) : 10,
+          sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        },
+        filter,
+        "id basicInfo businessInfo"
+      );
+      return agentRegistrations;
     });
   };
 }

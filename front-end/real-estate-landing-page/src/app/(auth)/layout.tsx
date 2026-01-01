@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Sider from "@/components/layout/Sider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -10,5 +11,12 @@ export default function AuthLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div>{children}</div>;
+  return (
+    <div className="grid grid-cols-10 h-screen">
+      <div className="col-span-4">{children}</div>
+      <div className="col-span-6 bg-[#F5F5F5]">
+        <Sider />
+      </div>
+    </div>
+  );
 }

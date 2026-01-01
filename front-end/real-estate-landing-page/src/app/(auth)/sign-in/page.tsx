@@ -1,5 +1,7 @@
+import SignIn from "@/components/features/sign-in";
+
 const Page = () => {
-  return <div>Đăng nhập</div>;
+  return <SignIn />;
 };
 
 export default Page;

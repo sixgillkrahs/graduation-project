@@ -37,7 +37,7 @@ const envSchema = z.object({
     process.env.NODE_ENV === "development"
       ? z.string().optional().default("Express Boilerplate")
       : z.string(),
-  SERVER_URL: z.string().url(),
+  SERVER_URL: z.url(),
   // PROMETHEUS_URL: z.string().url().optional().default('http://localhost:9090'),
 });
 export const ENV = envSchema.parse(process.env);

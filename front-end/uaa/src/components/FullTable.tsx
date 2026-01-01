@@ -1,10 +1,12 @@
 import ModalForm from "./ModalForm";
 import { DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { buildDateRange, cleanEmpty } from "@shared/helper";
 import MessageService from "@shared/message";
 import type { IPaginationResp, IParamsPagination, IResp } from "@shared/types/service";
 import type { UseQueryResult } from "@tanstack/react-query";
 import {
   Button,
+  DatePicker,
   Dropdown,
   Form,
   Input,
@@ -31,9 +33,23 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 
+const { RangePicker } = DatePicker;
+
+type Path<T> = T extends object
+  ? {
+      [K in keyof T]: K extends string | number
+        ? T[K] extends object
+          ? [K] | [K, ...Path<T[K]>]
+          : [K]
+        : never;
+    }[keyof T]
+  : never;
+
+type FilterName<T> = keyof T | Path<T>;
+
 export interface IFilter<T extends { id: string | number }> {
-  name: keyof T;
-  type: "input" | "select";
+  name: FilterName<T>;
+  type: "input" | "select" | "date";
   options?: {
     label: string;
     value: string | number | boolean;
@@ -194,13 +210,36 @@ const FullTable = <T extends { id: string | number }>({
     }
   }, [pagination]);
 
+  const toDotPath = (name: FilterName<any>) =>
+    Array.isArray(name) ? name.join(".") : String(name);
+
   const handleFilterChange = () => {
-    const formValues = formFilter.getFieldsValue();
+    const rawValues = formFilter.getFieldsValue();
+    const cleanedValues = cleanEmpty(rawValues);
+
+    const formattedFilters: Record<string, any> = {};
+    filter?.forEach((item) => {
+      const key = getLastKey(item.name);
+      const value = cleanedValues[key];
+
+      if (value === undefined) return;
+
+      const apiKey = toDotPath(item.name);
+
+      if (item.type === "date") {
+        const range = buildDateRange(value);
+        if (range) {
+          formattedFilters[apiKey] = range;
+        }
+      } else {
+        formattedFilters[apiKey] = value;
+      }
+    });
+
     setPagination({
-      ...pagination,
-      ...formValues,
       page: 1,
       limit: 10,
+      ...formattedFilters,
     });
   };
 
@@ -318,8 +357,15 @@ const FullTable = <T extends { id: string | number }>({
     t,
   ]);
 
+  const getLastKey = (name: FilterName<T>): string => {
+    if (Array.isArray(name)) {
+      return String(name[name.length - 1]);
+    }
+    return String(name);
+  };
+
   const handleSubmit = useCallback(() => {
-    formInstance.validateFields().then(async (values) => {
+    formInstance.validateFields().then(async (values: any) => {
       try {
         setIsSubmitting(true);
         if (formMode === "ADD" && onAdd) {
@@ -377,33 +423,48 @@ const FullTable = <T extends { id: string | number }>({
         <div className="flex gap-2">
           <div>
             {filter && (
-              <div className="flex gap-2">
-                {filter.map((item) => (
-                  <div key={String(item.name)}>
-                    <Form form={formFilter}>
-                      {item.type === "input" ? (
-                        <Form.Item name={String(item.name)} className="mb-0!">
+              <Form form={formFilter}>
+                <div className="flex gap-2">
+                  {filter.map((item) => {
+                    const fieldName = getLastKey(item.name);
+                    if (item.type === "input") {
+                      return (
+                        <Form.Item key={fieldName} name={fieldName} className="mb-0!">
                           <Input
-                            placeholder={item.placeholder || `Search ${String(item.name)}`}
-                            ref={searchRef}
+                            placeholder={item.placeholder || `Search ${fieldName}`}
+                            allowClear
                             onPressEnter={handleFilterChange}
+                            onClear={handleFilterChange}
                           />
                         </Form.Item>
-                      ) : (
-                        <Form.Item name={String(item.name)} className="mb-0!">
+                      );
+                    }
+                    if (item.type === "select") {
+                      return (
+                        <Form.Item key={fieldName} name={fieldName} className="mb-0!">
                           <Select
-                            placeholder={item.placeholder || `Search ${String(item.name)}`}
+                            placeholder={item.placeholder || `Search ${fieldName}`}
                             options={item.options}
                             className="w-full min-w-[180px]"
-                            allowClear={true}
+                            allowClear
                             onChange={handleFilterChange}
                           />
                         </Form.Item>
-                      )}
-                    </Form>
-                  </div>
-                ))}
-              </div>
+                      );
+                    }
+                    return (
+                      <Form.Item key={fieldName} name={fieldName} className="mb-0!">
+                        <RangePicker
+                          className="w-full min-w-[260px]"
+                          placeholder={["From date", "To date"]}
+                          allowClear
+                          onChange={handleFilterChange}
+                        />
+                      </Form.Item>
+                    );
+                  })}
+                </div>
+              </Form>
             )}
           </div>
           {extraButtonTop}

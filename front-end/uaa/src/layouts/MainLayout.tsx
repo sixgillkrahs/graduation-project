@@ -4,7 +4,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(true);
   return (
     <div className="flex h-screen">
       <div className="relative">

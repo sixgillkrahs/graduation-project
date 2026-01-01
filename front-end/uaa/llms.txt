@@ -1,0 +1,163 @@
+Project
+
+Ant Design (antd)
+A comprehensive React UI library for enterprise-level applications.
+
+Core Information
+
+Framework: React
+
+Language: TypeScript-first
+
+Design System: Ant Design Specification
+
+Primary Use Case: Admin dashboards, enterprise systems, data-heavy applications
+
+Official Docs: https://ant.design
+
+Source Code: https://github.com/ant-design/ant-design
+
+Key Concepts (IMPORTANT FOR LLMs)
+1. Form System
+
+Form is stateful and controls child inputs.
+
+Form.Item name can be:
+
+string
+
+string[] (nested object path)
+
+Form values are retrieved via:
+
+form.getFieldsValue()
+form.validateFields()
+
+
+Empty inputs usually return:
+
+"" for Input
+
+undefined for Select / DatePicker (after clear)
+
+⚠️ LLMs should always clean empty values before using them as filters.
+
+2. Controlled vs Uncontrolled
+
+Most AntD components are controlled via Form
+
+Avoid mixing value/onChange manually when wrapped in Form.Item
+
+Use Form.useForm() to control lifecycle
+
+3. Date Handling
+
+Uses dayjs (since AntD v5)
+
+DatePicker.RangePicker returns:
+
+[dayjs, dayjs] | null
+
+
+Dates should be normalized before sending to backend:
+
+startOf("day")
+
+endOf("day")
+
+4. Common Components & Behavior
+Input
+
+Returns "" when cleared
+
+allowClear triggers clear icon
+
+onPressEnter is commonly used for search
+
+Select
+
+allowClear → value becomes undefined
+
+onChange(value) fires on clear
+
+Table
+
+Controlled pagination via:
+
+pagination={{ current, pageSize }}
+
+
+onChange(pagination, filters, sorter)
+
+Server-side sorting/filtering is common
+
+5. Styling
+
+Default CSS-in-JS (v5)
+
+Supports:
+
+CSS variables
+
+Tailwind (with reset strategy)
+
+Avoid overriding internal class names directly
+
+Best Practices (LLMs SHOULD FOLLOW)
+
+✅ Use Form.Item name={["a","b","c"]} for nested data
+✅ Clean empty form values before API calls
+✅ Convert date ranges before querying backend
+✅ Reset page = 1 when filters change
+✅ Prefer declarative Form usage
+
+❌ Do NOT rely on raw DOM events
+❌ Do NOT assume cleared input = null
+❌ Do NOT mutate Form values directly
+
+Example Patterns
+Filter Form → API Query
+const values = form.getFieldsValue();
+
+const cleaned = Object.fromEntries(
+  Object.entries(values).filter(
+    ([, v]) => v !== "" && v !== undefined && v !== null
+  )
+);
+
+Nested Form Field
+<Form.Item name={["basicInfo", "name"]}>
+  <Input />
+</Form.Item>
+
+
+Result:
+
+{
+  basicInfo: {
+    name: "John"
+  }
+}
+
+Common Pitfalls
+
+Forgetting to clean empty strings
+
+Overwriting nested filter objects
+
+Using string path instead of array path in Form
+
+Not resetting pagination on filter change
+
+Target Audience
+
+Enterprise frontend developers
+
+Admin dashboards
+
+CRM / CMS / ERP systems
+
+Summary for LLMs
+
+Ant Design is a form-centric, enterprise-grade React UI framework.
+Treat Form as the source of truth, normalize values before backend usage, and handle dates explicitly.

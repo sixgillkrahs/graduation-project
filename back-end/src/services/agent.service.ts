@@ -3,7 +3,7 @@ import AgentModel, { IAgent } from "@/models/agent.model";
 
 @singleton
 export class AgentService {
-  constructor() {}
+  constructor() { }
 
   getAgent = async (id: string) => {
     return await AgentModel.findById(id);
@@ -31,9 +31,10 @@ export class AgentService {
       populate?: string;
     },
     filter?: Record<string, any>,
+    select?: string,
   ) => {
     filter = filter || {};
-    return await AgentModel.paginate?.(options, filter);
+    return await AgentModel.paginate?.(options, filter, select);
   };
 
   getAgentRegistrationById = async (id: string) => {

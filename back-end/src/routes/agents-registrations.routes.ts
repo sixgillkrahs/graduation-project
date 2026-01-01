@@ -34,7 +34,7 @@ const agentController = new AgentController(
  * /agents-registrations/application:
  *   post:
  *     summary: Agent application registration
- *     tags: [Agent]
+ *     tags: [Agent Registrations]
  *     requestBody:
  *       required: true
  *       content:
@@ -174,7 +174,7 @@ router.use(requireAuth);
  * /agents-registrations:
  *   get:
  *     summary: Get agent registrations
- *     tags: [Agent]
+ *     tags: [Agent Registrations]
  *     parameters:
  *       - in: query
  *         name: limit
@@ -199,6 +199,22 @@ router.use(requireAuth);
  *           type: string
  *           enum: [asc, desc]
  *         description: Sort order (ascending or descending)
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [PENDING, REJECTED, APPROVED]
+ *         description: Status of the agent registration
+ *       - in: query
+ *         name: nameRegister
+ *         schema:
+ *           type: string
+ *         description: Name of the agent registration
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         description: Email of the agent registration
  *     responses:
  *       200:
  *         description: A list of agent registrations
@@ -244,14 +260,14 @@ router.use(requireAuth);
  *                   updatedAt:
  *                     type: string
  */
-router.get("/", agentController.agentRegistrations);
+router.get("/", agentController.getAgentRegistrations);
 
 /**
  * @swagger
  * /agents-registrations/{id}:
  *   get:
  *     summary: Get agent registration by ID
- *     tags: [Agent]
+ *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
  *         name: id
@@ -323,7 +339,7 @@ router.get(
  * /agents-registrations/{id}/reject:
  *   patch:
  *     summary: Reject agent registration by ID
- *     tags: [Agent]
+ *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
  *         name: id
@@ -375,7 +391,7 @@ router.patch(
  * /agents-registrations/{id}/approve:
  *   patch:
  *     summary: Approve agent registration by ID
- *     tags: [Agent]
+ *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
  *         name: id
