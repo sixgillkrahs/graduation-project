@@ -5,7 +5,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 
 @singleton
 export class AuthService {
-  constructor() {}
+  constructor() { }
 
   async getAuthByUsername(username: string) {
     return AuthModel.findOne({
@@ -56,5 +56,14 @@ export class AuthService {
       expiresIn: expiresTime,
     };
     return jwt.sign(payload, secret, options);
+  }
+
+  validateToken(token: string) {
+    try {
+      const decoded = jwt.verify(token, ENV.JWT_SECRET);
+      return decoded;
+    } catch (error) {
+      return false;
+    }
   }
 }

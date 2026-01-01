@@ -167,6 +167,43 @@ router.post(
   agentController.application,
 );
 
+/**
+ * @swagger
+ * /agents-registrations/{token}:
+ *   get:
+ *     summary: Verify agent registration token
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The agent registration token
+ *     responses:
+ *       200:
+ *         description: Token verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Token verified successfully"
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+router.get(
+  "/:token",
+  agentController.verifyTokenRegistration,
+);
+
 router.use(requireAuth);
 
 /**

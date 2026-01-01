@@ -305,6 +305,36 @@ export class AgentController extends BaseController {
     });
   };
 
+  verifyTokenRegistration = (
+    req: Request<
+      { token: string }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { token } = req.params;
+      if (!token) {
+        throw new AppError(
+          lang === "vi" ? "Token is required" : "Token is required",
+          400,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      const decoded = this.authService.validateToken(token) as { userId: string };
+      if (!decoded) {
+        throw new AppError(
+          lang === "vi" ? "Invalid token" : "Invalid token",
+          400,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      const userId = decoded?.userId;
+      return userId
+    });
+  };
+
   getAgents = (
     req: Request<
       {},

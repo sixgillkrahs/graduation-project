@@ -14,7 +14,7 @@ export default function AuthLayout({
   return (
     <div className="grid grid-cols-10 h-screen">
       <div className="col-span-4">{children}</div>
-      <div className="col-span-6 bg-[#F5F5F5]">
+      <div className="col-span-6 bg-[#F5F5F5] hidden md:block">
         <Sider />
       </div>
     </div>
