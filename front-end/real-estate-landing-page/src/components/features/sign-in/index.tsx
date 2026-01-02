@@ -7,10 +7,13 @@ import { Button, Checkbox, Icon, Input } from "@/components/ui";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSignIn } from "./services/mutate";
 
 const SignIn = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const { mutateAsync: signIn, isPending } = useSignIn();
+
   const {
     handleSubmit,
     formState: { errors },
@@ -28,7 +31,18 @@ const SignIn = () => {
     mode: "onChange",
   });
 
-  const onSubmit = (data: { email: string; password: string }) => {};
+  const onSubmit = async (data: {
+    email: string;
+    password: string;
+    rememberMe: boolean;
+  }) => {
+    await signIn({
+      username: data.email,
+      password: data.password,
+      rememberMe: data.rememberMe,
+    });
+    router.push("/");
+  };
 
   const handleToHome = () => {
     router.push("/");
@@ -87,12 +101,12 @@ const SignIn = () => {
               suffix={
                 showPassword ? (
                   <Icon.Eye
-                    className="main-color-gray w-5 h-5"
+                    className="main-color-gray w-5 h-5 cursor-pointer"
                     onClick={handleTogglePassword}
                   />
                 ) : (
                   <Icon.EyeClose
-                    className="main-color-gray w-5 h-5"
+                    className="main-color-gray w-5 h-5 cursor-pointer"
                     onClick={handleTogglePassword}
                   />
                 )
@@ -121,7 +135,11 @@ const SignIn = () => {
           />
           <span className="cs-typography-gray text-sm!">Forgot password?</span>
         </div>
-        <Button type="submit" className="w-full cs-bg-red text-white">
+        <Button
+          type="submit"
+          className="w-full cs-bg-red text-white"
+          loading={isPending}
+        >
           Sign In
         </Button>
       </form>

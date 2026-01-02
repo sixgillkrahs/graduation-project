@@ -24,7 +24,9 @@ export class AgentService {
   getAgentByUserId = async (userId: string) => {
     return await AgentModel.findOne({
       userId: userId,
-    });
+    })
+      .lean()
+      .exec();
   };
 
   createAgentRegistration = async (agentData: IAgent) => {

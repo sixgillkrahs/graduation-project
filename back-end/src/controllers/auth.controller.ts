@@ -1,14 +1,19 @@
-import { validationMessages } from "@/i18n/validationMessages";
 import { AuthService } from "@/services/auth.service";
-import { RoleService } from "@/services/role.service";
-import { UserService } from "@/services/user.service";
 import { ApiRequest } from "@/utils/apiRequest";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 import bcrypt from "bcrypt";
-import { parse } from "cookie";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
+import { validationMessages } from "@/i18n/validationMessages";
+import { UserService } from "@/services/user.service";
+import jwt, { SignOptions } from "jsonwebtoken";
+import { ENV } from "@/config/env";
+import { RoleService } from "@/services/role.service";
+import { parse } from "cookie";
+import { IAuth } from "@/models/auth.model";
+import { IRole } from "@/models/role.model";
+import { IUser } from "@/models/user.model";
 
 export class AuthController extends BaseController {
   private userService: UserService;
@@ -30,7 +35,21 @@ export class AuthController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
       const { username, password, rememberMe } = req.body;
-      const auth = await this.authService.getAuthByUsername(username);
+      const auth = await this.authService.getAuthByUsername<
+        IAuth & {
+          roleId: IRole & { _id: string };
+          userId: IUser & { _id: string };
+        }
+      >(username, [
+        {
+          path: "roleId",
+          select: "_id name code permissionIds",
+        },
+        {
+          path: "userId",
+          select: "_id email fullName isActive phone",
+        },
+      ]);
       if (!auth || !auth.password) {
         throw new AppError(
           lang === "vi" ? "Sai tài khoản" : "Incorrect username",
@@ -38,10 +57,9 @@ export class AuthController extends BaseController {
           ErrorCode.INCORRECT_CREDENTIALS,
         );
       }
-      const user = await this.userService.getUserById(auth.userId.toString());
-      if (!user) {
+      if (!auth.userId.isActive) {
         throw new AppError(
-          validationMessages[lang].userNotFound || "User not found",
+          validationMessages[lang].userNotActive || "User not active",
           401,
           ErrorCode.USER_NOT_FOUND,
         );
@@ -54,23 +72,16 @@ export class AuthController extends BaseController {
           ErrorCode.INCORRECT_CREDENTIALS,
         );
       }
-      if (!user.isActive) {
-        throw new AppError(
-          validationMessages[lang].userNotActive || "User not active",
-          401,
-          ErrorCode.INVALID_TOKEN,
-        );
-      }
       const accessToken = this.authService.generateAccessToken(
         {
-          user: user,
-          roleId: auth.roleId,
+          user: auth.userId,
+          role: auth.roleId,
         },
         15 * 1000 * 60, // 15 phút
       );
       const refreshToken = this.authService.generateRefreshToken(
         {
-          userId: user.id,
+          userId: auth.userId._id,
         },
         15 * 1000 * 60 * 24, // 15 ngày
       );
@@ -86,7 +97,18 @@ export class AuthController extends BaseController {
         sameSite: "none",
         maxAge: 60 * 60 * 1000 * 24 * 7,
       });
-      return user;
+      return {
+        user: {
+          id: auth.userId._id,
+          email: auth.userId.email,
+          name: auth.userId.fullName,
+        },
+        role: {
+          id: auth.roleId._id,
+          name: auth.roleId.name,
+          code: auth.roleId.code,
+        },
+      };
     });
   };
 
@@ -212,9 +234,9 @@ export class AuthController extends BaseController {
           ErrorCode.INVALID_TOKEN,
         );
       }
-      const userAuth = await this.authService.getAuthByUserId(
-        decoded.userId.toString(),
-      );
+      const userAuth = await this.authService.getAuthByUserId<
+        IAuth & { _id: string }
+      >(decoded.userId.toString());
       if (!userAuth) {
         throw new AppError(
           validationMessages[lang].userNotFound || "User not found",
@@ -231,7 +253,7 @@ export class AuthController extends BaseController {
       );
       const refreshToken = this.authService.generateRefreshToken(
         {
-          userId: user.id,
+          userId: user._id,
         },
         15 * 1000 * 60 * 24, // 15 ngày
       );

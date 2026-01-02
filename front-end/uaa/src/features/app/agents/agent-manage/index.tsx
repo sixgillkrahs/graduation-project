@@ -1,4 +1,4 @@
-import AgentRegistrationService from "../agent-registration1/services/service";
+import AgentRegistrationService from "../agent-registration/services/service";
 import { useGetAgents } from "./services/query";
 import FullTable from "@/components/FullTable";
 import { renderConstant } from "@shared/render/const";

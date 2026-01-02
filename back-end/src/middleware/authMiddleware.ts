@@ -1,16 +1,48 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { ENV } from "@/config/env";
+import { logger } from "@/config/logger";
+import { AuthService } from "@/services/auth.service";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
-import { logger } from "@/config/logger";
-import { ENV } from "@/config/env";
 import { parse } from "cookie";
-import { UserService } from "@/services/user.service";
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
+interface Root {
+  _id: string;
+  username: string;
+  password: string;
+  userId: UserId;
+  roleId: RoleId;
+  passwordHistories: PasswordHistory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface UserId {
+  _id: string;
+  email: string;
+  fullName: string;
+  phone: string;
+  isActive: boolean;
+}
+
+interface RoleId {
+  _id: string;
+  name: string;
+  code: string;
+  permissionIds: any[];
+}
+
+interface PasswordHistory {
+  _id: string;
+  password: string;
+  createdAt: string;
+}
 
 interface JwtPayload {
   user: {
     email: string;
-    id: string;
+    _id: string;
     [k: string]: any;
   };
   role: string;
@@ -19,7 +51,7 @@ interface JwtPayload {
 declare global {
   namespace Express {
     interface Request {
-      user: JwtPayload & { detail?: any };
+      user: Root;
     }
   }
 }
@@ -45,12 +77,21 @@ export const requireAuth = async (
     }
     try {
       const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
-      const userService = new UserService();
-      const user = await userService.getUserById(decoded.user.id);
+      const authService = new AuthService();
+      const user = (await authService.getAuthByUserId(decoded.user._id, [
+        {
+          path: "roleId",
+          select: "_id name code permissionIds",
+        },
+        {
+          path: "userId",
+          select: "_id email fullName isActive phone",
+        },
+      ])) as Root;
       if (!user) {
         throw new AppError("User not found", 404, ErrorCode.NOT_FOUND);
       }
-      req.user = { ...decoded };
+      req.user = user;
       next();
     } catch (error) {
       logger.warn({
@@ -72,13 +113,13 @@ export const requireAuth = async (
 export const requireRole = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      if (!req.user?.role || !roles.includes(req.user.role)) {
+      if (!req.user?.roleId._id || !roles.includes(req.user.roleId.code)) {
         logger.warn({
           message: "Insufficient permissions",
           context: "AuthMiddleware.requireRole",
           requiredRoles: roles,
-          userRole: req.user?.role,
-          userId: req.user?.user.id,
+          userRole: req.user?.roleId.code,
+          userId: req.user?.userId._id,
         });
         throw new AppError(
           "Forbidden - Insufficient permissions",

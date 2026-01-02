@@ -4,10 +4,14 @@ import { UserService } from "@/services/user.service";
 import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { createUserSchema } from "@/validators/user.validator";
+import { AgentService } from "@/services/agent.service";
 
 const router = Router();
 const userService = new UserService();
-const userController = new UserController(userService);
+const agentService = new AgentService();
+const userController = new UserController(userService, agentService);
+
+router.use(requireAuth);
 
 /**
  * @swagger
@@ -50,4 +54,21 @@ const userController = new UserController(userService);
  *         description: Forbidden - Admin only
  */
 router.post("/", validateRequest(createUserSchema), userController.createUser);
+
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile
+ *       403:
+ *         description: Forbidden - User role required
+ */
+router.get("/profile", userController.profile);
+
 export default router;

@@ -20,12 +20,12 @@ const router: RouterConfig = {
       childRoutes: [
         {
           path: "/registration",
-          component: lazy(() => import("./agents/agent-registration1/agent-registration")),
+          component: lazy(() => import("./agents/agent-registration/agent-registration")),
           name: "Agent Registration",
         },
         {
           path: "/registration/:id",
-          component: lazy(() => import("./agents/agent-registration1/agent-registration-detail")),
+          component: lazy(() => import("./agents/agent-registration/agent-registration-detail")),
           name: "Agent Registration Detail",
           hideInMenu: true,
         },

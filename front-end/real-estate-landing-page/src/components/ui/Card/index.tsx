@@ -3,7 +3,7 @@ export const Card = ({
   title,
   tag,
 }: {
-  image: string;
+  image?: string;
   title: string;
   tag: string;
 }) => {

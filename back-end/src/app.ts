@@ -70,7 +70,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-// app.use("/api/users", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);

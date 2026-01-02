@@ -2,16 +2,30 @@
 
 import Logo from "@/assets/Logo.svg";
 import Image from "next/image";
-import { Button, Icon } from "../ui";
+import { Button, Dropdown, DropdownItem, Icon } from "../ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useGetMe } from "@/shared/auth/query";
+import AuthService from "@/shared/auth/AuthService";
+import toast from "react-hot-toast";
+import { queryClient } from "@/lib/react-query/queryClient";
 
 const Header = () => {
+  const { data: me, isLoading } = useGetMe();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogin = () => {
     router.push("/sign-in");
+  };
+
+  const handleLogout = async () => {
+    const resp = await AuthService.logout();
+    if (resp.success) {
+      toast.success(resp.data.message);
+      queryClient.setQueryData(["me"], null);
+      router.refresh();
+    }
   };
 
   return (
@@ -69,11 +83,52 @@ const Header = () => {
           </button>
         </div>
       </div>
-      <div className="hidden md:flex items-center rounded-full cs-outline-gray">
-        <Icon.User className="bg-black w-full h-full p-2 rounded-full text-white" />
-        <Button type="button" className="text-black pl-2!">
-          Login
-        </Button>
+      <div className="min-w-[180px] flex justify-end">
+        {isLoading ? (
+          <div className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1 cs-outline-gray animate-pulse">
+            <div className="h-4 w-24 rounded bg-gray-200" />
+            <div className="w-8 h-8 rounded-full bg-gray-300" />
+          </div>
+        ) : me?.data.userId ? (
+          <Dropdown
+            trigger={
+              <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 cs-outline-gray cursor-pointer">
+                <span className="whitespace-nowrap">
+                  {me.data.userId.fullName}
+                </span>
+                <Icon.User className="w-8 h-8 rounded-full bg-black text-white p-1.5" />
+              </div>
+            }
+          >
+            <DropdownItem
+              onClick={() => router.push(`/profile/${me.data.userId._id}`)}
+              icon={<Icon.User className="w-4 h-4" />}
+            >
+              Profile
+            </DropdownItem>
+            <DropdownItem
+              onClick={() => router.push("/settings")}
+              icon={<Icon.Settings className="w-4 h-4" />}
+            >
+              Settings
+            </DropdownItem>
+            <div className="my-1 border-t border-gray-200" />
+            <DropdownItem
+              danger
+              onClick={handleLogout}
+              icon={<Icon.LogoutCircle className="w-4 h-4" />}
+            >
+              Logout
+            </DropdownItem>
+          </Dropdown>
+        ) : (
+          <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2">
+            <Icon.User className="bg-black w-8 h-8 p-1.5 rounded-full text-white" />
+            <Button type="button" className="text-black" onClick={handleLogin}>
+              Login
+            </Button>
+          </div>
+        )}
       </div>
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-lg z-50">

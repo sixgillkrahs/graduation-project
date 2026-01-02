@@ -12,6 +12,7 @@ import { RoleService } from "@/services/role.service";
 import { ENV } from "@/config/env";
 import bcrypt from "bcrypt";
 import { EmailQueue } from "@/queues/email.queue";
+import { IAuth } from "@/models/auth.model";
 
 export class AgentController extends BaseController {
   constructor(
@@ -447,9 +448,9 @@ export class AgentController extends BaseController {
           ErrorCode.TOKEN_EXPIRED,
         );
       }
-      const auth = await this.authService.getAuthByUserId(
-        agentRegistration.userId!.toString(),
-      );
+      const auth = await this.authService.getAuthByUserId<
+        IAuth & { _id: string }
+      >(agentRegistration.userId!.toString());
       if (!auth) {
         throw new AppError(
           lang === "vi" ? "Error occur" : "Error occur",
@@ -464,6 +465,9 @@ export class AgentController extends BaseController {
           ErrorCode.EXTERNAL_SERVICE_ERROR,
         );
       }
+      await this.userService.updateUser(agentRegistration.userId!.toString(), {
+        isActive: true,
+      });
       const hashedPassword = await bcrypt.hash(password, 10);
 
       await this.authService.updateAuth(auth._id!.toString(), {

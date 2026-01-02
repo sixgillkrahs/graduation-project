@@ -1,8 +1,23 @@
+import AuthService from "@/shared/auth/AuthService";
 import axios, {
   AxiosError,
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+
+let isRefreshing = false;
+let failedQueue: {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}[] = [];
+
+const processQueue = (error: any) => {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve(true);
+  });
+  failedQueue = [];
+};
 
 export const client = (() => {
   return axios.create({
@@ -10,7 +25,7 @@ export const client = (() => {
     headers: {
       Accept: "application/json, text/plain, */*",
     },
-    // withCredentials: true, // bật cái này nếu ở backend có bật cờ Access-Control-Allow-Credentials: true
+    withCredentials: true, // bật cái này nếu ở backend có bật cờ Access-Control-Allow-Credentials: true
   });
 })();
 
@@ -28,28 +43,48 @@ client.interceptors.request.use(
 );
 
 client.interceptors.response.use(
-  (res: AxiosResponse) => {
-    return res;
-  },
-  async (err: AxiosError) => {
-    const status = err.response ? err.response.status : null;
+  (res: AxiosResponse) => res,
+  async (error: AxiosError) => {
+    const originalRequest: any = error.config;
+    const status = error.response?.status;
 
-    if (status === 401) {
+    if (originalRequest?.url?.includes("/auth/refresh")) {
+      return Promise.reject(error);
+    }
+    if (status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: () => resolve(client(originalRequest)),
+            reject,
+          });
+        });
+      }
+      isRefreshing = true;
       try {
-        // const refreshTokenFromStorage = localStorage.getItem(STORAGE_TOKEN.REFRESH_TOKEN);
-        // const { accessToken, refreshToken } = await AuthService.refresh(refreshTokenFromStorage);
-        // LocalStorageService.setTokens(accessToken, refreshToken);
-        // client.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-        // return await client(originalConfig);
-      } catch (error: any) {
-        return Promise.reject(error);
+        const resp = await AuthService.refresh();
+
+        if (!resp?.success) {
+          throw new Error("Refresh token failed");
+        }
+
+        processQueue(null);
+        return client(originalRequest);
+      } catch (err) {
+        processQueue(err);
+        await AuthService.logout();
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
 
-    if (status === 403 && err?.response?.data) {
-      return Promise.reject(err.response.data);
+    if (status === 403 && error.response?.data) {
+      return Promise.reject(error.response.data);
     }
 
-    return Promise.reject(err);
+    return Promise.reject(error);
   }
 );

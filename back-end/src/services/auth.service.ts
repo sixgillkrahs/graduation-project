@@ -2,15 +2,22 @@ import { ENV } from "@/config/env";
 import { singleton } from "@/decorators/singleton";
 import AuthModel, { IAuth } from "@/models/auth.model";
 import jwt, { SignOptions } from "jsonwebtoken";
+import { PopulateOptions } from "mongoose";
 
 @singleton
 export class AuthService {
   constructor() {}
 
-  async getAuthByUsername(username: string) {
-    return AuthModel.findOne({
-      username,
-    });
+  async getAuthByUsername<T>(
+    username: string,
+    populate?: string | PopulateOptions | (string | PopulateOptions)[],
+  ): Promise<T | null> {
+    return AuthModel.findOne({ username })
+      .populate(
+        populate ? (Array.isArray(populate) ? populate : [populate]) : [],
+      )
+      .lean()
+      .exec() as Promise<T | null>;
   }
 
   async createAuth(auth: IAuth) {
@@ -25,10 +32,18 @@ export class AuthService {
     return AuthModel.findById(id);
   }
 
-  async getAuthByUserId(id: string) {
+  async getAuthByUserId<T>(
+    id: string,
+    populate?: string | PopulateOptions | (string | PopulateOptions)[],
+  ): Promise<T | null> {
     return AuthModel.findOne({
       userId: id,
-    });
+    })
+      .populate(
+        populate ? (Array.isArray(populate) ? populate : [populate]) : [],
+      )
+      .lean()
+      .exec() as Promise<T | null>;
   }
 
   async refreshToken(refreshToken: string) {

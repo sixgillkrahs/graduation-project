@@ -30,6 +30,8 @@ import { Youtube } from "./Youtube";
 import { Eye } from "./Eye";
 import { EyeClose } from "./EyeClose";
 import { Lock } from "./Lock";
+import { LogoutCircle } from "./LogoutCircle";
+import { Settings } from "./Settings";
 //#endregion
 
 export const Icon = {
@@ -64,4 +66,6 @@ export const Icon = {
   Eye,
   EyeClose,
   Lock,
+  LogoutCircle,
+  Settings,
 };
