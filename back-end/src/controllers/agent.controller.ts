@@ -10,6 +10,7 @@ import { ErrorCode } from "@/utils/errorCodes";
 import { AuthService } from "@/services/auth.service";
 import { RoleService } from "@/services/role.service";
 import { ENV } from "@/config/env";
+import bcrypt from "bcrypt";
 import { EmailQueue } from "@/queues/email.queue";
 
 export class AgentController extends BaseController {
@@ -143,7 +144,8 @@ export class AgentController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
-      const { limit, page, sortField, sortOrder, status, nameRegister, email } = req.query;
+      const { limit, page, sortField, sortOrder, status, nameRegister, email } =
+        req.query;
       let filter: Record<string, any> = {
         // status: status
       };
@@ -276,18 +278,25 @@ export class AgentController extends BaseController {
       });
       await this.authService.createAuth({
         userId: user.id,
-        password: "no-password",
+        password: ENV.PASS_INIT || "no-password",
         username: agentRegistration.basicInfo?.email!,
         roleId: role.id,
       });
       const verifyToken = this.authService.generateAccessToken(
-        { userId: user.id },
+        {
+          userId: user.id,
+          email: agentRegistration.basicInfo?.email!,
+          fullName: agentRegistration.basicInfo?.nameRegister!,
+        },
         1000 * 60 * 15,
+        ENV.JWT_SECRET_LANDING_PAGE,
       );
       const updated = await this.agentService.updateAgentRegistration(id, {
+        userId: user.id,
         status: AgentStatusEnum.APPROVED,
         note: note,
-        registrationLink: `${ENV.FRONTEND_URLLANDINGPAGE}/api/auth/verify-email/${verifyToken}`,
+        registrationLink: `${ENV.FRONTEND_URLLANDINGPAGE}/verify-email/${verifyToken}`,
+        expirationDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
       });
       if (!updated) {
         throw new AppError(
@@ -306,9 +315,7 @@ export class AgentController extends BaseController {
   };
 
   verifyTokenRegistration = (
-    req: Request<
-      { token: string }
-    >,
+    req: Request<{ token: string }>,
     res: Response,
     next: NextFunction,
   ) => {
@@ -322,7 +329,14 @@ export class AgentController extends BaseController {
           ErrorCode.EXTERNAL_SERVICE_ERROR,
         );
       }
-      const decoded = this.authService.validateToken(token) as { userId: string };
+      const decoded = this.authService.validateToken(
+        token,
+        ENV.JWT_SECRET_LANDING_PAGE,
+      ) as {
+        userId: string;
+        email: string;
+        fullName: string;
+      };
       if (!decoded) {
         throw new AppError(
           lang === "vi" ? "Invalid token" : "Invalid token",
@@ -330,8 +344,31 @@ export class AgentController extends BaseController {
           ErrorCode.EXTERNAL_SERVICE_ERROR,
         );
       }
-      const userId = decoded?.userId;
-      return userId
+      const agentRegistration = await this.agentService.getAgentByUserId(
+        decoded.userId,
+      );
+      if (
+        !agentRegistration ||
+        agentRegistration?.status != AgentStatusEnum.APPROVED
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          405,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      if (
+        agentRegistration.expirationDate &&
+        agentRegistration.expirationDate < new Date()
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          405,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      const { email, fullName, userId } = decoded;
+      return { email, fullName, userId };
     });
   };
 
@@ -365,9 +402,80 @@ export class AgentController extends BaseController {
           sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
         },
         filter,
-        "id basicInfo businessInfo"
+        "id basicInfo businessInfo",
       );
       return agentRegistrations;
+    });
+  };
+
+  createPasswordAgent = (
+    req: Request<
+      { token: string },
+      {},
+      {
+        password: string;
+        confirmPassword: string;
+        email: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { token } = req.params;
+      const { password, email } = req.body;
+
+      const agentRegistration = await this.agentService.getAgentByEmail(email);
+      if (
+        !agentRegistration ||
+        agentRegistration?.status != AgentStatusEnum.APPROVED
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          400,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      if (
+        agentRegistration.expirationDate &&
+        agentRegistration.expirationDate < new Date()
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Hết hạn đăng ký" : "Agent registration expired",
+          400,
+          ErrorCode.TOKEN_EXPIRED,
+        );
+      }
+      const auth = await this.authService.getAuthByUserId(
+        agentRegistration.userId!.toString(),
+      );
+      if (!auth) {
+        throw new AppError(
+          lang === "vi" ? "Error occur" : "Error occur",
+          400,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      if (auth.password != ENV.PASS_INIT || auth.password != "no-password") {
+        throw new AppError(
+          lang === "vi" ? "Password already set" : "Password already set",
+          400,
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+        );
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await this.authService.updateAuth(auth._id!.toString(), {
+        password: hashedPassword,
+        passwordHistories: [
+          {
+            password: hashedPassword,
+            createdAt: new Date(),
+          },
+        ],
+      });
+      return true;
     });
   };
 }

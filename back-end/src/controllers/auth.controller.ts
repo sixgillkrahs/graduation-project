@@ -1,16 +1,14 @@
+import { validationMessages } from "@/i18n/validationMessages";
 import { AuthService } from "@/services/auth.service";
+import { RoleService } from "@/services/role.service";
+import { UserService } from "@/services/user.service";
 import { ApiRequest } from "@/utils/apiRequest";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 import bcrypt from "bcrypt";
+import { parse } from "cookie";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
-import { validationMessages } from "@/i18n/validationMessages";
-import { UserService } from "@/services/user.service";
-import jwt, { SignOptions } from "jsonwebtoken";
-import { ENV } from "@/config/env";
-import { RoleService } from "@/services/role.service";
-import { parse } from "cookie";
 
 export class AuthController extends BaseController {
   private userService: UserService;

@@ -4,7 +4,7 @@
   "description": "",
   "main": "worker.js",
   "scripts": {
-    "dev": "npx nodemon tsx src/bootstrap/email-worker.bootstrap.ts",
+    "dev": "npx nodemon",
     "worker:email": "tsx src/bootstrap/email-worker.bootstrap.ts",
     "dev:clean": "rimraf dist && tsx watch src/index.ts",
     "start": "node --expose-gc --trace-gc --trace-gc-ignore-scavenger dist/index.js",

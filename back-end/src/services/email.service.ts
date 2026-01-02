@@ -63,7 +63,7 @@ export class EmailService {
     name: string,
     verificationToken: string,
   ): Promise<void> {
-    const verificationUrl = `${ENV.SERVER_URL}/api/auth/verify-email/${verificationToken}`; // TODO: Change this to frontend URL
+    const verificationUrl = `${ENV.FRONTEND_URLLANDINGPAGE}/verify-email/${verificationToken}`;
     try {
       const info = await this.transporter.sendMail({
         from: this.fromAddress,

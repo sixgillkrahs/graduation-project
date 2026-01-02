@@ -5,7 +5,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 
 @singleton
 export class AuthService {
-  constructor() { }
+  constructor() {}
 
   async getAuthByUsername(username: string) {
     return AuthModel.findOne({
@@ -15,6 +15,10 @@ export class AuthService {
 
   async createAuth(auth: IAuth) {
     return AuthModel.create(auth);
+  }
+
+  async updateAuth(id: string, auth: Partial<IAuth>) {
+    return AuthModel.findByIdAndUpdate(id, auth);
   }
 
   async getAuthById(id: string) {
@@ -34,8 +38,11 @@ export class AuthService {
     return decoded;
   }
 
-  generateAccessToken(payload: object, expiresTime: number): string {
-    const secret = ENV.JWT_SECRET;
+  generateAccessToken(
+    payload: object,
+    expiresTime: number,
+    secret = ENV.JWT_SECRET,
+  ): string {
     if (!secret) {
       throw new Error("JWT_SECRET is not defined");
     }
@@ -58,9 +65,9 @@ export class AuthService {
     return jwt.sign(payload, secret, options);
   }
 
-  validateToken(token: string) {
+  validateToken(token: string, secret = ENV.JWT_SECRET) {
     try {
-      const decoded = jwt.verify(token, ENV.JWT_SECRET);
+      const decoded = jwt.verify(token, secret);
       return decoded;
     } catch (error) {
       return false;

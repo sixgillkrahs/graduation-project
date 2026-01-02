@@ -1,3 +1,4 @@
+import { showToast } from "@/components/ui/Toast";
 import {
   Mutation,
   MutationCache,
@@ -22,26 +23,23 @@ export const queryClient = new QueryClient({
       query: Query<unknown, unknown, unknown, QueryKey>
     ): void => {
       if (query.meta?.SUCCESS_MESSAGE) {
-        // toast.success(`${query.meta.SUCCESS_MESSAGE}:`);
-        console.log(`${query.meta.SUCCESS_MESSAGE}:`);
+        showToast.success(`${query.meta.SUCCESS_MESSAGE}`);
       }
     },
     onError: (
       error: any,
       query: Query<unknown, unknown, unknown, QueryKey>
     ): void => {
-      if (axios.isAxiosError(error) && query.meta?.ERROR_SOURCE) {
-        // toast.error(`${query.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
-        console.error(
-          `${query.meta.ERROR_SOURCE}: ${error.response?.data?.message}`
-        );
+      const errorSource = (query.meta?.ERROR_SOURCE as string) || "Error";
+      let errorMessage = "An unknown error occurred";
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
-      if (error instanceof Error && query.meta?.ERROR_SOURCE) {
-        // toast.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
-        console.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
-      }
-      if (error?.response && error.response.status === 404) {
-      }
+
+      showToast.error(errorSource, errorMessage);
     },
   }),
   mutationCache: new MutationCache({
@@ -51,13 +49,22 @@ export const queryClient = new QueryClient({
       _context: unknown,
       mutation: Mutation<unknown, unknown, unknown, unknown>
     ): void => {
-      if (axios.isAxiosError(error) && mutation.meta?.ERROR_SOURCE) {
+      const errorSource = (mutation.meta?.ERROR_SOURCE as string) || "Error";
+      let errorMessage = "An unknown error occurred";
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
-      if (error instanceof Error && mutation.meta?.ERROR_SOURCE) {
+
+      // @ts-expect-error Error type 'AxiosError' is not assignable to type 'Error'.
+      if (error?.code === "ERR_BAD_REQUEST") {
+        // @ts-expect-error Object is of type 'unknown'.
+        errorMessage = error.response?.data?.message || errorMessage;
       }
-      //@ts-expect-error  Error type 'AxiosError' is not assignable to type 'Error'.
-      if (error.code === "ERR_BAD_REQUEST" && mutation.meta?.ERROR_SOURCE) {
-      }
+
+      showToast.error(errorSource, errorMessage);
     },
     onSuccess: (
       _data: unknown,
@@ -66,6 +73,7 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>
     ): void => {
       if (mutation.meta?.SUCCESS_MESSAGE) {
+        showToast.success(`${mutation.meta.SUCCESS_MESSAGE}`);
       }
     },
   }),

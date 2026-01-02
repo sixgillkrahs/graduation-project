@@ -1,36 +1,24 @@
 import { ENV } from "@/config/env";
-import mongoose from 'mongoose'
-
-// const prisma = new PrismaClient({
-//     // log only in development
-//     log: ENV.NODE_ENV === "development" ? ["query", "error", "warn"] : [],
-//     datasources: {
-//         db: {
-//             url: ENV.DATABASE_URL,
-//         },
-//     },
-// });
-
+import mongoose from "mongoose";
 
 class MongoDB {
-    constructor() {
-    }
+  constructor() {}
 
-    async disconnect() {
-        await mongoose.disconnect();
-    }
+  async disconnect() {
+    await mongoose.disconnect();
+  }
 
-    async connect() {
-        await mongoose.connect(ENV.DATABASE_URL).then(() => console.log("Connected to MongoDB"))
-            .catch((err) => console.error("Error connecting to MongoDB:", err));
-    }
+  async connect() {
+    await mongoose
+      .connect(ENV.DATABASE_URL)
+      .then(() => console.log("Connected to MongoDB"))
+      .catch((err) => console.error("Error connecting to MongoDB:", err));
+  }
 }
 
-
-
 const handleShutdown = async () => {
-    console.log("Shutting down database connection");
-    await mongoose.disconnect();
+  console.log("Shutting down database connection");
+  await mongoose.disconnect();
 };
 
 process.on("SIGTERM", handleShutdown);

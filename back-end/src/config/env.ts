@@ -16,7 +16,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   REFRESH_TOKEN_SECRET: z.string().min(32),
   JWT_EXPIRY: z.string().regex(/^\d+[smhd]$/),
+  PASS_INIT: z.string().min(6),
   // REFRESH_TOKEN_EXPIRY: z.string().regex(/^\d+[smhd]$/),
+  JWT_SECRET_LANDING_PAGE: z.string().min(32),
   FRONTEND_URL: z.url(),
   FRONTEND_URLLANDINGPAGE: z.url(),
   SMTP_HOST:

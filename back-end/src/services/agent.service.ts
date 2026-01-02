@@ -3,7 +3,7 @@ import AgentModel, { IAgent } from "@/models/agent.model";
 
 @singleton
 export class AgentService {
-  constructor() { }
+  constructor() {}
 
   getAgent = async (id: string) => {
     return await AgentModel.findById(id);
@@ -12,6 +12,18 @@ export class AgentService {
   getAgentByIdNumber = async (idNumber: string) => {
     return await AgentModel.findOne({
       "basicInfo.identityInfo.IDNumber": idNumber,
+    });
+  };
+
+  getAgentByEmail = async (email: string) => {
+    return await AgentModel.findOne({
+      "basicInfo.email": email,
+    });
+  };
+
+  getAgentByUserId = async (userId: string) => {
+    return await AgentModel.findOne({
+      userId: userId,
     });
   };
 

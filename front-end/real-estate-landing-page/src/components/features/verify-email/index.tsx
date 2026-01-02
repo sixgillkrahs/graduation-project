@@ -4,17 +4,56 @@ import { Button, Icon, Input } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
 import Logo from "@/assets/Logo.svg";
 import { useVerifyEmail } from "./services/query";
+import { Controller, useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { showToast } from "@/components/ui/Toast";
+import { useCreatePassword } from "./services/mutate";
 
 const VerifyEmail = () => {
   const router = useRouter();
   const { token } = useParams();
   const { data, isLoading, isError } = useVerifyEmail(token);
+  const { mutateAsync: createPassword, isPending } = useCreatePassword();
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<IVerifyEmailService.IBodyVerifyEmail>({
+    defaultValues: {
+      confirmPassword: "",
+      email: "",
+      password: "",
+      token: (token as string) || "",
+    },
+    mode: "onChange",
+  });
+
+  const password = watch("password");
+
+  useEffect(() => {
+    if (data?.data?.email) {
+      reset({
+        email: data.data.email,
+        password: "",
+        confirmPassword: "",
+        token: token as string,
+      });
+    }
+  }, [data?.data?.email, reset, token]);
 
   const handleToHome = () => {
     router.push("/");
+  };
+
+  const onSubmit = async (data: IVerifyEmailService.IBodyCreatePassword) => {
+    await createPassword(data);
+    showToast.success("The password has been successfully created");
+    router.push("/sign-in");
   };
 
   if (isError) {
@@ -42,29 +81,68 @@ const VerifyEmail = () => {
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          <form className="grid gap-4">
-            <Input
-              label="Email Address"
-              placeholder="john.doe@example.com"
-              disabled
-              suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
+          <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  label="Email"
+                  placeholder="Enter email"
+                  error={errors.email?.message}
+                  disabled
+                  suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
+                  {...field}
+                />
+              )}
+            />
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters long",
+                },
+              }}
+              render={({ field }) => (
+                <Input
+                  label="Password"
+                  placeholder="Enter password"
+                  type="password"
+                  suffix={<Icon.Lock className="main-color-gray w-5 h-5" />}
+                  error={errors.password?.message}
+                  {...field}
+                />
+              )}
             />
 
-            <Input
-              label="Password"
-              placeholder="Enter password"
-              type="password"
-              //   suffix={<Icon.Lock className="main-color-gray w-5 h-5" />}
+            <Controller
+              name="confirmPassword"
+              control={control}
+              rules={{
+                required: "Confirm Password is required",
+                validate: (value) =>
+                  value === password || "Passwords do not match",
+              }}
+              render={({ field }) => (
+                <Input
+                  label="Confirm Password"
+                  placeholder="Re-enter password"
+                  type="password"
+                  suffix={<Icon.Lock className="main-color-gray w-5 h-5" />}
+                  error={errors.confirmPassword?.message}
+                  {...field}
+                />
+              )}
             />
 
-            <Input
-              label="Confirm Password"
-              placeholder="Re-enter password"
-              type="password"
-              //   suffix={<Icon.Lock className="main-color-gray w-5 h-5" />}
-            />
-
-            <Button type="submit" className="w-full cs-bg-red text-white mt-2">
+            <Button
+              type="submit"
+              className="w-full cs-bg-red text-white mt-2"
+              loading={isPending}
+            >
               Verify & Continue
             </Button>
           </form>

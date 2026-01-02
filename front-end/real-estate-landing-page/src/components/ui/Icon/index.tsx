@@ -29,6 +29,7 @@ import { User } from "./User";
 import { Youtube } from "./Youtube";
 import { Eye } from "./Eye";
 import { EyeClose } from "./EyeClose";
+import { Lock } from "./Lock";
 //#endregion
 
 export const Icon = {
@@ -62,4 +63,5 @@ export const Icon = {
   DeleteBin,
   Eye,
   EyeClose,
+  Lock,
 };

@@ -4,32 +4,23 @@ import {
   SendVerifyEmailJob,
 } from "@/@types/jobTypes";
 import { RedisConnection } from "@/config/redis";
+import { EmailService } from "@/services/email.service";
 import { Worker } from "bullmq";
-
-export interface IEmailService {
-  sendVerificationEmail(
-    email: string,
-    name: string | undefined,
-    token: string,
-  ): Promise<void>;
-  sendPasswordResetEmail(
-    to: string,
-    name: string,
-    resetToken: string,
-  ): Promise<void>;
-  sendRejectEmail(to: string, name: string, reason: string): Promise<void>;
-}
 
 export class EmailWorker {
   private worker: Worker;
 
-  constructor(private emailService: IEmailService) {
+  constructor(private emailService: EmailService) {
     this.worker = new Worker(
       "email",
       async (job) => {
         if (job.name === "sendVerifyEmail") {
           const { email, name, token } = job.data as SendVerifyEmailJob;
-          await this.emailService.sendVerificationEmail(email, name, token);
+          await this.emailService.sendVerificationEmail(
+            email,
+            name || "",
+            token,
+          );
         } else if (job.name === "sendPasswordResetEmail") {
           const { to, name, resetToken } =
             job.data as SendPasswordResetEmailJob;

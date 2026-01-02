@@ -169,6 +169,63 @@ router.post(
 
 /**
  * @swagger
+ * /agents-registrations/{token}/create-password:
+ *   post:
+ *     summary: Create password for agent registration
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The agent registration token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - confirmPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "dovanquan28041999@gmail.com"
+ *
+ *               password:
+ *                 type: string
+ *                 example: "12345678"
+ *
+ *               confirmPassword:
+ *                 type: string
+ *                 example: "12345678"
+ *
+ *     responses:
+ *       200:
+ *         description: Password created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Password created successfully"
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ */
+router.post("/:token/create-password", agentController.createPasswordAgent);
+
+/**
+ * @swagger
  * /agents-registrations/{token}:
  *   get:
  *     summary: Verify agent registration token
@@ -199,10 +256,7 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.get(
-  "/:token",
-  agentController.verifyTokenRegistration,
-);
+router.get("/:token/verify", agentController.verifyTokenRegistration);
 
 router.use(requireAuth);
 
@@ -312,11 +366,6 @@ router.get("/", agentController.getAgentRegistrations);
  *           type: string
  *         required: true
  *         description: ID of the agent registration
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
  *
  *     responses:
  *       200:
