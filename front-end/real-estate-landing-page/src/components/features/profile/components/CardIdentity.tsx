@@ -9,10 +9,10 @@ const CardIdentity = ({
 }) => {
   const [visible, setVisible] = useState(false);
   return (
-    <div className="bg-black/10 rounded-[18px]">
+    <div className="bg-white rounded-[18px]">
       <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
-          <div className="size-5 flex items-center justify-center bg-white p-2 rounded-lg box-content">
+          <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
             <Icon.IdCard className="size-5" />
           </div>{" "}
           <div>

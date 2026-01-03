@@ -12,4 +12,14 @@ export default class ProfileService {
       method: AxiosMethod.GET,
     });
   };
+
+  public static readonly changePassword = (
+    data: IProfileService.ChangePasswordRequest
+  ): Promise<IResp<void>> => {
+    return request({
+      url: ProfileEndpoint.changePassword(),
+      method: AxiosMethod.PUT,
+      data,
+    });
+  };
 }

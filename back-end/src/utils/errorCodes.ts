@@ -9,6 +9,7 @@ export enum ErrorCode {
   USERNAME_EXISTS = "ERR_1007",
   EMAIL_EXISTS = "ERR_1008",
   USER_NOT_FOUND = "ERR_1009",
+  USER_NOT_ACTIVE = "ERR_1010",
 
   // Authorization Errors (2xxx)
   FORBIDDEN = "ERR_2001",

@@ -1,4 +1,7 @@
-import { ChangeEvent, InputHTMLAttributes, ReactNode } from "react";
+"use client";
+
+import { ChangeEvent, InputHTMLAttributes, ReactNode, useState } from "react";
+import { Icon } from "../Icon";
 
 const Input = ({
   placeholder,
@@ -53,4 +56,64 @@ const Input = ({
   );
 };
 
-export { Input };
+const Password = ({
+  placeholder,
+  className,
+  preIcon,
+  name,
+  label,
+  error,
+  onChange,
+  value,
+  register,
+  suffix,
+  ...rest
+}: {
+  placeholder?: string;
+  className?: string;
+  preIcon?: ReactNode;
+  name?: string;
+  label?: string;
+  error?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  value?: string;
+  register?: any;
+  suffix?: ReactNode;
+} & InputHTMLAttributes<HTMLInputElement>) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  return (
+    <Input
+      placeholder={placeholder}
+      className={className}
+      preIcon={preIcon}
+      name={name}
+      label={label}
+      error={error}
+      onChange={onChange}
+      value={value}
+      register={register}
+      type={showPassword ? "text" : "password"}
+      suffix={
+        showPassword ? (
+          <Icon.Eye
+            className="main-color-gray w-5 h-5 cursor-pointer"
+            onClick={handleTogglePassword}
+          />
+        ) : (
+          <Icon.EyeClose
+            className="main-color-gray w-5 h-5 cursor-pointer"
+            onClick={handleTogglePassword}
+          />
+        )
+      }
+      {...rest}
+    />
+  );
+};
+
+export { Input, Password };

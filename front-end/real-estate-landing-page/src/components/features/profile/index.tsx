@@ -1,28 +1,37 @@
-import { Button, Icon, Tag } from "@/components/ui";
+import { Button, Icon, Image, Modal, Tag, useModal } from "@/components/ui";
 import { useProfile } from "./services/query";
 import RenderField from "./components/RenderField";
 import CardField from "./components/CardField";
 import CardIdentity from "./components/CardIdentity";
+import { ModalChangePassword } from "./components/ModalChangePassword";
+import { useCallback } from "react";
 
 const Profile = () => {
   const { data: profile } = useProfile();
+  const { open, show, hide } = useModal();
 
   const profileData = profile?.data;
 
-  console.log(profileData);
+  const handleOpenModal = () => {
+    show();
+  };
+
+  const handleCloseModal = useCallback(() => {
+    hide();
+  }, [hide]);
 
   return (
-    <section className="p-6 md:p-8 container mx-auto grid gap-6">
-      <div className="flex justify-between items-center gap-4 p-8  w-full rounded-[18px] bg-black/10">
+    <section className="p-6 md:p-8 container mx-auto grid gap-6 bg-black/10">
+      <div className="flex justify-between items-center gap-4 p-8  w-full rounded-[18px] bg-white">
         <div className="">
           <div className="flex items-center gap-2">
-            <div className="rounded-full bg-gray-200 p-4 size-36 flex items-center justify-center">
-              <img
-                src="/avatar.png"
-                alt="avatar"
-                className="w-full h-full rounded-full"
-              />
-            </div>
+            <Image
+              src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo.identityBack}`}
+              alt="avatar"
+              className="w-full h-full rounded-full bg-gray-200 p-4 size-36 flex items-center justify-center object-cover overflow-hidden"
+              width={150}
+              height={150}
+            />
             <div className="grid gap-2">
               <span className="cs-typography text-[30px]! font-bold!">
                 {profileData?.basicInfo.nameRegister}
@@ -45,6 +54,7 @@ const Profile = () => {
             className="text-black"
             outline
             icon={<Icon.RotateLock className="size-5" />}
+            onClick={handleOpenModal}
           >
             Change Password
           </Button>
@@ -57,9 +67,9 @@ const Profile = () => {
         </div>
       </div>
       <div className="grid grid-cols-3 gap-6">
-        <div className="bg-black/10 rounded-[18px]">
+        <div className="bg-white rounded-[18px]">
           <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
-            <div className="size-5 flex items-center justify-center bg-white p-2 rounded-lg box-content">
+            <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
               <Icon.User className="size-5" />
             </div>{" "}
             Contact Info
@@ -79,9 +89,9 @@ const Profile = () => {
             />
           </div>
         </div>
-        <div className="bg-black/10 rounded-[18px]">
+        <div className="bg-white rounded-[18px]">
           <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
-            <div className="size-5 flex items-center justify-center bg-white p-2 rounded-lg box-content">
+            <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
               <Icon.Briefcase className="size-5" />
             </div>{" "}
             Professional Profile
@@ -129,9 +139,9 @@ const Profile = () => {
                 />
               </div>
             </div>
-            <div className="my-4 bg-black/10 w-full h-px" />
+            <div className="my-4 bg-white w-full h-px" />
             <div className="grid gap-2">
-              <span className="flex items-center gap-2 cs-typography text-[14px]! font-bold!">
+              <span className="flex items-center gap-2 cs-typography text-[14px]! font-bold! ">
                 <span>
                   <Icon.VerifiedBadge className="size-5" />
                 </span>{" "}
@@ -149,7 +159,7 @@ const Profile = () => {
                 })}
               </div>
             </div>
-            <div className="my-4 bg-black/10 w-full h-px" />
+            <div className="my-4 bg-white w-full h-px" />
             <div className="grid gap-2">
               <span className="flex items-center gap-2 cs-typography text-[14px]! font-bold!">
                 <span>
@@ -173,9 +183,9 @@ const Profile = () => {
         </div>
         <div className="grid grid-cols-1 gap-6">
           <CardIdentity identityInfo={profileData?.basicInfo.identityInfo} />
-          <div className="bg-black/10 rounded-[18px] h-full">
+          <div className="bg-white rounded-[18px] h-full">
             <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
-              <div className="size-5 flex items-center justify-center bg-white p-2 rounded-lg box-content">
+              <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
                 <Icon.IdCard className="size-5" />
               </div>{" "}
               Documents
@@ -186,20 +196,49 @@ const Profile = () => {
                   Identity Card
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="w-full h-20 bg-black/10 rounded-[12px]"></div>
-                  <div className="w-full h-20 bg-black/10 rounded-[12px]"></div>
+                  <Image
+                    src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo.identityFront}`}
+                    alt="Identity Front"
+                    width={40}
+                    height={40}
+                    className="w-full"
+                    unoptimized={true}
+                  />
+                  <Image
+                    src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo.identityBack}`}
+                    alt="Identity Back"
+                    width={40}
+                    height={40}
+                    className="w-full"
+                    unoptimized={true}
+                  />
                 </div>
               </div>
               <div className="grid gap-2">
                 <div className="cs-paragraph text-[14px]! font-bold! uppercase">
                   Business License
                 </div>
-                <div className="w-full h-20 bg-black/10 rounded-[12px]"></div>
+                <div className="grid gap-2">
+                  {profileData?.imageInfo.certificateImage.map((item) => {
+                    return (
+                      <Image
+                        src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${item}`}
+                        key={item}
+                        alt="Business License"
+                        width={40}
+                        height={40}
+                        className="w-full"
+                        unoptimized={true}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <ModalChangePassword onCancel={handleCloseModal} open={open} />
     </section>
   );
 };

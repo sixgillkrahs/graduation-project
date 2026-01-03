@@ -9,3 +9,5 @@ export * from "./Tag";
 export * from "./Upload";
 export * from "./Checkbox";
 export * from "./Dropdown";
+export * from "./Image";
+export * from "./Modal";

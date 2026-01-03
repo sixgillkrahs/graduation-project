@@ -34,9 +34,8 @@ interface RoleId {
 }
 
 interface PasswordHistory {
-  _id: string;
   password: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 interface JwtPayload {

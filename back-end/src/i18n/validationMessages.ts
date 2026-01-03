@@ -30,6 +30,8 @@ export const validationMessages = {
     userNotFound: "Không tồn tại người dùng",
     invalidPath: "Đường dẫn không hợp lệ",
     userNotActive: "Người dùng đã bị khóa",
+    incorrectPassword: "Sai mật khẩu",
+    passwordSame: "Mật khẩu mới không thể trùng với mật khẩu cũ",
   },
   en: {
     refreshTokenNotExist: "Refresh token not exist",
@@ -62,5 +64,7 @@ export const validationMessages = {
     userNotFound: "User not found",
     invalidPath: "Invalid path",
     userNotActive: "User not active",
+    incorrectPassword: "Incorrect password",
+    passwordSame: "New password cannot be the same as the old password",
   },
 } as const;

@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 const CardField = ({ title, value }: { title?: string; value: ReactNode }) => {
   return (
     <div
-      className={`bg-white rounded-[18px] grid gap-2 ${
+      className={` rounded-[18px] grid gap-2 bg-black/10 ${
         title ? "p-4" : "px-4 py-2"
       }`}
     >

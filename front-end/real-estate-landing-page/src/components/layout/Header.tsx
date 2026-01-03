@@ -36,7 +36,7 @@ const Header = () => {
           onClick={() => router.push("/")}
         >
           <Image src={Logo} alt="logo" width={24} height={24} />
-          <span className="text-[#222222]">Havenly</span>
+          <span className="text-black">Havenly</span>
         </div>
         <nav className="hidden md:block">
           <ul className="flex gap-6 p-6">

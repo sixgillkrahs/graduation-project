@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import styles from "./slider.module.css";
 
 const Slider = ({
   min = 0,
@@ -24,15 +23,18 @@ const Slider = ({
 
   const percent = ((value - min) / (max - min)) * 100;
 
+  const format = (value: number) =>
+    new Intl.NumberFormat("en-US").format(value);
+
   return (
     <div>
       {!hiddenStat && (
         <div className="flex items-center justify-between bg-black/10 rounded-full p-2">
           <span className="text-sm main-color-red font-medium">
-            ${min.toLocaleString()}K
+            ${format(min)}K
           </span>
           <span className="text-sm main-color-red font-medium">
-            ${max.toLocaleString()}K
+            ${format(max)}K
           </span>
         </div>
       )}

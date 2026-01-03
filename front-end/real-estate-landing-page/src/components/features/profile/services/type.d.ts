@@ -39,4 +39,10 @@ namespace IProfileService {
     identityFront: string;
     identityBack: string;
   }
+
+  export interface ChangePasswordRequest {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }
 }

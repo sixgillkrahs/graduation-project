@@ -148,4 +148,32 @@ router.post("/refresh-token", authController.refreshToken);
  */
 router.post("/logout", authController.logout);
 
+/**
+ * @swagger
+ * /auth/change-password:
+ *   put:
+ *     summary: Change password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       description: Change password request body
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *               confirmPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Change password successful
+ *       400:
+ *         description: Invalid input
+ */
+router.put("/change-password", requireAuth, authController.changePassword);
+
 export default router;

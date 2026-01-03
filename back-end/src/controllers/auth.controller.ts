@@ -1,19 +1,18 @@
+import { ChangePasswordRequest } from "@/dto/auth.dto";
+import { validationMessages } from "@/i18n/validationMessages";
+import { IAuth } from "@/models/auth.model";
+import { IRole } from "@/models/role.model";
+import { IUser } from "@/models/user.model";
 import { AuthService } from "@/services/auth.service";
+import { RoleService } from "@/services/role.service";
+import { UserService } from "@/services/user.service";
 import { ApiRequest } from "@/utils/apiRequest";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 import bcrypt from "bcrypt";
+import { parse } from "cookie";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
-import { validationMessages } from "@/i18n/validationMessages";
-import { UserService } from "@/services/user.service";
-import jwt, { SignOptions } from "jsonwebtoken";
-import { ENV } from "@/config/env";
-import { RoleService } from "@/services/role.service";
-import { parse } from "cookie";
-import { IAuth } from "@/models/auth.model";
-import { IRole } from "@/models/role.model";
-import { IUser } from "@/models/user.model";
 
 export class AuthController extends BaseController {
   private userService: UserService;
@@ -203,7 +202,7 @@ export class AuthController extends BaseController {
       if (!token) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-            "Refresh token not exist",
+          "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -212,7 +211,7 @@ export class AuthController extends BaseController {
       if (!decoded) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-            "Refresh token not exist",
+          "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -279,4 +278,48 @@ export class AuthController extends BaseController {
       return user;
     });
   };
+
+  changePassword = (req: Request<{}, {}, ChangePasswordRequest>, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { oldPassword, newPassword, confirmPassword } = req.body;
+      const lang = ApiRequest.getCurrentLang(req);
+      const currentUser = req.user;
+      if (!currentUser.userId.isActive) {
+        throw new AppError(
+          validationMessages[lang].userNotActive || "User not active",
+          401,
+          ErrorCode.USER_NOT_ACTIVE,
+        );
+      }
+      // Kiểm tra mật khẩu cũ có đúng không
+      const isPasswordValid = await bcrypt.compare(oldPassword, currentUser.password);
+      if (!isPasswordValid) {
+        throw new AppError(
+          validationMessages[lang].incorrectPassword || "Incorrect password",
+          401,
+          ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+      // Kiểm tra mật khẩu mới có trùng với mật khẩu cũ không
+      const isPasswordNewValid = await bcrypt.compare(newPassword, currentUser.password);
+      if (isPasswordNewValid) {
+        throw new AppError(
+          validationMessages[lang].passwordSame || "Password same",
+          400,
+          ErrorCode.PASSWORD_MISMATCH,
+        );
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      const historyPass = currentUser.passwordHistories || [];
+      historyPass.push({
+        password: hashedPassword,
+        createdAt: new Date(),
+      })
+      await this.authService.updateAuth(currentUser._id, {
+        password: hashedPassword,
+        passwordHistories: historyPass
+      });
+      return true
+    })
+  }
 }
