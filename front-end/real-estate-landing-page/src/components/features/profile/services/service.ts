@@ -5,7 +5,7 @@ import { ProfileEndpoint } from "./config";
 
 export default class ProfileService {
   public static readonly profile = (): Promise<
-    IResp<IProfileService.BasicInfo>
+    IResp<IProfileService.ProfileDTO>
   > => {
     return request({
       url: ProfileEndpoint.profile(),

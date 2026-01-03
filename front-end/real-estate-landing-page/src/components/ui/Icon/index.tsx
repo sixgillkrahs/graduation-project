@@ -32,6 +32,11 @@ import { EyeClose } from "./EyeClose";
 import { Lock } from "./Lock";
 import { LogoutCircle } from "./LogoutCircle";
 import { Settings } from "./Settings";
+import Pencil from "./Pencil";
+import { RotateLock } from "./RotateLock";
+import { Briefcase } from "./Briefcase";
+import { VerifiedBadge } from "./VerifiedBadge";
+import { IdCard } from "./IdCard";
 //#endregion
 
 export const Icon = {
@@ -68,4 +73,9 @@ export const Icon = {
   Lock,
   LogoutCircle,
   Settings,
+  Pencil,
+  RotateLock,
+  Briefcase,
+  VerifiedBadge,
+  IdCard,
 };

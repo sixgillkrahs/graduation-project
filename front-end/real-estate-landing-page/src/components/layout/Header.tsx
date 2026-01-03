@@ -101,7 +101,7 @@ const Header = () => {
             }
           >
             <DropdownItem
-              onClick={() => router.push(`/profile/${me.data.userId._id}`)}
+              onClick={() => router.push(`/profile`)}
               icon={<Icon.User className="w-4 h-4" />}
             >
               Profile
