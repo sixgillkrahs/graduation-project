@@ -2,6 +2,7 @@
 
 import { ChangeEvent, InputHTMLAttributes, ReactNode, useState } from "react";
 import { Icon } from "../Icon";
+import OTP from "./OTP";
 
 const Input = ({
   placeholder,
@@ -116,4 +117,4 @@ const Password = ({
   );
 };
 
-export { Input, Password };
+export { Input, Password, OTP };

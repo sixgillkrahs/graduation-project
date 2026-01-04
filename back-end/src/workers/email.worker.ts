@@ -1,4 +1,5 @@
 import {
+  SendOTPEmailJob,
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
   SendVerifyEmailJob,
@@ -28,6 +29,9 @@ export class EmailWorker {
         } else if (job.name === "sendRejectEmail") {
           const { to, name, reason } = job.data as SendRejectEmailJob;
           await this.emailService.sendRejectEmail(to, name, reason);
+        } else if (job.name === "sendOTPEmail") {
+          const { to, otp } = job.data as SendOTPEmailJob;
+          await this.emailService.sendOTPEmail(to, otp);
         }
       },
       {

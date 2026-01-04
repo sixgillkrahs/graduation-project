@@ -133,7 +133,12 @@ const SignIn = () => {
               />
             )}
           />
-          <span className="cs-typography-gray text-sm!">Forgot password?</span>
+          <Link
+            className="cs-typography-gray text-sm! cursor-pointer hover:underline"
+            href="/forgot-password"
+          >
+            Forgot password?
+          </Link>
         </div>
         <Button
           type="submit"

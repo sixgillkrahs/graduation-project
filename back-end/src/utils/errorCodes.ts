@@ -39,4 +39,6 @@ export enum ErrorCode {
 
   // Validation Errors (3xxx)
   VALIDATION_ERROR = "ERR_3006",
+  OTP_EXPIRED = "ERR_3007",
+  INCORRECT_OTP = "ERR_3008",
 }

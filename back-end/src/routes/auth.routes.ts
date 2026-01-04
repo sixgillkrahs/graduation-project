@@ -6,16 +6,19 @@ import { validateRequest } from "@/middleware/validateRequest";
 import { loginSchema, signupSchema } from "@/validators/auth.validator";
 import { UserService } from "@/services/user.service";
 import { RoleService } from "@/services/role.service";
+import { EmailQueue } from "@/queues/email.queue";
 
 const router = Router();
 
 const authService = new AuthService();
 const userService = new UserService();
 const roleService = new RoleService();
+const emailQueue = new EmailQueue();
 const authController = new AuthController(
   authService,
   userService,
   roleService,
+  emailQueue,
 );
 
 /**
@@ -175,5 +178,55 @@ router.post("/logout", authController.logout);
  *         description: Invalid input
  */
 router.put("/change-password", requireAuth, authController.changePassword);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Forgot password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       description: Forgot password request body
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Forgot password successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/forgot-password", authController.forgotPassword);
+
+/**
+ * @swagger
+ * /auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       description: Verify OTP request body
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verify OTP successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/verify-otp", authController.verifyOTP);
 
 export default router;

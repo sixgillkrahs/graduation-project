@@ -6,6 +6,8 @@ const envSchema = z.object({
   REDIS_URL: z.string(),
   REDIS_PORT: z.string(),
   REDIS_HOST: z.string(),
+  REDIS_PASS: z.string(),
+  REDIS_DB: z.string(),
   PORT: z
     .string()
     .transform(Number)

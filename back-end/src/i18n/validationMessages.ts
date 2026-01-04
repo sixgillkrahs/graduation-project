@@ -32,6 +32,8 @@ export const validationMessages = {
     userNotActive: "Người dùng đã bị khóa",
     incorrectPassword: "Sai mật khẩu",
     passwordSame: "Mật khẩu mới không thể trùng với mật khẩu cũ",
+    otpExpired: "OTP đã hết hạn",
+    incorrectOTP: "OTP không đúng",
   },
   en: {
     refreshTokenNotExist: "Refresh token not exist",
@@ -66,5 +68,7 @@ export const validationMessages = {
     userNotActive: "User not active",
     incorrectPassword: "Incorrect password",
     passwordSame: "New password cannot be the same as the old password",
+    otpExpired: "OTP expired",
+    incorrectOTP: "Incorrect OTP",
   },
 } as const;

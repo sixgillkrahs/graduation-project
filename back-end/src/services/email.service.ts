@@ -5,6 +5,7 @@ import {
   getVerificationEmailTemplate,
   getPasswordResetEmailTemplate,
   getRejectApplicationEmailTemplate,
+  sendOTPEmailTemplate
 } from "@/templates/email";
 
 export class EmailService {
@@ -134,6 +135,32 @@ export class EmailService {
     } catch (error) {
       logger.error("Failed to send verification email", {
         context: "EmailService.sendVerificationEmail",
+        error: error instanceof Error ? error.message : "Unknown error",
+        to,
+      });
+      throw error;
+    }
+  }
+
+  async sendOTPEmail(
+    to: string,
+    otp: string,
+  ): Promise<void> {
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to,
+        subject: "Verify your email address",
+        html: sendOTPEmailTemplate(otp),
+      });
+      logger.info("OTP email sent", {
+        context: "EmailService.sendOTPEmail",
+        to,
+        messageId: info.messageId,
+      });
+    } catch (error) {
+      logger.error("Failed to send OTP email", {
+        context: "EmailService.sendOTPEmail",
         error: error instanceof Error ? error.message : "Unknown error",
         to,
       });

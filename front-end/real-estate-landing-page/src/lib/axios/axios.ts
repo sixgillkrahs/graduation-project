@@ -51,7 +51,7 @@ client.interceptors.response.use(
     if (originalRequest?.url?.includes("/auth/refresh")) {
       return Promise.reject(error);
     }
-    if (status === 401 && !originalRequest._retry) {
+    if (status === 400 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       if (isRefreshing) {

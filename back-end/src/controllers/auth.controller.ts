@@ -13,21 +13,27 @@ import bcrypt from "bcrypt";
 import { parse } from "cookie";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
+import { EmailQueue } from "@/queues/email.queue";
+import { redis } from "@/config/redis";
+import { redisConnection } from "@/config/redis.connection";
 
 export class AuthController extends BaseController {
   private userService: UserService;
   private authService: AuthService;
   private roleService: RoleService;
+  private emailQueue: EmailQueue;
 
   constructor(
     authService: AuthService,
     userService: UserService,
     roleService: RoleService,
+    emailQueue: EmailQueue,
   ) {
     super();
     this.userService = userService;
     this.authService = authService;
     this.roleService = roleService;
+    this.emailQueue = emailQueue;
   }
 
   login = async (req: Request, res: Response, next: NextFunction) => {
@@ -320,6 +326,42 @@ export class AuthController extends BaseController {
         passwordHistories: historyPass
       });
       return true
+    })
+  }
+
+  forgotPassword = (req: Request<{}, {}, { email: string }>, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { email } = req.body;
+      const otp = this.authService.getOTP();
+      await redisConnection.set(`otp:${email}`, otp, "EX", 6 * 60);
+      await this.emailQueue.sendOTPEmail({
+        to: email,
+        otp,
+      });
+      return true
+    })
+  }
+
+  verifyOTP = (req: Request<{}, {}, { email: string, otp: string }>, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { email, otp } = req.body;
+      const storedOTP = await redisConnection.get(`otp:${email}`);
+      if (!storedOTP) {
+        throw new AppError(
+          validationMessages[lang].otpExpired || "OTP expired",
+          410,
+          ErrorCode.OTP_EXPIRED,
+        );
+      }
+      if (storedOTP !== otp) {
+        throw new AppError(
+          validationMessages[lang].incorrectOTP || "Incorrect OTP",
+          410,
+          ErrorCode.INCORRECT_OTP,
+        );
+      }
+      return storedOTP
     })
   }
 }

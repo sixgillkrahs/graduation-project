@@ -6,7 +6,7 @@ import { PopulateOptions } from "mongoose";
 
 @singleton
 export class AuthService {
-  constructor() {}
+  constructor() { }
 
   async getAuthByUsername<T>(
     username: string,
@@ -87,5 +87,9 @@ export class AuthService {
     } catch (error) {
       return false;
     }
+  }
+
+  getOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 }

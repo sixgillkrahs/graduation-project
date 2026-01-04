@@ -1,9 +1,10 @@
 import {
+  SendOTPEmailJob,
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
   SendVerifyEmailJob,
 } from "@/@types/jobTypes";
-import { RedisConnection } from "@/config/redis";
+import { redisConnection } from "@/config/redis.connection";
 import { Queue } from "bullmq";
 
 export class EmailQueue {
@@ -12,7 +13,7 @@ export class EmailQueue {
   constructor() {
     console.log("initial jobs");
     this.queue = new Queue("email", {
-      connection: RedisConnection.getInstance(),
+      connection: redisConnection,
     });
   }
 
@@ -42,6 +43,17 @@ export class EmailQueue {
   enqueueRejectEmail(data: SendRejectEmailJob) {
     const jobId = `reject-email:${data.to}`;
     return this.queue.add("sendRejectEmail", data, {
+      jobId,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+  }
+
+  sendOTPEmail(data: SendOTPEmailJob) {
+    const jobId = `otp-email-${data.to}`;
+    return this.queue.add("sendOTPEmail", data, {
       jobId,
       attempts: 5,
       backoff: { type: "exponential", delay: 3000 },

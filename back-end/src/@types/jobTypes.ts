@@ -21,3 +21,8 @@ export type SendRejectEmailJob = {
   name: string;
   reason: string;
 };
+
+export type SendOTPEmailJob = {
+  to: string;
+  otp: string;
+};
