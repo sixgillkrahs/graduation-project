@@ -12,6 +12,12 @@ export interface IAuth {
   }[];
   userId: mongoose.Schema.Types.ObjectId;
   roleId: mongoose.Schema.Types.ObjectId;
+  passkeys?: Array<{
+    credentialID: string;
+    publicKey: string;
+    counter: number;
+    transports: string[];
+  }>;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -87,6 +93,35 @@ const authSchema = new mongoose.Schema<IAuth, AuthModel, IAuthMethods>(
     roleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: collections.roles,
+    },
+    passkeys: {
+      type: [
+        {
+          credentialID: {
+            type: String,
+            required: true,
+            trim: true,
+          },
+          publicKey: {
+            type: String,
+            required: true,
+            trim: true,
+          },
+          counter: {
+            type: Number,
+            required: true,
+            trim: true,
+          },
+          transports: {
+            type: [String],
+            required: true,
+            trim: true,
+          },
+        },
+      ],
+      default: [],
+      unique: true,
+      trim: true,
     },
   },
   {

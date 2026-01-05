@@ -18,3 +18,20 @@ export const useSignIn = (): UseMutationResult<
     },
   });
 };
+
+export const useSignInPasskey = (): UseMutationResult<
+  IResp<void>,
+  Error,
+  ISignInService.IBodySignInPasskey,
+  void
+> => {
+  return useMutation({
+    mutationFn: (data: ISignInService.IBodySignInPasskey) => {
+      return SignInService.signInPasskey(data);
+    },
+    meta: {
+      ERROR_SOURCE: "[Sign in failed]: The passkey is incorrect",
+      SUCCESS_MESSAGE: "Sign in successfully",
+    },
+  });
+};

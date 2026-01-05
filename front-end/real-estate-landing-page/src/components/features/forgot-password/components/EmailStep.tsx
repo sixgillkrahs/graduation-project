@@ -5,16 +5,15 @@ import { Controller, useForm } from "react-hook-form";
 
 import { useRouter } from "next/navigation";
 import { useForgotPassword } from "../services/mutate";
+import { setEmail } from "@/store/verify.store";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
 
-const EmailStep = ({
-  onNext,
-  setEmail,
-}: {
-  onNext: () => void;
-  setEmail: (email: string) => void;
-}) => {
+const EmailStep = ({ onNext }: { onNext: () => void }) => {
   const router = useRouter();
   const { mutateAsync: forgotPassword, isPending } = useForgotPassword();
+  const { email } = useSelector((state: RootState) => state.verifyOTP);
+  const dispatch = useDispatch();
 
   const {
     control,
@@ -22,15 +21,17 @@ const EmailStep = ({
     formState: { errors },
   } = useForm<IForgotPasswordService.IBodyForgotPassword>({
     defaultValues: {
-      email: "",
+      email: email,
     },
     mode: "onChange",
   });
 
   const onSubmit = async (data: IForgotPasswordService.IBodyForgotPassword) => {
-    setEmail(data.email);
-    await forgotPassword(data);
-    onNext();
+    dispatch(setEmail(data.email));
+    const resp = await forgotPassword(data);
+    if (resp.success) {
+      onNext();
+    }
   };
 
   const onBack = () => {

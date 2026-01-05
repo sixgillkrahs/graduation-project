@@ -12,9 +12,9 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="grid grid-cols-10 h-screen">
-      <div className="col-span-4">{children}</div>
-      <div className="col-span-6 bg-[#F5F5F5] hidden md:block">
+    <div className="grid grid-cols-3 h-screen">
+      <div className="col-span-1">{children}</div>
+      <div className="col-span-2 bg-[#F5F5F5] hidden md:block">
         <Sider />
       </div>
     </div>

@@ -7,12 +7,14 @@ import { Button, Checkbox, Icon, Input } from "@/components/ui";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSignIn } from "./services/mutate";
+import { useSignIn, useSignInPasskey } from "./services/mutate";
 
 const SignIn = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const { mutateAsync: signIn, isPending } = useSignIn();
+  const { mutateAsync: signInPasskey, isPending: isPendingPasskey } =
+    useSignInPasskey();
 
   const {
     handleSubmit,
@@ -50,6 +52,11 @@ const SignIn = () => {
 
   const handleTogglePassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const onSubmitPasskey = async () => {
+    await signInPasskey({ email: "dvq2804@gmail.com" });
+    router.push("/");
   };
 
   return (
@@ -146,6 +153,15 @@ const SignIn = () => {
           loading={isPending}
         >
           Sign In
+        </Button>
+        <Button
+          type="button"
+          className="w-full "
+          outline
+          icon={<Icon.Fingerprint className="w-5 h-5" />}
+          onClick={onSubmitPasskey}
+        >
+          Sign In with Passkey
         </Button>
       </form>
       <div className="mt-4 text-center">

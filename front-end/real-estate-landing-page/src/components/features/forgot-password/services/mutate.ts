@@ -14,15 +14,14 @@ export const useForgotPassword = (): UseMutationResult<
       return ForgotPasswordService.forgotPassword(data);
     },
     meta: {
-      ERROR_SOURCE:
-        "[Forgot password failed]: The password has been successfully reset",
-      SUCCESS_MESSAGE: "The password has been successfully reset",
+      ERROR_SOURCE: "[Forgot password failed]: send OTP failed",
+      SUCCESS_MESSAGE: "send OTP successfully",
     },
   });
 };
 
 export const useVerifyOTP = (): UseMutationResult<
-  IResp<void>,
+  IResp<IForgotPasswordService.IRespVerifyOTP>,
   Error,
   IForgotPasswordService.IBodyVerifyOTP,
   void
@@ -32,10 +31,25 @@ export const useVerifyOTP = (): UseMutationResult<
       return ForgotPasswordService.verifyOTP(data);
     },
     meta: {
-      ERROR_SOURCE:
-        "[Verify OTP failed]: The OTP is invalid",
+      ERROR_SOURCE: "[Verify OTP failed]: The OTP is invalid",
       SUCCESS_MESSAGE: "The OTP is valid",
     },
   });
 };
 
+export const useResetPassword = (): UseMutationResult<
+  IResp<void>,
+  Error,
+  IForgotPasswordService.IBodyResetPassword,
+  void
+> => {
+  return useMutation({
+    mutationFn: (data: IForgotPasswordService.IBodyResetPassword) => {
+      return ForgotPasswordService.resetPassword(data);
+    },
+    meta: {
+      ERROR_SOURCE: "[Reset password failed]: The password is invalid",
+      SUCCESS_MESSAGE: "The password is valid",
+    },
+  });
+};

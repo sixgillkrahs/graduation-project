@@ -53,3 +53,29 @@ export const signupSchema = (lang: keyof typeof validationMessages) => {
       }),
   });
 };
+
+export const resetPasswordSchema = (lang: keyof typeof validationMessages) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    body: z
+      .object({
+        token: z.string({ error: t.required("Token") }),
+
+        password: z
+          .string({ error: t.required("Mật khẩu") })
+          .min(6, { message: t.passwordMin }),
+        // .regex(
+        //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+        //   { message: t.passwordInvalid },
+        // )
+        confirmPassword: z.string({
+          error: t.required("Xác nhận mật khẩu"),
+        }),
+      })
+      .refine((data) => data.password === data.confirmPassword, {
+        message: t.passwordNotMatch,
+        path: ["confirmPassword"],
+      }),
+  });
+};

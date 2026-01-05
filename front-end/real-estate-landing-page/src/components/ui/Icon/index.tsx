@@ -37,6 +37,10 @@ import { RotateLock } from "./RotateLock";
 import { Briefcase } from "./Briefcase";
 import { VerifiedBadge } from "./VerifiedBadge";
 import { IdCard } from "./IdCard";
+import { Fingerprint } from "./Fingerprint";
+import { Alert } from "./Alert";
+import { BankCard } from "./BankCard";
+import { Edit } from "./Edit";
 //#endregion
 
 export const Icon = {
@@ -78,4 +82,8 @@ export const Icon = {
   Briefcase,
   VerifiedBadge,
   IdCard,
+  Fingerprint,
+  Alert,
+  BankCard,
+  Edit,
 };

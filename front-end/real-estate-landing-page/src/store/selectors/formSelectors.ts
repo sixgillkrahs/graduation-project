@@ -10,28 +10,3 @@ export const selectAllFormData = createSelector([selectFormData], (form) => ({
   ...form.businessInfo,
   ...form.verification,
 }));
-
-export const selectIsStepValid = (step: number) =>
-  createSelector([selectFormData], (form) => {
-    switch (step) {
-      case 0:
-        return !!(
-          form.basicInfo.identityInfo.fullName &&
-          form.basicInfo.email &&
-          form.basicInfo.phoneNumber
-        );
-      case 1:
-        return !!(
-          form.businessInfo.agentName &&
-          form.businessInfo.area &&
-          form.businessInfo.businessName &&
-          form.businessInfo.IDNumber &&
-          form.businessInfo.dateOfBirth &&
-          form.businessInfo.gender &&
-          form.businessInfo.address &&
-          form.businessInfo.nationality
-        );
-      default:
-        return false;
-    }
-  });

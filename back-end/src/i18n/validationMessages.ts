@@ -34,6 +34,7 @@ export const validationMessages = {
     passwordSame: "Mật khẩu mới không thể trùng với mật khẩu cũ",
     otpExpired: "OTP đã hết hạn",
     incorrectOTP: "OTP không đúng",
+    invalidToken: "Token không hợp lệ",
   },
   en: {
     refreshTokenNotExist: "Refresh token not exist",
@@ -70,5 +71,6 @@ export const validationMessages = {
     passwordSame: "New password cannot be the same as the old password",
     otpExpired: "OTP expired",
     incorrectOTP: "Incorrect OTP",
+    invalidToken: "Invalid token",
   },
 } as const;

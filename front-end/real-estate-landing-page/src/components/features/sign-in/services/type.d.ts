@@ -4,4 +4,8 @@ namespace ISignInService {
     password: string;
     rememberMe?: boolean;
   }
+
+  interface IBodySignInPasskey {
+    email: string;
+  }
 }

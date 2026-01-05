@@ -13,4 +13,14 @@ export default class SignInService {
       data,
     });
   };
+
+  public static readonly signInPasskey = (
+    data: ISignInService.IBodySignInPasskey
+  ): Promise<IResp<void>> => {
+    return request({
+      url: SignInEndpoint.signInPasskey(),
+      method: AxiosMethod.POST,
+      data,
+    });
+  };
 }

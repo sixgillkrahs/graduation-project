@@ -7,11 +7,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import EmailStep from "./components/EmailStep";
 import OTPStep from "./components/OTPStep";
+import EnterPassStep from "./components/EnterPassStep";
 
 const ForgotPassword = () => {
   const router = useRouter();
-  const [step, setStep] = useState<"email" | "otp">("email");
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<"email" | "otp" | "password">("email");
 
   const handleToHome = () => {
     router.push("/");
@@ -35,7 +35,7 @@ const ForgotPassword = () => {
             exit={{ x: -100, opacity: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <EmailStep onNext={() => setStep("otp")} setEmail={setEmail} />
+            <EmailStep onNext={() => setStep("otp")} />
           </motion.div>
         )}
 
@@ -46,7 +46,21 @@ const ForgotPassword = () => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -100, opacity: 0 }}
           >
-            <OTPStep onBack={() => setStep("email")} email={email} />
+            <OTPStep
+              onBack={() => setStep("email")}
+              onNext={() => setStep("password")}
+            />
+          </motion.div>
+        )}
+
+        {step === "password" && (
+          <motion.div
+            key="password"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -100, opacity: 0 }}
+          >
+            <EnterPassStep onBack={() => setStep("otp")} />
           </motion.div>
         )}
       </AnimatePresence>

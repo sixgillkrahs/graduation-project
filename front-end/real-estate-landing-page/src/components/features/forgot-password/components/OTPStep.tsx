@@ -1,11 +1,23 @@
 "use client";
 
 import { Button, Icon, OTP } from "@/components/ui";
+import { RootState } from "@/store";
+import { setToken } from "@/store/verify.store";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { useVerifyOTP } from "../services/mutate";
+import Timer from "./Timer";
 
-const OTPStep = ({ onBack, email }: { onBack: () => void; email: string }) => {
+const OTPStep = ({
+  onBack,
+  onNext,
+}: {
+  onBack: () => void;
+  onNext: () => void;
+}) => {
   const { mutateAsync: verifyOTP, isPending } = useVerifyOTP();
+  const { email } = useSelector((state: RootState) => state.verifyOTP);
+  const dispatch = useDispatch();
   const {
     control,
     setValue,
@@ -23,7 +35,12 @@ const OTPStep = ({ onBack, email }: { onBack: () => void; email: string }) => {
   const otpValue = watch("otp");
 
   const onSubmit = async (data: IForgotPasswordService.IBodyVerifyOTP) => {
-    await verifyOTP(data);
+    const resp = await verifyOTP(data);
+    if (resp.success) {
+      console.log(resp.data.token);
+      dispatch(setToken(resp.data.token));
+      onNext();
+    }
   };
 
   return (
@@ -61,6 +78,7 @@ const OTPStep = ({ onBack, email }: { onBack: () => void; email: string }) => {
             <OTP
               length={6}
               value={otpValue}
+              className="mx-auto"
               onValueChange={(val) =>
                 setValue("otp", val, {
                   shouldValidate: true,
@@ -71,10 +89,15 @@ const OTPStep = ({ onBack, email }: { onBack: () => void; email: string }) => {
             />
           )}
         />
-        <Button type="submit" className="w-full cs-bg-red text-white mt-2">
+        <Button
+          type="submit"
+          className="w-full cs-bg-red text-white mt-2"
+          loading={isPending}
+        >
           Reset Password
         </Button>
       </form>
+      <Timer email={email} />
     </div>
   );
 };

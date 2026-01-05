@@ -16,6 +16,13 @@ import { BaseController } from "./base.controller";
 import { EmailQueue } from "@/queues/email.queue";
 import { redis } from "@/config/redis";
 import { redisConnection } from "@/config/redis.connection";
+import {
+  AuthenticatorTransportFuture,
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyRegistrationResponse,
+} from "@simplewebauthn/server";
+import { ENV } from "@/config/env";
 
 export class AuthController extends BaseController {
   private userService: UserService;
@@ -208,7 +215,7 @@ export class AuthController extends BaseController {
       if (!token) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-          "Refresh token not exist",
+            "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -217,7 +224,7 @@ export class AuthController extends BaseController {
       if (!decoded) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-          "Refresh token not exist",
+            "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -285,9 +292,13 @@ export class AuthController extends BaseController {
     });
   };
 
-  changePassword = (req: Request<{}, {}, ChangePasswordRequest>, res: Response, next: NextFunction) => {
+  changePassword = (
+    req: Request<{}, {}, ChangePasswordRequest>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     this.handleRequest(req, res, next, async () => {
-      const { oldPassword, newPassword, confirmPassword } = req.body;
+      const { oldPassword, newPassword } = req.body;
       const lang = ApiRequest.getCurrentLang(req);
       const currentUser = req.user;
       if (!currentUser.userId.isActive) {
@@ -298,7 +309,10 @@ export class AuthController extends BaseController {
         );
       }
       // Kiểm tra mật khẩu cũ có đúng không
-      const isPasswordValid = await bcrypt.compare(oldPassword, currentUser.password);
+      const isPasswordValid = await bcrypt.compare(
+        oldPassword,
+        currentUser.password,
+      );
       if (!isPasswordValid) {
         throw new AppError(
           validationMessages[lang].incorrectPassword || "Incorrect password",
@@ -307,7 +321,10 @@ export class AuthController extends BaseController {
         );
       }
       // Kiểm tra mật khẩu mới có trùng với mật khẩu cũ không
-      const isPasswordNewValid = await bcrypt.compare(newPassword, currentUser.password);
+      const isPasswordNewValid = await bcrypt.compare(
+        newPassword,
+        currentUser.password,
+      );
       if (isPasswordNewValid) {
         throw new AppError(
           validationMessages[lang].passwordSame || "Password same",
@@ -320,16 +337,20 @@ export class AuthController extends BaseController {
       historyPass.push({
         password: hashedPassword,
         createdAt: new Date(),
-      })
+      });
       await this.authService.updateAuth(currentUser._id, {
         password: hashedPassword,
-        passwordHistories: historyPass
+        passwordHistories: historyPass,
       });
-      return true
-    })
-  }
+      return true;
+    });
+  };
 
-  forgotPassword = (req: Request<{}, {}, { email: string }>, res: Response, next: NextFunction) => {
+  forgotPassword = (
+    req: Request<{}, {}, { email: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     this.handleRequest(req, res, next, async () => {
       const { email } = req.body;
       const otp = this.authService.getOTP();
@@ -338,11 +359,15 @@ export class AuthController extends BaseController {
         to: email,
         otp,
       });
-      return true
-    })
-  }
+      return true;
+    });
+  };
 
-  verifyOTP = (req: Request<{}, {}, { email: string, otp: string }>, res: Response, next: NextFunction) => {
+  verifyOTP = (
+    req: Request<{}, {}, { email: string; otp: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
       const { email, otp } = req.body;
@@ -361,7 +386,222 @@ export class AuthController extends BaseController {
           ErrorCode.INCORRECT_OTP,
         );
       }
-      return storedOTP
-    })
-  }
+      await redisConnection.del(`otp:${email}`);
+      const token = this.authService.generateAccessToken(
+        {
+          user: {
+            email,
+          },
+        },
+        15 * 1000 * 60,
+      );
+      return {
+        token,
+      };
+    });
+  };
+
+  resetPassword = (
+    req: Request<{}, {}, { token: string; password: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { token, password } = req.body;
+      const lang = ApiRequest.getCurrentLang(req);
+      const decoded = (await this.authService.validateToken(token)) as {
+        user: {
+          email: string;
+        };
+      };
+      if (!decoded) {
+        throw new AppError(
+          validationMessages[lang].invalidToken || "Invalid token",
+          404,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+      const userAuth = await this.authService.getAuthByUsername<
+        IAuth & { _id: string }
+      >(decoded.user.email);
+      if (!userAuth) {
+        throw new AppError(
+          validationMessages[lang].userNotFound || "User not found",
+          404,
+          ErrorCode.USER_NOT_FOUND,
+        );
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const isPasswordSame = await Promise.all(
+        userAuth?.passwordHistories?.map((item) => {
+          return bcrypt.compare(password, item.password);
+        }) || [],
+      );
+      if (isPasswordSame.includes(true)) {
+        throw new AppError(
+          validationMessages[lang].passwordSame || "Password same",
+          400,
+          ErrorCode.PASSWORD_MISMATCH,
+        );
+      }
+      userAuth.password = hashedPassword;
+      userAuth?.passwordHistories?.push({
+        password: hashedPassword,
+        createdAt: new Date(),
+      });
+      await this.authService.updateAuth(userAuth._id, userAuth);
+      return true;
+    });
+  };
+
+  registerPasskey = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+
+      const options = generateRegistrationOptions({
+        rpName: "My App",
+        rpID: "localhost",
+        userID: currentUser._id as any,
+        userName: currentUser.userId.email,
+        timeout: 60000,
+        attestationType: "none",
+        authenticatorSelection: {
+          residentKey: "preferred",
+          userVerification: "preferred",
+        },
+      });
+
+      res.cookie("webauthn_register_challenge", (await options).challenge, {
+        httpOnly: true,
+        secure: ENV.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 2 * 60 * 1000,
+      });
+
+      return options;
+    });
+  };
+
+  verifyPasskey = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+      const lang = ApiRequest.getCurrentLang(req);
+      const expectedChallenge = req.headers.cookie
+        ?.split("; ")
+        .find((item) => item.startsWith("webauthn_register_challenge"))
+        ?.split("=")[1];
+      if (!expectedChallenge) {
+        throw new AppError(
+          lang === "vi"
+            ? "Chưa đăng ký khóa thông minh"
+            : "WebAuthn challenge not found",
+          410,
+          ErrorCode.WEBAUTHN_CHALLENGE_NOT_FOUND,
+        );
+      }
+      const verification = await verifyRegistrationResponse({
+        response: req.body,
+        expectedChallenge,
+        expectedOrigin:
+          process.env.NODE_ENV === "production"
+            ? "https://app.example.com"
+            : "http://localhost:3000",
+        expectedRPID:
+          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
+      });
+
+      if (!verification.verified || !verification.registrationInfo) {
+        throw new AppError(
+          lang === "vi"
+            ? "Xác thực khóa thông minh thất bại"
+            : "WebAuthn verification failed",
+          410,
+          ErrorCode.WEBAUTHN_VERIFICATION_FAILED,
+        );
+      }
+      const { credential } = verification.registrationInfo;
+      await this.authService.updateAuth(currentUser._id, {
+        passkeys: [
+          {
+            counter: credential.counter,
+            credentialID: credential.id,
+            publicKey: credential.publicKey.toString(),
+            transports: credential.transports!,
+          },
+        ],
+      });
+      res.clearCookie("webauthn_register_challenge");
+      return true;
+    });
+  };
+
+  loginPasskey = (
+    req: Request<{}, {}, { email: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = ApiRequest.getCurrentLang(req);
+      const { email } = req.body;
+      const auth = await this.authService.getAuthByUsername<
+        IAuth & {
+          roleId: IRole & { _id: string };
+          userId: IUser & { _id: string };
+        }
+      >(email, [
+        {
+          path: "roleId",
+          select: "_id name code permissionIds",
+        },
+        {
+          path: "userId",
+          select: "_id email fullName isActive phone",
+        },
+      ]);
+      if (!auth || !auth.password) {
+        throw new AppError(
+          lang === "vi" ? "Sai tài khoản" : "Incorrect username",
+          401,
+          ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+      if (!auth.userId.isActive) {
+        throw new AppError(
+          validationMessages[lang].userNotActive || "User not active",
+          401,
+          ErrorCode.USER_NOT_FOUND,
+        );
+      }
+      const passkeys = auth.passkeys;
+      if (!passkeys || !passkeys.length) {
+        throw new AppError(
+          lang === "vi"
+            ? "Chưa đăng ký khóa thông minh"
+            : "No passkey registered",
+          401,
+          ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+
+      const options = generateAuthenticationOptions({
+        rpID:
+          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
+        userVerification: "preferred",
+        allowCredentials: passkeys.map((pk) => ({
+          id: Buffer.from(pk.credentialID, "base64").toString("base64"),
+          type: "public-key",
+          transports: pk.transports as AuthenticatorTransportFuture[],
+        })),
+        timeout: 60000,
+      });
+      res.cookie("webauthn_login_challenge", (await options).challenge, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 120000,
+      });
+
+      return options;
+    });
+  };
 }

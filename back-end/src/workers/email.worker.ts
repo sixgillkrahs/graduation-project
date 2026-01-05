@@ -4,7 +4,7 @@ import {
   SendRejectEmailJob,
   SendVerifyEmailJob,
 } from "@/@types/jobTypes";
-import { RedisConnection } from "@/config/redis";
+import { redisConnection } from "@/config/redis.connection";
 import { EmailService } from "@/services/email.service";
 import { Worker } from "bullmq";
 
@@ -35,7 +35,7 @@ export class EmailWorker {
         }
       },
       {
-        connection: RedisConnection.getInstance(),
+        connection: redisConnection,
       },
     );
 

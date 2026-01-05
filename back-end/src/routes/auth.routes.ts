@@ -3,7 +3,11 @@ import { AuthService } from "@/services/auth.service";
 import { Router } from "express";
 import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
-import { loginSchema, signupSchema } from "@/validators/auth.validator";
+import {
+  loginSchema,
+  resetPasswordSchema,
+  signupSchema,
+} from "@/validators/auth.validator";
 import { UserService } from "@/services/user.service";
 import { RoleService } from "@/services/role.service";
 import { EmailQueue } from "@/queues/email.queue";
@@ -228,5 +232,77 @@ router.post("/forgot-password", authController.forgotPassword);
  *         description: Invalid input
  */
 router.post("/verify-otp", authController.verifyOTP);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       description: Reset password request body
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Reset password successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post(
+  "/reset-password",
+  validateRequest((lang) => resetPasswordSchema(lang)),
+  authController.resetPassword,
+);
+
+/**
+ * @swagger
+ * /auth/register-passkey:
+ *   post:
+ *     summary: Register passkey
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Register passkey successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/register-passkey", requireAuth, authController.registerPasskey);
+
+/**
+ * @swagger
+ * /auth/verify-passkey:
+ *   post:
+ *     summary: Verify passkey
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Verify passkey successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/verify-passkey", requireAuth, authController.verifyPasskey);
+
+/**
+ * @swagger
+ * /auth/login-passkey:
+ *   post:
+ *     summary: Login passkey
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Login passkey successful
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/login-passkey", authController.loginPasskey);
 
 export default router;

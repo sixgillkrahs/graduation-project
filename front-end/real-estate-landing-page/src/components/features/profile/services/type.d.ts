@@ -4,6 +4,7 @@ namespace IProfileService {
     basicInfo: BasicInfo;
     businessInfo: BusinessInfo;
     imageInfo: ImageInfo;
+    bankInfo?: BankInfo;
     status: string;
     createdAt: string;
     updatedAt: string;
@@ -24,6 +25,12 @@ namespace IProfileService {
     gender: string;
     nationality: string;
     placeOfBirth: string;
+  }
+
+  export interface BankInfo {
+    bankName?: string;
+    bankAccountNumber?: string;
+    bankAccountName?: string;
   }
 
   export interface BusinessInfo {
