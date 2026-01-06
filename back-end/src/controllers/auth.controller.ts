@@ -97,18 +97,33 @@ export class AuthController extends BaseController {
         },
         15 * 1000 * 60 * 24, // 15 ngày
       );
-      res.cookie("accessToken", accessToken, {
+
+      const cookieOptions = {
         httpOnly: true,
         secure: true,
-        sameSite: "none",
-        maxAge: 15 * 1000 * 60,
-      });
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 60 * 60 * 1000 * 24 * 7,
-      });
+        sameSite: "none" as const,
+      };
+
+      res.cookie(
+        "accessToken",
+        accessToken,
+        rememberMe
+          ? {
+              ...cookieOptions,
+              maxAge: 15 * 60 * 1000,
+            }
+          : cookieOptions,
+      );
+      res.cookie(
+        "refreshToken",
+        refreshToken,
+        rememberMe
+          ? {
+              ...cookieOptions,
+              maxAge: 7 * 24 * 60 * 60 * 1000,
+            }
+          : cookieOptions,
+      );
       return {
         user: {
           id: auth.userId._id,

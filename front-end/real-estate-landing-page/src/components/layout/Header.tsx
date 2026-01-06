@@ -122,7 +122,7 @@ const Header = () => {
             </DropdownItem>
           </Dropdown>
         ) : (
-          <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2">
+          <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2 w-35!">
             <Icon.User className="bg-black w-8 h-8 p-1.5 rounded-full text-white" />
             <Button type="button" className="text-black" onClick={handleLogin}>
               Login
