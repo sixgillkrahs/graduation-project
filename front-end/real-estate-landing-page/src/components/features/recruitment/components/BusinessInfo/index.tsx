@@ -1,13 +1,13 @@
 import { Button, Icon, Input, Select, Upload } from "@/components/ui";
+import { showToast } from "@/components/ui/Toast";
+import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
 import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
 import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import ExtractService from "../../services/service";
 import { useUploadImage } from "../../services/mutation";
-import { showToast } from "@/components/ui/Toast";
 
 type BusinessInfoFormType = BusinessInfoType & {
   certificateImage: File[];
@@ -43,7 +43,6 @@ const BusinessInfo = () => {
   const onSubmit = (data: BusinessInfoFormType) => {
     const errors = validateBusinessInfo(data);
     if (Object.keys(errors).length > 0) return;
-    debugger;
     const payload = {
       ...data,
       certificateImage: businessInfo.certificateImage,
@@ -175,9 +174,9 @@ const BusinessInfo = () => {
             render={({ field }) => (
               <Select
                 multiple
-                label="Specialization"
+                label="Working Area"
                 error={errors.workingArea?.message}
-                options={ExtractService.vietnamProvinces}
+                options={vietnamProvinces}
                 {...field}
               />
             )}

@@ -32,7 +32,7 @@ const Button = ({
       onClick={onClick}
       disabled={disabled}
       className={[
-        "py-2 rounded-full cursor-pointer flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95",
+        "py-2 rounded-full cursor-pointer flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95 min-w-28",
         paddingClass,
         variant === "secondary" && "bg-[#5a6260]",
         outline && "bg-transparent text-[#7f8b89] border border-[#7f8b89]",

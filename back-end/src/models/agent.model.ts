@@ -39,6 +39,11 @@ export interface IAgent {
     identityFront: string;
     identityBack: string;
   };
+  bankInfo?: {
+    bankAccountName: string;
+    bankAccountNumber: string;
+    bankName: string;
+  };
   expirationDate?: Date;
   registrationLink?: string;
   reasonReject?: string;
@@ -179,7 +184,20 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
         trim: true,
       },
     },
-
+    bankInfo: {
+      bankAccountName: {
+        type: String,
+        trim: true,
+      },
+      bankAccountNumber: {
+        type: String,
+        trim: true,
+      },
+      bankName: {
+        type: String,
+        trim: true,
+      },
+    },
     expirationDate: {
       type: Date,
     },

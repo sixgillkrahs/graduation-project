@@ -1,3 +1,4 @@
+import { ErrorCode } from "@/const/error-code";
 import AuthService from "@/shared/auth/AuthService";
 import axios, {
   AxiosError,
@@ -47,11 +48,15 @@ client.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
     const status = error.response?.status;
-
+    const errorCode = (error.response?.data as any)?.code;
     if (originalRequest?.url?.includes("/auth/refresh")) {
       return Promise.reject(error);
     }
-    if (status === 400 && !originalRequest._retry) {
+    if (
+      status === 401 &&
+      errorCode === ErrorCode.UNAUTHORIZED &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       if (isRefreshing) {

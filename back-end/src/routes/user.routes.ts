@@ -71,4 +71,20 @@ router.post("/", validateRequest(createUserSchema), userController.createUser);
  */
 router.get("/profile", userController.profile);
 
+/**
+ * @swagger
+ * /users/profile:
+ *   patch:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile
+ *       403:
+ *         description: Forbidden - User role required
+ */
+router.patch("/profile", userController.updateProfile);
+
 export default router;

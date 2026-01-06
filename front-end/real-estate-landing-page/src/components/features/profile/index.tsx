@@ -2,6 +2,7 @@
 
 import { Button, Icon, Image, Tag, useModal } from "@/components/ui";
 import { startRegistration } from "@simplewebauthn/browser";
+import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import CardField from "./components/CardField";
 import CardIdentity from "./components/CardIdentity";
@@ -10,11 +11,10 @@ import RegisterPasskey from "./components/RegisterPasskey";
 import RenderField from "./components/RenderField";
 import { useRegisterPasskey, useVerifyPasskey } from "./services/mutate";
 import { useProfile } from "./services/query";
-import { useRouter } from "next/navigation";
 
 const Profile = () => {
   const router = useRouter();
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading } = useProfile();
   const { open, show, hide } = useModal();
   const { mutateAsync: registerPasskey } = useRegisterPasskey();
   const { mutateAsync: verifyPasskey } = useVerifyPasskey();
@@ -41,10 +41,13 @@ const Profile = () => {
     router.push("/profile/edit");
   };
 
+  const isBankInfoMissing =
+    !isLoading && !!profileData && !profileData.bankInfo;
+
   return (
     <section className="p-6 md:p-8 bg-black/10">
       <div className="container mx-auto grid gap-6">
-        {!profileData?.bankInfo && (
+        {isBankInfoMissing && (
           <div className="w-full rounded-[18px] bg-amber-50 border border-amber-200 p-6 flex gap-3 items-start">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 shrink-0">
               <Icon.Alert className="size-4 text-amber-600" />
@@ -139,9 +142,9 @@ const Profile = () => {
             </div>
             <div
               className={
-                profileData?.bankInfo
-                  ? "bg-white rounded-[18px]"
-                  : "bg-amber-50 border border-amber-200 rounded-[18px]"
+                isBankInfoMissing
+                  ? "bg-amber-50 border border-amber-200 rounded-[18px]"
+                  : "bg-white rounded-[18px]"
               }
             >
               <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4 px-8 flex justify-between items-center">
@@ -151,7 +154,7 @@ const Profile = () => {
                   </div>{" "}
                   Bank Info
                 </div>
-                {!profileData?.bankInfo && (
+                {isBankInfoMissing && (
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 shrink-0">
                     <Icon.Alert className="size-4 text-amber-600" />
                   </div>

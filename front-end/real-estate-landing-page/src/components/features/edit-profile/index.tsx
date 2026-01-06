@@ -1,43 +1,63 @@
 "use client";
 
 import { Button, Icon, Input, Select } from "@/components/ui";
+import { bankList } from "@/const/bank";
+import { vietnamProvinces } from "@/const/vietnam-provinces";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import ExtractService from "../recruitment/services/service";
 import { useProfile } from "../profile/services/query";
+import { useEditProfile } from "./services/mutate";
+import { useRouter } from "next/navigation";
 
 const EditProfile = () => {
-  const { data: profile, isLoading } = useProfile();
+  const router = useRouter();
+  const { data: profile } = useProfile();
+  const { mutateAsync: editProfile, isPending } = useEditProfile();
   const {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<{
-    nameRegister: string;
-    phone: string;
-    certificateNumber: string;
-    taxCode: string;
-    yearsOfExperience: string;
-    workingArea: string;
-    specialization: string;
-    bankAccountName: string;
-    bankAccountNumber: string;
-    bankName: string;
-  }>({
+    reset,
+  } = useForm<IEditProfileService.IFormData>({
     defaultValues: {
-      nameRegister: profile?.data.basicInfo.nameRegister || "",
-      phone: profile?.data.basicInfo.phoneNumber || "",
-      certificateNumber: profile?.data.businessInfo.certificateNumber || "",
-      taxCode: profile?.data.businessInfo.taxCode || "",
-      yearsOfExperience: profile?.data.businessInfo.yearsOfExperience || "",
-      workingArea: profile?.data.businessInfo.workingArea?.join(", ") || "",
-      specialization:
-        profile?.data.businessInfo.specialization?.join(", ") || "",
-      bankAccountName: profile?.data.bankInfo?.bankAccountName || "",
-      bankAccountNumber: profile?.data.bankInfo?.bankAccountNumber || "",
-      bankName: profile?.data.bankInfo?.bankName || "",
+      nameRegister: "",
+      phone: "",
+      certificateNumber: "",
+      taxCode: "",
+      yearsOfExperience: "",
+      workingArea: [],
+      specialization: [],
+      bankAccountName: "",
+      bankAccountNumber: "",
+      bankName: "",
     },
     mode: "onChange",
   });
+
+  useEffect(() => {
+    if (profile?.data) {
+      reset({
+        nameRegister: profile.data.basicInfo.nameRegister || "",
+        phone: profile.data.basicInfo.phoneNumber || "",
+        certificateNumber: profile.data.businessInfo.certificateNumber || "",
+        taxCode: profile.data.businessInfo.taxCode || "",
+        yearsOfExperience: profile.data.businessInfo.yearsOfExperience || "",
+        workingArea: profile.data.businessInfo.workingArea || [],
+        specialization: profile.data.businessInfo.specialization || [],
+        bankAccountName: profile.data.bankInfo?.bankAccountName || "",
+        bankAccountNumber: profile.data.bankInfo?.bankAccountNumber || "",
+        bankName: profile.data.bankInfo?.bankName || "",
+      });
+    }
+  }, [profile, reset]);
+
+  const onSubmit = async (data: IEditProfileService.IFormData) => {
+    await editProfile(data);
+  };
+
+  const onBack = () => {
+    router.back();
+  };
 
   return (
     <section className="p-6 md:p-8 bg-black/10">
@@ -56,8 +76,7 @@ const EditProfile = () => {
           </div>
           <div className="rounded-[18px] bg-white p-10">
             <div className="grid gap-4">
-              {/* <div className="border-b border-black/10 "></div> */}
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
                 <div className="space-y-4">
                   <div className="flex gap-3 items-center ">
                     <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center text-[18px] font-black text-black">
@@ -71,7 +90,13 @@ const EditProfile = () => {
                     <Controller
                       name="nameRegister"
                       control={control}
-                      rules={{ required: "Name is required" }}
+                      rules={{
+                        required: "Full name is required",
+                        minLength: {
+                          value: 2,
+                          message: "Name must be at least 2 characters",
+                        },
+                      }}
                       render={({ field }) => (
                         <Input
                           label="Full Name"
@@ -84,7 +109,13 @@ const EditProfile = () => {
                     <Controller
                       name="phone"
                       control={control}
-                      rules={{ required: "Phone is required" }}
+                      rules={{
+                        required: "Phone number is required",
+                        pattern: {
+                          value: /^(0|\+84)[0-9]{9}$/,
+                          message: "Invalid phone number",
+                        },
+                      }}
                       render={({ field }) => (
                         <Input
                           label="Phone"
@@ -112,6 +143,10 @@ const EditProfile = () => {
                       control={control}
                       rules={{
                         required: "Certificate number is required",
+                        pattern: {
+                          value: /^[A-Z0-9-]{6,}$/,
+                          message: "Invalid certificate format",
+                        },
                       }}
                       render={({ field }) => (
                         <Input
@@ -127,11 +162,14 @@ const EditProfile = () => {
                       control={control}
                       rules={{
                         required: "Tax code is required",
+                        pattern: {
+                          value: /^[0-9]{9,13}$/,
+                          message: "Tax code must be 9–13 digits",
+                        },
                       }}
                       render={({ field }) => (
                         <Input
                           label="Tax code"
-                          placeholder="8888888888"
                           error={errors.taxCode?.message}
                           {...field}
                         />
@@ -144,15 +182,17 @@ const EditProfile = () => {
                       control={control}
                       rules={{
                         required: "Year of experience is required",
-                        pattern: {
-                          value: /^[0-9]{0,}$/,
-                          message: "Please enter number",
+                        validate: (value) => {
+                          const num = Number(value);
+                          if (isNaN(num)) return "Must be a number";
+                          if (num < 0) return "Must be >= 0";
+                          if (num > 50) return "Too large";
+                          return true;
                         },
                       }}
                       render={({ field }) => (
                         <Input
                           label="Years Of Experience"
-                          placeholder="8888888888"
                           suffix="Year"
                           error={errors.yearsOfExperience?.message}
                           {...field}
@@ -163,7 +203,9 @@ const EditProfile = () => {
                       name="specialization"
                       control={control}
                       rules={{
-                        required: "Specialization is required",
+                        validate: (val) =>
+                          val?.length > 0 ||
+                          "Select at least one specialization",
                       }}
                       render={({ field }) => (
                         <Select
@@ -190,14 +232,15 @@ const EditProfile = () => {
                       name="workingArea"
                       control={control}
                       rules={{
-                        required: "Working area is required",
+                        validate: (val) =>
+                          val?.length > 0 || "Select at least one working area",
                       }}
                       render={({ field }) => (
                         <Select
                           multiple
-                          label="Specialization"
+                          label="Working Area"
                           error={errors.workingArea?.message}
-                          options={ExtractService.vietnamProvinces}
+                          options={vietnamProvinces}
                           {...field}
                         />
                       )}
@@ -246,12 +289,18 @@ const EditProfile = () => {
                     <Controller
                       name="bankAccountName"
                       control={control}
-                      rules={{ required: "Bank account name is required" }}
+                      rules={{
+                        required: "Bank account name is required",
+                        pattern: {
+                          value: /^[A-Za-zÀ-ỹ\s]+$/,
+                          message: "Invalid account name",
+                        },
+                      }}
                       render={({ field }) => (
                         <Input
                           label="Bank Account Name"
                           placeholder="e.g. 123 Main St"
-                          error={errors.nameRegister?.message}
+                          error={errors.bankAccountName?.message}
                           {...field}
                         />
                       )}
@@ -260,12 +309,18 @@ const EditProfile = () => {
                       <Controller
                         name="bankAccountNumber"
                         control={control}
-                        rules={{ required: "Bank account number is required" }}
+                        rules={{
+                          required: "Bank account number is required",
+                          pattern: {
+                            value: /^[0-9]{8,20}$/,
+                            message: "Invalid bank account number",
+                          },
+                        }}
                         render={({ field }) => (
                           <Input
                             label="Bank Account Number"
                             placeholder="e.g. 123 Main St"
-                            error={errors.phone?.message}
+                            error={errors.bankAccountNumber?.message}
                             {...field}
                           />
                         )}
@@ -273,10 +328,15 @@ const EditProfile = () => {
                       <Controller
                         name="bankName"
                         control={control}
-                        rules={{ required: "Bank name is required" }}
+                        rules={{
+                          required: "Bank name is required",
+                        }}
                         render={({ field }) => (
-                          <Input
+                          <Select
                             label="Bank Name"
+                            options={bankList}
+                            searchable
+                            searchPlaceholder="Search bank name"
                             placeholder="e.g. 123 Main St"
                             error={errors.bankName?.message}
                             {...field}
@@ -287,10 +347,19 @@ const EditProfile = () => {
                   </div>
                 </div>
                 <div className="mt-10 flex justify-end gap-4">
-                  <Button type="button" outline>
+                  <Button
+                    type="button"
+                    outline
+                    onClick={onBack}
+                    className="text-black"
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-black text-white">
+                  <Button
+                    type="submit"
+                    className="bg-black text-white"
+                    loading={isPending}
+                  >
                     Save
                   </Button>
                 </div>

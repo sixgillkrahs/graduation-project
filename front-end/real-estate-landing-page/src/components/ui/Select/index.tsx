@@ -20,6 +20,10 @@ interface SelectProps<T extends string | number | (string | number)[]>
   value?: T;
   placeholder?: string;
   onChange?: (e: { target: { name?: string; value: T } }) => void;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  filterOption?: (input: string, option: Option) => boolean;
+  onSearch?: (value: string) => void;
 }
 
 const Select = forwardRef<
@@ -39,12 +43,18 @@ const Select = forwardRef<
       onBlur,
       disabled,
       multiple = false,
+      searchable = false,
+      searchPlaceholder = "Search...",
+      filterOption,
+      onSearch,
       ...rest
     },
     ref
   ) => {
     const [open, setOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLInputElement>(null);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
@@ -53,6 +63,7 @@ const Select = forwardRef<
           !wrapperRef.current.contains(e.target as Node)
         ) {
           setOpen(false);
+          setSearch("");
         }
       };
 
@@ -61,6 +72,31 @@ const Select = forwardRef<
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }, [multiple]);
+
+    useEffect(() => {
+      if (open && searchable) {
+        setTimeout(() => {
+          searchRef.current?.focus();
+        }, 0);
+      }
+    }, [open, searchable]);
+
+    const normalizeText = (str: string) =>
+      str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    const filteredOptions = options.filter((opt) => {
+      if (!searchable || !search) return true;
+      if (filterOption) return filterOption(search, opt);
+
+      const label = normalizeText(opt.label);
+      const value = normalizeText(String(opt.value));
+
+      const keywords = normalizeText(search).split(" ").filter(Boolean);
+
+      return keywords.every((kw) => label.includes(kw) || value.includes(kw));
+    });
 
     const handleSelect = (optionValue: string | number) => {
       let newValue: string | number | (string | number)[];
@@ -72,23 +108,20 @@ const Select = forwardRef<
         } else {
           newValue = [...currentValues, optionValue];
         }
+
+        setSearch("");
       } else {
         newValue = optionValue;
         setOpen(false);
+        setSearch("");
       }
 
-      const fakeEvent = {
+      onChange?.({
         target: {
-          name: name,
-          value: newValue,
+          name,
+          value: newValue as any,
         },
-      };
-
-      if (onChange) {
-        onChange(
-          fakeEvent as { target: { name?: string; value: typeof newValue } }
-        );
-      }
+      });
     };
 
     // Tìm label hiển thị dựa trên value hiện tại (cho cả single và multi-select)
@@ -116,6 +149,12 @@ const Select = forwardRef<
       }
     };
 
+    const highlight = (text: string) => {
+      if (!search) return text;
+      const regex = new RegExp(`(${search})`, "ig");
+      return text.replace(regex, "<mark>$1</mark>");
+    };
+
     return (
       <div className="flex flex-col gap-1" ref={wrapperRef}>
         {label && (
@@ -123,13 +162,12 @@ const Select = forwardRef<
         )}
 
         <div className="relative w-full">
-          {/* Gán ref vào button để RHF có thể focus vào đây khi có lỗi validate */}
           <button
             ref={ref}
             type="button"
             name={name}
             onClick={() => !disabled && setOpen((prev) => !prev)}
-            onBlur={onBlur} // Gọi onBlur của register để đánh dấu field đã touched
+            onBlur={onBlur}
             disabled={disabled}
             className={`
             flex items-center justify-between w-full
@@ -163,7 +201,6 @@ const Select = forwardRef<
             />
           </button>
 
-          {/* Dropdown Menu */}
           {open && !disabled && (
             <ul
               className="
@@ -172,12 +209,29 @@ const Select = forwardRef<
               bg-white shadow-lg py-1
             "
             >
-              {options.length > 0 ? (
-                options.map((opt) => (
+              {searchable && (
+                <li className="px-3 pb-2">
+                  <input
+                    ref={searchRef}
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      onSearch?.(e.target.value);
+                    }}
+                    placeholder={searchPlaceholder}
+                    className="
+                      w-full border border-black/10 rounded-lg px-3 py-2 text-sm
+                      outline-none focus:border-black/30
+                    "
+                  />
+                </li>
+              )}
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((opt) => (
                   <li
                     key={opt.value}
                     onClick={(e) => {
-                      e.stopPropagation(); // Ngăn sự kiện nổi bọt
+                      e.stopPropagation();
                       handleSelect(opt.value);
                     }}
                     className={`
@@ -198,8 +252,8 @@ const Select = forwardRef<
                   </li>
                 ))
               ) : (
-                <li className="px-4 py-2 text-sm text-gray-400 text-center">
-                  No options
+                <li className="px-4 py-3 text-sm text-gray-400 text-center">
+                  No results found
                 </li>
               )}
             </ul>
