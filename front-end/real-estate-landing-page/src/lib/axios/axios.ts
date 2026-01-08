@@ -54,9 +54,17 @@ client.interceptors.response.use(
     }
     if (
       status === 401 &&
-      errorCode === ErrorCode.UNAUTHORIZED &&
+      (errorCode === ErrorCode.UNAUTHORIZED ||
+        errorCode === ErrorCode.TOKEN_EXPIRED) &&
       !originalRequest._retry
     ) {
+      if (
+        errorCode === ErrorCode.UNAUTHORIZED &&
+        typeof window !== "undefined" &&
+        localStorage.getItem("isLoggedIn") !== "true"
+      ) {
+        return Promise.reject(error);
+      }
       originalRequest._retry = true;
 
       if (isRefreshing) {

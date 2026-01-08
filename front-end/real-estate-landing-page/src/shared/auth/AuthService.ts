@@ -9,7 +9,12 @@ interface IUser {
     email: string;
     [k: string]: any;
   };
-  roleId: string;
+  roleId: {
+    _id: string;
+    name: string;
+    code: string;
+    [k: string]: any;
+  };
 }
 
 export default class AuthService {
@@ -21,6 +26,7 @@ export default class AuthService {
   };
 
   public static readonly logout = (): Promise<IResp<{ message: string }>> => {
+    localStorage.removeItem("isLoggedIn");
     return request({
       url: "/auth/logout",
       method: AxiosMethod.POST,

@@ -46,6 +46,7 @@ const FormSearch = () => {
         Start Your Search Today
       </h2>
       <Tabs
+        fullWidth
         items={[
           {
             title: "Rent",

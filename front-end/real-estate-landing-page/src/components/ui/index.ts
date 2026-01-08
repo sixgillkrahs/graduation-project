@@ -11,3 +11,4 @@ export * from "./Checkbox";
 export * from "./Dropdown";
 export * from "./Image";
 export * from "./Modal";
+export * from "./Table";
