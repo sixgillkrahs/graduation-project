@@ -5,6 +5,7 @@ const collections = {
   users: "users",
   auths: "auths",
   agents: "agents",
+  properties: "properties",
 };
 
 export default collections;

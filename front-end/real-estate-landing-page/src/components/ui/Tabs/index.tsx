@@ -1,25 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
 import clsx from "clsx";
-
-interface ItemTabs {
-  title: string;
-  children?: React.ReactNode;
-}
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { ItemTabs } from "./tabs.types";
 
 const Tabs = ({
   items,
   fullWidth,
+  current,
+  onChange,
 }: {
   items: ItemTabs[];
   fullWidth?: boolean;
+  current?: number;
+  onChange?: (index: number) => void;
 }) => {
-  const [activeTab, setActiveTab] = useState(0);
+  const [localActive, setLocalActive] = useState(0);
+  const activeTab = current !== undefined ? current : localActive;
 
   const handleClick = (index: number) => {
-    setActiveTab(index);
+    if (current === undefined) setLocalActive(index);
+    onChange?.(index);
   };
 
   return (

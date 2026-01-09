@@ -28,6 +28,7 @@ import { Group } from "./Group";
 import { HeadGear } from "./HeadGear";
 import { HotelBed } from "./HotelBed";
 import { IdCard } from "./IdCard";
+import { Information } from "./Information";
 import { Instagram } from "./Instagram";
 import { Lock } from "./Lock";
 import { LogoutCircle } from "./LogoutCircle";
@@ -102,4 +103,5 @@ export const Icon = {
   Plus,
   MoreHorizontal,
   MoreVertical,
+  Information,
 };

@@ -23,6 +23,7 @@ import uploadRoutes from "./routes/upload.routes";
 import roleRoutes from "./routes/role.routes";
 import agentsRegistrationsRoutes from "./routes/agents-registrations.routes";
 import agentRoutes from "./routes/agents.routes";
+import propertyRoutes from "./routes/property.routes";
 
 const app = express();
 
@@ -77,6 +78,7 @@ app.use("/api/permissions", permissionRoutes);
 app.use("/api/resources", resourcesRoutes);
 app.use("/api/agents-registrations", agentsRegistrationsRoutes);
 app.use("/api/agents", agentRoutes);
+app.use("/api/properties", propertyRoutes);
 
 const swaggerOptions = {
   explorer: true,
