@@ -90,7 +90,7 @@ const SignIn = () => {
               label="Email Address"
               placeholder="john.doe@example.com"
               suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
-              error={errors.email?.message}
+              // error={errors.email?.message}
               {...field}
             />
           )}
@@ -119,7 +119,7 @@ const SignIn = () => {
                 )
               }
               type={showPassword ? "text" : "password"}
-              error={errors.password?.message}
+              // error={errors.password?.message}
               {...field}
             />
           )}
@@ -157,7 +157,7 @@ const SignIn = () => {
         <Button
           type="button"
           className="w-full "
-          outline
+          variant={"outline"}
           icon={<Icon.Fingerprint className="w-5 h-5" />}
           onClick={onSubmitPasskey}
         >

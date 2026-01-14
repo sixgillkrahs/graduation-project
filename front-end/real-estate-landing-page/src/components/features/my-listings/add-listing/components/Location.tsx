@@ -1,12 +1,12 @@
 import { Button, Icon } from "@/components/ui";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { MapPicker } from "@/components/ui/Map";
 import { RootState } from "@/store";
 import { prevStep, submitStep2 } from "@/store/listing.store";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { Map } from "@/components/ui/Map";
 
 const Location = () => {
   const dispatch = useDispatch();
@@ -19,6 +19,8 @@ const Location = () => {
       district: locationData.district || "",
       ward: locationData.ward || "",
       address: locationData.address || "",
+      latitude: locationData.latitude || null,
+      longitude: locationData.longitude || null,
     },
   });
 
@@ -26,77 +28,6 @@ const Location = () => {
   const [searchString, setSearchString] = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const onAddressChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fieldChange: (val: string) => void
-  ) => {
-    const val = e.target.value;
-    fieldChange(val);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
-    timeoutRef.current = setTimeout(async () => {
-      if (val.length > 2) {
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              val
-            )}&addressdetails=1&limit=5&countrycodes=vn`
-          );
-          const data = await res.json();
-          setSuggestions(data);
-        } catch (e) {
-          setSuggestions([]);
-        }
-      } else {
-        setSuggestions([]);
-      }
-    }, 500);
-  };
-
-  const selectSuggestion = (s: any) => {
-    setSuggestions([]);
-    handleMapChange({
-      lat: parseFloat(s.lat),
-      lng: parseFloat(s.lon),
-      address: { ...s.address, display_name: s.display_name },
-    });
-  };
-
-  // Debounce form updates to map query
-  useEffect(() => {
-    const parts = [
-      formValues.address,
-      formValues.ward?.label || formValues.ward,
-      formValues.district?.label || formValues.district,
-      formValues.province?.label || formValues.province,
-    ].filter(Boolean);
-
-    const query = parts.join(", ");
-    const timeout = setTimeout(() => setSearchString(query), 1000);
-    return () => clearTimeout(timeout);
-  }, [
-    formValues.address,
-    formValues.ward,
-    formValues.district,
-    formValues.province,
-  ]);
-
-  const handleMapChange = (val: {
-    lat: number;
-    lng: number;
-    address?: any;
-  }) => {
-    if (val.address) {
-      const { address } = val;
-      const street = address.road
-        ? `${address.house_number ? address.house_number + " " : ""}${
-            address.road
-          }`
-        : address.display_name;
-      setValue("address", street);
-    }
-  };
 
   const onSubmit = (data: any) => {
     dispatch(submitStep2({ location: data }));
@@ -222,16 +153,66 @@ const Location = () => {
                 <Input
                   label="Street Address"
                   placeholder="Ex: 208 Nguyen Huu Canh"
-                  {...field}
-                  onChange={(e) => onAddressChange(e, field.onChange)}
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    const val = e.target.value;
+                    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+                    if (!val || val.length < 5) {
+                      setSuggestions([]);
+                      return;
+                    }
+
+                    timeoutRef.current = setTimeout(() => {
+                      // Helper to find label by value
+                      const getLabel = (options: any[], value: any) =>
+                        options?.find((opt) => opt.value === value)?.label ||
+                        "";
+
+                      // Get names instead of codes
+                      const pName = getLabel(provinces, formValues.province);
+                      const dName = getLabel(districts, formValues.district);
+                      const wName = getLabel(wards, formValues.ward);
+
+                      // Combine address with province/district names
+                      const fullQuery = [val, wName, dName, pName]
+                        .filter(Boolean)
+                        .join(", ");
+
+                      fetch(
+                        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+                          fullQuery
+                        )}&format=json&addressdetails=1&limit=5&countrycodes=vn`
+                      )
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (Array.isArray(data)) {
+                            setSuggestions(data);
+                          } else {
+                            setSuggestions([]);
+                          }
+                        })
+                        .catch(() => setSuggestions([]));
+                    }, 500);
+                  }}
+                  onBlur={() => {
+                    // Small delay to allow clicking on suggestion
+                    setTimeout(() => setSuggestions([]), 200);
+                  }}
                 />
                 {suggestions.length > 0 && (
                   <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-auto">
                     {suggestions.map((s, idx) => (
                       <li
                         key={idx}
-                        onClick={() => selectSuggestion(s)}
                         className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 text-sm flex flex-col"
+                        onClick={() => {
+                          field.onChange(s.display_name); // Update visible address
+                          setValue("latitude", parseFloat(s.lat));
+                          setValue("longitude", parseFloat(s.lon));
+                          setSuggestions([]);
+                        }}
                       >
                         <span className="font-medium text-gray-900">
                           {s.display_name.split(",")[0]}
@@ -253,9 +234,25 @@ const Location = () => {
               Pin Location on Map
             </label>
             <div className="rounded-xl overflow-hidden border border-gray-200">
-              <MapPicker
-                searchQuery={searchString}
-                onChange={handleMapChange}
+              <Controller
+                name="latitude"
+                control={control}
+                render={({ field: { value: lat } }) => (
+                  <Controller
+                    name="longitude"
+                    control={control}
+                    render={({ field: { value: lng } }) => (
+                      <Map
+                        latitude={lat}
+                        longitude={lng}
+                        onLocationSelect={({ lat, lng }) => {
+                          setValue("latitude", lat);
+                          setValue("longitude", lng);
+                        }}
+                      />
+                    )}
+                  />
+                )}
               />
             </div>
           </div>

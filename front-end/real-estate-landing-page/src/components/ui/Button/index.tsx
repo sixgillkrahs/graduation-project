@@ -1,47 +1,45 @@
 "use client";
 
+import {
+  RippleButton,
+  RippleButtonProps,
+  RippleButtonRipples,
+} from "@/components/animate-ui/components/buttons/ripple";
+import { cn } from "@/lib/utils";
 import React from "react";
 
 const Button = ({
   children,
-  variant = "primary",
+  variant = "default",
   type,
-  outline = false,
   className = "",
   style = {},
   icon = null,
   onClick = () => {},
   disabled = false,
   loading = false,
+  size = "default",
 }: {
   children?: React.ReactNode;
-  variant?: "primary" | "secondary";
   type?: "button" | "submit" | "reset";
-  outline?: boolean;
   className?: string;
   style?: React.CSSProperties;
   icon?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   loading?: boolean;
+  variant?: RippleButtonProps["variant"];
+  size?: RippleButtonProps["size"];
 }) => {
-  const hasText = React.Children.count(children) > 0;
-  const paddingClass = icon && !hasText ? "px-2" : "px-4";
   return (
-    <button
+    <RippleButton
+      className={cn("cs-bg-black text-white", className)}
       onClick={onClick}
       disabled={disabled}
-      className={[
-        "py-2 rounded-full cursor-pointer flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95",
-        paddingClass,
-        variant === "secondary" && "bg-[#5a6260]",
-        outline && "bg-transparent text-[#7f8b89] border border-[#7f8b89]",
-        className,
-      ]
-        .filter(Boolean)
-        .join(" ")}
       type={type}
       style={style}
+      variant={variant}
+      size={size}
     >
       {loading ? (
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -51,7 +49,8 @@ const Button = ({
           {children}
         </>
       )}
-    </button>
+      <RippleButtonRipples />
+    </RippleButton>
   );
 };
 

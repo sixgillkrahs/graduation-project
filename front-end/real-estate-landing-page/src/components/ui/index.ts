@@ -13,3 +13,4 @@ export * from "./Image";
 export * from "./Modal";
 export * from "./Table";
 export * from "./Steps";
+export * from "./Map";

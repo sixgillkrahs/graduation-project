@@ -42,6 +42,7 @@ import { Phone } from "./Phone";
 import { Rocket2 } from "./Rocket2";
 import { RotateLock } from "./RotateLock";
 import { Safe2 } from "./Safe2";
+import { Search } from "./Search";
 import { Settings } from "./Settings";
 import Shape from "./Shape";
 import { ShieldCheck } from "./ShieldCheck";
@@ -104,4 +105,5 @@ export const Icon = {
   MoreHorizontal,
   MoreVertical,
   Information,
+  Search,
 };

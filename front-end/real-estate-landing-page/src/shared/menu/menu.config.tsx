@@ -15,6 +15,12 @@ export const sidebarMenu: MenuItem[] = [
     href: "/agent/listings",
   },
   {
+    key: "landlord",
+    label: "Landlord",
+    icon: <Icon.Group />,
+    href: "/agent/landlord",
+  },
+  {
     key: "crm",
     label: "Leads & CRM",
     icon: <Icon.Group />,
