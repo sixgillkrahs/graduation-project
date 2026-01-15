@@ -1,25 +1,23 @@
 "use client";
 
-import Image from "next/image";
 import Logo from "@/assets/Logo.svg";
-import { Controller, useForm } from "react-hook-form";
-import { Button, Checkbox, Icon, Input } from "@/components/ui";
-import { useState } from "react";
+import { Button, Checkbox, Icon, Input, Password } from "@/components/ui";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
 import { useSignIn, useSignInPasskey } from "./services/mutate";
 
 const SignIn = () => {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
   const { mutateAsync: signIn, isPending } = useSignIn();
   const { mutateAsync: signInPasskey, isPending: isPendingPasskey } =
     useSignInPasskey();
 
   const {
     handleSubmit,
-    formState: { errors },
     control,
+    formState: { errors },
   } = useForm<{
     email: string;
     password: string;
@@ -50,10 +48,6 @@ const SignIn = () => {
     router.push("/");
   };
 
-  const handleTogglePassword = () => {
-    setShowPassword(!showPassword);
-  };
-
   const onSubmitPasskey = async () => {
     await signInPasskey({ email: "dvq2804@gmail.com" });
     router.push("/");
@@ -74,7 +68,7 @@ const SignIn = () => {
           Please enter your details.
         </span>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 grid gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <Controller
           name="email"
           control={control}
@@ -90,7 +84,7 @@ const SignIn = () => {
               label="Email Address"
               placeholder="john.doe@example.com"
               suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
-              // error={errors.email?.message}
+              error={errors.email?.message}
               {...field}
             />
           )}
@@ -102,24 +96,10 @@ const SignIn = () => {
             required: "Password is required",
           }}
           render={({ field }) => (
-            <Input
+            <Password
               label="Password"
               placeholder="Password"
-              suffix={
-                showPassword ? (
-                  <Icon.Eye
-                    className="main-color-gray w-5 h-5 cursor-pointer"
-                    onClick={handleTogglePassword}
-                  />
-                ) : (
-                  <Icon.EyeClose
-                    className="main-color-gray w-5 h-5 cursor-pointer"
-                    onClick={handleTogglePassword}
-                  />
-                )
-              }
-              type={showPassword ? "text" : "password"}
-              // error={errors.password?.message}
+              error={errors.password?.message}
               {...field}
             />
           )}
@@ -156,8 +136,7 @@ const SignIn = () => {
         </Button>
         <Button
           type="button"
-          className="w-full "
-          variant={"outline"}
+          // variant={"outline"}
           icon={<Icon.Fingerprint className="w-5 h-5" />}
           onClick={onSubmitPasskey}
         >

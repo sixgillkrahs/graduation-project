@@ -13,6 +13,7 @@
   "dependencies": {
     "@next/env": "^16.1.1",
     "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-separator": "^1.1.8",
     "@react-google-maps/api": "^2.20.8",
     "@reduxjs/toolkit": "^2.11.2",
     "@simplewebauthn/browser": "^13.2.2",

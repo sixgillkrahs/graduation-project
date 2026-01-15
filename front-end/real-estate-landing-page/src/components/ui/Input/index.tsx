@@ -1,10 +1,10 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { ChangeEvent, InputHTMLAttributes, ReactNode, useState } from "react";
 import { Icon } from "../Icon";
+import { Field, FieldError, FieldLabel } from "../field";
 import OTP from "./OTP";
-import { cn } from "@/lib/utils";
-import { Label } from "../Label/label";
 
 // const Input = ({
 //   placeholder,
@@ -68,7 +68,6 @@ const Password = ({
   error,
   onChange,
   value,
-  register,
   suffix,
   ...rest
 }: {
@@ -80,7 +79,6 @@ const Password = ({
   error?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   value?: string;
-  register?: any;
   suffix?: ReactNode;
 } & InputHTMLAttributes<HTMLInputElement>) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -95,11 +93,10 @@ const Password = ({
       className={className}
       preIcon={preIcon}
       name={name}
-      label={label}
+      label={label || ""}
       error={error}
       onChange={onChange}
       value={value}
-      register={register}
       type={showPassword ? "text" : "password"}
       suffix={
         showPassword ? (
@@ -169,24 +166,38 @@ function Input({
   preIcon,
   suffix,
   label,
+  error,
   ...props
 }: React.ComponentProps<"input"> & {
   label: string;
   preIcon?: ReactNode;
   suffix?: ReactNode;
+  error?: string;
 }) {
   return (
-    <div className="grid w-full max-w-sm items-center gap-3">
-      <Label>{label}</Label>
-      <InputRadix
-        className={className}
-        type={type}
-        {...props}
-        suffix={suffix}
-        preIcon={preIcon}
-      />
+    <div className="grid w-full items-center gap-3">
+      <Field>
+        <FieldLabel htmlFor={props.id}>{label}</FieldLabel>
+        <InputRadix
+          id={props.id}
+          className={className}
+          type={type}
+          {...props}
+          suffix={suffix}
+          preIcon={preIcon}
+        />
+        {error && (
+          <FieldError
+            errors={[
+              {
+                message: error,
+              },
+            ]}
+          />
+        )}
+      </Field>
     </div>
   );
 }
 
-export { Input, Password, OTP };
+export { Input, OTP, Password };
