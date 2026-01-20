@@ -1,41 +1,35 @@
-import { MenuItem } from "@/components/ui/Menu/menu.types";
 import { Icon } from "@/components/ui/Icon";
+import { MenuItem } from "@/components/ui/siderbar";
 
 export const sidebarMenu: MenuItem[] = [
   {
-    key: "dashboard",
-    label: "Dashboard",
+    title: "Dashboard",
     icon: <Icon.Dashboard />,
-    href: "/agent/dashboard",
+    url: "/agent/dashboard",
   },
   {
-    key: "listings",
-    label: "My Listings",
+    title: "My Listings",
     icon: <Icon.Building />,
-    href: "/agent/listings",
+    url: "/agent/listings",
   },
   {
-    key: "landlord",
-    label: "Landlord",
+    title: "Landlord",
     icon: <Icon.Group />,
-    href: "/agent/landlord",
+    url: "/agent/landlord",
   },
   {
-    key: "crm",
-    label: "Leads & CRM",
+    title: "Leads & CRM",
     icon: <Icon.Group />,
-    href: "/agent/crm",
+    url: "/agent/crm",
   },
   {
-    key: "schedule",
-    label: "Schedule",
+    title: "Schedule",
     icon: <Icon.CalendarSchedule />,
-    href: "/agent/schedule",
+    url: "/agent/schedule",
   },
   {
-    key: "messages",
-    label: "Messages",
+    title: "Messages",
     icon: <Icon.Message />,
-    href: "/agent/messages",
+    url: "/agent/messages",
   },
 ];

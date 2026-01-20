@@ -1,3 +1,6 @@
 export interface Menu {
-  label: string;
+  info: {
+    title: string;
+    href: string;
+  }[]
 }

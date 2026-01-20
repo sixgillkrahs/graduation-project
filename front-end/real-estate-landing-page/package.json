@@ -11,9 +11,11 @@
     "preview": "next preview"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.16",
     "@next/env": "^16.1.1",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
     "@react-google-maps/api": "^2.20.8",
     "@reduxjs/toolkit": "^2.11.2",
     "@simplewebauthn/browser": "^13.2.2",
@@ -29,6 +31,7 @@
     "motion": "^12.26.2",
     "next": "16.0.10",
     "next-intl": "^4.6.1",
+    "radix-ui": "^1.4.3",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "^7.69.0",

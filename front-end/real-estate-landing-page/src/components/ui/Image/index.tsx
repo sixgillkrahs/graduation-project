@@ -15,7 +15,7 @@ const Image = ({
   alt: string;
   width: number;
   height: number;
-  className: string;
+  className?: string;
   unoptimized?: boolean;
 }) => {
   return (

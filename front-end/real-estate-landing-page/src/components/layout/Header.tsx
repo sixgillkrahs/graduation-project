@@ -2,7 +2,7 @@
 
 import Logo from "@/assets/Logo.svg";
 import Image from "next/image";
-import { Button, Dropdown, DropdownItem, Icon } from "../ui";
+import { Dropdown, DropdownItem, Icon } from "../ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useGetMe } from "@/shared/auth/query";
@@ -10,6 +10,7 @@ import AuthService from "@/shared/auth/AuthService";
 import toast from "react-hot-toast";
 import { queryClient } from "@/lib/react-query/queryClient";
 import Link from "next/link";
+import { Button } from "../ui/Button";
 
 const Header = () => {
   const { data: me, isLoading } = useGetMe();
@@ -137,7 +138,11 @@ const Header = () => {
         ) : (
           <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2 w-35!">
             <Icon.User className="bg-black w-8 h-8 p-1.5 rounded-full text-white" />
-            <Button type="button" className="text-black" onClick={handleLogin}>
+            <Button
+              type="button"
+              className="bg-white! outline-none! border-none! shadow-none! text-black"
+              onClick={handleLogin}
+            >
               Login
             </Button>
           </div>

@@ -92,16 +92,14 @@ const Profile = () => {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              className="text-black"
-              outline
               icon={<Icon.Fingerprint className="size-5" />}
               onClick={handleRegisterPasskey}
+              className="bg-white! border border-black/10! text-black"
             >
               Register Passkey
             </Button>
             <Button
-              className="text-black"
-              outline
+              className="bg-white! border border-black/10! text-black"
               icon={<Icon.RotateLock className="size-5" />}
               onClick={handleOpenModal}
             >

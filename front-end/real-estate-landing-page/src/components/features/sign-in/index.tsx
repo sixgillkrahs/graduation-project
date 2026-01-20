@@ -1,12 +1,14 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
-import { Button, Checkbox, Icon, Input, Password } from "@/components/ui";
+import { Button, Icon, Input, Password } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { useSignIn, useSignInPasskey } from "./services/mutate";
+import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
+import { Label } from "@/components/ui/label";
 
 const SignIn = () => {
   const router = useRouter();
@@ -108,16 +110,11 @@ const SignIn = () => {
           <Controller
             name="rememberMe"
             control={control}
-            render={({ field: { value, onChange, ...restField } }) => (
-              <Checkbox
-                label="Remember me"
-                checked={value}
-                {...restField}
-                onChange={(e) => {
-                  const isChecked = e.target.checked;
-                  onChange(isChecked);
-                }}
-              />
+            render={({ field }) => (
+              <Label>
+                <Checkbox checked={field.value} onCheckedChange={field.onChange}/>
+                Remember me
+              </Label>
             )}
           />
           <Link
