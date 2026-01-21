@@ -35,7 +35,7 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
-function Siderbar({
+function CsSidebar({
   items = [],
   children,
   header,
@@ -97,7 +97,10 @@ function Siderbar({
                               ? undefined
                               : () => handleClick(item.url, item.title)
                           }
-                          className={cn(item.children ? "" : "cursor-pointer")}
+                          className={cn(
+                            "py-5",
+                            item.children ? "" : "cursor-pointer",
+                          )}
                         >
                           {item.icon && item.icon}
                           <span className="truncate">{item.title}</span>
@@ -133,11 +136,17 @@ function Siderbar({
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter>
-          <Link href="/">
+        <SidebarFooter className="border-t p-0">
+          <SidebarMenuButton
+            tooltip={"Client Mode"}
+            onClick={() => {
+              router.push("/");
+            }}
+            className="m-2 cursor-pointer"
+          >
             <ArrowLeft />
-            <span>Client Mode</span>
-          </Link>
+            <span className="truncate">Client Mode</span>
+          </SidebarMenuButton>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
@@ -149,4 +158,4 @@ function Siderbar({
   );
 }
 
-export { Siderbar };
+export { CsSidebar };

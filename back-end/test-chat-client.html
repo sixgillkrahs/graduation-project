@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket Chat Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .container {
+        display: flex;
+        gap: 20px;
+      }
+      .box {
+        border: 1px solid #ccc;
+        padding: 10px;
+        flex: 1;
+      }
+      #messages {
+        height: 300px;
+        overflow-y: scroll;
+        border: 1px solid #eee;
+        margin-bottom: 10px;
+        padding: 5px;
+      }
+      .message {
+        padding: 5px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .my-message {
+        background: #e3f2fd;
+      }
+      input,
+      button {
+        padding: 8px;
+        margin: 5px 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+    </style>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h1>Socket.IO Chat Test</h1>
+
+    <div class="container">
+      <div class="box">
+        <h3>1. Connection & Setup</h3>
+        <input
+          type="text"
+          id="serverUrl"
+          value="http://localhost:8080"
+          placeholder="Server URL"
+        />
+        <input
+          type="text"
+          id="socketPath"
+          value="/io"
+          placeholder="Socket Path (default: /io)"
+        />
+        <button onclick="connect()">Connect</button>
+        <div id="status">Status: Disconnected</div>
+
+        <h3>2. Start Conversation</h3>
+        <input type="text" id="myId" placeholder="My User ID" />
+        <input type="text" id="otherId" placeholder="Other User ID" />
+        <button onclick="startChat()">Start Chat</button>
+
+        <h3>3. Join Existing Room (Optional)</h3>
+        <input
+          type="text"
+          id="conversationIdInput"
+          placeholder="Conversation ID"
+        />
+        <button onclick="joinRoom()">Join Room</button>
+      </div>
+
+      <div class="box">
+        <h3>Chat Room</h3>
+        <div id="activeConversation">No active conversation</div>
+        <div id="messages"></div>
+        <textarea id="messageInput" placeholder="Type a message..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+        <div
+          id="typingStatus"
+          style="font-style: italic; color: gray; height: 20px"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      let socket;
+      let currentConversationId = null;
+      let myUserId = null;
+
+      function log(msg, type = "info") {
+        console.log(`[${type.toUpperCase()}] ${msg}`);
+        const div = document.createElement("div");
+        div.textContent = `[${type}] ${msg}`;
+        document.getElementById("messages").appendChild(div);
+        // scroll to bottom
+        const container = document.getElementById("messages");
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function connect() {
+        const url = document.getElementById("serverUrl").value;
+        const path = document.getElementById("socketPath").value;
+
+        socket = io(url, {
+          path: path,
+          transports: ["websocket"],
+        });
+
+        socket.on("connect", () => {
+          document.getElementById("status").textContent =
+            "Status: Connected (" + socket.id + ")";
+          document.getElementById("status").style.color = "green";
+          log("Connected to server");
+        });
+
+        socket.on("disconnect", () => {
+          document.getElementById("status").textContent =
+            "Status: Disconnected";
+          document.getElementById("status").style.color = "red";
+          log("Disconnected from server");
+        });
+
+        socket.on("chat:started", (conversation) => {
+          log("Chat started/joined: " + conversation._id);
+          currentConversationId = conversation._id;
+          document.getElementById("activeConversation").textContent =
+            "Active ID: " + conversation._id;
+          document.getElementById("conversationIdInput").value =
+            conversation._id;
+        });
+
+        socket.on("chat:receive", (message) => {
+          log(`Received from ${message.senderId}: ${message.content}`, "msg");
+        });
+
+        socket.on("chat:typing", (data) => {
+          if (data.isTyping && data.userId !== myUserId) {
+            document.getElementById("typingStatus").textContent =
+              `${data.userId} is typing...`;
+          } else {
+            document.getElementById("typingStatus").textContent = "";
+          }
+        });
+
+        socket.on("chat:error", (err) => {
+          log("Error: " + JSON.stringify(err), "error");
+        });
+
+        // Typing handler
+        document
+          .getElementById("messageInput")
+          .addEventListener("input", (e) => {
+            if (currentConversationId && myUserId) {
+              socket.emit("chat:typing", {
+                conversationId: currentConversationId,
+                userId: myUserId,
+                isTyping: true,
+              });
+
+              // Stop typing after 1s debounce logic (simplified here)
+              setTimeout(() => {
+                socket.emit("chat:typing", {
+                  conversationId: currentConversationId,
+                  userId: myUserId,
+                  isTyping: false,
+                });
+              }, 1000);
+            }
+          });
+      }
+
+      function startChat() {
+        if (!socket) return alert("Connect first");
+        const p1 = document.getElementById("myId").value;
+        const p2 = document.getElementById("otherId").value;
+
+        if (!p1 || !p2) return alert("Enter both user IDs");
+
+        myUserId = p1;
+
+        socket.emit("chat:start", {
+          participants: [p1, p2],
+        });
+      }
+
+      function joinRoom() {
+        if (!socket) return alert("Connect first");
+        const id = document.getElementById("conversationIdInput").value;
+        currentConversationId = id;
+        socket.emit("chat:join", { conversationId: id });
+        document.getElementById("activeConversation").textContent =
+          "Joined Room: " + id;
+      }
+
+      function sendMessage() {
+        if (!socket || !currentConversationId)
+          return alert("No active conversation");
+        const content = document.getElementById("messageInput").value;
+        // Use the ID entered in input if not set globally yet, or fail
+        if (!myUserId) myUserId = document.getElementById("myId").value; // fallback
+
+        if (!myUserId) return alert("Set My User ID first");
+
+        socket.emit("chat:send", {
+          conversationId: currentConversationId,
+          senderId: myUserId,
+          content: content,
+        });
+        document.getElementById("messageInput").value = "";
+      }
+    </script>
+  </body>
+</html>

@@ -1,12 +1,6 @@
-import {
-  Button,
-  Icon,
-  Input,
-  Select,
-  Slider,
-  Tabs,
-  Tag,
-} from "@/components/ui";
+import { CsButton } from "@/components/custom";
+import { Icon, Select, Slider, Tabs, Tag } from "@/components/ui";
+import { Input } from "@/components/ui/input";
 import { memo } from "react";
 
 const optionsType = [
@@ -59,6 +53,7 @@ const FormSearch = () => {
       <div className="h-px bg-black/10 my-4"></div>
       <div className="flex flex-col gap-3">
         <Input
+          label=""
           placeholder="Enter location"
           preIcon={<Icon.MapPin className="w-5 h-5 text-black" />}
         />
@@ -67,7 +62,7 @@ const FormSearch = () => {
           <Select placeholder="Bedrooms" options={optionsBedrooms} />
         </div>
         <Slider min={0} max={10000} step={1000} />
-        <Button className="cs-bg-black text-white">Search</Button>
+        <CsButton className="cs-bg-black text-white">Search</CsButton>
       </div>
       <div className="h-px bg-black/10 my-4"></div>
       <div className="flex  flex-col items-center gap-2">

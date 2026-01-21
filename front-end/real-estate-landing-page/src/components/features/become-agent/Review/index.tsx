@@ -1,5 +1,4 @@
 import { Icon } from "@/components/ui";
-import React from "react";
 
 const Review = () => {
   return (

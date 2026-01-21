@@ -1,7 +1,9 @@
 import clsx from "clsx";
 import React from "react";
-import { Button, Icon, Input } from "..";
+import { Icon } from "..";
 import { TableProps } from "./table.types";
+import { Input } from "../input";
+import { CsButton } from "@/components/custom";
 
 const Table = <T extends object>({
   columns,
@@ -32,7 +34,7 @@ const Table = <T extends object>({
 
   const handleSelectRow = (
     e: React.ChangeEvent<HTMLInputElement>,
-    record: T
+    record: T,
   ) => {
     if (!rowSelection) return;
     const { selectedRowKeys, onChange } = rowSelection;
@@ -42,7 +44,7 @@ const Table = <T extends object>({
     } else {
       onChange(
         selectedRowKeys.filter((k) => k !== key),
-        dataSource.filter((r) => getRowKey(r) !== key) // This assumes all selected are in current dataSource for simplified filtering
+        dataSource.filter((r) => getRowKey(r) !== key), // This assumes all selected are in current dataSource for simplified filtering
       );
     }
   };
@@ -66,6 +68,7 @@ const Table = <T extends object>({
     <div>
       <div className="mb-6 p-4 bg-white rounded-3xl shadow-sm">
         <Input
+          label=""
           placeholder="Search"
           preIcon={<Icon.Search />}
           className="rounded-[14px]! w-[400px]!"
@@ -74,7 +77,7 @@ const Table = <T extends object>({
       <div
         className={clsx(
           "w-full overflow-hidden bg-white rounded-3xl shadow-sm border border-gray-200",
-          className
+          className,
         )}
       >
         <div className="overflow-x-auto">
@@ -100,7 +103,7 @@ const Table = <T extends object>({
                     key={col.key || String(col.dataIndex)}
                     className={clsx(
                       "px-6 py-4",
-                      col.align ? `text-${col.align}` : ""
+                      col.align ? `text-${col.align}` : "",
                     )}
                     style={{ width: col.width }}
                   >
@@ -138,7 +141,7 @@ const Table = <T extends object>({
                       key={key}
                       className={clsx(
                         "hover:bg-gray-50 transition-colors duration-150",
-                        isSelected && "bg-blue-50"
+                        isSelected && "bg-blue-50",
                       )}
                     >
                       {rowSelection && (
@@ -158,14 +161,14 @@ const Table = <T extends object>({
                           key={col.key || String(col.dataIndex)}
                           className={clsx(
                             "px-6 py-4 text-sm text-gray-700",
-                            col.align ? `text-${col.align}` : ""
+                            col.align ? `text-${col.align}` : "",
                           )}
                         >
                           {col.render
                             ? col.render(
                                 record[col.dataIndex],
                                 record,
-                                rowIndex
+                                rowIndex,
                               )
                             : (record[col.dataIndex] as React.ReactNode)}
                         </td>
@@ -185,14 +188,14 @@ const Table = <T extends object>({
               <span className="font-bold! cs-paragraph text-sm!">
                 {Math.min(
                   pagination.total,
-                  (pagination.current - 1) * pagination.pageSize + 1
+                  (pagination.current - 1) * pagination.pageSize + 1,
                 )}{" "}
               </span>
               to{" "}
               <span className="font-bold! cs-paragraph text-sm!">
                 {Math.min(
                   pagination.total,
-                  pagination.current * pagination.pageSize
+                  pagination.current * pagination.pageSize,
                 )}{" "}
               </span>
               of{" "}
@@ -202,32 +205,32 @@ const Table = <T extends object>({
               results
             </span>
             <div className="flex gap-2">
-              <Button
+              <CsButton
                 disabled={pagination.current === 1}
                 onClick={() =>
                   pagination.onChange(
                     pagination.current - 1,
-                    pagination.pageSize
+                    pagination.pageSize,
                   )
                 }
                 className="px-3 py-1 text-sm  disabled:opacity-50 disabled:cursor-not-allowed font-bold"
               >
                 Prev
-              </Button>
-              <Button
+              </CsButton>
+              <CsButton
                 disabled={
                   pagination.current * pagination.pageSize >= pagination.total
                 }
                 onClick={() =>
                   pagination.onChange(
                     pagination.current + 1,
-                    pagination.pageSize
+                    pagination.pageSize,
                   )
                 }
                 className="px-3 py-1 text-sm  disabled:opacity-50 disabled:cursor-not-allowed font-bold"
               >
                 Next
-              </Button>
+              </CsButton>
             </div>
           </div>
         )}

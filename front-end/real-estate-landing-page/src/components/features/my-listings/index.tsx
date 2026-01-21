@@ -1,12 +1,13 @@
 "use client";
 
-import { Button, Icon, Table } from "@/components/ui";
+import { Icon, Table } from "@/components/ui";
 import { TableColumn } from "@/components/ui/Table/table.types";
 import { useState } from "react";
 import { useGetMyProperties } from "./services/query";
 import { IProperty } from "./services/type";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Building2, Eye, Plus } from "lucide-react";
+import { CsButton } from "@/components/custom";
 
 const MyListings = () => {
   const router = useRouter();
@@ -38,7 +39,7 @@ const MyListings = () => {
               <></>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <Icon.Building className="w-6 h-6" />
+                <Building2 className="w-6 h-6" />
               </div>
             )}
           </div>
@@ -84,7 +85,7 @@ const MyListings = () => {
       dataIndex: "viewCount",
       render: (viewCount) => (
         <div className="flex items-center gap-2">
-          <Icon.Eye className="w-4 h-4 text-gray-400" />
+          <Eye className="w-4 h-4 text-gray-400" />
           <span className="font-medium text-gray-700">
             {viewCount?.toLocaleString() || 0}
           </span>
@@ -115,9 +116,9 @@ const MyListings = () => {
       render: () => {
         return (
           <div className="flex gap-2 justify-end">
-            <Button outline icon={<Icon.Eye className="w-4 h-4" />} />
-            <Button outline icon={<Icon.Edit className="w-4 h-4" />} />
-            <Button outline icon={<Icon.MoreVertical className="w-4 h-4" />} />
+            <CsButton icon={<Eye className="w-4 h-4" />} />
+            <CsButton icon={<Icon.Edit className="w-4 h-4" />} />
+            <CsButton icon={<Icon.MoreVertical className="w-4 h-4" />} />
           </div>
         );
       },
@@ -134,13 +135,13 @@ const MyListings = () => {
           </div>
         </div>
         <div>
-          <Button
-            icon={<Icon.Plus />}
+          <CsButton
+            icon={<Plus />}
             className="cs-bg-black text-white px-4"
             onClick={() => router.push("/agent/listings/add")}
           >
             Create New Listing
-          </Button>
+          </CsButton>
         </div>
       </div>
       <Table

@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Icon } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import { Avatar } from "@/components/ui/Icon/Avatar";
 import bg from "@/assets/images/become-agent/bg.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { CsButton } from "@/components/custom";
 
 const Hero = () => {
   const router = useRouter();
@@ -28,15 +29,15 @@ const Hero = () => {
           details faster, price accurately, and manage clients effortlessly
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start gap-4">
-          <Button
+          <CsButton
             className="cs-bg-red text-white font-semibold"
             onClick={handleApplyNow}
           >
             Join Now
-          </Button>
-          <Button className="cs-bg-black text-white font-semibold">
+          </CsButton>
+          <CsButton className="cs-bg-black text-white font-semibold">
             Learn More
-          </Button>
+          </CsButton>
         </div>
         <div className="flex items-center justify-start gap-4">
           <Avatar />

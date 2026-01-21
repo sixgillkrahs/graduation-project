@@ -1,5 +1,4 @@
 //#region import
-import { Plus } from "./Add";
 import { AddUser } from "./AddUser";
 import { Alert } from "./Alert";
 import { ArrowDown } from "./ArrowDown";
@@ -10,7 +9,6 @@ import { BankCard } from "./BankCard";
 import { BarChatBox } from "./BarChartBox";
 import { BathRoom } from "./BathRoom";
 import { Briefcase } from "./Briefcase";
-import { Building } from "./Building";
 import { CalendarSchedule } from "./CalendarSchedule";
 import { CheckMark } from "./CheckMark";
 import { Circle } from "./Circle";
@@ -19,12 +17,10 @@ import { Dashboard } from "./Dashboard";
 import { DeleteBin } from "./DeleteBin";
 import { Edit } from "./Edit";
 import { ExpandUpDown } from "./ExpandUpDown";
-import { Eye } from "./Eye";
 import { EyeClose } from "./EyeClose";
 import { Facebook } from "./Facebook";
 import { FileUpload } from "./FileUpload";
 import { Fingerprint } from "./Fingerprint";
-import { Group } from "./Group";
 import { HeadGear } from "./HeadGear";
 import { HotelBed } from "./HotelBed";
 import { IdCard } from "./IdCard";
@@ -49,7 +45,6 @@ import { ShieldCheck } from "./ShieldCheck";
 import { Star } from "./Star";
 import { TwitterX } from "./TwitterX";
 import { User } from "./User";
-import { VerifiedBadge } from "./VerifiedBadge";
 import { Youtube } from "./Youtube";
 //#endregion
 
@@ -82,7 +77,6 @@ export const Icon = {
   FileUpload,
   Close,
   DeleteBin,
-  Eye,
   EyeClose,
   Lock,
   LogoutCircle,
@@ -90,18 +84,14 @@ export const Icon = {
   Pencil,
   RotateLock,
   Briefcase,
-  VerifiedBadge,
   IdCard,
   Fingerprint,
   Alert,
   BankCard,
   Edit,
   Dashboard,
-  Building,
-  Group,
   CalendarSchedule,
   Message,
-  Plus,
   MoreHorizontal,
   MoreVertical,
   Information,

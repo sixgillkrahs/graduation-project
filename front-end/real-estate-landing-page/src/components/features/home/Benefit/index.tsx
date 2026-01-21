@@ -1,4 +1,5 @@
-import { Button, Icon } from "@/components/ui";
+import { CsButton } from "@/components/custom";
+import { Icon } from "@/components/ui";
 import Image from "next/image";
 import React from "react";
 
@@ -46,9 +47,9 @@ const Benefit = () => {
               <BenefitItem title="Complete management within your application." />
               <BenefitItem title="Receive your rent on time every month." />
               <div className="mt-4">
-                <Button className="cs-bg-black text-white">
+                <CsButton className="cs-bg-black text-white">
                   List My Property
-                </Button>
+                </CsButton>
               </div>
             </div>
           </div>
@@ -84,9 +85,9 @@ const Benefit = () => {
               <BenefitItem title="Complete management within your application." />
               <BenefitItem title="Receive your rent on time every month." />
               <div className="mt-4">
-                <Button className="cs-bg-black text-white">
+                <CsButton className="cs-bg-black text-white">
                   List My Property
-                </Button>
+                </CsButton>
               </div>
             </div>
           </div>

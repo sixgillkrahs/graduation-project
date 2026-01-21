@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui";
+import { CsButton } from "@/components/custom";
 
 const CTA = () => {
   return (
@@ -11,7 +11,7 @@ const CTA = () => {
           join the network that empowers agents with technology, not paperwork
         </div>
       </div>
-      <Button className="cs-bg-black text-white">Apply Now</Button>
+      <CsButton className="cs-bg-black text-white">Apply Now</CsButton>
     </section>
   );
 };

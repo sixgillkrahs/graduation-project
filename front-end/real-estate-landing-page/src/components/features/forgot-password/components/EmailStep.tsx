@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Icon, Input } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import { Controller, useForm } from "react-hook-form";
 
 import { useRouter } from "next/navigation";
@@ -8,6 +8,8 @@ import { useForgotPassword } from "../services/mutate";
 import { setEmail } from "@/store/verify.store";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { CsButton } from "@/components/custom";
+import { Input } from "@/components/ui/input";
 
 const EmailStep = ({ onNext }: { onNext: () => void }) => {
   const router = useRouter();
@@ -76,13 +78,13 @@ const EmailStep = ({ onNext }: { onNext: () => void }) => {
             />
           )}
         />
-        <Button
+        <CsButton
           type="submit"
           className="w-full cs-bg-red text-white"
           loading={isPending}
         >
           Send Code
-        </Button>
+        </CsButton>
       </form>
     </div>
   );

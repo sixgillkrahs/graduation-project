@@ -1,6 +1,8 @@
 "use client";
 
-import { Button, Icon, OTP } from "@/components/ui";
+import { CsButton } from "@/components/custom";
+import { Icon } from "@/components/ui";
+import { OTP } from "@/components/ui/input-otp";
 import { RootState } from "@/store";
 import { setToken } from "@/store/verify.store";
 import { Controller, useForm } from "react-hook-form";
@@ -63,7 +65,7 @@ const OTPStep = ({
           password.
         </div>
       </div>
-      <form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+      <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
         <Controller
           name="otp"
           control={control}
@@ -76,26 +78,22 @@ const OTPStep = ({
           }}
           render={({ field, fieldState }) => (
             <OTP
-              length={6}
-              value={otpValue}
-              className="mx-auto"
-              onValueChange={(val) =>
-                setValue("otp", val, {
-                  shouldValidate: true,
-                  shouldDirty: true,
-                })
-              }
+              maxLength={6}
               error={fieldState.error?.message}
+              {...field}
+              pattern="digitals"
+              disabled={isPending}
+              containerClassName="justify-center"
             />
           )}
         />
-        <Button
+        <CsButton
           type="submit"
           className="w-full cs-bg-red text-white mt-2"
           loading={isPending}
         >
           Reset Password
-        </Button>
+        </CsButton>
       </form>
       <Timer email={email} />
     </div>

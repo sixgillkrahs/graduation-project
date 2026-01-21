@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui";
+import { CsButton } from "@/components/custom";
 import Properties from "./components/Properties";
 import { useTranslations } from "next-intl";
 
@@ -15,7 +15,9 @@ const FeaturedProperties = () => {
             Discover our hand-picked selection of premium rentals.
           </span>
         </div>
-        <Button className="text-white cs-bg-black">View All Properties</Button>
+        <CsButton className="text-white cs-bg-black">
+          View All Properties
+        </CsButton>
       </div>
       <div className="h-px w-full bg-[#E5E5E5] my-6" />
       <Properties />

@@ -1,30 +1,33 @@
-import { processingSocket } from '@/middleware/processingSocket';
+import { processingSocket } from "@/middleware/processingSocket";
 // import { ISocketEventSetting } from "@/@types/global";
 import { Socket } from "socket.io";
-import { ChatChit } from "./event-handlers";
+import { ChatChit, ChatHandler } from "./event-handlers";
 import { processResponse } from "@/middleware/processingSocket";
-import { ISocketEventSetting } from '@/@types/socket';
-
+import { ISocketEventSetting } from "@/@types/socket";
 
 export function socketEventHandle(socket: Socket) {
-    ChatChit(socket);
+  ChatChit(socket);
+  ChatHandler(socket);
 }
 
 export const eventProcess = (
-    socket: Socket,
-    setting: ISocketEventSetting,
+  socket: Socket,
+  setting: ISocketEventSetting,
 ): void => {
-    socket.on(setting.name, (data) => {
-        processingSocket(socket, setting, data).then(({ req }) => {
-            setting.action(data, socket).then((resp) => {
-                socket.emit(setting.name, processResponse(resp));
-            }).catch((err) => {
-                console.error(`Error processing ${setting.name} event:`, err);
-                socket.emit(setting.name, { error: 'Internal server error' });
-            });
+  socket.on(setting.name, (data) => {
+    processingSocket(socket, setting, data).then(({ req }) => {
+      setting
+        .action(data, socket)
+        .then((resp) => {
+          socket.emit(setting.name, processResponse(resp));
+        })
+        .catch((err) => {
+          console.error(`Error processing ${setting.name} event:`, err);
+          socket.emit(setting.name, { error: "Internal server error" });
         });
-    })
-}
+    });
+  });
+};
 
 // export const eventProcess = (socket: Socket, setting: ISocketEventSetting): void => {
 //     socket.on(setting.name, (data: any) => {

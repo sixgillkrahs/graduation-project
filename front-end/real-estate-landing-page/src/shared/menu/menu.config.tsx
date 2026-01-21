@@ -1,30 +1,32 @@
 import { Icon } from "@/components/ui/Icon";
-import { MenuItem } from "@/components/ui/siderbar";
+import { MenuItem } from "@/components/custom/siderbar";
+import { Building2, LayoutDashboard, Users } from "lucide-react";
+import { CalendarSchedule } from "@/components/ui/Icon/CalendarSchedule";
 
 export const sidebarMenu: MenuItem[] = [
   {
     title: "Dashboard",
-    icon: <Icon.Dashboard />,
+    icon: <LayoutDashboard />,
     url: "/agent/dashboard",
   },
   {
     title: "My Listings",
-    icon: <Icon.Building />,
+    icon: <Building2 />,
     url: "/agent/listings",
   },
   {
     title: "Landlord",
-    icon: <Icon.Group />,
+    icon: <Users />,
     url: "/agent/landlord",
   },
   {
     title: "Leads & CRM",
-    icon: <Icon.Group />,
+    icon: <Users />,
     url: "/agent/crm",
   },
   {
     title: "Schedule",
-    icon: <Icon.CalendarSchedule />,
+    icon: <CalendarSchedule />,
     url: "/agent/schedule",
   },
   {

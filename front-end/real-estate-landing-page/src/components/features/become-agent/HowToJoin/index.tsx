@@ -1,5 +1,6 @@
 import { Icon } from "@/components/ui";
 import React from "react";
+import { UserRoundPlus } from "lucide-react";
 
 const Step = ({
   title,

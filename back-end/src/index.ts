@@ -14,6 +14,12 @@ const server = app.listen(PORT, () => {
 
 const instance = WebSocketService.getInstance(server);
 
+// Initialize Email Worker
+import { EmailService } from "@/services/email.service";
+import { EmailWorker } from "@/workers/email.worker";
+const emailService = new EmailService();
+new EmailWorker(emailService);
+
 // Lắng nghe message từ client
 // wsService.onMessage((ws, msg) => {
 //   if (msg.type === 'ping') {
@@ -24,7 +30,7 @@ const instance = WebSocketService.getInstance(server);
 app.use((req, res, next) => {
   req.io = instance.getWss();
   next();
-})
+});
 
 const shutdown = async () => {
   logger.info("Shutdown signal received");
@@ -33,11 +39,11 @@ const shutdown = async () => {
   // wsService.broadcast({ type: 'shutdown', data: { message: 'Server shutting down' } });
 
   // Add connection draining
-  app.disable('connection'); // Stop accepting new connections
+  app.disable("connection"); // Stop accepting new connections
 
   // Add timeout for existing connections
   const connectionDrainTimeout = setTimeout(() => {
-    logger.warn('Connection drain timeout reached, forcing shutdown');
+    logger.warn("Connection drain timeout reached, forcing shutdown");
     process.exit(1);
   }, 10000);
 
@@ -58,11 +64,11 @@ const shutdown = async () => {
   // Force shutdown after 30 seconds
   setTimeout(() => {
     logger.error(
-      "Could not close connections in time, forcefully shutting down"
+      "Could not close connections in time, forcefully shutting down",
     );
     process.exit(1);
   }, 30000);
-}
+};
 
 // Ví dụ 5 giây broadcast cho tất cả client
 setInterval(() => {
@@ -75,4 +81,4 @@ setInterval(() => {
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
-export default server
+export default server;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Icon, Image, Tag, useModal } from "@/components/ui";
+import { Icon, Image, Tag, useModal } from "@/components/ui";
 import { startRegistration } from "@simplewebauthn/browser";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
@@ -11,6 +11,8 @@ import RegisterPasskey from "./components/RegisterPasskey";
 import RenderField from "./components/RenderField";
 import { useRegisterPasskey, useVerifyPasskey } from "./services/mutate";
 import { useProfile } from "./services/query";
+import { CsButton } from "@/components/custom";
+import { BadgeCheck } from "lucide-react";
 
 const Profile = () => {
   const router = useRouter();
@@ -91,27 +93,27 @@ const Profile = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
+            <CsButton
               icon={<Icon.Fingerprint className="size-5" />}
               onClick={handleRegisterPasskey}
               className="bg-white! border border-black/10! text-black"
             >
               Register Passkey
-            </Button>
-            <Button
+            </CsButton>
+            <CsButton
               className="bg-white! border border-black/10! text-black"
               icon={<Icon.RotateLock className="size-5" />}
               onClick={handleOpenModal}
             >
               Change Password
-            </Button>
-            <Button
+            </CsButton>
+            <CsButton
               className="cs-bg-black text-white"
               icon={<Icon.Pencil className="size-5" />}
               onClick={handleToEdit}
             >
               Edit Profile
-            </Button>
+            </CsButton>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-6">
@@ -228,7 +230,7 @@ const Profile = () => {
               <div className="grid gap-2">
                 <span className="flex items-center gap-2 cs-typography text-[14px]! font-bold! ">
                   <span>
-                    <Icon.VerifiedBadge className="size-5" />
+                    <BadgeCheck className="size-5" />
                   </span>{" "}
                   Specialization
                 </span>

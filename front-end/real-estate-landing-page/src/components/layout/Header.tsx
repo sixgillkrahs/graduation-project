@@ -10,7 +10,7 @@ import AuthService from "@/shared/auth/AuthService";
 import toast from "react-hot-toast";
 import { queryClient } from "@/lib/react-query/queryClient";
 import Link from "next/link";
-import { Button } from "../ui/Button";
+import { CsButton } from "../custom";
 
 const Header = () => {
   const { data: me, isLoading } = useGetMe();
@@ -95,12 +95,12 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-2">
             {me.data.roleId.code === "AGENT" && (
               <Link href="/agent/dashboard">
-                <Button
-                  className="cs-bg-black text-white"
+                <CsButton
+                  className="cs-bg-black text-white rounded-full"
                   icon={<Icon.Briefcase />}
                 >
                   Agent space
-                </Button>
+                </CsButton>
               </Link>
             )}
             <Dropdown
@@ -138,13 +138,13 @@ const Header = () => {
         ) : (
           <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2 w-35!">
             <Icon.User className="bg-black w-8 h-8 p-1.5 rounded-full text-white" />
-            <Button
+            <CsButton
               type="button"
               className="bg-white! outline-none! border-none! shadow-none! text-black"
               onClick={handleLogin}
             >
               Login
-            </Button>
+            </CsButton>
           </div>
         )}
       </div>
@@ -166,13 +166,13 @@ const Header = () => {
               </li>
               <li className="flex items-center rounded-full cs-outline-gray mt-4">
                 <Icon.User className="bg-black w-full h-full p-2 rounded-full text-white" />
-                <Button
+                <CsButton
                   type="button"
                   className="text-black pl-2!"
                   onClick={() => handleLogin()}
                 >
                   Login
-                </Button>
+                </CsButton>
               </li>
             </ul>
           </nav>

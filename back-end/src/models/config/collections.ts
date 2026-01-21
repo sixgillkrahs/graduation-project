@@ -6,6 +6,8 @@ const collections = {
   auths: "auths",
   agents: "agents",
   properties: "properties",
+  conversations: "conversations",
+  messages: "messages",
 };
 
 export default collections;

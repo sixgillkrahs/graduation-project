@@ -1,7 +1,7 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
-import { Button, Icon, Input, Password } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,9 @@ import { Controller, useForm } from "react-hook-form";
 import { useSignIn, useSignInPasskey } from "./services/mutate";
 import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
 import { Label } from "@/components/ui/label";
+import { CsButton } from "@/components/custom";
+import { Input } from "@/components/ui/input";
+import { Password } from "@/components/ui/password";
 
 const SignIn = () => {
   const router = useRouter();
@@ -112,7 +115,10 @@ const SignIn = () => {
             control={control}
             render={({ field }) => (
               <Label>
-                <Checkbox checked={field.value} onCheckedChange={field.onChange}/>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
                 Remember me
               </Label>
             )}
@@ -124,21 +130,21 @@ const SignIn = () => {
             Forgot password?
           </Link>
         </div>
-        <Button
+        <CsButton
           type="submit"
           className="w-full cs-bg-red text-white"
           loading={isPending}
         >
           Sign In
-        </Button>
-        <Button
+        </CsButton>
+        <CsButton
           type="button"
-          // variant={"outline"}
+          className="w-full"
           icon={<Icon.Fingerprint className="w-5 h-5" />}
           onClick={onSubmitPasskey}
         >
           Sign In with Passkey
-        </Button>
+        </CsButton>
       </form>
       <div className="mt-4 text-center">
         <span className="cs-typography-gray text-sm!">

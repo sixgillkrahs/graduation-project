@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Icon, Tag } from "@/components/ui";
+import { CsButton } from "@/components/custom";
+import { Icon, Tag } from "@/components/ui";
 import { useState } from "react";
 
 const categories = [
@@ -45,9 +46,9 @@ const Card = ({
           <span className="cs-paragraph text-xl! font-semibold!">
             ${price}/<span className="text-sm text-gray-500">month</span>
           </span>
-          <Button className="cs-outline-black text-sm text-black font-semibold border-none">
+          <CsButton className="cs-outline-black text-sm text-black font-semibold border-none">
             View Details
-          </Button>
+          </CsButton>
         </div>
         <div>
           <h3 className="cs-typography font-black! mb-3">{name}</h3>
@@ -91,16 +92,16 @@ const Properties = () => {
           ))}
         </div>
         <div className="flex gap-2">
-          <Button
+          <CsButton
             className="bg-black/10 main-color-black font-medium border-none"
             icon={<Icon.ArrowLeft />}
             onClick={() => setIsActive(isActive - 1)}
           />
-          <Button
+          <CsButton
             className="bg-black/10 main-color-black font-medium border-none"
             icon={<Icon.ArrowRight />}
             onClick={() => setIsActive(isActive + 1)}
-          ></Button>
+          ></CsButton>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">

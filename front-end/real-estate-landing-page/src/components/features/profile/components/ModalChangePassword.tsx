@@ -1,6 +1,8 @@
-import { Button, Modal, Password } from "@/components/ui";
+import { Modal } from "@/components/ui";
 import { Controller, useForm } from "react-hook-form";
 import { useChangePassword } from "../services/mutate";
+import { Password } from "@/components/ui/password";
+import { CsButton } from "@/components/custom";
 
 export const ModalChangePassword = ({
   open,
@@ -85,21 +87,16 @@ export const ModalChangePassword = ({
           )}
         />
         <div className="flex justify-end gap-2 pt-4">
-          <Button
-            type="submit"
-            className="text-black "
-            onClick={onCancel}
-            outline
-          >
+          <CsButton type="submit" className="text-black " onClick={onCancel}>
             Cancel
-          </Button>
-          <Button
+          </CsButton>
+          <CsButton
             type="submit"
             className="cs-bg-black text-white"
             loading={isPending}
           >
             Change Password
-          </Button>
+          </CsButton>
         </div>
       </form>
     </Modal>

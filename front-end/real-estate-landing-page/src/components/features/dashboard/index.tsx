@@ -1,13 +1,14 @@
 import { Icon } from "@/components/ui";
 import CardStats, { CardStatsProps } from "./components/CardStats";
 import ChartLine from "./components/ChartLine";
+import { BadgeCheck, Building2, Eye, Users } from "lucide-react";
 
 const Dashboard = () => {
   const stats: CardStatsProps[] = [
     {
       title: "Total Views",
       value: "1240",
-      icon: <Icon.Eye className="text-blue-800" />,
+      icon: <Eye className="text-blue-800" />,
       color: "blue",
       percentage: 10,
       type: "increase",
@@ -15,7 +16,7 @@ const Dashboard = () => {
     {
       title: "New Leads",
       value: "45",
-      icon: <Icon.Group className="text-green-800" />,
+      icon: <Users className="text-green-800" />,
       color: "green",
       percentage: 5,
       type: "increase",
@@ -23,7 +24,7 @@ const Dashboard = () => {
     {
       title: "Active Listings",
       value: "3",
-      icon: <Icon.Building className="text-purple-800" />,
+      icon: <Building2 className="text-purple-800" />,
       color: "purple",
       percentage: 0,
       type: "static",
@@ -31,7 +32,7 @@ const Dashboard = () => {
     {
       title: "Properties sold",
       value: "12",
-      icon: <Icon.VerifiedBadge className="text-orange-800" />,
+      icon: <BadgeCheck className="text-orange-800" />,
       color: "orange",
       percentage: 2,
       type: "decrease",

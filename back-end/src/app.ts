@@ -1,29 +1,29 @@
-import express, { ErrorRequestHandler } from "express";
-import { requestId } from "./middleware/requestId";
-import { setupSecurityHeaders } from "./middleware/securityHeaders";
+import monitoringRoutes from "@/routes/monitoring.routes";
+import userRoutes from "@/routes/user.routes";
 import cors from "cors";
+import express, { ErrorRequestHandler } from "express";
+import swaggerUi from "swagger-ui-express";
 import { ENV } from "./config/env";
-import { compressionMiddleware } from "./middleware/performanceMiddleware";
-import { apiLimiter, authLimiter } from "./middleware/rateLimiter";
+import { specs } from "./docs/swagger";
+import { cache } from "./middleware/cacheMiddleware";
+import { errorHandler } from "./middleware/errorHandler";
 import { loggingMiddleware } from "./middleware/loggingMiddleware";
 import { metricsMiddleware } from "./middleware/monitoringMiddleware";
-import monitoringRoutes from "@/routes/monitoring.routes";
-import heroRoutes from "@/routes/hero.routes";
-import swaggerUi from "swagger-ui-express";
-import { specs } from "./docs/swagger";
-import { errorHandler } from "./middleware/errorHandler";
-import { cache } from "./middleware/cacheMiddleware";
 import { notFoundHandler } from "./middleware/notFound";
-import userRoutes from "@/routes/user.routes";
-import permissionRoutes from "./routes/permission.routes";
+import { compressionMiddleware } from "./middleware/performanceMiddleware";
+import { authLimiter } from "./middleware/rateLimiter";
+import { requestId } from "./middleware/requestId";
+import { setupSecurityHeaders } from "./middleware/securityHeaders";
 import authRoutes from "./routes/auth.routes";
+import permissionRoutes from "./routes/permission.routes";
 import resourcesRoutes from "./routes/resource.routes";
 
-import uploadRoutes from "./routes/upload.routes";
-import roleRoutes from "./routes/role.routes";
 import agentsRegistrationsRoutes from "./routes/agents-registrations.routes";
 import agentRoutes from "./routes/agents.routes";
+import chatRoutes from "./routes/chat.routes";
 import propertyRoutes from "./routes/property.routes";
+import roleRoutes from "./routes/role.routes";
+import uploadRoutes from "./routes/upload.routes";
 
 const app = express();
 
@@ -79,6 +79,7 @@ app.use("/api/resources", resourcesRoutes);
 app.use("/api/agents-registrations", agentsRegistrationsRoutes);
 app.use("/api/agents", agentRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/chat", chatRoutes);
 
 const swaggerOptions = {
   explorer: true,

@@ -10,14 +10,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import { sidebarMenu } from "@/shared/menu/menu.config";
 import { RootState } from "@/store";
 import { useSelector } from "react-redux";
 
 const Header = () => {
-  const {
-    info: {},
-  } = useSelector((state: RootState) => state.menu);
+  const { info } = useSelector((state: RootState) => state.menu);
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-2xs">
@@ -26,10 +23,30 @@ const Header = () => {
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="#">{label}</BreadcrumbLink>
-            </BreadcrumbItem>
-            {/* <BreadcrumbSeparator className="hidden md:block" /> */}
+            {info?.map((item, index) => {
+              if (index === info.length - 1) {
+                return (
+                  <BreadcrumbItem key={item.title}>
+                    <BreadcrumbPage className="text-black uppercase font-bold">
+                      {item.title}
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                );
+              }
+              return (
+                <>
+                  <BreadcrumbItem key={item.title}>
+                    <BreadcrumbLink
+                      href={item.href}
+                      className="text-black uppercase!"
+                    >
+                      {item.title}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator key={item.title} />
+                </>
+              );
+            })}
           </BreadcrumbList>
         </Breadcrumb>
       </div>

@@ -1,12 +1,14 @@
 "use client";
 
-import { Button, Icon, Table } from "@/components/ui";
+import { Icon, Table } from "@/components/ui";
 import ModalAdd from "./components/ModalAdd";
 import { useCallback, useState } from "react";
 import {
   RippleButton,
   RippleButtonRipples,
 } from "@/components/animate-ui/components/buttons/ripple";
+import { CsButton } from "@/components/custom";
+import { Eye } from "lucide-react";
 
 export const Landlord = () => {
   const [openModalAdd, setOpenModalAdd] = useState(false);
@@ -31,9 +33,12 @@ export const Landlord = () => {
       key: "action",
       render: () => (
         <div className="flex gap-2">
-          <Button variant={"outline"} icon={<Icon.Eye className="w-4 h-4" />} />
-          <Button variant={"outline"} icon={<Icon.Edit className="w-4 h-4" />} />
-          <Button
+          <CsButton variant={"outline"} icon={<Eye className="w-4 h-4" />} />
+          <CsButton
+            variant={"outline"}
+            icon={<Icon.Edit className="w-4 h-4" />}
+          />
+          <CsButton
             variant={"outline"}
             icon={<Icon.DeleteBin className="text-red-500 w-4 h-4" />}
           />

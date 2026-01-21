@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Icon, Input, Select } from "@/components/ui";
+import { Icon, Select } from "@/components/ui";
 import { bankList } from "@/const/bank";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { useEffect } from "react";
@@ -8,6 +8,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useProfile } from "../profile/services/query";
 import { useEditProfile } from "./services/mutate";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { CsButton } from "@/components/custom";
 
 const EditProfile = () => {
   const router = useRouter();
@@ -347,21 +349,20 @@ const EditProfile = () => {
                   </div>
                 </div>
                 <div className="mt-10 flex justify-end gap-4">
-                  <Button
+                  <CsButton
                     type="button"
-                    outline
                     onClick={onBack}
                     className="text-black"
                   >
                     Cancel
-                  </Button>
-                  <Button
+                  </CsButton>
+                  <CsButton
                     type="submit"
                     className="bg-black text-white"
                     loading={isPending}
                   >
                     Save
-                  </Button>
+                  </CsButton>
                 </div>
               </form>
             </div>

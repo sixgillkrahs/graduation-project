@@ -1,10 +1,12 @@
-import { Button, Icon, Password } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import { RootState } from "@/store";
 import { Controller, useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useResetPassword } from "../services/mutate";
 import { useState } from "react";
 import Link from "next/link";
+import { CsButton } from "@/components/custom";
+import { Password } from "@/components/ui/password";
 
 const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
   const { token } = useSelector((state: RootState) => state.verifyOTP);
@@ -140,13 +142,13 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
               )}
             />
 
-            <Button
+            <CsButton
               type="submit"
               className="w-full cs-bg-red text-white mt-4"
               loading={isPending}
             >
               Reset Password
-            </Button>
+            </CsButton>
           </form>
         </>
       )}
