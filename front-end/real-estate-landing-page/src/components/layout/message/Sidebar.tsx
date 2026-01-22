@@ -1,6 +1,5 @@
 import { CsButton } from "@/components/custom";
 import ListChat from "@/components/features/message/components/ListChat";
-import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import { ListFilter, Search } from "lucide-react";
 import React from "react";
@@ -8,8 +7,8 @@ import React from "react";
 const Sidebar = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex gap-4 h-screen">
-      <div className="w-80 rounded-2xl border p-3 flex flex-col gap-3">
-        <div className="flex gap-2 items-center">
+      <div className="w-80 rounded-2xl border py-3 flex flex-col gap-3">
+        <div className="flex gap-2 items-center px-3">
           <Input
             preIcon={<Search className="w-4 h-4" />}
             placeholder="Search"

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import collections from "../config/collections";
 import paginate from "../plugins/paginate.plugin";
 import toJSON from "../plugins/toJSON.plugin";
+import { encrypt, decrypt } from "@/utils/encryption";
 
 export interface IMessage {
   conversationId: mongoose.Schema.Types.ObjectId;
@@ -46,6 +47,8 @@ const messageSchema = new mongoose.Schema<
     content: {
       type: String,
       required: true,
+      get: decrypt,
+      set: encrypt,
     },
     isRead: {
       type: Boolean,
@@ -54,6 +57,8 @@ const messageSchema = new mongoose.Schema<
   },
   {
     timestamps: true,
+    toJSON: { getters: true },
+    toObject: { getters: true },
   },
 );
 

@@ -9,22 +9,36 @@ export class ChatController extends BaseController {
   }
 
   getConversations = async (
-    req: Request,
+    req: Request<
+      {},
+      {},
+      {},
+      {
+        limit?: string;
+        page?: string;
+        sortField?: string;
+        sortOrder?: string;
+      }
+    >,
     res: Response,
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      // Assuming req.user is populated by auth middleware
-      // Check type definition for req.user if necessary.
-      // In user.controller it seems req.user has { userId: { _id: ... }, roleId: ... } structure?
-      // Let's verify req.user structure from user.controller usage:
-      // const { userId, roleId } = req.user;
-      // and userId._id
-
-      const userId =
-        req.user?.userId?._id?.toString() || req.user?.userId?.toString();
-
-      return await this.chatService.getUserConversations(userId);
+      const { userId, roleId } = req.user;
+      const { limit, page, sortField, sortOrder } = req.query;
+      let filter: Record<string, any> = {};
+      if (userId) {
+        filter.participants = userId._id;
+      }
+      return await this.chatService.getConversationsPaginated(
+        {
+          page: page ? Number(page) : 1,
+          limit: limit ? Number(limit) : 10,
+          sortBy: `${(sortField as string) || "updatedAt"}:${(sortOrder as string) || "desc"}`,
+          populate: "participants:fullName ,lastMessageId",
+        },
+        filter,
+      );
     });
   };
 

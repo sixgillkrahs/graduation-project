@@ -1,103 +1,125 @@
 import { Socket } from "socket.io";
 import { ChatService } from "@/services/chat.service";
 import { WebSocketService } from "@/services/websocket.service";
+import { ISocketEventSetting, SocketEventAction } from "@/@types/socket";
+import { eventProcess } from "@/socket.io/event";
 
 const chatService = new ChatService();
 
-export function ChatHandler(socket: Socket) {
-  const wsService = WebSocketService.getInstance();
+// const chatStartAction: SocketEventAction = async (data, socket) => {
+//   const { participants } = data.body;
+//   if (!participants || participants.length < 2) {
+//     throw new Error("Invalid participants");
+//   }
+//   const conversation = await chatService.createConversation(participants);
 
-  // Event: chat:start
-  // Initialize or fetch conversation
-  socket.on("chat:start", async (data: { participants: string[] }) => {
-    try {
-      if (!data.participants || data.participants.length < 2) {
-        socket.emit("chat:error", { message: "Invalid participants" });
-        return;
-      }
-      const conversation = await chatService.createConversation(
-        data.participants,
-      );
+//   // Auto join the room
+//   const room = conversation._id.toString();
+//   socket.join(room);
 
-      // Auto join the room
-      const room = conversation._id.toString();
-      socket.join(room);
+//   // Note: Original code emitted 'chat:started'.
+//   // eventProcess will emit response on 'chat:start'.
+//   // If strict backward compat is needed, we could allow manual emit, but standardizing implies using the return.
 
-      socket.emit("chat:started", conversation);
-    } catch (error: any) {
-      console.error("Chat start error:", error);
-      socket.emit("chat:error", { message: error.message || "Internal error" });
-    }
-  });
+//   return {
+//     code: 200,
+//     state: 1,
+//     data: conversation,
+//     message: "Chat started successfully",
+//   };
+// };
 
-  // Event: chat:join
-  socket.on("chat:join", async (data: { conversationId: string }) => {
-    if (!data.conversationId) return;
-    socket.join(data.conversationId);
-    // console.log(`Socket ${socket.id} joined room ${data.conversationId}`);
-  });
+// const chatJoinAction: SocketEventAction = async (data, socket) => {
+//   const { conversationId } = data.body;
+//   if (!conversationId) throw new Error("Missing conversationId");
 
-  // Event: chat:leave
-  socket.on("chat:leave", async (data: { conversationId: string }) => {
-    if (!data.conversationId) return;
-    socket.leave(data.conversationId);
-  });
+//   socket.join(conversationId);
 
-  // Event: chat:send
-  socket.on(
-    "chat:send",
-    async (data: {
-      conversationId: string;
-      senderId: string;
-      content: string;
-    }) => {
-      try {
-        const { conversationId, senderId, content } = data;
+//   return {
+//     code: 200,
+//     state: 1,
+//     message: `Joined room ${conversationId}`,
+//   };
+// };
 
-        if (!conversationId || !senderId || !content) {
-          socket.emit("chat:error", { message: "Missing fields" });
-          return;
-        }
+// const chatLeaveAction: SocketEventAction = async (data, socket) => {
+//   const { conversationId } = data.body;
+//   if (!conversationId) throw new Error("Missing conversationId");
 
-        const message = await chatService.sendMessage(
-          conversationId,
-          senderId,
-          content,
-        );
+//   socket.leave(conversationId);
 
-        // Broadcast to everyone in the room (including sender to confirm receipt/update UI)
-        wsService.getWss().to(conversationId).emit("chat:receive", message);
-      } catch (error) {
-        console.error("Chat error:", error);
-        socket.emit("chat:error", { message: "Internal server error" });
-      }
-    },
-  );
+//   return {
+//     code: 200,
+//     state: 1,
+//     message: `Left room ${conversationId}`,
+//   };
+// };
 
-  // Event: chat:typing
-  socket.on(
-    "chat:typing",
-    (data: { conversationId: string; userId: string; isTyping: boolean }) => {
-      // Broadcast to others in the room
-      socket.to(data.conversationId).emit("chat:typing", data);
-    },
-  );
+// const chatSendAction: SocketEventAction = async (data, socket) => {
+//   const { conversationId, senderId, content } = data.body;
+//   const wsService = WebSocketService.getInstance();
 
-  // Event: chat:read (optional)
-  socket.on(
-    "chat:read",
-    async (data: { conversationId: string; userId: string }) => {
-      try {
-        await chatService.markMessagesAsRead(data.conversationId, data.userId);
-        socket
-          .to(data.conversationId)
-          .emit("chat:read_receipt", {
-            conversationId: data.conversationId,
-            userId: data.userId,
-          });
-      } catch (e) {
-        console.error(e);
-      }
-    },
-  );
-}
+//   if (!conversationId || !senderId || !content) {
+//     throw new Error("Missing fields");
+//   }
+
+//   const message = await chatService.sendMessage(
+//     conversationId,
+//     senderId,
+//     content,
+//   );
+
+//   // Broadcast to everyone in the room
+//   wsService.getWss().to(conversationId).emit("chat:receive", message);
+
+//   return {
+//     code: 200,
+//     state: 1,
+//     data: message,
+//     message: "Message sent",
+//   };
+// };
+
+// const chatTypingAction: SocketEventAction = async (data, socket) => {
+//   const { conversationId, userId, isTyping } = data.body;
+//   // Broadcast to others in the room
+//   socket
+//     .to(conversationId)
+//     .emit("chat:typing", { conversationId, userId, isTyping });
+
+//   return {
+//     code: 200,
+//     state: 1,
+//     message: "Typing status sent",
+//   };
+// };
+
+// const chatReadAction: SocketEventAction = async (data, socket) => {
+//   const { conversationId, userId } = data.body;
+
+//   await chatService.markMessagesAsRead(conversationId, userId);
+
+//   socket.to(conversationId).emit("chat:read_receipt", {
+//     conversationId,
+//     userId,
+//   });
+
+//   return {
+//     code: 200,
+//     state: 1,
+//     message: "Messages marked as read",
+//   };
+// };
+
+// export function ChatHandler(socket: Socket) {
+//   const events: ISocketEventSetting[] = [
+//     { name: "chat:start", method: "POST", action: chatStartAction },
+//     { name: "chat:join", method: "POST", action: chatJoinAction },
+//     { name: "chat:leave", method: "POST", action: chatLeaveAction },
+//     { name: "chat:send", method: "POST", action: chatSendAction },
+//     { name: "chat:typing", method: "POST", action: chatTypingAction },
+//     { name: "chat:read", method: "PUT", action: chatReadAction },
+//   ];
+
+//   events.forEach((setting) => eventProcess(socket, setting));
+// }

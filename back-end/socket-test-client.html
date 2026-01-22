@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Chat Test Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: monospace;
+        padding: 20px;
+        background: #f0f0f0;
+      }
+      .container {
+        display: flex;
+        gap: 20px;
+      }
+      .panel {
+        flex: 1;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .log-box {
+        height: 400px;
+        overflow-y: auto;
+        background: #222;
+        color: #0f0;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #444;
+      }
+      .input-group {
+        margin-bottom: 10px;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      textarea,
+      input,
+      select {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .event-row {
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Socket.IO Chat Test Client</h1>
+    <div class="container">
+      <div class="panel">
+        <h2>Controls</h2>
+        <div class="input-group">
+          <label>Server URL</label>
+          <input type="text" id="serverUrl" value="http://localhost:8000" />
+        </div>
+        <div class="input-group">
+          <label>Path</label>
+          <input type="text" id="serverPath" value="/io" />
+        </div>
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()" style="background: #dc3545">
+          Disconnect
+        </button>
+
+        <hr />
+
+        <h3>Send Event</h3>
+        <div class="input-group">
+          <label>Event Name</label>
+          <select id="eventName" onchange="updateTemplate()">
+            <option value="chat:start">chat:start</option>
+            <option value="chat:join">chat:join</option>
+            <option value="chat:send">chat:send</option>
+            <option value="chat:leave">chat:leave</option>
+            <option value="chat:typing">chat:typing</option>
+            <option value="chat:read">chat:read</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Payload (JSON)</label>
+          <textarea id="payload" rows="10"></textarea>
+        </div>
+        <button onclick="sendPayload()">Send</button>
+      </div>
+
+      <div class="panel">
+        <h2>Logs</h2>
+        <button
+          onclick="clearLogs()"
+          style="float: right; padding: 5px 10px; background: #666"
+        >
+          Clear
+        </button>
+        <div id="logs" class="log-box"></div>
+      </div>
+    </div>
+
+    <script>
+      let socket;
+
+      const templates = {
+        "chat:start": {
+          header: { method: "POST" },
+          body: { participants: ["user1_id", "user2_id"] },
+        },
+        "chat:join": {
+          header: { method: "POST" },
+          body: { conversationId: "room_id_here" },
+        },
+        "chat:send": {
+          header: { method: "POST" },
+          body: {
+            conversationId: "room_id_here",
+            senderId: "user1_id",
+            content: "Hello World",
+          },
+        },
+        "chat:leave": {
+          header: { method: "POST" },
+          body: { conversationId: "room_id_here" },
+        },
+        "chat:typing": {
+          header: { method: "POST" },
+          body: {
+            conversationId: "room_id_here",
+            userId: "user1_id",
+            isTyping: true,
+          },
+        },
+        "chat:read": {
+          header: { method: "PUT" },
+          body: { conversationId: "room_id_here", userId: "user1_id" },
+        },
+      };
+
+      function updateTemplate() {
+        const event = document.getElementById("eventName").value;
+        document.getElementById("payload").value = JSON.stringify(
+          templates[event],
+          null,
+          2,
+        );
+      }
+
+      // Initialize template
+      updateTemplate();
+
+      function log(msg, type = "info") {
+        const logs = document.getElementById("logs");
+        const div = document.createElement("div");
+        div.style.color =
+          type === "error"
+            ? "#ff4444"
+            : type === "in"
+              ? "#00ff00"
+              : type === "out"
+                ? "#ffff00"
+                : "#cccccc";
+        div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logs.appendChild(div);
+        logs.scrollTop = logs.scrollHeight;
+      }
+
+      function clearLogs() {
+        document.getElementById("logs").innerHTML = "";
+      }
+
+      async function connect() {
+        const url = document.getElementById("serverUrl").value;
+        const path = document.getElementById("serverPath").value;
+
+        if (socket && socket.connected) {
+          log("Already connected", "error");
+          return;
+        }
+
+        // 1. Basic HTTP Check first
+        try {
+          log(`Checking HTTP connectivity to ${url}...`);
+          // Note: CORS might block this fetch if not configured for file:// origin,
+          // but if server is up and CORS is *, it should work.
+          // We'll try hitting a likely endpoint or just root.
+          // Trying /health if it exists or just /
+          const healthUrl = url.replace(/\/$/, "") + "/health";
+          const resp = await fetch(healthUrl);
+          if (resp.ok) {
+            log(`HTTP Check OK: ${await resp.text()}`, "in");
+          } else {
+            log(
+              `HTTP Check Failed: ${resp.status} ${resp.statusText}`,
+              "error",
+            );
+          }
+        } catch (e) {
+          log(
+            `HTTP Check Error: ${e.message} (Is server running? CORS?)`,
+            "error",
+          );
+        }
+
+        log(`Connecting to Socket.IO at ${url} (path: ${path})...`);
+
+        socket = io(url, {
+          path: path,
+          transports: ["websocket", "polling"], // Try websocket first, then polling
+        });
+
+        socket.on("connect", () => {
+          log(`Connected! Socket ID: ${socket.id}`, "in");
+          document.body.style.backgroundColor = "#e6ffe6";
+        });
+
+        socket.on("disconnect", (reason) => {
+          log(`Disconnected: ${reason}`, "error");
+          document.body.style.backgroundColor = "#fff0f0";
+        });
+
+        socket.on("connect_error", (error) => {
+          log(
+            `Connect Error: ${error.message} (Check port? Path? CORS?)`,
+            "error",
+          );
+        });
+
+        // Listen to all standard chat events
+        const events = [
+          "chat:start",
+          "chat:started",
+          "chat:joined",
+          "chat:receive",
+          "chat:error",
+          "chat:typing",
+          "chat:read_receipt",
+        ];
+        events.forEach((evt) => {
+          socket.on(evt, (data) => {
+            log(`Received [${evt}]: ${JSON.stringify(data, null, 2)}`, "in");
+          });
+        });
+
+        // Catch-all for debugging other events (requires socket.io-client special patch or just manual list)
+        socket.onAny &&
+          socket.onAny((event, ...args) => {
+            if (!events.includes(event)) {
+              log(`Received [${event}]: ${JSON.stringify(args)}`, "in");
+            }
+          });
+      }
+
+      function disconnect() {
+        if (socket) {
+          socket.disconnect();
+          log("Disconnected by user", "info");
+        }
+      }
+
+      function sendPayload() {
+        if (!socket || !socket.connected) {
+          log("Not connected!", "error");
+          return;
+        }
+
+        const eventName = document.getElementById("eventName").value;
+        const payloadStr = document.getElementById("payload").value;
+
+        try {
+          const payload = JSON.parse(payloadStr);
+          log(`Sending [${eventName}]: ${JSON.stringify(payload)}`, "out");
+          socket.emit(eventName, payload);
+        } catch (e) {
+          log("Invalid JSON payload!", "error");
+        }
+      }
+    </script>
+  </body>
+</html>

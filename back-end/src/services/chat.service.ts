@@ -3,9 +3,11 @@ import MessageModel from "@/models/chat/message.model";
 import { singleton } from "@/decorators/singleton";
 import mongoose from "mongoose";
 
-// @ts-ignore
 @singleton
 export class ChatService {
+  constructor() {
+    console.log("init chat service");
+  }
   /**
    * Create or get existing conversation between participants
    */
@@ -55,13 +57,25 @@ export class ChatService {
   /**
    * Get conversations for a user
    */
-  public async getUserConversations(userId: string) {
-    return await ConversationModel.find({
-      participants: userId,
-    })
-      .populate("participants", "fullName email avatar") // Adjust fields based on User model
-      .populate("lastMessageId")
-      .sort({ updatedAt: -1 });
+  // public async getUserConversations(userId: string) {
+  //   return await ConversationModel?.paginate()
+  //     // .populate("participants", "fullName email avatar") // Adjust fields based on User model
+  //     // .populate("lastMessageId")
+  //     // .sort({ updatedAt: -1 });
+  // }
+
+  public async getConversationsPaginated(
+    options: {
+      page: number;
+      limit: number;
+      sortBy?: string;
+      populate?: string;
+    },
+    filter?: Record<string, any>,
+    select?: string,
+  ) {
+    filter = filter || {};
+    return await ConversationModel.paginate?.(options, filter, select);
   }
 
   /**

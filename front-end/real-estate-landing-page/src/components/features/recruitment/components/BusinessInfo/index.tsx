@@ -1,4 +1,4 @@
-import { Button, Icon, Input, Select, Upload } from "@/components/ui";
+import { Icon, Select, Upload } from "@/components/ui";
 import { showToast } from "@/components/ui/Toast";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
@@ -8,6 +8,8 @@ import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useUploadImage } from "../../services/mutation";
+import { Input } from "@/components/ui/input";
+import { CsButton } from "@/components/custom";
 
 type BusinessInfoFormType = BusinessInfoType & {
   certificateImage: File[];
@@ -210,7 +212,7 @@ const BusinessInfo = () => {
           />
         </div>
         <div className="flex justify-between pt-6">
-          <Button
+          <CsButton
             className="text-black px-6 py-2 rounded-full"
             onClick={handlePrev}
             type="button"
@@ -218,15 +220,15 @@ const BusinessInfo = () => {
             disabled={isSubmitting}
           >
             Back
-          </Button>
-          <Button
+          </CsButton>
+          <CsButton
             className="cs-bg-black text-white px-6 py-2 rounded-full"
             type="submit"
             loading={uploading}
             disabled={uploading || isSubmitting}
           >
             Next
-          </Button>
+          </CsButton>
         </div>
       </form>
     </div>

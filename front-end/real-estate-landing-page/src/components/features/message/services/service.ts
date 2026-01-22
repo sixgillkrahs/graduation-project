@@ -1,7 +1,7 @@
 import { IPaginationResp } from "@/@types/service";
 import { AxiosMethod } from "@/lib/axios/method";
-import { request } from "http";
 import { ConversationsEndpoint } from "./config";
+import request from "@/lib/axios/request";
 
 export default class ConversationService {
   public static readonly conversations = (): Promise<
