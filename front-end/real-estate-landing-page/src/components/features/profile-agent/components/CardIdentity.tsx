@@ -1,6 +1,7 @@
 import { Icon } from "@/components/ui";
 import RenderField from "./RenderField";
 import { useState } from "react";
+import { Eye, EyeClosed } from "lucide-react";
 
 const CardIdentity = ({
   identityInfo,
@@ -25,12 +26,12 @@ const CardIdentity = ({
         </div>
         <div>
           {visible ? (
-            <Icon.EyeClose
+            <EyeClosed
               className="size-5 cursor-pointer"
               onClick={() => setVisible(false)}
             />
           ) : (
-            <Icon.Eye
+            <Eye
               className="size-5 cursor-pointer"
               onClick={() => setVisible(true)}
             />

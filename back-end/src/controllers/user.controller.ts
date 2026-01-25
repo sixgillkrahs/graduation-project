@@ -101,6 +101,17 @@ export class UserController extends BaseController {
         } = profile;
         return rest;
       }
+      if (roleId.code === "USER") {
+        const profile = await this.userService.getUserById(userId._id);
+        if (!profile) {
+          throw new AppError(
+            validationMessages[lang].userNotFound || "User not found",
+            401,
+            ErrorCode.USER_NOT_FOUND,
+          );
+        }
+        return profile;
+      }
       return true;
     });
   };
