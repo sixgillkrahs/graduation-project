@@ -166,6 +166,7 @@ export class AuthController extends BaseController {
         phone,
         prefixPhone: "+84",
         address: "",
+        avatarUrl: "default-avatar.jpg",
         isActive: true,
         isDeleted: false,
       });

@@ -5,7 +5,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/lib/utils";
 
-function Avatar({
+function AvatarWrapper({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root>) {
@@ -14,7 +14,7 @@ function Avatar({
       data-slot="avatar"
       className={cn(
         "relative flex size-8 shrink-0 overflow-hidden rounded-full",
-        className
+        className,
       )}
       {...props}
     />
@@ -43,7 +43,7 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
         "group-data-[size=sm]/avatar:size-2 group-data-[size=sm]/avatar:[&>svg]:hidden",
         "group-data-[size=default]/avatar:size-2.5 group-data-[size=default]/avatar:[&>svg]:size-2",
         "group-data-[size=lg]/avatar:size-3 group-data-[size=lg]/avatar:[&>svg]:size-2",
-        className
+        className,
       )}
       {...props}
     />
@@ -59,10 +59,28 @@ function AvatarFallback({
       data-slot="avatar-fallback"
       className={cn(
         "bg-muted flex size-full items-center justify-center rounded-full",
-        className
+        className,
       )}
       {...props}
     />
+  );
+}
+
+function Avatar({
+  className,
+  src,
+  alt,
+  ...props
+}: {
+  className?: string;
+  src?: string;
+  alt?: string;
+} = {}) {
+  return (
+    <AvatarWrapper className={className} {...props}>
+      <AvatarImage src={src} alt={alt} />
+      <AvatarFallback>{src ? "" : alt?.charAt(0)}</AvatarFallback>
+    </AvatarWrapper>
   );
 }
 

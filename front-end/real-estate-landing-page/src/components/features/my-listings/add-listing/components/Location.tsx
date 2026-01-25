@@ -1,5 +1,5 @@
-import { Button, Icon } from "@/components/ui";
-import { Input } from "@/components/ui/Input";
+import { Icon } from "@/components/ui";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/Select";
 import { RootState } from "@/store";
 import { prevStep, submitStep2 } from "@/store/listing.store";
@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { Map } from "@/components/ui/Map";
+import { CsButton } from "@/components/custom";
 
 const Location = () => {
   const dispatch = useDispatch();
@@ -62,7 +63,10 @@ const Location = () => {
         .then((data) => {
           if (data.districts) {
             setDistricts(
-              data.districts.map((d: any) => ({ label: d.name, value: d.code }))
+              data.districts.map((d: any) => ({
+                label: d.name,
+                value: d.code,
+              })),
             );
           }
         });
@@ -80,7 +84,7 @@ const Location = () => {
         .then((data) => {
           if (data.wards) {
             setWards(
-              data.wards.map((w: any) => ({ label: w.name, value: w.code }))
+              data.wards.map((w: any) => ({ label: w.name, value: w.code })),
             );
           }
         });
@@ -182,8 +186,8 @@ const Location = () => {
 
                       fetch(
                         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
-                          fullQuery
-                        )}&format=json&addressdetails=1&limit=5&countrycodes=vn`
+                          fullQuery,
+                        )}&format=json&addressdetails=1&limit=5&countrycodes=vn`,
                       )
                         .then((res) => res.json())
                         .then((data) => {
@@ -260,32 +264,31 @@ const Location = () => {
       </div>
 
       <div className="flex justify-between pt-10">
-        <Button
+        <CsButton
           onClick={onBack}
-          outline={true}
           icon={<Icon.ArrowLeft />}
           className="text-black"
           type="button"
         >
           Back
-        </Button>
+        </CsButton>
         <div className="flex gap-4">
-          <Button
+          <CsButton
             onClick={() => {}}
             type="button"
             variant="secondary"
             className="bg-gray-100 text-gray-700"
           >
             Save Draft
-          </Button>
-          <Button
+          </CsButton>
+          <CsButton
             className="cs-bg-black hover:bg-black/90 text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-gray-200"
             onClick={handleSubmit(onSubmit)}
             type="submit"
           >
             Continue
             <Icon.ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
+          </CsButton>
         </div>
       </div>
     </div>

@@ -1,8 +1,7 @@
-import { Modal } from "@/components/ui";
+import { CsDialog } from "@/components/ui/dialog";
+import { Password } from "@/components/ui/password";
 import { Controller, useForm } from "react-hook-form";
 import { useChangePassword } from "../../profile/services/mutate";
-import { Password } from "@/components/ui/password";
-import { CsButton } from "@/components/custom";
 
 export const ModalChangePassword = ({
   open,
@@ -37,8 +36,28 @@ export const ModalChangePassword = ({
   };
 
   return (
-    <Modal open={open} onCancel={onCancel} title="Change Password">
-      <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+    <CsDialog
+      open={open}
+      title="Change Password"
+      description="Please enter your old password and new password to change your password."
+      onCancel={onCancel}
+      formId="form-change-pass"
+      okProps={{
+        okText: "Change Password",
+        type: "submit",
+        loading: isPending,
+      }}
+      cancelProps={{
+        cancelText: "Cancel",
+        type: "button",
+      }}
+      closeOnClickOutside={false}
+    >
+      <form
+        className="space-y-4"
+        onSubmit={handleSubmit(onSubmit)}
+        id="form-change-pass"
+      >
         <Controller
           name="oldPassword"
           control={control}
@@ -64,7 +83,6 @@ export const ModalChangePassword = ({
             <Password
               label="New Password"
               placeholder="New Password"
-              type={"password"}
               error={errors.newPassword?.message}
               {...field}
             />
@@ -80,25 +98,12 @@ export const ModalChangePassword = ({
             <Password
               label="Confirm Password"
               placeholder="Confirm Password"
-              type={"password"}
               error={errors.confirmPassword?.message}
               {...field}
             />
           )}
         />
-        <div className="flex justify-end gap-2 pt-4">
-          <CsButton type="submit" className="text-black " onClick={onCancel}>
-            Cancel
-          </CsButton>
-          <CsButton
-            type="submit"
-            className="cs-bg-black text-white"
-            loading={isPending}
-          >
-            Change Password
-          </CsButton>
-        </div>
       </form>
-    </Modal>
+    </CsDialog>
   );
 };

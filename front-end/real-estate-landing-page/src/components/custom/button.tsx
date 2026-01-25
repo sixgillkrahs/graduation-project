@@ -8,6 +8,13 @@ import {
 import { cn } from "@/lib/utils";
 import React from "react";
 
+type CsButtonProps = React.ComponentProps<"button"> & {
+  loading?: boolean;
+  icon?: React.ReactNode;
+  variant?: RippleButtonProps["variant"];
+  size?: RippleButtonProps["size"];
+};
+
 const CsButton = ({
   children,
   variant = "default",
@@ -19,18 +26,8 @@ const CsButton = ({
   disabled = false,
   loading = false,
   size = "default",
-}: {
-  children?: React.ReactNode;
-  type?: "button" | "submit" | "reset";
-  className?: string;
-  style?: React.CSSProperties;
-  icon?: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-  variant?: RippleButtonProps["variant"];
-  size?: RippleButtonProps["size"];
-}) => {
+  form,
+}: CsButtonProps) => {
   return (
     <RippleButton
       className={cn(
@@ -43,6 +40,7 @@ const CsButton = ({
       style={style}
       variant={variant}
       size={size}
+      form={form}
     >
       {loading ? (
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

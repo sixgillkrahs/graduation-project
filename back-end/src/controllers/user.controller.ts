@@ -99,7 +99,10 @@ export class UserController extends BaseController {
           note,
           ...rest
         } = profile;
-        return rest;
+        return {
+          ...rest,
+          roleId: roleId.code,
+        };
       }
       if (roleId.code === "USER") {
         const profile = await this.userService.getUserById(userId._id);
@@ -110,7 +113,10 @@ export class UserController extends BaseController {
             ErrorCode.USER_NOT_FOUND,
           );
         }
-        return profile;
+        return {
+          ...profile,
+          roleId: roleId.code,
+        };
       }
       return true;
     });

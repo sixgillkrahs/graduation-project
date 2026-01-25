@@ -5,7 +5,7 @@ import { bankList } from "@/const/bank";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useProfile } from "../profile-agent/services/query";
+import { useProfile } from "../profile/services/query";
 import { useEditProfile } from "./services/mutate";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";

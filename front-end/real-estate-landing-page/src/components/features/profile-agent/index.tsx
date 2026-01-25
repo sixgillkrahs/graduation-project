@@ -9,8 +9,11 @@ import CardIdentity from "./components/CardIdentity";
 import { ModalChangePassword } from "./components/ModalChangePassword";
 import RegisterPasskey from "./components/RegisterPasskey";
 import RenderField from "./components/RenderField";
-import { useRegisterPasskey, useVerifyPasskey } from "./services/mutate";
-import { useProfile } from "./services/query";
+import {
+  useRegisterPasskey,
+  useVerifyPasskey,
+} from "../profile/services/mutate";
+import { useProfile } from "../profile/services/query";
 import { CsButton } from "@/components/custom";
 import { BadgeCheck } from "lucide-react";
 

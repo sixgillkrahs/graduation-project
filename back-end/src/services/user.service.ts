@@ -1,7 +1,6 @@
 import { logger } from "@/config/logger";
 import { singleton } from "@/decorators/singleton";
 import UserModel, { IUser } from "@/models/user.model";
-import { populate } from "dotenv";
 
 @singleton
 export class UserService {

@@ -6,7 +6,7 @@ import {
 } from "../store";
 import { RootState } from "..";
 import request from "@/lib/axios/request";
-import { showToast } from "@/components/ui/Toast";
+import { toast } from "sonner";
 
 export const submitForm = createAsyncThunk(
   "form/submit",
@@ -49,7 +49,7 @@ export const submitForm = createAsyncThunk(
 
       dispatch(submitFormFailure(errorMessage));
 
-      showToast.error("Đăng ký thất bại", errorMessage);
+      toast.error(errorMessage);
 
       return rejectWithValue(errorMessage);
     }

@@ -1,4 +1,4 @@
-import { showToast } from "@/components/ui/Toast";
+import { toast } from "sonner"
 import {
   Mutation,
   MutationCache,
@@ -23,7 +23,7 @@ export const queryClient = new QueryClient({
       query: Query<unknown, unknown, unknown, QueryKey>
     ): void => {
       if (query.meta?.SUCCESS_MESSAGE) {
-        showToast.success(`${query.meta.SUCCESS_MESSAGE}`);
+        toast.success(`${query.meta.SUCCESS_MESSAGE}`, { position: "top-center" })
       }
     },
     onError: (
@@ -39,7 +39,7 @@ export const queryClient = new QueryClient({
         errorMessage = error.message;
       }
 
-      showToast.error(errorSource, errorMessage);
+      toast.error(`${errorSource}: ${errorMessage}`, { position: "top-center" });
     },
   }),
   mutationCache: new MutationCache({
@@ -64,7 +64,7 @@ export const queryClient = new QueryClient({
         errorMessage = error.response?.data?.message || errorMessage;
       }
 
-      showToast.error(errorSource, errorMessage);
+      toast.error(`${errorSource}: ${errorMessage}`, { position: "top-center" });
     },
     onSuccess: (
       _data: unknown,
@@ -73,7 +73,7 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>
     ): void => {
       if (mutation.meta?.SUCCESS_MESSAGE) {
-        showToast.success(`${mutation.meta.SUCCESS_MESSAGE}`);
+        toast.success(`${mutation.meta.SUCCESS_MESSAGE}`, { position: "top-center" })
       }
     },
   }),

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Icon, Input, Upload } from "@/components/ui";
+import { Icon, Upload } from "@/components/ui";
 import { AppDispatch, RootState } from "@/store";
 import { nextStep, updateBasicInfo } from "@/store/store";
 import { memo } from "react";
@@ -8,6 +8,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useExtractID, useUploadImage } from "../../services/mutation";
 import { BasicInfo as BasicInfoType } from "@/models/basicInfo.model";
+import { Input } from "@/components/ui/input";
+import { CsButton } from "@/components/custom";
 
 const validateBasicInfo = (data: BasicInfoType) => {
   const errors: Record<string, string> = {};
@@ -49,7 +51,7 @@ const BasicInfo = () => {
   });
 
   const onSubmit = (
-    data: BasicInfoType & { identityFront: File[]; identityBack: File[] }
+    data: BasicInfoType & { identityFront: File[]; identityBack: File[] },
   ) => {
     const errorsList = validateBasicInfo(data);
     if (Object.keys(errorsList).length > 0) return;
@@ -84,7 +86,7 @@ const BasicInfo = () => {
             nationality: res.data[5],
             placeOfBirth: res.data[6],
           },
-        })
+        }),
       );
     }
   };
@@ -98,7 +100,7 @@ const BasicInfo = () => {
         dispatch(
           updateBasicInfo({
             [name]: resp.filename,
-          })
+          }),
         );
       }
     }
@@ -216,7 +218,7 @@ const BasicInfo = () => {
           Your information is automatically saved as you type.
         </div>
         <div className="flex justify-between pt-6">
-          <Button
+          <CsButton
             className="text-black px-6 py-2 rounded-full"
             // onClick={handlePrev}
             type="button"
@@ -224,13 +226,13 @@ const BasicInfo = () => {
             // disabled={isSubmitting}
           >
             Back
-          </Button>
-          <Button
+          </CsButton>
+          <CsButton
             className="cs-bg-black text-white px-6 py-2 rounded-full"
             type="submit"
           >
             Next
-          </Button>
+          </CsButton>
         </div>
       </form>
     </div>

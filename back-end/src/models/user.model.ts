@@ -4,6 +4,7 @@ import paginate from "./plugins/paginate.plugin";
 import toJSON from "./plugins/toJSON.plugin";
 
 export interface IUser {
+  avatarUrl?: string;
   email: string;
   fullName: string;
   phone?: string;
@@ -15,7 +16,7 @@ export interface IUser {
   updatedAt?: Date;
 }
 
-export interface IUserMethods {}
+export interface IUserMethods { }
 
 interface UserModel extends mongoose.Model<IUser, {}, IUserMethods> {
   paginate?: (
@@ -59,6 +60,11 @@ const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
     fullName: {
       type: String,
       required: true,
+      trim: true,
+    },
+    avatarUrl: {
+      type: String,
+      required: false,
       trim: true,
     },
     prefixPhone: {

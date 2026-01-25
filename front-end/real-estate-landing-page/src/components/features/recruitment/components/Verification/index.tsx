@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Checkbox, Icon, Input, Select } from "@/components/ui";
+import { Checkbox, Icon, Select } from "@/components/ui";
 import {
   BasicInfo,
   BusinessInfo,
@@ -17,13 +17,15 @@ import { useDispatch, useSelector } from "react-redux";
 import ExtractService from "../../services/service";
 import { memo, useEffect } from "react";
 import { submitForm } from "@/store/thunks/formThunks";
-import { showToast } from "@/components/ui/Toast";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { CsButton } from "@/components/custom";
 
 const Verification = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const { basicInfo, verification, businessInfo, isSubmitting } = useSelector(
-    (state: RootState) => state.form
+    (state: RootState) => state.form,
   );
   console.log(businessInfo);
   const {
@@ -54,7 +56,7 @@ const Verification = () => {
   const handleSubmitData = async () => {
     try {
       await dispatch(submitForm()).unwrap();
-      showToast.success("Đăng ký thành công", "Cảm ơn bạn đã đăng ký!");
+      toast.success("Đăng ký thành công", { position: "top-center" });
     } catch (error) {
       console.error("Failed to submit form:", error);
     }
@@ -186,7 +188,7 @@ const Verification = () => {
         />
       </div>
       <div className="flex justify-between pt-6">
-        <Button
+        <CsButton
           className="text-black px-6 py-2 rounded-full"
           onClick={handlePrev}
           type="button"
@@ -194,15 +196,15 @@ const Verification = () => {
           disabled={isSubmitting}
         >
           Back
-        </Button>
-        <Button
+        </CsButton>
+        <CsButton
           className="cs-bg-black text-white px-6 py-2 rounded-full"
           onClick={handleSubmitData}
           disabled={isSubmitting}
           // loading={isSubmitting}
         >
           {isSubmitting ? "Submitting..." : "Submit Application"}
-        </Button>
+        </CsButton>
       </div>
     </form>
   );

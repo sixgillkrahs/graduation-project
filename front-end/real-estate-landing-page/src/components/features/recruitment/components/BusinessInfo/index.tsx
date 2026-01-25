@@ -1,5 +1,4 @@
 import { Icon, Select, Upload } from "@/components/ui";
-import { showToast } from "@/components/ui/Toast";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
@@ -10,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useUploadImage } from "../../services/mutation";
 import { Input } from "@/components/ui/input";
 import { CsButton } from "@/components/custom";
+import { toast } from "sonner";
 
 type BusinessInfoFormType = BusinessInfoType & {
   certificateImage: File[];
@@ -28,7 +28,7 @@ const BusinessInfo = () => {
   const [uploading, setUploading] = useState(false);
   const { mutateAsync: uploadImage } = useUploadImage();
   const { businessInfo, isSubmitting } = useSelector(
-    (state: RootState) => state.form
+    (state: RootState) => state.form,
   );
   const {
     control,
@@ -68,13 +68,13 @@ const BusinessInfo = () => {
         dispatch(
           updateBusinessInfo({
             certificateImage: [resp.filename],
-          })
+          }),
         );
       } else {
-        showToast.error("Upload error");
+        toast.error("Upload error");
       }
     } catch (err) {
-      showToast.error("Upload failed");
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
     }

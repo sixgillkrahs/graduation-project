@@ -3,7 +3,7 @@
 import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
 import { Input } from "@/components/ui/input";
-import { showToast } from "@/components/ui/Toast";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -48,7 +48,7 @@ const VerifyEmail = () => {
 
   const onSubmit = async (data: IVerifyEmailService.IBodyCreatePassword) => {
     await createPassword(data);
-    showToast.success("The password has been successfully created");
+    toast.success("The password has been successfully created");
     router.push("/sign-in");
   };
 
