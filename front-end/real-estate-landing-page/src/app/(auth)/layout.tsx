@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Sider from "@/components/layout/Sider";
+import Header from "@/components/layout/auth/Header";
 
 export const metadata: Metadata = {
   title: "Havenly",
@@ -13,7 +14,12 @@ export default function AuthLayout({
 }>) {
   return (
     <div className="grid grid-cols-3 h-screen">
-      <div className="col-span-1">{children}</div>
+      <div className="col-span-1">
+        <div className="px-10 py-5 h-full">
+          <Header />
+          {children}
+        </div>
+      </div>
       <div className="col-span-2 bg-[#F5F5F5] hidden md:block">
         <Sider />
       </div>

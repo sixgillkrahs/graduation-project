@@ -4,8 +4,28 @@ declare global {
     namespace Express {
         interface Request {
             user: {
-                userId: string;
-                role: string;
+                _id: string;
+                username: string;
+                password: string;
+                userId: {
+                    _id: string;
+                    email: string;
+                    fullName: string;
+                    phone: string;
+                    isActive: boolean;
+                };
+                roleId: {
+                    _id: string;
+                    name: string;
+                    code: string;
+                    permissionIds: any[];
+                };
+                passwordHistories: {
+                    password: string;
+                    createdAt: Date;
+                }[];
+                createdAt: string;
+                updatedAt: string;
             };
             requestId: string;
             io: Server;

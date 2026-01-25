@@ -109,9 +109,9 @@ export class AuthController extends BaseController {
         accessToken,
         rememberMe
           ? {
-              ...cookieOptions,
-              maxAge: 15 * 60 * 1000,
-            }
+            ...cookieOptions,
+            maxAge: 15 * 60 * 1000,
+          }
           : cookieOptions,
       );
       res.cookie(
@@ -119,9 +119,9 @@ export class AuthController extends BaseController {
         refreshToken,
         rememberMe
           ? {
-              ...cookieOptions,
-              maxAge: 7 * 24 * 60 * 60 * 1000,
-            }
+            ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+          }
           : cookieOptions,
       );
       return {
@@ -142,7 +142,7 @@ export class AuthController extends BaseController {
   signup = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const lang = ApiRequest.getCurrentLang(req);
-      const { username, password, email, firstName, lastName, phone } =
+      const { username, password, email, firstName, lastName, phone, roleCode } =
         req.body;
       const userExists = await this.authService.getAuthByUsername(username);
       if (userExists) {
@@ -170,7 +170,10 @@ export class AuthController extends BaseController {
         isDeleted: false,
       });
       const hashedPassword = await bcrypt.hash(password, 10);
-      const roleDefault = await this.roleService.getRoleDefault();
+      let roleDefault = await this.roleService.getRoleByCode(roleCode)
+      if (!roleDefault) {
+        roleDefault = await this.roleService.getRoleDefault()
+      }
       const userAuth = await this.authService.createAuth({
         username,
         password: hashedPassword,
@@ -230,7 +233,7 @@ export class AuthController extends BaseController {
       if (!token) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-            "Refresh token not exist",
+          "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -239,7 +242,7 @@ export class AuthController extends BaseController {
       if (!decoded) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-            "Refresh token not exist",
+          "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );

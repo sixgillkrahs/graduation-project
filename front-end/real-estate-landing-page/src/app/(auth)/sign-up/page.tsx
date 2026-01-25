@@ -1,5 +1,7 @@
+import SignUp from "@/components/features/sign-up";
+
 const Page = () => {
-  return <div>Đăng ký</div>;
+  return <SignUp />;
 };
 
 export default Page;

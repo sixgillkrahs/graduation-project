@@ -15,10 +15,21 @@ export class UserService {
 
   getUserByEmail = async (email: string) => {
     return UserModel.findOne({
-      where: {
-        email,
-      },
+      email,
     });
+  };
+
+  getUsers = async (
+    options: {
+      page: number;
+      limit: number;
+      sortBy?: string;
+      populate?: string;
+    },
+    filter: Record<string, any> = {},
+    select?: string,
+  ) => {
+    return UserModel.paginate?.(options, filter, select);
   };
 
   getUserById = async (id: string) => {

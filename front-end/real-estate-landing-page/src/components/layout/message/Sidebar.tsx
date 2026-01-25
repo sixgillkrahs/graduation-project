@@ -6,7 +6,7 @@ import React from "react";
 
 const Sidebar = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex gap-4 h-screen">
+    <div className="flex gap-4 h-screen w-full">
       <div className="w-80 rounded-2xl border py-3 flex flex-col gap-3">
         <div className="flex gap-2 items-center px-3">
           <Input
@@ -21,7 +21,7 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
         </div>
         <ListChat />
       </div>
-      <div className="flex-1">{children}</div>
+      <div className="flex-1 border p-3 rounded-2xl">{children}</div>
     </div>
   );
 };

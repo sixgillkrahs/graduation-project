@@ -44,6 +44,9 @@ const envSchema = z.object({
   SERVER_URL: z.url(),
   // PROMETHEUS_URL: z.string().url().optional().default('http://localhost:9090'),
   MESSAGE_ENCRYPTION_KEY: z.string().min(32).default("01234567890123456789012345678901"),
+  // Google API
+  GOOGLE_CLIENT_ID: z.string(),
+  GOOGLE_CLIENT_SECRET: z.string(),
 });
 export const ENV = envSchema.parse(process.env);
 if (process.env.NODE_ENV === "production") {

@@ -1,6 +1,7 @@
 import Permissions from "./permissions";
 import Resources from "./resources";
 import Roles from "./roles";
+import Users from "./user";
 import { Tabs } from "antd";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,7 +18,7 @@ const UserManager = () => {
 
   useEffect(() => {
     const tabFromParams = searchParams.get("tab");
-    if (tabFromParams && ["roles", "permissions", "resources"].includes(tabFromParams)) {
+    if (tabFromParams && ["users", "roles", "permissions", "resources"].includes(tabFromParams)) {
       setSelected(tabFromParams);
     } else {
       setSelected("roles");
@@ -34,6 +35,11 @@ const UserManager = () => {
         onChange={handleSelectionChange}
         destroyOnHidden={true}
         items={[
+          {
+            key: "users",
+            label: t("tabs.users"),
+            children: <Users />,
+          },
           {
             key: "roles",
             label: t("tabs.roles"),

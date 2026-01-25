@@ -7,11 +7,13 @@ import { validationMessages } from "@/i18n/validationMessages";
 import { ErrorCode } from "@/utils/errorCodes";
 import { ApiRequest } from "@/utils/apiRequest";
 import { EditProfileDto } from "@/dto/user.dto";
+import { AuthService } from "@/services/auth.service";
 
 export class UserController extends BaseController {
   constructor(
     private userService: UserService,
     private agentService: AgentService,
+    private authService: AuthService,
   ) {
     super();
   }
@@ -21,6 +23,59 @@ export class UserController extends BaseController {
     } catch (error) {
       throw error;
     }
+  };
+
+  getUsers = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { page = 1, limit = 10, search, sortField, sortOrder } = req.query;
+      const filter: any = {};
+      if (search) {
+        filter.$or = [
+          { fullName: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ];
+      }
+      return this.authService.getAuths(
+        {
+          page: Number(page),
+          limit: Number(limit),
+          sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+          populate: "userId:email fullName phone isActive,roleId:name code"
+        },
+        filter,
+        "username userId roleId createdAt"
+      );
+    });
+  };
+
+  getUser = async (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const lang = ApiRequest.getCurrentLang(req);
+      const user = await this.authService.getAuthById(
+        id,
+        [
+          {
+            path: "roleId",
+            select: "_id name code",
+          },
+          {
+            path: "userId",
+            select: "_id email fullName isActive phone",
+          },
+        ],
+        "username userId roleId createdAt updatedAt"
+
+      );
+      if (!user) {
+        throw new AppError(
+          validationMessages[lang].userNotFound || "User not found",
+          404,
+          ErrorCode.USER_NOT_FOUND,
+        );
+      }
+      return user;
+    });
   };
 
   profile = async (req: Request, res: Response, next: NextFunction) => {
@@ -114,4 +169,5 @@ export class UserController extends BaseController {
       return true;
     });
   };
+
 }

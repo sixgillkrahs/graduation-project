@@ -1,15 +1,15 @@
 "use client";
 
-import { Button, Icon, Input } from "@/components/ui";
-import Image from "next/image";
+import { CsButton } from "@/components/custom";
+import { Icon } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import { showToast } from "@/components/ui/Toast";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import Logo from "@/assets/Logo.svg";
-import { useVerifyEmail } from "./services/query";
-import { Controller, useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { showToast } from "@/components/ui/Toast";
+import { Controller, useForm } from "react-hook-form";
 import { useCreatePassword } from "./services/mutate";
+import { useVerifyEmail } from "./services/query";
 
 const VerifyEmail = () => {
   const router = useRouter();
@@ -46,10 +46,6 @@ const VerifyEmail = () => {
     }
   }, [data?.data?.email, reset, token]);
 
-  const handleToHome = () => {
-    router.push("/");
-  };
-
   const onSubmit = async (data: IVerifyEmailService.IBodyCreatePassword) => {
     await createPassword(data);
     showToast.success("The password has been successfully created");
@@ -62,14 +58,6 @@ const VerifyEmail = () => {
 
   return (
     <div className="px-10 py-5 h-full">
-      <div
-        className="flex items-start gap-2 text-xl md:text-2xl font-semibold cursor-pointer mb-6"
-        onClick={handleToHome}
-      >
-        <Image src={Logo} alt="logo" width={24} height={24} />
-        <span className="text-black">Havenly</span>
-      </div>
-
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-black">Verify Email</h2>
         <span className="cs-typography-gray text-sm!">
@@ -138,13 +126,13 @@ const VerifyEmail = () => {
               )}
             />
 
-            <Button
+            <CsButton
               type="submit"
               className="w-full cs-bg-red text-white mt-2"
               loading={isPending}
             >
               Verify & Continue
-            </Button>
+            </CsButton>
           </form>
         )}
       </div>

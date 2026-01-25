@@ -1,17 +1,15 @@
 "use client";
 
-import Logo from "@/assets/Logo.svg";
+import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
+import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Password } from "@/components/ui/password";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { useSignIn, useSignInPasskey } from "./services/mutate";
-import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
-import { Label } from "@/components/ui/label";
-import { CsButton } from "@/components/custom";
-import { Input } from "@/components/ui/input";
-import { Password } from "@/components/ui/password";
 
 const SignIn = () => {
   const router = useRouter();
@@ -49,24 +47,13 @@ const SignIn = () => {
     router.push("/");
   };
 
-  const handleToHome = () => {
-    router.push("/");
-  };
-
   const onSubmitPasskey = async () => {
     await signInPasskey({ email: "dvq2804@gmail.com" });
     router.push("/");
   };
 
   return (
-    <div className="px-10 py-5 h-full">
-      <div
-        className="flex items-start gap-2 text-xl md:text-2xl font-semibold cursor-pointer mb-6"
-        onClick={handleToHome}
-      >
-        <Image src={Logo} alt="logo" width={24} height={24} />
-        <span className="text-black">Havenly</span>
-      </div>
+    <>
       <div>
         <h2 className="text-2xl font-bold text-black">Welcome Back</h2>
         <span className="cs-typography-gray text-sm!">
@@ -154,7 +141,7 @@ const SignIn = () => {
           </Link>
         </span>
       </div>
-    </div>
+    </>
   );
 };
 

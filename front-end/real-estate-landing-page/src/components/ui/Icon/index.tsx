@@ -21,6 +21,7 @@ import { EyeClose } from "./EyeClose";
 import { Facebook } from "./Facebook";
 import { FileUpload } from "./FileUpload";
 import { Fingerprint } from "./Fingerprint";
+import { Google } from "./Google";
 import { HeadGear } from "./HeadGear";
 import { HotelBed } from "./HotelBed";
 import { IdCard } from "./IdCard";
@@ -96,4 +97,5 @@ export const Icon = {
   MoreVertical,
   Information,
   Search,
+  Google,
 };

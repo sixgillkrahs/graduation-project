@@ -39,7 +39,8 @@
   "tabs": {
     "roles": "Vai trò",
     "permissions": "Quyền",
-    "resources": "Tài nguyên"
+    "resources": "Tài nguyên",
+    "users":"Người dùng"
   },
   "columns": {
      "action": "Hành động",
@@ -79,5 +80,13 @@
     "default": "Mặc định",
     "createdAt": "Ngày tạo",
     "updatedAt": "Ngày cập nhật"
+  },
+  "users": {
+    "username": "Tài khoản",
+    "fullName": "Tên người dùng",
+    "phone": "Số điện thoại",
+    "active": "Trạng thái",
+    "createdAt": "Ngày tạo",
+    "role":"Vai trò"
   }
 }

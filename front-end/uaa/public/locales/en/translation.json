@@ -36,7 +36,8 @@
   "tabs": {
     "roles": "Roles",
     "permissions": "Permissions",
-    "resources": "Resources"
+    "resources": "Resources",
+    "users":"Người dùng"
   },
   "columns": {
      "action": "Action",
@@ -76,5 +77,13 @@
     "default": "Default",
     "createdAt": "Created At",
     "updatedAt": "Updated At"
+  },
+  "users": {
+    "username": "Username",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "active": "Active",
+    "createdAt": "Created At",
+    "role":"Role"
   }
 }

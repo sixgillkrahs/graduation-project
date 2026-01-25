@@ -28,8 +28,22 @@ export class AuthService {
     return AuthModel.findByIdAndUpdate(id, auth);
   }
 
-  async getAuthById(id: string) {
-    return AuthModel.findById(id);
+  async getAuthById<T>(
+    id: string,
+    populate?: string | PopulateOptions | (string | PopulateOptions)[],
+    select?: string
+  ): Promise<T | null> {
+    const query = AuthModel.findById(id);
+
+    if (populate) {
+      query.populate(Array.isArray(populate) ? populate : [populate]);
+    }
+
+    if (select) {
+      query.select(select);
+    }
+
+    return query.lean().exec() as Promise<T | null>;
   }
 
   async getAuthByUserId<T>(
@@ -88,6 +102,19 @@ export class AuthService {
       return false;
     }
   }
+
+  getAuths = async (
+    options: {
+      page: number;
+      limit: number;
+      sortBy?: string;
+      populate?: string
+    },
+    filter: Record<string, any> = {},
+    select?: string,
+  ) => {
+    return AuthModel.paginate?.(options, filter, select);
+  };
 
   getOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
