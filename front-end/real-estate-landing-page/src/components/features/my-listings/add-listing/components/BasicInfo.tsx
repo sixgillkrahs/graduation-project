@@ -5,7 +5,7 @@ import { ItemTabs } from "@/components/ui/Tabs/tabs.types";
 import { RootState } from "@/store";
 import { submitStep1 } from "@/store/listing.store";
 import clsx from "clsx";
-import { Building, Building2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -142,7 +142,6 @@ const BasicInfo = () => {
           <CsButton
             onClick={handleSubmit(onSubmit)}
             icon={<Icon.ArrowLeft />}
-            className="text-black"
             type="button"
           >
             Cancel
@@ -151,11 +150,7 @@ const BasicInfo = () => {
             <CsButton onClick={handleSubmit(onSubmit)} type="button">
               Save Draft
             </CsButton>
-            <CsButton
-              className="cs-bg-black hover:bg-black/90 text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-gray-200"
-              onClick={handleSubmit(onSubmit)}
-              type="submit"
-            >
+            <CsButton onClick={handleSubmit(onSubmit)} type="submit">
               Continue
               <Icon.ArrowRight className="w-5 h-5 ml-2" />
             </CsButton>

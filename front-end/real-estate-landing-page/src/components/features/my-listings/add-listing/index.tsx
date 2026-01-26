@@ -6,31 +6,33 @@ import { setStep } from "@/store/listing.store";
 import { useDispatch, useSelector } from "react-redux";
 import BasicInfo from "./components/BasicInfo";
 import Location from "./components/Location";
+import { CsStep } from "@/components/ui/stepper";
 
 const AddListing = () => {
   const dispatch = useDispatch();
   const currentStep = useSelector(
-    (state: RootState) => state.listing.currentStep
+    (state: RootState) => state.listing.currentStep,
   );
+
+  const steps = [
+    { title: "Basic Info", content: <BasicInfo /> },
+    { title: "Location", content: <Location /> },
+    { title: "Features", content: <div>Features Content</div> },
+    { title: "Media", content: <div>Media Content</div> },
+    { title: "Review", content: <div>Review Content</div> },
+  ];
+
+  // Steps 0 and 1 have their own navigation buttons
+  const showNav = currentStep > 1;
 
   return (
     <div className="max-w-5xl mx-auto p-8 pb-24">
-      <Steps
-        current={currentStep}
-        items={[
-          { title: "Basic Info" },
-          { title: "Location" },
-          { title: "Features" },
-          { title: "Media" },
-          { title: "Review" },
-        ]}
-        onChange={(step) => dispatch(setStep(step))}
+      <CsStep
+        steps={steps}
+        currentStep={currentStep + 1}
+        onStepChange={(step) => dispatch(setStep(step - 1))}
+        showNavigation={showNav}
       />
-      <div className="mt-8">
-        {currentStep === 0 && <BasicInfo />}
-        {currentStep === 1 && <Location />}
-        {/* {currentStep === 2 && <Step3 />} */}
-      </div>
     </div>
   );
 };
