@@ -70,16 +70,21 @@ function Avatar({
   className,
   src,
   alt,
+  status,
   ...props
 }: {
   className?: string;
   src?: string;
   alt?: string;
+  status?: "online" | "offline";
 } = {}) {
   return (
     <AvatarWrapper className={className} {...props}>
       <AvatarImage src={src} alt={alt} />
       <AvatarFallback>{src ? "" : alt?.charAt(0)}</AvatarFallback>
+      {status === "online" && (
+        <AvatarBadge className="bg-green-600 dark:bg-green-800" />
+      )}
     </AvatarWrapper>
   );
 }

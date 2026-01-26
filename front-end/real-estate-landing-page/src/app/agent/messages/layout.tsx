@@ -12,7 +12,7 @@ export default function MessagesLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-[calc(100vh-80px)]">
       <Sidebar>{children}</Sidebar>
     </div>
   );

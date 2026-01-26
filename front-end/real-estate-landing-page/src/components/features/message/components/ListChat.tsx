@@ -1,18 +1,33 @@
 "use client";
 
+import { Spinner } from "@/components/ui/spinner";
 import { useConversations } from "../services/query";
 import MessageItem from "./MessageItem";
+import { useRouter } from "next/navigation";
 
-const ListChat = () => {
+interface ListChatProps {
+  onSelectConversation?: (conversation: any) => void;
+}
+
+const ListChat = ({ onSelectConversation }: ListChatProps) => {
   const { data, isLoading } = useConversations();
 
   if (isLoading) {
-    return <>loading</>;
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <Spinner className="w-10 h-10" />
+      </div>
+    );
   }
-  console.log("data", data);
 
-  const handleGetMessage = () => {
-    console.log("first");
+  const router = useRouter();
+
+  const handleGetMessage = (item: any) => {
+    if (onSelectConversation) {
+      onSelectConversation(item);
+    } else {
+      router.push(`/agent/messages/${item.id}`);
+    }
   };
 
   return (
@@ -21,12 +36,12 @@ const ListChat = () => {
         return (
           <MessageItem
             key={item.id}
-            // avatar={item.participants[1]?.}
-            title={item.participants[1]?.fullName}
-            message={item.lastMessageId?.content}
-            time={item.lastMessageId?.updatedAt}
-            isRead={item.lastMessageId?.isRead}
-            onClick={handleGetMessage}
+            avatar={item.displayAvatar || ""}
+            title={item.displayName || "User"}
+            message={item.lastMessage?.content || ""}
+            time={item.lastMessage?.createdAt || ""}
+            isRead={item.lastMessage?.isRead}
+            onClick={() => handleGetMessage(item)}
           />
         );
       })}

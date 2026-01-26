@@ -19,7 +19,8 @@ export class ChatEvent extends BaseEvent {
       method: string;
     };
     body: {
-      participants: string[];
+      participants?: string[];
+      conversationId?: string;
     };
     socket: Socket;
   }): Promise<{
@@ -29,31 +30,53 @@ export class ChatEvent extends BaseEvent {
     message?: string;
   }> => {
     return this.handleRequest(req, async () => {
-      const { participants } = req.body;
+      const { participants, conversationId } = req.body;
       const socket = req.socket;
-      const user = await Promise.all(
-        participants.map((id) => this.userService.getUserById(id)),
-      );
-      const userNotFound = user.some((userItem) => userItem === null);
-      if (userNotFound) {
+
+      if (conversationId) {
+        socket.join(conversationId);
         return {
-          code: 404,
-          state: 0,
+          code: 200,
+          state: 1,
           data: {
-            message: "User not found",
+            conversationId,
+            message: "Joined conversation room",
           },
         };
       }
-      const conversation =
-        await this.chatService.createConversation(participants);
-      const room = conversation._id.toString();
-      socket.join(room);
+
+      if (participants) {
+        const user = await Promise.all(
+          participants.map((id) => this.userService.getUserById(id)),
+        );
+        const userNotFound = user.some((userItem) => userItem === null);
+        if (userNotFound) {
+          return {
+            code: 404,
+            state: 0,
+            data: {
+              message: "User not found",
+            },
+          };
+        }
+        const conversation =
+          await this.chatService.createConversation(participants);
+        const room = conversation._id.toString();
+        socket.join(room);
+        return {
+          code: 200,
+          state: 1,
+          data: {
+            users: user,
+          },
+        };
+      }
+
       return {
-        code: 200,
-        state: 1,
-        data: {
-          users: user,
-        },
+        code: 400,
+        state: 0,
+        message: "Missing conversationId or participants",
+        data: null,
       };
     });
   };
@@ -75,9 +98,12 @@ export class ChatEvent extends BaseEvent {
     message?: string;
   }> => {
     return this.handleRequest(req, async () => {
+      console.log("Processing sendMessage request:", JSON.stringify(req.body));
       const { conversationId, senderId, content } = req.body;
+
       const wsService = WebSocketService.getInstance();
       if (!conversationId || !senderId || !content) {
+        console.error("Missing fields in sendMessage:", req.body);
         throw new Error("Missing fields");
       }
 
@@ -87,7 +113,9 @@ export class ChatEvent extends BaseEvent {
         content,
       );
 
+      console.log("Message saved, emitting to room:", conversationId);
       wsService.getWss().to(conversationId).emit("chat:receive", message);
+
       return {
         code: 200,
         state: 1,
@@ -124,6 +152,34 @@ export class ChatEvent extends BaseEvent {
         code: 200,
         state: 1,
         message: "Typing status sent",
+      };
+    });
+  };
+
+  readMessage = async (req: {
+    header: { method: string };
+    body: { conversationId: string; userId: string };
+    socket: Socket;
+  }): Promise<{
+    code: number;
+    state: number;
+    data: any;
+    message?: string;
+  }> => {
+    return this.handleRequest(req, async () => {
+      const { conversationId, userId } = req.body;
+
+      await this.chatService.markMessagesAsRead(conversationId, userId);
+
+      // Notify others in the room that messages have been read
+      req.socket
+        .to(conversationId)
+        .emit("chat:read", { conversationId, userId });
+
+      return {
+        code: 200,
+        state: 1,
+        message: "Messages marked as read",
       };
     });
   };

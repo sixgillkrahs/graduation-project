@@ -8,3 +8,11 @@ export const useConversations = () => {
     queryFn: () => ConversationService.conversations(),
   });
 };
+
+export const useConversationDetail = (conversationId: string) => {
+  return useQuery({
+    queryKey: [ConversationsQueryKey.conversationDetail, conversationId],
+    queryFn: () => ConversationService.conversationDetail(conversationId),
+    enabled: !!conversationId,
+  });
+};

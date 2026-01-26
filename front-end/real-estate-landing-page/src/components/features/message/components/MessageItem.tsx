@@ -1,9 +1,4 @@
-import {
-  Avatar,
-  AvatarBadge,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { formatChatTime } from "@/shared/helper/formatChatTime";
 import { CheckCheck } from "lucide-react";
@@ -29,19 +24,12 @@ const MessageItem = ({
       onClick={onClick}
     >
       <div className="flex gap-2">
-        <Avatar className="w-10 h-10">
-          <AvatarImage src={avatar} alt={title} className="grayscale" />
-          <AvatarFallback>
-            {title
-              .trim()
-              .split(/\s+/)
-              .map((w) => w[0])
-              .join("")
-              .slice(0, 2)
-              .toUpperCase()}
-          </AvatarFallback>
-          <AvatarBadge className="bg-green-600 dark:bg-green-800" />
-        </Avatar>
+        <Avatar
+          alt={title}
+          src={avatar}
+          className="w-10 h-10"
+          status="online"
+        />
         <div>
           <div className="text-sm font-medium text-gray-900">{title}</div>
           <div className="text-sm text-gray-500">{message}</div>
@@ -49,7 +37,7 @@ const MessageItem = ({
       </div>
       <div className="grid gap-2">
         <div className="text-xs text-gray-500">{formatChatTime(time)}</div>
-        <div className="w-4 h-4 flex items-center justify-center">
+        <div className="flex items-center justify-end">
           <CheckCheck
             className={cn("w-4 h-4 ", isRead ? "text-green-600" : "opacity-50")}
           />

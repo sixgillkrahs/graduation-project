@@ -8,7 +8,16 @@ export default class ConversationService {
     IPaginationResp<IConversationService.ConversationDTO>
   > => {
     return request({
-      url: ConversationsEndpoint.conversations(),
+      url: ConversationsEndpoint.Conversations(),
+      method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly conversationDetail = (
+    conversationId: string,
+  ): Promise<IPaginationResp<IConversationService.ConversationDetailDTO>> => {
+    return request({
+      url: ConversationsEndpoint.ConversationDetail(conversationId),
       method: AxiosMethod.GET,
     });
   };

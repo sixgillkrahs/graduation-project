@@ -38,6 +38,7 @@ export class ChatController extends BaseController {
           populate: "participants:fullName ,lastMessageId",
         },
         filter,
+        userId._id.toString(),
       );
     });
   };
@@ -53,10 +54,16 @@ export class ChatController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const { conversationId } = req.params;
+      const { userId } = req.user;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 50;
 
-      return await this.chatService.getMessages(conversationId, page, limit);
+      return await this.chatService.getMessages(
+        conversationId,
+        page,
+        limit,
+        userId._id.toString(),
+      );
     });
   };
 

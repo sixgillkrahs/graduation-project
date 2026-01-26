@@ -18,6 +18,16 @@ export function socketEventHandle(socket: Socket) {
     method: "POST",
     action: chatEvent.sendMessage,
   });
+  eventProcess(socket, {
+    name: "chat:typing",
+    method: "POST",
+    action: chatEvent.typingMessage,
+  });
+  eventProcess(socket, {
+    name: "chat:read",
+    method: "POST",
+    action: chatEvent.readMessage,
+  });
 }
 
 export const eventProcess = (
