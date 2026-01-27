@@ -40,7 +40,7 @@ const listingSlice = createSlice({
     },
     updateListingData: (
       state,
-      action: PayloadAction<Partial<ListingState["data"]>>
+      action: PayloadAction<Partial<ListingState["data"]>>,
     ) => {
       state.data = { ...state.data, ...action.payload };
     },
@@ -50,12 +50,16 @@ const listingSlice = createSlice({
         demandType: string;
         propertyType: string;
         projectName: string;
-      }>
+      }>,
     ) => {
       state.data = { ...state.data, ...action.payload };
       state.currentStep += 1; // Auto advance
     },
     submitStep2: (state, action: PayloadAction<{ location: any }>) => {
+      state.data = { ...state.data, ...action.payload };
+      state.currentStep += 1;
+    },
+    submitStep3: (state, action: PayloadAction<{ features: any }>) => {
       state.data = { ...state.data, ...action.payload };
       state.currentStep += 1;
     },
@@ -69,5 +73,6 @@ export const {
   updateListingData,
   submitStep1,
   submitStep2,
+  submitStep3,
 } = listingSlice.actions;
 export default listingSlice.reducer;

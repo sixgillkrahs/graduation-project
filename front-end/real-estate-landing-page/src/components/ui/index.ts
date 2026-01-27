@@ -1,6 +1,5 @@
 export * from "./Card";
 export * from "./Icon";
-export * from "./Select";
 export * from "./Slider";
 export * from "./Tabs";
 export * from "./Tag";

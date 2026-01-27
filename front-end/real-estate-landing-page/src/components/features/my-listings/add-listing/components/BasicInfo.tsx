@@ -61,7 +61,7 @@ const BasicInfo = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           <Icon.Information className="w-6 h-6" /> Step 1: Basic Information
         </h2>

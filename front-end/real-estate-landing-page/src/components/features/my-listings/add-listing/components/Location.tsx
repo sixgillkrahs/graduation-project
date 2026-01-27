@@ -1,13 +1,13 @@
+import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
+import { Map } from "@/components/ui/Map";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/Select";
+import { CsSelect } from "@/components/ui/select";
 import { RootState } from "@/store";
 import { prevStep, submitStep2 } from "@/store/listing.store";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { Map } from "@/components/ui/Map";
-import { CsButton } from "@/components/custom";
 
 const Location = () => {
   const dispatch = useDispatch();
@@ -95,7 +95,7 @@ const Location = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           <Icon.MapPin className="w-6 h-6" /> Step 2: Location
         </h2>
@@ -106,13 +106,13 @@ const Location = () => {
               name="province"
               control={control}
               render={({ field }) => (
-                <Select
+                <CsSelect
                   label="Province / City"
                   placeholder="Select Province"
                   options={provinces}
                   value={field.value}
-                  onChange={(opt) => {
-                    field.onChange(opt);
+                  onChange={(val) => {
+                    field.onChange(val);
                     setValue("district", ""); // Reset child
                     setValue("ward", "");
                   }}
@@ -123,13 +123,13 @@ const Location = () => {
               name="district"
               control={control}
               render={({ field }) => (
-                <Select
+                <CsSelect
                   label="District"
                   placeholder="Select District"
                   options={districts}
                   value={field.value}
-                  onChange={(opt) => {
-                    field.onChange(opt);
+                  onChange={(val) => {
+                    field.onChange(val);
                     setValue("ward", ""); // Reset child
                   }}
                 />
@@ -139,12 +139,12 @@ const Location = () => {
               name="ward"
               control={control}
               render={({ field }) => (
-                <Select
+                <CsSelect
                   label="Ward"
                   placeholder="Select Ward"
                   options={wards}
                   value={field.value}
-                  onChange={(opt) => field.onChange(opt)}
+                  onChange={(val) => field.onChange(val)}
                 />
               )}
             />
@@ -261,34 +261,20 @@ const Location = () => {
             </div>
           </div>
         </form>
-      </div>
 
-      <div className="flex justify-between pt-10">
-        <CsButton
-          onClick={onBack}
-          icon={<Icon.ArrowLeft />}
-          className="text-black"
-          type="button"
-        >
-          Back
-        </CsButton>
-        <div className="flex gap-4">
-          <CsButton
-            onClick={() => {}}
-            type="button"
-            variant="secondary"
-            className="bg-gray-100 text-gray-700"
-          >
-            Save Draft
+        <div className="flex justify-between pt-10">
+          <CsButton onClick={onBack} icon={<Icon.ArrowLeft />} type="button">
+            Back
           </CsButton>
-          <CsButton
-            className="cs-bg-black hover:bg-black/90 text-white px-8 py-3 rounded-full font-semibold shadow-lg shadow-gray-200"
-            onClick={handleSubmit(onSubmit)}
-            type="submit"
-          >
-            Continue
-            <Icon.ArrowRight className="w-5 h-5 ml-2" />
-          </CsButton>
+          <div className="flex gap-4">
+            <CsButton onClick={() => {}} type="button">
+              Save Draft
+            </CsButton>
+            <CsButton onClick={handleSubmit(onSubmit)} type="submit">
+              Continue
+              <Icon.ArrowRight className="w-5 h-5 ml-2" />
+            </CsButton>
+          </div>
         </div>
       </div>
     </div>

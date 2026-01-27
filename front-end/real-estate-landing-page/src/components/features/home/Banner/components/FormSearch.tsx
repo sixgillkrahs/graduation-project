@@ -1,6 +1,7 @@
 import { CsButton } from "@/components/custom";
-import { Icon, Select, Slider, Tabs, Tag } from "@/components/ui";
+import { Icon, Slider, Tabs, Tag } from "@/components/ui";
 import { Input } from "@/components/ui/input";
+import { CsSelect } from "@/components/ui/select";
 import { memo } from "react";
 
 const optionsType = [
@@ -58,8 +59,8 @@ const FormSearch = () => {
           preIcon={<Icon.MapPin className="w-5 h-5 text-black" />}
         />
         <div className="grid grid-cols-2 gap-3">
-          <Select placeholder="Property Type" options={optionsType} />
-          <Select placeholder="Bedrooms" options={optionsBedrooms} />
+          <CsSelect placeholder="Property Type" options={optionsType} />
+          <CsSelect placeholder="Bedrooms" options={optionsBedrooms} />
         </div>
         <Slider min={0} max={10000} step={1000} />
         <CsButton className="cs-bg-black text-white">Search</CsButton>

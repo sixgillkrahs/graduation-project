@@ -4,6 +4,9 @@ import fs, { statSync } from 'fs';
 import path from 'path';
 import { BaseController } from "./base.controller";
 import busboy from 'busboy';
+import { cloudinary, isCloudinaryConfigured } from "@/config/cloudinary";
+import { AppError } from "@/utils/appError";
+import { ErrorCode } from "@/utils/errorCodes";
 
 const UPLOAD_FOLDER = path.join(process.cwd(), "uploads")
 const ASSET_PATH = path.join(process.cwd(), "src", "assets")
@@ -277,5 +280,164 @@ export class UploadController extends BaseController {
         };
         });
     }
+
+    /**
+     * Upload a single image to Cloudinary
+     * File is handled by multer middleware before reaching this method
+     */
+    uploadImage = (req: Request, res: Response, next: NextFunction) => {
+        this.handleRequest(req, res, next, async () => {
+            if (!isCloudinaryConfigured()) {
+                throw new AppError(
+                    "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.",
+                    500,
+                    ErrorCode.INTERNAL_SERVER_ERROR
+                );
+            }
+
+            const file = req.file as Express.Multer.File & {
+                path?: string;
+                filename?: string;
+            };
+
+            if (!file) {
+                throw new AppError(
+                    "No file uploaded. Please provide an image file.",
+                    400,
+                    ErrorCode.VALIDATION_ERROR
+                );
+            }
+
+            // When using multer-storage-cloudinary, the file object contains:
+            // - path: the Cloudinary URL
+            // - filename: the public_id in Cloudinary
+            return {
+                url: file.path,
+                publicId: file.filename,
+                originalName: file.originalname,
+                size: file.size,
+                mimetype: file.mimetype,
+            };
+        });
+    };
+
+    /**
+     * Upload multiple images to Cloudinary
+     * Files are handled by multer middleware before reaching this method
+     */
+    uploadImages = (req: Request, res: Response, next: NextFunction) => {
+        this.handleRequest(req, res, next, async () => {
+            if (!isCloudinaryConfigured()) {
+                throw new AppError(
+                    "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.",
+                    500,
+                    ErrorCode.INTERNAL_SERVER_ERROR
+                );
+            }
+
+            const files = req.files as (Express.Multer.File & {
+                path?: string;
+                filename?: string;
+            })[];
+
+            if (!files || files.length === 0) {
+                throw new AppError(
+                    "No files uploaded. Please provide image files.",
+                    400,
+                    ErrorCode.VALIDATION_ERROR
+                );
+            }
+
+            const uploadedFiles = files.map((file) => ({
+                url: file.path,
+                publicId: file.filename,
+                originalName: file.originalname,
+                size: file.size,
+                mimetype: file.mimetype,
+            }));
+
+            return {
+                count: uploadedFiles.length,
+                files: uploadedFiles,
+            };
+        });
+    };
+
+    /**
+     * Delete an image from Cloudinary by public_id
+     */
+    deleteImage = (req: Request, res: Response, next: NextFunction) => {
+        this.handleRequest(req, res, next, async () => {
+            if (!isCloudinaryConfigured()) {
+                throw new AppError(
+                    "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.",
+                    500,
+                    ErrorCode.INTERNAL_SERVER_ERROR
+                );
+            }
+
+            const { publicId } = req.params;
+
+            if (!publicId) {
+                throw new AppError(
+                    "Public ID is required to delete an image.",
+                    400,
+                    ErrorCode.VALIDATION_ERROR
+                );
+            }
+
+            const result = await cloudinary.uploader.destroy(publicId);
+
+            if (result.result !== "ok") {
+                throw new AppError(
+                    `Failed to delete image: ${result.result}`,
+                    400,
+                    ErrorCode.VALIDATION_ERROR
+                );
+            }
+
+            return {
+                message: "Image deleted successfully",
+                publicId: publicId,
+            };
+        });
+    };
+
+    /**
+     * Get image details from Cloudinary by public_id
+     */
+    getImageDetails = (req: Request, res: Response, next: NextFunction) => {
+        this.handleRequest(req, res, next, async () => {
+            if (!isCloudinaryConfigured()) {
+                throw new AppError(
+                    "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.",
+                    500,
+                    ErrorCode.INTERNAL_SERVER_ERROR
+                );
+            }
+
+            const { publicId } = req.params;
+
+            if (!publicId) {
+                throw new AppError(
+                    "Public ID is required to get image details.",
+                    400,
+                    ErrorCode.VALIDATION_ERROR
+                );
+            }
+
+            const result = await cloudinary.api.resource(publicId);
+
+            return {
+                publicId: result.public_id,
+                url: result.secure_url,
+                format: result.format,
+                width: result.width,
+                height: result.height,
+                bytes: result.bytes,
+                createdAt: result.created_at,
+            };
+        });
+    };
 
 }
