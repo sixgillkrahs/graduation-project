@@ -2,12 +2,12 @@ import { UploadController } from "@/controllers/upload.controller";
 import { UploadService } from "@/services/upload.service";
 import { uploadSingle, uploadMultiple } from "@/middleware/uploadMiddleware";
 import { Router } from "express";
-import fs from 'fs';
+import fs from "fs";
 
-const UPLOAD_FOLDER = 'uploads';
+const UPLOAD_FOLDER = "uploads";
 
 if (!fs.existsSync(UPLOAD_FOLDER)) {
-    fs.mkdirSync(UPLOAD_FOLDER, { recursive: true });
+  fs.mkdirSync(UPLOAD_FOLDER, { recursive: true });
 }
 
 const router = Router();
@@ -30,19 +30,22 @@ router.put("/resume-upload/:sessionId", uploadController.resumeUpload);
  *   post:
  *     summary: Upload a single image to Cloudinary
  *     tags: [Upload]
- *     consumes:
- *       - multipart/form-data
  *     parameters:
  *       - in: query
  *         name: folder
  *         schema:
  *           type: string
  *         description: Cloudinary folder to store the image (default: "uploads")
- *       - in: formData
- *         name: image
- *         type: file
- *         required: true
- *         description: Image file to upload
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Image uploaded successfully
@@ -76,19 +79,24 @@ router.post("/image", uploadSingle("image"), uploadController.uploadImage);
  *   post:
  *     summary: Upload multiple images to Cloudinary
  *     tags: [Upload]
- *     consumes:
- *       - multipart/form-data
  *     parameters:
  *       - in: query
  *         name: folder
  *         schema:
  *           type: string
- *         description: Cloudinary folder to store the images (default: "uploads")
- *       - in: formData
- *         name: images
- *         type: file
- *         required: true
- *         description: Image files to upload (max 10)
+ *         description: 'Cloudinary folder to store the images (default: "uploads")'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       200:
  *         description: Images uploaded successfully
@@ -119,7 +127,11 @@ router.post("/image", uploadSingle("image"), uploadController.uploadImage);
  *       500:
  *         description: Cloudinary not configured or upload failed
  */
-router.post("/images", uploadMultiple("images", 10), uploadController.uploadImages);
+router.post(
+  "/images",
+  uploadMultiple("images", 10),
+  uploadController.uploadImages,
+);
 
 /**
  * @swagger

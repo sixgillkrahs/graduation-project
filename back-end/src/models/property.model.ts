@@ -133,7 +133,7 @@ interface PropertyModel
 const locationSchema = new mongoose.Schema(
   {
     province: { type: String, required: true, trim: true },
-    district: { type: String, required: true, trim: true },
+    district: { type: String, trim: true },
     ward: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true },
     hideAddress: { type: Boolean, default: false },

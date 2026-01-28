@@ -209,7 +209,7 @@ function CsSelect({
 }: CsSelectProps) {
   return (
     <Field
-      aria-invalid={!!error}
+      data-invalid={!!error}
       className={cn("w-full min-w-[120px]", className)}
     >
       {label && <FieldLabel>{label}</FieldLabel>}

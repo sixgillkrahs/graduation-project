@@ -2,7 +2,12 @@ import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
 import { PropertyService } from "@/services/property.service";
 import { ApiRequest } from "@/utils/apiRequest";
-import { PropertyStatusEnum } from "@/models/property.model";
+import {
+  PropertyDirectionEnum,
+  PropertyFurnitureEnum,
+  PropertyLegalStatusEnum,
+  PropertyStatusEnum,
+} from "@/models/property.model";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 
@@ -26,10 +31,73 @@ export class PropertyController extends BaseController {
         );
       }
 
+      const body = req.body;
+      const getDirection = (val: string) => {
+        const map: Record<string, any> = {
+          North: PropertyDirectionEnum.NORTH,
+          South: PropertyDirectionEnum.SOUTH,
+          East: PropertyDirectionEnum.EAST,
+          West: PropertyDirectionEnum.WEST,
+          "North East": PropertyDirectionEnum.NORTH_EAST,
+          "North West": PropertyDirectionEnum.NORTH_WEST,
+          "South East": PropertyDirectionEnum.SOUTH_EAST,
+          "South West": PropertyDirectionEnum.SOUTH_WEST,
+        };
+        return map[val] || undefined;
+      };
+
+      const getLegalStatus = (val: string) => {
+        const map: Record<string, any> = {
+          "Pink Book": PropertyLegalStatusEnum.PINK_BOOK,
+          "Red Book": PropertyLegalStatusEnum.RED_BOOK,
+          "Sales Contract": PropertyLegalStatusEnum.SALE_CONTRACT,
+          "Waiting for Book": PropertyLegalStatusEnum.WAITING,
+        };
+        return map[val] || undefined;
+      };
+
+      const getFurniture = (val: string) => {
+        const map: Record<string, any> = {
+          Full: PropertyFurnitureEnum.FULL,
+          Basic: PropertyFurnitureEnum.BASIC,
+          None: PropertyFurnitureEnum.EMPTY,
+        };
+        return map[val] || undefined;
+      };
+
       const propertyData = {
-        ...req.body,
         userId: user.userId,
-        status: PropertyStatusEnum.PENDING, // Default status
+        demandType: body.demandType,
+        propertyType: body.propertyType,
+        projectName: body.projectName,
+        location: {
+          province: body.province,
+          ward: body.ward,
+          district: "", // Optional in model now
+          address: body.address,
+          hideAddress: false,
+          coordinates: {
+            lat: Number(body.latitude) || 0,
+            long: Number(body.longitude) || 0,
+          },
+        },
+        features: {
+          area: Number(body.area),
+          price: Number(body.price),
+          priceUnit: "MILLION" as any, // Default or derived
+          bedrooms: Number(body.bedrooms) || 0,
+          bathrooms: Number(body.bathrooms) || 0,
+          direction: getDirection(body.direction),
+          legalStatus: getLegalStatus(body.legalStatus),
+          furniture: getFurniture(body.furniture),
+        },
+        media: {
+          images: body.images || [],
+        },
+        amenities: body.amenities || [],
+        description: body.description || "No description",
+        status: PropertyStatusEnum.PENDING,
+        viewCount: 0,
       };
 
       const property = await this.propertyService.createProperty(propertyData);

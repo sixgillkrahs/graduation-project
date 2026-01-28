@@ -22,7 +22,7 @@ const CsButton = ({
   className = "",
   style = {},
   icon = null,
-  onClick = () => {},
+  onClick,
   disabled = false,
   loading = false,
   size = "default",

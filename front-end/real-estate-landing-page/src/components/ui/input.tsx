@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { Field, FieldError, FieldLabel } from "./field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "./field";
 
 function Input({
   className,
@@ -9,6 +9,7 @@ function Input({
   preIcon,
   suffix,
   label,
+  description,
   error,
   ...props
 }: React.ComponentProps<"input"> & {
@@ -16,11 +17,12 @@ function Input({
   preIcon?: React.ReactNode;
   suffix?: React.ReactNode;
   error?: string;
+  description?: string;
 }) {
   const id = React.useId();
 
   return (
-    <Field>
+    <Field data-invalid={!!error}>
       {label && <FieldLabel htmlFor={id}>{label}</FieldLabel>}
       <div className="relative w-full">
         {preIcon ? (
@@ -43,6 +45,7 @@ function Input({
           type={type}
           data-slot="input"
           id={id}
+          aria-invalid={!!error}
           className={cn(
             "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-xl border bg-transparent px-3 py-5 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
             "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
@@ -54,6 +57,7 @@ function Input({
           {...props}
         />
       </div>
+      {description && <FieldDescription>{description}</FieldDescription>}
       {error && (
         <FieldError
           errors={[

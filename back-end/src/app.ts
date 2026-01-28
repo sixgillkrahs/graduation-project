@@ -58,8 +58,6 @@ const setupMiddleware = (app: express.Application) => {
   // app.use("/api", apiLimiter);
 };
 
-app.use("/api/upload", uploadRoutes);
-
 setupMiddleware(app);
 
 app.get("/health", (req, res) => {
@@ -70,7 +68,7 @@ app.get("/health", (req, res) => {
     memoryUsage: process.memoryUsage(),
   });
 });
-
+app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);

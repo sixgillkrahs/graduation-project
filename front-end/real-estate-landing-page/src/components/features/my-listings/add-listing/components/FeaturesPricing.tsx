@@ -1,33 +1,22 @@
 import { CsButton } from "@/components/custom";
-import { Icon } from "@/components/ui";
 import { Counter } from "@/components/ui/counter";
 import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
-import { RootState } from "@/store";
-import { prevStep, submitStep3 } from "@/store/listing.store";
-import { Home, Sparkles } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
+import { nextStep, prevStep } from "@/store/listing.store";
+import { ArrowLeft, ArrowRight, Home, Sparkles } from "lucide-react";
+import { Controller, useFormContext } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { ListingFormData, stepFields } from "../types";
 
 const FeaturesPricing = () => {
   const dispatch = useDispatch();
-  const listingData = useSelector((state: RootState) => state.listing.data);
-  const featuresData = listingData.features || {};
+  const { control, trigger } = useFormContext<ListingFormData>();
 
-  const { control, handleSubmit } = useForm({
-    defaultValues: {
-      area: featuresData.area || "",
-      price: featuresData.price || "",
-      bedrooms: featuresData.bedrooms || 1,
-      bathrooms: featuresData.bathrooms || 1,
-      direction: featuresData.direction || "",
-      legalStatus: featuresData.legalStatus || "",
-      furniture: featuresData.furniture || "",
-    },
-  });
-
-  const onSubmit = (data: any) => {
-    dispatch(submitStep3({ features: data }));
+  const handleContinue = async () => {
+    const isValid = await trigger(stepFields.step3);
+    if (isValid) {
+      dispatch(nextStep());
+    }
   };
 
   const onBack = () => {
@@ -72,10 +61,12 @@ const FeaturesPricing = () => {
             <Controller
               name="area"
               control={control}
-              render={({ field }) => (
+              rules={{ required: "Area is required" }}
+              render={({ field, fieldState }) => (
                 <Input
                   label="Area (m²)"
                   type="number"
+                  error={fieldState.error?.message}
                   placeholder="e.g. 120"
                   {...field}
                 />
@@ -84,10 +75,12 @@ const FeaturesPricing = () => {
             <Controller
               name="price"
               control={control}
-              render={({ field }) => (
+              rules={{ required: "Price is required" }}
+              render={({ field, fieldState }) => (
                 <Input
                   label="Price (USD)"
                   type="number"
+                  error={fieldState.error?.message}
                   placeholder="e.g. 500000"
                   {...field}
                 />
@@ -141,25 +134,29 @@ const FeaturesPricing = () => {
             <Controller
               name="direction"
               control={control}
-              render={({ field }) => (
+              rules={{ required: "Direction is required" }}
+              render={({ field, fieldState }) => (
                 <CsSelect
                   label="Direction"
                   placeholder="Select Direction"
                   options={directionOptions}
                   value={field.value}
                   onChange={field.onChange}
+                  error={fieldState.error?.message}
                 />
               )}
             />
             <Controller
               name="legalStatus"
               control={control}
-              render={({ field }) => (
+              rules={{ required: "Legal Status is required" }}
+              render={({ field, fieldState }) => (
                 <CsSelect
                   label="Legal Status"
                   placeholder="Select Status"
                   options={legalStatusOptions}
                   value={field.value}
+                  error={fieldState.error?.message}
                   onChange={field.onChange}
                 />
               )}
@@ -167,32 +164,33 @@ const FeaturesPricing = () => {
             <Controller
               name="furniture"
               control={control}
-              render={({ field }) => (
+              rules={{ required: "Furniture is required" }}
+              render={({ field, fieldState }) => (
                 <CsSelect
                   label="Furniture"
                   placeholder="Select Furniture"
                   options={furnitureOptions}
                   value={field.value}
+                  error={fieldState.error?.message}
                   onChange={field.onChange}
                 />
               )}
             />
           </div>
         </form>
-      </div>
-
-      <div className="flex justify-between pt-10">
-        <CsButton onClick={onBack} icon={<Icon.ArrowLeft />} type="button">
-          Back
-        </CsButton>
-        <div className="flex gap-4">
-          <CsButton onClick={() => {}} type="button">
-            Save Draft
+        <div className="flex justify-between pt-10">
+          <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
+            Back
           </CsButton>
-          <CsButton onClick={handleSubmit(onSubmit)} type="submit">
-            Continue
-            <Icon.ArrowRight className="w-5 h-5 ml-2" />
-          </CsButton>
+          <div className="flex gap-4">
+            <CsButton onClick={() => {}} type="button">
+              Save Draft
+            </CsButton>
+            <CsButton onClick={handleContinue} type="button">
+              Continue
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </CsButton>
+          </div>
         </div>
       </div>
     </div>

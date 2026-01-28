@@ -1,31 +1,26 @@
 import { CsButton } from "@/components/custom";
-import { Icon, Tabs } from "@/components/ui";
+import { Tabs } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { ItemTabs } from "@/components/ui/Tabs/tabs.types";
-import { RootState } from "@/store";
-import { submitStep1 } from "@/store/listing.store";
+import { nextStep } from "@/store/listing.store";
 import clsx from "clsx";
-import { Building2 } from "lucide-react";
-import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
+import { ArrowLeft, ArrowRight, Building2, Info, MapPin } from "lucide-react";
+import { Controller, useFormContext } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { ListingFormData, stepFields } from "../types";
 
 const BasicInfo = () => {
   const dispatch = useDispatch();
-  const listingData = useSelector((state: RootState) => state.listing.data);
-
-  const { handleSubmit, control, setValue, watch } = useForm({
-    defaultValues: {
-      demandType: listingData.demandType || "SALE",
-      propertyType: listingData.propertyType || "APARTMENT",
-      projectName: listingData.projectName || "",
-    },
-    mode: "onChange",
-  });
+  const { control, setValue, watch, trigger } =
+    useFormContext<ListingFormData>();
 
   const formData = watch();
 
-  const onSubmit = (data: typeof listingData) => {
-    dispatch(submitStep1(data));
+  const handleContinue = async () => {
+    const isValid = await trigger(stepFields.step1);
+    if (isValid) {
+      dispatch(nextStep());
+    }
   };
 
   const demandTypes: ItemTabs[] = [{ title: "Rent" }, { title: "Sale" }];
@@ -51,7 +46,7 @@ const BasicInfo = () => {
       value: "VILLA",
       icon: <Building2 className="w-6 h-6" />,
     },
-    { label: "Land", value: "LAND", icon: <Icon.MapPin className="w-6 h-6" /> },
+    { label: "Land", value: "LAND", icon: <MapPin className="w-6 h-6" /> },
     {
       label: "Street House",
       value: "STREET_HOUSE",
@@ -63,7 +58,7 @@ const BasicInfo = () => {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <Icon.Information className="w-6 h-6" /> Step 1: Basic Information
+          <Info className="w-6 h-6" /> Step 1: Basic Information
         </h2>
         <form className="space-y-6">
           <div className="w-[400px]">
@@ -139,20 +134,14 @@ const BasicInfo = () => {
           />
         </form>
         <div className="flex justify-between pt-10">
-          <CsButton
-            onClick={handleSubmit(onSubmit)}
-            icon={<Icon.ArrowLeft />}
-            type="button"
-          >
+          <CsButton icon={<ArrowLeft />} type="button">
             Cancel
           </CsButton>
           <div className="flex gap-4">
-            <CsButton onClick={handleSubmit(onSubmit)} type="button">
-              Save Draft
-            </CsButton>
-            <CsButton onClick={handleSubmit(onSubmit)} type="submit">
+            <CsButton type="button">Save Draft</CsButton>
+            <CsButton onClick={handleContinue} type="button">
               Continue
-              <Icon.ArrowRight className="w-5 h-5 ml-2" />
+              <ArrowRight className="w-5 h-5 ml-2" />
             </CsButton>
           </div>
         </div>

@@ -1,33 +1,16 @@
 "use client";
 
-import NextImage from "next/image";
+import NextImage, { ImageProps as NextImageProps } from "next/image";
 import { PhotoView } from "react-photo-view";
 
-const Image = ({
-  src,
-  alt,
-  width,
-  height,
-  className,
-  unoptimized = false,
-}: {
+type ImageProps = Omit<NextImageProps, "src"> & {
   src: string;
-  alt: string;
-  width: number;
-  height: number;
-  className?: string;
-  unoptimized?: boolean;
-}) => {
+};
+
+const Image = ({ src, alt, className, ...rest }: ImageProps) => {
   return (
     <PhotoView src={src} key={src}>
-      <NextImage
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        unoptimized={unoptimized}
-      />
+      <NextImage src={src} alt={alt} className={className} {...rest} />
     </PhotoView>
   );
 };

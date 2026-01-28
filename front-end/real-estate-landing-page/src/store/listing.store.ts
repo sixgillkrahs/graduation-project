@@ -1,18 +1,5 @@
+import { ListingState } from "@/models/listing.model";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface ListingState {
-  currentStep: number;
-  data: {
-    demandType: string;
-    propertyType: string;
-    projectName: string;
-    // Add other fields as we implement more steps
-    location?: any;
-    features?: any;
-    media?: any;
-    description?: string;
-  };
-}
 
 const initialState: ListingState = {
   currentStep: 0,
@@ -47,8 +34,8 @@ const listingSlice = createSlice({
     submitStep1: (
       state,
       action: PayloadAction<{
-        demandType: string;
-        propertyType: string;
+        demandType: "SALE" | "RENT";
+        propertyType: "APARTMENT" | "HOUSE" | "VILLA" | "LAND" | "STREET_HOUSE";
         projectName: string;
       }>,
     ) => {

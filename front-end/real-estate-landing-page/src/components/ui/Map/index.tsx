@@ -1,61 +1,97 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import MapGL, {
-  Marker,
-  NavigationControl,
-  GeolocateControl,
-} from "react-map-gl/maplibre";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useCallback, useEffect, useRef, useState } from "react";
+import MapGL, {
+  GeolocateControl,
+  MapRef,
+  Marker,
+  NavigationControl,
+} from "react-map-gl/maplibre";
 
 interface MapProps {
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   onLocationSelect?: (location: { lat: number; lng: number }) => void;
+  height?: string;
+  interactive?: boolean;
 }
 
-function Map({ latitude, longitude, onLocationSelect }: MapProps) {
-  // Default to Ho Chi Minh City
+// Default to Ho Chi Minh City
+const DEFAULT_CENTER = {
+  latitude: 10.762622,
+  longitude: 106.660172,
+};
+
+function Map({
+  latitude,
+  longitude,
+  onLocationSelect,
+  height = "400px",
+  interactive = true,
+}: MapProps) {
+  const mapRef = useRef<MapRef>(null);
+
   const [viewState, setViewState] = useState({
-    longitude: longitude || 106.660172,
-    latitude: latitude || 10.762622,
-    zoom: 13,
+    longitude: longitude || DEFAULT_CENTER.longitude,
+    latitude: latitude || DEFAULT_CENTER.latitude,
+    zoom: 15,
   });
 
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(
-    latitude && longitude ? { lat: latitude, lng: longitude } : null
+    latitude && longitude ? { lat: latitude, lng: longitude } : null,
   );
 
-  // Sync state if props change (controlled mode)
+  // Fly to new location when props change
   useEffect(() => {
     if (latitude && longitude) {
-      setViewState((prev) => ({
-        ...prev,
-        latitude,
-        longitude,
-        // Don't auto-zoom on every prop change to avoid annoying jumps, unless it's way off
-      }));
       setMarker({ lat: latitude, lng: longitude });
+
+      // Use flyTo for smooth animation
+      if (mapRef.current) {
+        mapRef.current.flyTo({
+          center: [longitude, latitude],
+          zoom: 16,
+          duration: 1500,
+          essential: true,
+        });
+      }
     }
   }, [latitude, longitude]);
 
-  const handleMapClick = (event: any) => {
-    const { lngLat } = event;
-    const lat = lngLat.lat;
-    const lng = lngLat.lng;
+  const handleMapClick = useCallback(
+    (event: any) => {
+      if (!interactive) return;
 
-    setMarker({ lat, lng });
+      const { lngLat } = event;
+      const lat = lngLat.lat;
+      const lng = lngLat.lng;
 
-    if (onLocationSelect) {
-      onLocationSelect({ lat, lng });
-    }
-  };
+      setMarker({ lat, lng });
+      onLocationSelect?.({ lat, lng });
+    },
+    [interactive, onLocationSelect],
+  );
+
+  const handleMarkerDrag = useCallback(
+    (event: any) => {
+      if (!interactive) return;
+
+      const { lngLat } = event;
+      const lat = lngLat.lat;
+      const lng = lngLat.lng;
+
+      setMarker({ lat, lng });
+      onLocationSelect?.({ lat, lng });
+    },
+    [interactive, onLocationSelect],
+  );
 
   return (
     <div
       style={{
-        height: "400px",
+        height,
         width: "100%",
         position: "relative",
         borderRadius: "0.75rem",
@@ -63,21 +99,28 @@ function Map({ latitude, longitude, onLocationSelect }: MapProps) {
       }}
     >
       <MapGL
+        ref={mapRef}
         {...viewState}
         onMove={(evt) => setViewState(evt.viewState)}
         mapLib={maplibregl}
         style={{ width: "100%", height: "100%" }}
-        // Use CartoDB Voyager style for a nice, clean, free vector map
         mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
         onClick={handleMapClick}
-        cursor="crosshair"
+        cursor={interactive ? "crosshair" : "default"}
+        interactive={interactive}
       >
         <NavigationControl position="top-right" />
-        <GeolocateControl position="top-right" />
+        {interactive && <GeolocateControl position="top-right" />}
 
         {marker && (
-          <Marker longitude={marker.lng} latitude={marker.lat} anchor="bottom">
-            <div className="text-red-600 drop-shadow-2xl filter">
+          <Marker
+            longitude={marker.lng}
+            latitude={marker.lat}
+            anchor="bottom"
+            draggable={interactive}
+            onDragEnd={handleMarkerDrag}
+          >
+            <div className="text-red-600 drop-shadow-2xl filter animate-bounce">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
