@@ -50,6 +50,10 @@ const listingSlice = createSlice({
       state.data = { ...state.data, ...action.payload };
       state.currentStep += 1;
     },
+    resetListing: (state) => {
+      state.currentStep = 0;
+      state.data = initialState.data;
+    },
   },
 });
 
@@ -61,5 +65,6 @@ export const {
   submitStep1,
   submitStep2,
   submitStep3,
+  resetListing,
 } = listingSlice.actions;
 export default listingSlice.reducer;

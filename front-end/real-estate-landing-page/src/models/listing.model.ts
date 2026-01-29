@@ -7,7 +7,11 @@ export interface ListingState {
     // Add other fields as we implement more steps
     location?: any;
     features?: any;
-    media?: any;
+    media?: {
+      images: string[];
+      thumbnail?: string;
+      videoLink?: string;
+    };
     description?: string;
   };
 }

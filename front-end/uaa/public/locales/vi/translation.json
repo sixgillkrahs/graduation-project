@@ -56,13 +56,20 @@
     "export": "Xuất tệp",
     "close": "Đóng",
     "confirm": "Xác nhận",
-    "update": "Cập nhật"
+    "update": "Cập nhật",
+    "reject": "Từ chối",
+    "approve": "Phê duyệt"
   },
   "confirm": {
     "delete": {
       "title": "Xác nhận xóa",
       "content": "Bạn có chắc chắn muốn xóa không?"
     }
+  },
+  "message": {
+    "updateSuccess": "Cập nhật thành công",
+    "updateError": "Cập nhật thất bại",
+    "notFound": "Không tìm thấy bất động sản"
   },
   "menu": {
     "user-management": "Quản lý người dùng",
@@ -88,5 +95,28 @@
     "active": "Trạng thái",
     "createdAt": "Ngày tạo",
     "role":"Vai trò"
+  },
+  "properties": {
+    "propertyType": "Loại",
+    "demandType": "Nhu cầu",
+    "area": "Diện tích (m²)",
+    "price": "Giá",
+    "location": "Vị Trí",
+    "poster": "Người đăng",
+    "phone": "SĐT",
+    "status": "Trạng thái",
+    "createdAt": "Ngày tạo",
+    "propertyDetail": "Chi tiết bất động sản",
+    "description": "Mô tả",
+    "features": "Đặc điểm",
+    "bedrooms": "Phòng ngủ",
+    "bathrooms": "Phòng tắm",
+    "direction": "Hướng",
+    "furniture": "Nội thất",
+    "legalStatus": "Pháp lý"
+  },
+  "common": {
+    "sale": "Bán",
+    "rent": "Thuê"
   }
 }

@@ -2,7 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Map } from "@/components/ui/Map";
-import { prevStep } from "@/store/listing.store";
+import { prevStep, resetListing } from "@/store/listing.store";
 import {
   ArrowLeft,
   Bath,
@@ -13,21 +13,29 @@ import {
   FileText,
   Home,
   Images,
+  LayoutGrid,
   MapPin,
   Ruler,
   Sofa,
   Tag,
+  Video,
 } from "lucide-react";
 import NextImage from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
+import toast from "react-hot-toast";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useDispatch } from "react-redux";
-import { ListingFormData } from "../types";
+import { ListingFormData } from "../../dto/listingformdata.dto";
+import { useCreateProperty } from "../../services/mutate";
 import PropertyService from "../../services/service";
 
 const Review = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const { mutateAsync: createProperty, isPending: isCreatingProperty } =
+    useCreateProperty();
   const { getValues, handleSubmit } = useFormContext<ListingFormData>();
   const data = getValues();
 
@@ -41,8 +49,17 @@ const Review = () => {
   };
 
   const onPublish = (formData: ListingFormData) => {
-    console.log("Publishing listing:", formData);
-    // TODO: Call API to submit listing
+    createProperty(formData, {
+      onSuccess: () => {
+        toast.success("Listings created successfully! Wait for approval.");
+        dispatch(resetListing());
+        router.push("/agent/listings");
+      },
+      onError: (error) => {
+        toast.error("Failed to create property. Please try again.");
+        console.error(error);
+      },
+    });
   };
 
   // Format helpers
@@ -262,53 +279,103 @@ const Review = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Section 4: Media */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <Images className="w-5 h-5" />
-            Images ({imageUrls.length})
-          </h3>
-          {imageUrls.length > 0 ? (
-            <PhotoProvider>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {imageUrls.map((url, index) => (
-                  <PhotoView key={url} src={url}>
-                    <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted cursor-pointer hover:opacity-90 transition-opacity">
-                      <NextImage
-                        src={url}
-                        alt={`Property image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </PhotoView>
-                ))}
+      {/* Section 4: Media */}
+      <div className="mb-0">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <Images className="w-5 h-5" />
+          Images ({imageUrls.length})
+        </h3>
+        {imageUrls.length > 0 ? (
+          <PhotoProvider>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {imageUrls.map((url, index) => (
+                <PhotoView key={url} src={url}>
+                  <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted cursor-pointer hover:opacity-90 transition-opacity">
+                    <NextImage
+                      src={url}
+                      alt={`Property image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </PhotoView>
+              ))}
+            </div>
+          </PhotoProvider>
+        ) : (
+          <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
+            No images uploaded
+          </div>
+        )}
+      </div>
+
+      {/* Section 5: Thumbnail & Video */}
+      {(data.thumbnail || data.videoLink) && (
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {data.thumbnail && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <LayoutGrid className="w-5 h-5" />
+                Thumbnail Image
+              </h3>
+              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-gray-200">
+                <NextImage
+                  src={data.thumbnail}
+                  alt="Property thumbnail"
+                  fill
+                  className="object-cover"
+                />
               </div>
-            </PhotoProvider>
-          ) : (
-            <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
-              No images uploaded
+            </div>
+          )}
+
+          {data.videoLink && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <Video className="w-5 h-5" />
+                Video Tour
+              </h3>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-red-100 text-red-600 rounded-full">
+                    <Video className="w-5 h-5" />
+                  </div>
+                  <span className="font-medium text-gray-900 line-clamp-1">
+                    {data.videoLink}
+                  </span>
+                </div>
+                <a
+                  href={data.videoLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-700 hover:underline pl-12"
+                >
+                  Watch Video Tour &rarr;
+                </a>
+              </div>
             </div>
           )}
         </div>
+      )}
 
-        {/* Footer */}
-        <div className="flex justify-between pt-6 border-t border-gray-100">
-          <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
-            Back
+      {/* Footer */}
+      <div className="flex justify-between pt-6 border-t border-gray-100">
+        <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
+          Back
+        </CsButton>
+        <div className="flex gap-4">
+          <CsButton type="button">Save Draft</CsButton>
+          <CsButton
+            onClick={handleSubmit(onPublish)}
+            type="button"
+            className="bg-green-600 hover:bg-green-700"
+            loading={isCreatingProperty}
+          >
+            <CheckCircle className="w-5 h-5 mr-2" />
+            Publish Listing
           </CsButton>
-          <div className="flex gap-4">
-            <CsButton type="button">Save Draft</CsButton>
-            <CsButton
-              onClick={handleSubmit(onPublish)}
-              type="button"
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <CheckCircle className="w-5 h-5 mr-2" />
-              Publish Listing
-            </CsButton>
-          </div>
         </div>
       </div>
     </div>

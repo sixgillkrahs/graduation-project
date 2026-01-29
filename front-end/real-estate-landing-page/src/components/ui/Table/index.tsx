@@ -239,3 +239,5 @@ const Table = <T extends object>({
   );
 };
 export { Table };
+export { Table as CsTable };
+export type { TableColumn, TableProps } from "./table.types";

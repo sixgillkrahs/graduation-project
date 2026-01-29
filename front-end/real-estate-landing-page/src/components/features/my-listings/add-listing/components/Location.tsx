@@ -4,11 +4,12 @@ import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
 import { nextStep, prevStep } from "@/store/listing.store";
 import { ArrowLeft, ArrowRight, MapPin, Search, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { ListingFormData, stepFields } from "../types";
+import { ListingFormData } from "../../dto/listingformdata.dto";
 import PropertyService from "../../services/service";
+import { findOptionValue } from "@/shared/helper/findOptionValue";
 
 interface PhotonFeature {
   geometry: {
@@ -41,7 +42,7 @@ const Location = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleContinue = async () => {
-    const isValid = await trigger(stepFields.step2);
+    const isValid = await trigger(PropertyService.stepFields.step2);
     if (isValid) {
       dispatch(nextStep());
     }
@@ -130,25 +131,6 @@ const Location = () => {
     ].filter(Boolean);
     setValue("address", addressParts.join(" ") || formatResultAddress(props));
 
-    // Smart Match Helper
-    const findOptionValue = (
-      text: string | undefined,
-      options: { label: string; value: string }[],
-    ) => {
-      if (!text) return "";
-      const lowerText = text.toLowerCase();
-      // Try exact match first, then includes
-      const match = options.find(
-        (opt) =>
-          opt.value.toLowerCase() === lowerText ||
-          opt.label.toLowerCase() === lowerText ||
-          opt.label.toLowerCase().includes(lowerText) ||
-          lowerText.includes(opt.label.toLowerCase()) ||
-          opt.value.toLowerCase().includes(lowerText),
-      );
-      return match ? match.value : "";
-    };
-
     // Smart match Province
     const cityOrState = props.city || props.state;
     const provinceValue = findOptionValue(
@@ -183,7 +165,7 @@ const Location = () => {
           <MapPin className="w-6 h-6" /> Step 2: Location
         </h2>
 
-        <form className="space-y-6">
+        <div className="space-y-6">
           {/* Search Box */}
           <div className="relative">
             <label className="cs-paragraph-black text-[16px] font-semibold mb-2 block">
@@ -336,7 +318,6 @@ const Location = () => {
                                   props.quarter ||
                                   props.suburb ||
                                   props.locality;
-                                debugger;
                                 const wardValue = findOptionValue(
                                   wardText,
                                   PropertyService.Wards,
@@ -406,7 +387,7 @@ const Location = () => {
               />
             )}
           />
-        </form>
+        </div>
 
         <div className="flex justify-between pt-10">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">

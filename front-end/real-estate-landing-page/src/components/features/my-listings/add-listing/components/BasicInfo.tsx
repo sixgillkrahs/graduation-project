@@ -7,7 +7,8 @@ import clsx from "clsx";
 import { ArrowLeft, ArrowRight, Building2, Info, MapPin } from "lucide-react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { ListingFormData, stepFields } from "../types";
+import PropertyService from "../../services/service";
+import { ListingFormData } from "../../dto/listingformdata.dto";
 
 const BasicInfo = () => {
   const dispatch = useDispatch();
@@ -17,7 +18,7 @@ const BasicInfo = () => {
   const formData = watch();
 
   const handleContinue = async () => {
-    const isValid = await trigger(stepFields.step1);
+    const isValid = await trigger(PropertyService.stepFields.step1);
     if (isValid) {
       dispatch(nextStep());
     }
@@ -60,7 +61,7 @@ const BasicInfo = () => {
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           <Info className="w-6 h-6" /> Step 1: Basic Information
         </h2>
-        <form className="space-y-6">
+        <div className="space-y-6">
           <div className="w-[400px]">
             <label className="cs-paragraph-black text-[16px] font-semibold mb-2 block">
               Demand Type
@@ -132,7 +133,7 @@ const BasicInfo = () => {
               </>
             )}
           />
-        </form>
+        </div>
         <div className="flex justify-between pt-10">
           <CsButton icon={<ArrowLeft />} type="button">
             Cancel

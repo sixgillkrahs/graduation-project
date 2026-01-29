@@ -53,13 +53,20 @@
     "export": "Export",
     "close": "Close",
     "confirm": "Confirm",
-    "update": "Update"
+    "update": "Update",
+    "reject": "Reject",
+    "approve": "Approve"
   },
   "confirm": {
     "delete": {
       "title": "Confirm Delete",
       "content": "Are you sure you want to delete this item?"
     }
+  },
+  "message": {
+    "updateSuccess": "Update successful",
+    "updateError": "Update failed",
+    "notFound": "Property not found"
   },
   "menu": {
     "user-management": "User Management",
@@ -85,5 +92,28 @@
     "active": "Active",
     "createdAt": "Created At",
     "role":"Role"
+  },
+  "properties": {
+    "propertyType": "Type",
+    "demandType": "Demand",
+    "area": "Area (m²)",
+    "price": "Price",
+    "location": "Location",
+    "poster": "Poster",
+    "phone": "Phone",
+    "status": "Status",
+    "createdAt": "Created At",
+    "propertyDetail": "Property Details",
+    "description": "Description",
+    "features": "Features",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "direction": "Direction",
+    "furniture": "Furniture",
+    "legalStatus": "Legal Status"
+  },
+  "common": {
+    "sale": "Sale",
+    "rent": "Rent"
   }
 }

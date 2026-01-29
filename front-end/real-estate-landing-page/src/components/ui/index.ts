@@ -8,7 +8,6 @@ export * from "./Checkbox";
 export * from "./Dropdown";
 export * from "./Image";
 export * from "./Modal";
-export * from "./Table";
 export * from "./Steps";
 export * from "./Map";
 export * from "./Form";

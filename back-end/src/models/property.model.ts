@@ -39,6 +39,7 @@ export enum PropertyLegalStatusEnum {
   PINK_BOOK = "PINK_BOOK", // Sổ hồng
   SALE_CONTRACT = "SALE_CONTRACT", // Hợp đồng mua bán
   WAITING = "WAITING", // Đang chờ sổ
+  OTHER = "OTHER",
 }
 
 export enum PriceUnitEnum {

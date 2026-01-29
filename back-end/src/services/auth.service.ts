@@ -6,13 +6,15 @@ import { PopulateOptions } from "mongoose";
 
 @singleton
 export class AuthService {
-  constructor() { }
+  constructor() {}
 
   async getAuthByUsername<T>(
     username: string,
     populate?: string | PopulateOptions | (string | PopulateOptions)[],
   ): Promise<T | null> {
-    return AuthModel.findOne({ username })
+    return AuthModel.findOne({
+      username: username,
+    })
       .populate(
         populate ? (Array.isArray(populate) ? populate : [populate]) : [],
       )
@@ -31,7 +33,7 @@ export class AuthService {
   async getAuthById<T>(
     id: string,
     populate?: string | PopulateOptions | (string | PopulateOptions)[],
-    select?: string
+    select?: string,
   ): Promise<T | null> {
     const query = AuthModel.findById(id);
 
@@ -108,7 +110,7 @@ export class AuthService {
       page: number;
       limit: number;
       sortBy?: string;
-      populate?: string
+      populate?: string;
     },
     filter: Record<string, any> = {},
     select?: string,

@@ -1,13 +1,15 @@
 "use client";
 
-import { Icon, Table } from "@/components/ui";
-import { TableColumn } from "@/components/ui/Table/table.types";
+import { Icon, Image } from "@/components/ui";
 import { useState } from "react";
 import { useGetMyProperties } from "./services/query";
-import { IProperty } from "./services/type";
 import { useRouter } from "next/navigation";
 import { Building2, Eye, Plus } from "lucide-react";
 import { CsButton } from "@/components/custom";
+import { IPropertyDto } from "./dto/property.dto";
+import { CsTable, TableColumn } from "@/components/ui/table";
+import { findOptionLabel } from "@/shared/helper/findOptionValue";
+import PropertyService from "./services/service";
 
 const MyListings = () => {
   const router = useRouter();
@@ -21,7 +23,7 @@ const MyListings = () => {
     limit: pagination.pageSize,
   });
 
-  const columns: TableColumn<IProperty>[] = [
+  const columns: TableColumn<IPropertyDto>[] = [
     {
       title: "Property details",
       dataIndex: "projectName",
@@ -30,13 +32,12 @@ const MyListings = () => {
         <div className="flex gap-3">
           <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
             {record.media?.thumbnail ? (
-              // <Image
-              //   src={record.media.thumbnail}
-              //   alt="Property"
-              //   fill
-              //   className="object-cover"
-              // />
-              <></>
+              <Image
+                src={record.media.thumbnail}
+                alt="Property"
+                fill
+                className="object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
                 <Building2 className="w-6 h-6" />
@@ -49,8 +50,12 @@ const MyListings = () => {
                 `${record.propertyType} - ${record.location.province}`}
             </h4>
             <p className="text-sm text-gray-500 line-clamp-2 mt-1">
-              {record.location.address}, {record.location.ward},{" "}
-              {record.location.district}, {record.location.province}
+              {record.location.address},{" "}
+              {findOptionLabel(record.location.ward, PropertyService.Wards)},{" "}
+              {findOptionLabel(
+                record.location.province,
+                PropertyService.Provinces,
+              )}
             </p>
           </div>
         </div>
@@ -60,7 +65,7 @@ const MyListings = () => {
       title: "Status",
       dataIndex: "status",
       width: "15%",
-      render: (status) => {
+      render: (status: any) => {
         const colorMap: Record<string, string> = {
           PUBLISHED: "text-green-600 bg-green-50",
           PENDING: "text-yellow-600 bg-yellow-50",
@@ -97,10 +102,10 @@ const MyListings = () => {
       title: "Price & Date",
       dataIndex: "features",
       width: "20%",
-      render: (features, record) => (
+      render: (features: any, record) => (
         <div className="flex flex-col gap-1">
           <div className="font-semibold text-gray-900">
-            {features.price} {features.priceUnit}
+            {features?.price} {features?.priceUnit}
           </div>
           <div className="text-xs text-gray-500">
             {new Date(record.createdAt).toLocaleDateString("en-GB")}
@@ -144,7 +149,7 @@ const MyListings = () => {
           </CsButton>
         </div>
       </div>
-      <Table
+      <CsTable
         columns={columns}
         dataSource={data?.data.results || []}
         rowKey={"_id"}

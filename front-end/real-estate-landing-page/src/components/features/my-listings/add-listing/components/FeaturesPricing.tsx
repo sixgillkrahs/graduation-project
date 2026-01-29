@@ -6,14 +6,15 @@ import { nextStep, prevStep } from "@/store/listing.store";
 import { ArrowLeft, ArrowRight, Home, Sparkles } from "lucide-react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { ListingFormData, stepFields } from "../types";
+import { ListingFormData } from "../../dto/listingformdata.dto";
+import PropertyService from "../../services/service";
 
 const FeaturesPricing = () => {
   const dispatch = useDispatch();
   const { control, trigger } = useFormContext<ListingFormData>();
 
   const handleContinue = async () => {
-    const isValid = await trigger(stepFields.step3);
+    const isValid = await trigger(PropertyService.stepFields.step3);
     if (isValid) {
       dispatch(nextStep());
     }
@@ -24,28 +25,28 @@ const FeaturesPricing = () => {
   };
 
   const directionOptions = [
-    { label: "North", value: "North" },
-    { label: "South", value: "South" },
-    { label: "East", value: "East" },
-    { label: "West", value: "West" },
-    { label: "North East", value: "North East" },
-    { label: "North West", value: "North West" },
-    { label: "South East", value: "South East" },
-    { label: "South West", value: "South West" },
+    { label: "North", value: "NORTH" },
+    { label: "South", value: "SOUTH" },
+    { label: "East", value: "EAST" },
+    { label: "West", value: "WEST" },
+    { label: "North East", value: "NORTH_EAST" },
+    { label: "North West", value: "NORTH_WEST" },
+    { label: "South East", value: "SOUTH_EAST" },
+    { label: "South West", value: "SOUTH_WEST" },
   ];
 
   const legalStatusOptions = [
-    { label: "Pink Book", value: "Pink Book" },
-    { label: "Red Book", value: "Red Book" },
-    { label: "Sales Contract", value: "Sales Contract" },
-    { label: "Waiting for Book", value: "Waiting for Book" },
-    { label: "Other", value: "Other" },
+    { label: "Pink Book", value: "PINK_BOOK" },
+    { label: "Red Book", value: "RED_BOOK" },
+    { label: "Sales Contract", value: "SALE_CONTRACT" },
+    { label: "Waiting for Book", value: "WAITING" },
+    { label: "Other", value: "OTHER" },
   ];
 
   const furnitureOptions = [
-    { label: "Full", value: "Full" },
-    { label: "Basic", value: "Basic" },
-    { label: "None", value: "None" },
+    { label: "Full", value: "FULL" },
+    { label: "Basic", value: "BASIC" },
+    { label: "None", value: "EMPTY" },
   ];
 
   return (
@@ -55,7 +56,7 @@ const FeaturesPricing = () => {
           <Home className="w-6 h-6" /> Step 3: Features & Pricing
         </h2>
 
-        <form className="space-y-6">
+        <div className="space-y-6">
           {/* Row 1: Area & Price */}
           <div className="grid grid-cols-2 gap-6">
             <Controller
@@ -177,7 +178,7 @@ const FeaturesPricing = () => {
               )}
             />
           </div>
-        </form>
+        </div>
         <div className="flex justify-between pt-10">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
             Back

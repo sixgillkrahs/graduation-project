@@ -345,4 +345,74 @@ router.put(
  */
 router.delete("/:id", requireAuth, propertyController.deleteProperty);
 
+/**
+ * @swagger
+ * /properties/status/pending:
+ *   get:
+ *     summary: Get all properties with pagination and filtering
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *       - in: query
+ *         name: demandType
+ *         schema:
+ *           type: string
+ *           enum: [SALE, RENT]
+ *       - in: query
+ *         name: propertyType
+ *         schema:
+ *           type: string
+ *           enum: [APARTMENT, HOUSE, STREET_HOUSE, VILLA, LAND, OTHER]
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [DRAFT, PENDING, PUBLISHED, REJECTED, EXPIRED, SOLD]
+ *     responses:
+ *       200:
+ *         description: List of properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ */
+router.get(
+  "/status/pending",
+  requireAuth,
+  propertyController.getPendingProperties,
+);
+
 export default router;

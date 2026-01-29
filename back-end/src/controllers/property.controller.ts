@@ -19,7 +19,7 @@ export class PropertyController extends BaseController {
   createProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       // Assuming req.user is populated by auth middleware
-      const user = (req as any).user;
+      const user = req.user;
       if (!user || !user.userId) {
         const lang = ApiRequest.getCurrentLang(req);
         throw new AppError(
@@ -34,39 +34,40 @@ export class PropertyController extends BaseController {
       const body = req.body;
       const getDirection = (val: string) => {
         const map: Record<string, any> = {
-          North: PropertyDirectionEnum.NORTH,
-          South: PropertyDirectionEnum.SOUTH,
-          East: PropertyDirectionEnum.EAST,
-          West: PropertyDirectionEnum.WEST,
-          "North East": PropertyDirectionEnum.NORTH_EAST,
-          "North West": PropertyDirectionEnum.NORTH_WEST,
-          "South East": PropertyDirectionEnum.SOUTH_EAST,
-          "South West": PropertyDirectionEnum.SOUTH_WEST,
+          NORTH: PropertyDirectionEnum.NORTH,
+          SOUTH: PropertyDirectionEnum.SOUTH,
+          EAST: PropertyDirectionEnum.EAST,
+          WEST: PropertyDirectionEnum.WEST,
+          NORTH_EAST: PropertyDirectionEnum.NORTH_EAST,
+          NORTH_WEST: PropertyDirectionEnum.NORTH_WEST,
+          SOUTH_EAST: PropertyDirectionEnum.SOUTH_EAST,
+          SOUTH_WEST: PropertyDirectionEnum.SOUTH_WEST,
         };
         return map[val] || undefined;
       };
 
       const getLegalStatus = (val: string) => {
         const map: Record<string, any> = {
-          "Pink Book": PropertyLegalStatusEnum.PINK_BOOK,
-          "Red Book": PropertyLegalStatusEnum.RED_BOOK,
-          "Sales Contract": PropertyLegalStatusEnum.SALE_CONTRACT,
-          "Waiting for Book": PropertyLegalStatusEnum.WAITING,
+          PINK_BOOK: PropertyLegalStatusEnum.PINK_BOOK,
+          RED_BOOK: PropertyLegalStatusEnum.RED_BOOK,
+          SALE_CONTRACT: PropertyLegalStatusEnum.SALE_CONTRACT,
+          WAITING: PropertyLegalStatusEnum.WAITING,
+          OTHER: PropertyLegalStatusEnum.OTHER,
         };
         return map[val] || undefined;
       };
 
       const getFurniture = (val: string) => {
         const map: Record<string, any> = {
-          Full: PropertyFurnitureEnum.FULL,
-          Basic: PropertyFurnitureEnum.BASIC,
-          None: PropertyFurnitureEnum.EMPTY,
+          FULL: PropertyFurnitureEnum.FULL,
+          BASIC: PropertyFurnitureEnum.BASIC,
+          EMPTY: PropertyFurnitureEnum.EMPTY,
         };
         return map[val] || undefined;
       };
 
       const propertyData = {
-        userId: user.userId,
+        userId: user.userId._id as any,
         demandType: body.demandType,
         propertyType: body.propertyType,
         projectName: body.projectName,
@@ -93,6 +94,8 @@ export class PropertyController extends BaseController {
         },
         media: {
           images: body.images || [],
+          thumbnail: body?.thumbnail || "",
+          video: body?.video || "",
         },
         amenities: body.amenities || [],
         description: body.description || "No description",
@@ -125,6 +128,36 @@ export class PropertyController extends BaseController {
       const properties = await this.propertyService.getProperties(
         options,
         filters,
+      );
+      return properties;
+    });
+  };
+
+  getPendingProperties = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { limit, page, sortField, sortOrder, ...filters } = req.query;
+
+      const options = {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 10,
+        sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        populate: "userId", // Populate owner info if needed
+      };
+
+      const queryFilters = {
+        ...filters,
+        status: PropertyStatusEnum.PENDING,
+      };
+
+      // Transform filters if necessary (e.g., regex search for address)
+      // For now pass filters directly, assuming they match model fields or processed later.
+      // But typically req.query contains strings, so numbers need conversion if strict matching.
+      // However, usually detailed filtering requires more parsing.
+      // I'll leave basic filtering for now.
+
+      const properties = await this.propertyService.getProperties(
+        options,
+        queryFilters,
       );
       return properties;
     });
@@ -164,7 +197,7 @@ export class PropertyController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
       const lang = ApiRequest.getCurrentLang(req);
-      const property = await this.propertyService.getPropertyById(id);
+      const property = await this.propertyService.getPropertyById(id, "userId");
 
       if (!property) {
         throw new AppError(

@@ -26,7 +26,7 @@ export interface IParamsPagination {
   query?: string;
   sortField?: Key | readonly Key[];
   sortOrder?: "asc" | "desc" | "descend";
-  total?: number;
+  total?: number | null;
   [key: string]: any;
 }
 

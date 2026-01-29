@@ -5,12 +5,13 @@ import { RootState } from "@/store";
 import { setStep } from "@/store/listing.store";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { ListingFormData } from "../dto/listingformdata.dto";
+import PropertyService from "../services/service";
 import BasicInfo from "./components/BasicInfo";
 import FeaturesPricing from "./components/FeaturesPricing";
 import Location from "./components/Location";
 import MediaContent from "./components/MediaContent";
 import Review from "./components/Review";
-import { defaultFormValues, ListingFormData } from "./types";
 
 const AddListing = () => {
   const dispatch = useDispatch();
@@ -21,33 +22,64 @@ const AddListing = () => {
 
   const methods = useForm<ListingFormData>({
     defaultValues: {
-      ...defaultFormValues,
+      ...PropertyService.defaultFormValues,
       // Merge with any existing Redux data
-      demandType: listingData.demandType || defaultFormValues.demandType,
-      propertyType: listingData.propertyType || defaultFormValues.propertyType,
-      projectName: listingData.projectName || defaultFormValues.projectName,
-      province: listingData.location?.province || defaultFormValues.province,
+      demandType:
+        listingData.demandType || PropertyService.defaultFormValues.demandType,
+      propertyType:
+        listingData.propertyType ||
+        PropertyService.defaultFormValues.propertyType,
+      projectName:
+        listingData.projectName ||
+        PropertyService.defaultFormValues.projectName,
+      province:
+        listingData.location?.province ||
+        PropertyService.defaultFormValues.province,
 
-      ward: listingData.location?.ward || defaultFormValues.ward,
-      address: listingData.location?.address || defaultFormValues.address,
-      latitude: listingData.location?.latitude || defaultFormValues.latitude,
-      longitude: listingData.location?.longitude || defaultFormValues.longitude,
-      area: listingData.features?.area || defaultFormValues.area,
-      price: listingData.features?.price || defaultFormValues.price,
-      bedrooms: listingData.features?.bedrooms || defaultFormValues.bedrooms,
-      bathrooms: listingData.features?.bathrooms || defaultFormValues.bathrooms,
-      direction: listingData.features?.direction || defaultFormValues.direction,
+      ward:
+        listingData.location?.ward || PropertyService.defaultFormValues.ward,
+      address:
+        listingData.location?.address ||
+        PropertyService.defaultFormValues.address,
+      latitude:
+        listingData.location?.latitude ||
+        PropertyService.defaultFormValues.latitude,
+      longitude:
+        listingData.location?.longitude ||
+        PropertyService.defaultFormValues.longitude,
+      area:
+        listingData.features?.area || PropertyService.defaultFormValues.area,
+      price:
+        listingData.features?.price || PropertyService.defaultFormValues.price,
+      bedrooms:
+        listingData.features?.bedrooms ||
+        PropertyService.defaultFormValues.bedrooms,
+      bathrooms:
+        listingData.features?.bathrooms ||
+        PropertyService.defaultFormValues.bathrooms,
+      direction:
+        listingData.features?.direction ||
+        PropertyService.defaultFormValues.direction,
       legalStatus:
-        listingData.features?.legalStatus || defaultFormValues.legalStatus,
-      furniture: listingData.features?.furniture || defaultFormValues.furniture,
-      images: listingData.media?.images || defaultFormValues.images,
+        listingData.features?.legalStatus ||
+        PropertyService.defaultFormValues.legalStatus,
+      furniture:
+        listingData.features?.furniture ||
+        PropertyService.defaultFormValues.furniture,
+      images:
+        listingData.media?.images || PropertyService.defaultFormValues.images,
+      thumbnail:
+        listingData.media?.thumbnail ||
+        PropertyService.defaultFormValues.thumbnail,
+      videoLink:
+        listingData.media?.videoLink ||
+        PropertyService.defaultFormValues.videoLink,
     },
     mode: "onChange",
   });
 
   const onFinalSubmit = (data: ListingFormData) => {
     console.log("Final submission:", data);
-    // TODO: Call API to submit listing
   };
 
   const steps = [

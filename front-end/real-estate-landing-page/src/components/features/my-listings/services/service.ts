@@ -1,8 +1,9 @@
-import { IPaginationResp, IParamsPagination } from "@/@types/service";
+import { IPaginationResp, IParamsPagination, IResp } from "@/@types/service";
 import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
 import { PropertyEndpoint } from "./config";
-import { IProperty } from "./type";
+import { IPropertyDto } from "../dto/property.dto";
+import { ListingFormData } from "../dto/listingformdata.dto";
 
 export default class PropertyService {
   public static readonly Provinces = [
@@ -112,13 +113,67 @@ export default class PropertyService {
     { label: "Phường Phú Diễn", value: "Phu Dien Ward" },
   ];
 
+  public static readonly defaultFormValues: ListingFormData = {
+    // Step 1
+    demandType: "SALE",
+    propertyType: "APARTMENT",
+    projectName: "",
+
+    // Step 2
+    province: "",
+
+    ward: "",
+    address: "",
+    latitude: null,
+    longitude: null,
+
+    // Step 3
+    area: "",
+    price: "",
+    bedrooms: 1,
+    bathrooms: 1,
+    direction: "",
+    legalStatus: "",
+    furniture: "",
+
+    // Step 4
+    images: [],
+    thumbnail: "",
+    videoLink: "",
+  };
+
+  public static readonly stepFields = {
+    step1: ["demandType", "propertyType", "projectName"] as const,
+    step2: ["province", "ward", "address", "latitude", "longitude"] as const,
+    step3: [
+      "area",
+      "price",
+      "bedrooms",
+      "bathrooms",
+      "direction",
+      "legalStatus",
+      "furniture",
+    ] as const,
+    step4: ["images", "thumbnail", "videoLink"] as const,
+  };
+
   public static readonly getProperties = (
     params?: IParamsPagination,
-  ): Promise<IPaginationResp<IProperty>> => {
+  ): Promise<IPaginationResp<IPropertyDto>> => {
     return request({
       url: PropertyEndpoint.getProperties(),
       method: AxiosMethod.GET,
       params,
+    });
+  };
+
+  public static readonly createProperty = (
+    body: ListingFormData,
+  ): Promise<IResp<IPropertyDto>> => {
+    return request({
+      url: PropertyEndpoint.createProperty(),
+      method: AxiosMethod.POST,
+      data: body,
     });
   };
 }

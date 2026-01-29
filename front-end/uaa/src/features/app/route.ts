@@ -37,6 +37,24 @@ const router: RouterConfig = {
       ],
     },
     {
+      path: "/properties",
+      name: "Properties",
+      icon: Users,
+      childRoutes: [
+        {
+          path: "/pending",
+          component: lazy(() => import("./properties/properties/properties-pending")),
+          name: "Properties Pending",
+        },
+        {
+          path: "/pending/:id",
+          component: lazy(() => import("./properties/properties/properties-detail")),
+          name: "Properties Detail",
+          hideInMenu: true,
+        },
+      ],
+    },
+    {
       path: "/user-manage",
       component: lazy(() => import("./user-manage")),
       name: "menu.user-management",

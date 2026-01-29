@@ -1,0 +1,21 @@
+{
+  "name": "gra-helper",
+  "version": "1.0.1",
+  "description": "Shared middleware library for graduation project",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": ["middleware", "express", "validation"],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.1",
+    "typescript": "^5.9.2"
+  }
+}

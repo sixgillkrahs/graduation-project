@@ -143,7 +143,13 @@ const FullTable = <T extends { id: string | number }>({
     data: listData,
     isLoading: listLoading,
     refetch: refetchList,
-  } = useGetList?.(pagination) || {};
+  } = useGetList?.({
+    page: pagination.page,
+    limit: pagination.limit,
+    query: searchRef.current?.input?.value,
+    sortField: pagination.sortField,
+    sortOrder: pagination.sortOrder,
+  }) || {};
 
   const handleSetFormValues = useCallback(
     (data: T) => {
@@ -506,11 +512,11 @@ const FullTable = <T extends { id: string | number }>({
       {pagination && (
         <div className="flex justify-between">
           <div>
-            {t("pagination.totalRecords")}: {listData?.data.totalResults || pagination.total}{" "}
+            {t("pagination.totalRecords")}: {listData?.data.totalResults || pagination.total || 0}{" "}
             {t("pagination.records")}
           </div>
           <Pagination
-            total={listData?.data.totalResults || pagination.total}
+            total={listData?.data.totalResults || pagination.total || 0}
             current={listData?.data.page || pagination.page}
             pageSize={listData?.data.limit || pagination.limit}
             onChange={(page, pageSize) => {
