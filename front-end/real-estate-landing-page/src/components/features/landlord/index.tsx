@@ -1,6 +1,6 @@
 "use client";
 
-import { Icon, Table } from "@/components/ui";
+import { Icon } from "@/components/ui";
 import ModalAdd from "./components/ModalAdd";
 import { useCallback, useState } from "react";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/components/animate-ui/components/buttons/ripple";
 import { CsButton } from "@/components/custom";
 import { Eye } from "lucide-react";
+import { Table } from "@/components/ui/table";
 
 export const Landlord = () => {
   const [openModalAdd, setOpenModalAdd] = useState(false);
@@ -83,7 +84,7 @@ export const Landlord = () => {
         </RippleButton>
       </div>
       <div>
-        <Table columns={columns} dataSource={data} rowKey="id" />
+        <Table columns={[]} dataSource={data} rowKey="id" />
       </div>
       <ModalAdd open={openModalAdd} onCancel={handleClose} />
     </div>

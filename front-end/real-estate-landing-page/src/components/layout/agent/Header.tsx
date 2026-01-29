@@ -1,6 +1,7 @@
 "use client";
 
 import { SidebarTrigger } from "@/components/animate-ui/components/radix/sidebar";
+import { Avatar } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,6 +16,11 @@ import { useSelector } from "react-redux";
 
 const Header = () => {
   const { info } = useSelector((state: RootState) => state.menu);
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth,
+  );
+
+  console.log(user);
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-2xs">
@@ -49,6 +55,14 @@ const Header = () => {
             })}
           </BreadcrumbList>
         </Breadcrumb>
+      </div>
+      {isAuthenticated && user && (
+        <div className="ml-auto px-4 text-sm font-medium">
+          Welcome, {user.fullName || user.email}
+        </div>
+      )}
+      <div>
+        <Avatar src={user?.avatar} />
       </div>
     </header>
   );

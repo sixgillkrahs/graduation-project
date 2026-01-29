@@ -1,16 +1,16 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
+import { queryClient } from "@/lib/react-query/queryClient";
+import AuthService from "@/shared/auth/AuthService";
+import { useGetMe } from "@/shared/auth/query";
 import Image from "next/image";
-import { Dropdown, DropdownItem, Icon } from "../ui";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useGetMe } from "@/shared/auth/query";
-import AuthService from "@/shared/auth/AuthService";
 import toast from "react-hot-toast";
-import { queryClient } from "@/lib/react-query/queryClient";
-import Link from "next/link";
 import { CsButton } from "../custom";
+import { Dropdown, DropdownItem, Icon } from "../ui";
 
 const Header = () => {
   const { data: me, isLoading } = useGetMe();

@@ -171,7 +171,7 @@ const PropertyDetail = () => {
           </Card>
 
           <Card title={t("properties.features")} className="shadow-sm">
-            <Descriptions column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }} bordered>
+            <Descriptions column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}>
               <Descriptions.Item label={t("properties.propertyType")}>
                 {property.propertyType}
               </Descriptions.Item>
@@ -230,7 +230,7 @@ const PropertyDetail = () => {
             </div>
           </Card>
 
-          <Card title={t("properties.location")} bordered={false} className="mb-6 shadow-sm">
+          <Card title={t("properties.location")} className="mb-6 shadow-sm">
             <div className="flex flex-col gap-3">
               <div className="flex items-start gap-2">
                 <MapPin className="mt-1 text-red-500" size={20} />

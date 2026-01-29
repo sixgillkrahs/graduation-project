@@ -278,7 +278,6 @@ export class PropertyController extends BaseController {
   approveProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const { status } = req.body;
       const lang = ApiRequest.getCurrentLang(req);
 
       const existingProperty = await this.propertyService.getPropertyById(id);
@@ -291,10 +290,47 @@ export class PropertyController extends BaseController {
       }
 
       // Allow status to be PUBLISHED or REJECTED. Default to PUBLISHED if not provided.
-      const targetStatus = status || PropertyStatusEnum.PUBLISHED;
+      const targetStatus = PropertyStatusEnum.PUBLISHED;
 
       if (
         ![PropertyStatusEnum.PUBLISHED, PropertyStatusEnum.REJECTED].includes(
+          targetStatus,
+        )
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Trạng thái không hợp lệ" : "Invalid status",
+          400,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+
+      const updatedProperty = await this.propertyService.updateProperty(id, {
+        status: targetStatus,
+      });
+
+      return updatedProperty;
+    });
+  };
+
+  rejectProperty = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const lang = ApiRequest.getCurrentLang(req);
+
+      const existingProperty = await this.propertyService.getPropertyById(id);
+      if (!existingProperty) {
+        throw new AppError(
+          lang === "vi" ? "Bất động sản không tồn tại" : "Property not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      // Allow status to be PUBLISHED or REJECTED. Default to PUBLISHED if not provided.
+      const targetStatus = PropertyStatusEnum.REJECTED;
+
+      if (
+        ![PropertyStatusEnum.PENDING, PropertyStatusEnum.REJECTED].includes(
           targetStatus,
         )
       ) {

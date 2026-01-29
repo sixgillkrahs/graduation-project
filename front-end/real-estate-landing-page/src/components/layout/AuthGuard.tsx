@@ -3,10 +3,25 @@
 import { useGetMe } from "@/shared/auth/query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
+import { setUser } from "@/store/auth.store";
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { data: me, isLoading, isError } = useGetMe();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+
+  useEffect(() => {
+    if (me?.data) {
+      dispatch(
+        setUser({
+          user: me.data.userId,
+          role: me.data.roleId,
+        }),
+      );
+    }
+  }, [me, dispatch]);
 
   useEffect(() => {
     if (!isLoading && (isError || !me?.data?.userId)) {
