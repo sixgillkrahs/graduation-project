@@ -16,3 +16,31 @@ export const useUpdateProperty = () => {
     },
   });
 };
+
+export const useApproveProperty = () => {
+  return useMutation({
+    mutationFn: (id: string) => PropertiesService.ApproveProperty(id),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [PropertiesQueryKey.GetPropertiesPending, variables],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [PropertiesQueryKey.GetPropertyDetail, variables],
+      });
+    },
+  });
+};
+
+export const useRejectProperty = () => {
+  return useMutation({
+    mutationFn: (id: string) => PropertiesService.RejectProperty(id),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [PropertiesQueryKey.GetPropertiesPending, variables],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [PropertiesQueryKey.GetPropertyDetail, variables],
+      });
+    },
+  });
+};

@@ -320,6 +320,43 @@ router.put(
 
 /**
  * @swagger
+ * /properties/{id}/approve:
+ *   patch:
+ *     summary: Approve or Reject a property
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PUBLISHED, REJECTED]
+ *     responses:
+ *       200:
+ *         description: Property status updated
+ *       400:
+ *         description: Invalid status
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Property not found
+ */
+router.patch("/:id/approve", requireAuth, propertyController.approveProperty);
+
+/**
+ * @swagger
  * /properties/{id}:
  *   delete:
  *     summary: Delete a property listing

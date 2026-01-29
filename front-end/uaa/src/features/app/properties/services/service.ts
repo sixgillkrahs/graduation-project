@@ -32,4 +32,18 @@ export default class PropertiesService {
       data: payload,
     });
   };
+
+  public static readonly ApproveProperty = (id: string): Promise<IProperty> => {
+    return request({
+      url: PropertiesEndpoint.ApproveProperty(id),
+      method: AxiosMethod.PATCH,
+    });
+  };
+
+  public static readonly RejectProperty = (id: string): Promise<IProperty> => {
+    return request({
+      url: PropertiesEndpoint.RejectProperty(id),
+      method: AxiosMethod.PATCH,
+    });
+  };
 }

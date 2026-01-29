@@ -1,4 +1,4 @@
-import { useUpdateProperty } from "../../services/mutate";
+import { useApproveProperty, useRejectProperty } from "../../services/mutate";
 import { useGetPropertyDetail } from "../../services/query";
 import {
   Button,
@@ -7,25 +7,25 @@ import {
   Descriptions,
   Divider,
   Image,
-  message,
   Row,
   Space,
   Spin,
   Tag,
   Typography,
+  message,
 } from "antd";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import {
   ArrowLeft,
-  CheckCircle,
-  XCircle,
-  MapPin,
   Calendar,
-  User,
-  Phone,
-  Mail,
+  CheckCircle,
   Home,
+  Mail,
+  MapPin,
   Maximize,
+  Phone,
+  User,
+  XCircle,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -35,17 +35,17 @@ const { Title, Text, Paragraph } = Typography;
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { mutate: approveProperty, isPending: isApproving } = useApproveProperty();
+  const { mutate: rejectProperty, isPending: isRejecting } = useRejectProperty();
   const { t } = useTranslation();
   const { data: propertyResp, isLoading } = useGetPropertyDetail(id || "");
-  const { mutate: updateProperty, isPending: isUpdating } = useUpdateProperty();
 
   const property = propertyResp?.data;
 
   const handleUpdateStatus = (status: "PUBLISHED" | "REJECTED") => {
     if (!id) return;
-    updateProperty(
-      { id, payload: { status } },
-      {
+    if (status === "PUBLISHED") {
+      approveProperty(id, {
         onSuccess: () => {
           message.success(t("message.updateSuccess"));
           navigate("/properties/pending");
@@ -53,8 +53,18 @@ const PropertyDetail = () => {
         onError: () => {
           message.error(t("message.updateError"));
         },
-      },
-    );
+      });
+    } else {
+      rejectProperty(id, {
+        onSuccess: () => {
+          message.success(t("message.updateSuccess"));
+          navigate("/properties/pending");
+        },
+        onError: () => {
+          message.error(t("message.updateError"));
+        },
+      });
+    }
   };
 
   if (isLoading) {
@@ -112,7 +122,7 @@ const PropertyDetail = () => {
               danger
               icon={<XCircle size={16} />}
               onClick={() => handleUpdateStatus("REJECTED")}
-              loading={isUpdating}
+              loading={isRejecting}
             >
               {t("button.reject")}
             </Button>
@@ -120,7 +130,7 @@ const PropertyDetail = () => {
               type="primary"
               icon={<CheckCircle size={16} />}
               onClick={() => handleUpdateStatus("PUBLISHED")}
-              loading={isUpdating}
+              loading={isApproving}
               className="bg-green-600 hover:bg-green-700"
             >
               {t("button.approve")}
@@ -196,7 +206,7 @@ const PropertyDetail = () => {
 
         {/* Right Column: Overview, Location, Contact */}
         <Col span={24} lg={8} className="space-y-6!">
-          <Card bordered={false} className="mb-6 shadow-sm">
+          <Card className="mb-6 shadow-sm">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <Text type="secondary">{t("properties.price")}</Text>
@@ -234,7 +244,7 @@ const PropertyDetail = () => {
             </div>
           </Card>
 
-          <Card title={t("properties.poster")} bordered={false} className="shadow-sm">
+          <Card title={t("properties.poster")} className="shadow-sm">
             <div className="mb-4 flex flex-col items-center">
               <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
                 <User size={32} className="text-blue-500" />
