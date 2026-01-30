@@ -349,13 +349,13 @@ export class PropertyController extends BaseController {
         //   timestamp: new Date().toISOString(),
         // });
 
-        this.noticeService.createNotice({
-          userId: ownerId,
-          type: NoticeTypeEnum.PROPERTY,
-          content: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
-          isRead: false,
-          title: "Property approved",
-        });
+        // await this.noticeService.createNotice({
+        //   userId: ownerId,
+        //   type: NoticeTypeEnum.PROPERTY,
+        //   content: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
+        //   isRead: false,
+        //   title: "Property approved",
+        // });
         io.to(ownerId).emit("property_status_update", {
           message: "property_status_update",
         });
