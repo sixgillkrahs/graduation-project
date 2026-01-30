@@ -1,4 +1,5 @@
 import os
+import io
 
 import numpy as np
 import uuid
@@ -36,21 +37,14 @@ detector = Predictor(config)
 
 @app.post("/uploader")
 async def upload(file: UploadFile = File(...)):
-    if not os.path.isdir(UPLOAD_FOLDER):
-        os.mkdir(UPLOAD_FOLDER)
-    
-
-    file_location = f"./{UPLOAD_FOLDER}/{file.filename}"
-    contents = await file.read()
-    with open(file_location, "wb") as f:
-        f.write(contents)
-
-    if not file_location.lower().endswith((".png", ".jpg", ".jpeg")):
-        os.remove(file_location)
+    if not file.filename.lower().endswith((".png", ".jpg", ".jpeg")):
         error = "This file is not supported! Only PNG, JPG, JPEG are allowed."
         return JSONResponse(status_code=404, content={"message": error})
 
-    return await extract_info(image_path=file_location)
+    contents = await file.read()
+    image = Image.open(io.BytesIO(contents))
+
+    return await extract_info(image_input=image)
 
 @app.get("/images/{filename}")
 async def get_image(filename: str):
@@ -91,9 +85,9 @@ async def upload_single_image(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(status_code=500, content={"message": f"Lỗi server: {str(e)}"})
 
-async def extract_info(image_path: str = None):
+async def extract_info(image_input=None):
     """Extract information from the uploaded image."""
-    if not image_path:
+    if image_input is None:
         error = "No image to process!"
         return JSONResponse(status_code=400, content={"message": error})
 
@@ -103,7 +97,12 @@ async def extract_info(image_path: str = None):
     else:
         os.mkdir(SAVE_DIR)
 
-    img = image_path
+    if isinstance(image_input, str):
+        img = image_input
+        IMG = Image.open(img)
+    else:
+        img = image_input
+        IMG = image_input
 
     CORNER = CORNER_MODEL(img)
     predictions = CORNER.pred[0]
@@ -112,7 +111,7 @@ async def extract_info(image_path: str = None):
         error = "Detecting corner failed! Please ensure the image shows a clear ID card."
         return JSONResponse(status_code=401, content={"message": error})
     boxes = utils.class_Order(predictions[:, :4].tolist(), categories)  
-    IMG = Image.open(img)
+    
     center_points = list(map(utils.get_center_point, boxes))
 
     """ Temporary fixing """

@@ -144,11 +144,8 @@ const FullTable = <T extends { id: string | number }>({
     isLoading: listLoading,
     refetch: refetchList,
   } = useGetList?.({
-    page: pagination.page,
-    limit: pagination.limit,
-    query: searchRef.current?.input?.value,
-    sortField: pagination.sortField,
-    sortOrder: pagination.sortOrder,
+    ...pagination,
+    total: undefined,
   }) || {};
 
   const handleSetFormValues = useCallback(
@@ -222,7 +219,6 @@ const FullTable = <T extends { id: string | number }>({
   const handleFilterChange = () => {
     const rawValues = formFilter.getFieldsValue();
     const cleanedValues = cleanEmpty(rawValues);
-
     const formattedFilters: Record<string, any> = {};
     filter?.forEach((item) => {
       const key = getLastKey(item.name);

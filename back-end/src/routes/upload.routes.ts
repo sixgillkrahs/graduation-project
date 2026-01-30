@@ -35,7 +35,7 @@ router.put("/resume-upload/:sessionId", uploadController.resumeUpload);
  *         name: folder
  *         schema:
  *           type: string
- *         description: Cloudinary folder to store the image (default: "uploads")
+ *         description: 'Cloudinary folder to store the image (default: "uploads")'
  *     requestBody:
  *       required: true
  *       content:

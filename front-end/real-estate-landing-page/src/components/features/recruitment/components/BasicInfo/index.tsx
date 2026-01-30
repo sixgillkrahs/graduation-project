@@ -62,7 +62,6 @@ const BasicInfo = () => {
       identityBack: basicInfo.identityBack,
       identityInfo: basicInfo?.identityInfo || {},
     };
-    console.log(reduxPayload);
     dispatch(updateBasicInfo(reduxPayload));
     dispatch(nextStep());
   };

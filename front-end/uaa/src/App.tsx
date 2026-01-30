@@ -60,7 +60,6 @@ function App() {
   useEffect(() => {
     MessageService.init(messageApi);
   }, [messageApi]);
-  console.log(renderRouteConfig(routeConfig, <Spin fullscreen size="large" />));
 
   return (
     <>

@@ -8,12 +8,16 @@ import { PhotoProvider } from "react-photo-view";
 import { Provider } from "react-redux";
 import { Toaster } from "sonner";
 
+import { SocketProvider } from "@/components/features/message/services/socket-context";
+
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <PhotoProvider>{children}</PhotoProvider>
-        <Toaster />
+        <SocketProvider>
+          <PhotoProvider>{children}</PhotoProvider>
+          <Toaster />
+        </SocketProvider>
       </Provider>
     </QueryClientProvider>
   );

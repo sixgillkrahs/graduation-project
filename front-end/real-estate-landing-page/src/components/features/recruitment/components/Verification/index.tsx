@@ -1,25 +1,21 @@
 "use client";
 
-import { Checkbox, Icon, Select } from "@/components/ui";
+import { CsButton } from "@/components/custom";
+import { Checkbox, Icon } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import { CsSelect } from "@/components/ui/select";
 import {
   BasicInfo,
-  BusinessInfo,
   Verification as VerificationType,
 } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
-import {
-  prevStep,
-  updateBusinessInfo,
-  updateVerification,
-} from "@/store/store";
-import { useForm, Controller } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import ExtractService from "../../services/service";
-import { memo, useEffect } from "react";
+import { prevStep, updateVerification } from "@/store/store";
 import { submitForm } from "@/store/thunks/formThunks";
+import { memo, useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { CsButton } from "@/components/custom";
+import ExtractService from "../../services/service";
 
 const Verification = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -110,7 +106,7 @@ const Verification = () => {
           control={control}
           rules={{ required: "Please select gender" }}
           render={({ field }) => (
-            <Select
+            <CsSelect
               label="Gender"
               placeholder="Select gender"
               options={ExtractService.options}

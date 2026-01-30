@@ -10,9 +10,15 @@ import {
 } from "@/models/property.model";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
+import UserModel from "@/models/user.model";
+import { NoticeService } from "@/services/notice.service";
+import { NoticeTypeEnum } from "@/models/notice.model";
 
 export class PropertyController extends BaseController {
-  constructor(private propertyService: PropertyService) {
+  constructor(
+    private propertyService: PropertyService,
+    private noticeService: NoticeService,
+  ) {
     super();
   }
 
@@ -144,16 +150,40 @@ export class PropertyController extends BaseController {
         populate: "userId", // Populate owner info if needed
       };
 
+      // Handle user search
+      const userFilter: any = {};
+      if (filters["userId.fullName"]) {
+        userFilter.fullName = {
+          $regex: filters["userId.fullName"],
+          $options: "i",
+        };
+        delete filters["userId.fullName"];
+      }
+      if (filters["userId.phone"]) {
+        userFilter.phone = { $regex: filters["userId.phone"], $options: "i" };
+        delete filters["userId.phone"];
+      }
+
+      // If filters come as object (extended query parser behavior for userId[fullName]) or simple dot notation
+      if (filters.userId && typeof filters.userId === "object") {
+        const uFilters = filters.userId as any;
+        if (uFilters.fullName)
+          userFilter.fullName = { $regex: uFilters.fullName, $options: "i" };
+        if (uFilters.phone)
+          userFilter.phone = { $regex: uFilters.phone, $options: "i" };
+        delete filters.userId;
+      }
+
+      if (Object.keys(userFilter).length > 0) {
+        const users = await UserModel.find(userFilter).select("_id");
+        const userIds = users.map((u: any) => u._id);
+        (filters as any).userId = { $in: userIds };
+      }
+
       const queryFilters = {
         ...filters,
         status: PropertyStatusEnum.PENDING,
       };
-
-      // Transform filters if necessary (e.g., regex search for address)
-      // For now pass filters directly, assuming they match model fields or processed later.
-      // But typically req.query contains strings, so numbers need conversion if strict matching.
-      // However, usually detailed filtering requires more parsing.
-      // I'll leave basic filtering for now.
 
       const properties = await this.propertyService.getProperties(
         options,
@@ -290,25 +320,48 @@ export class PropertyController extends BaseController {
       }
 
       // Allow status to be PUBLISHED or REJECTED. Default to PUBLISHED if not provided.
-      const targetStatus = PropertyStatusEnum.PUBLISHED;
+      // const targetStatus = PropertyStatusEnum.PUBLISHED;
 
-      if (
-        ![PropertyStatusEnum.PUBLISHED, PropertyStatusEnum.REJECTED].includes(
-          targetStatus,
-        )
-      ) {
-        throw new AppError(
-          lang === "vi" ? "Trạng thái không hợp lệ" : "Invalid status",
-          400,
-          ErrorCode.INVALID_INPUT,
-        );
+      // if (
+      //   ![PropertyStatusEnum.PUBLISHED, PropertyStatusEnum.REJECTED].includes(
+      //     targetStatus,
+      //   )
+      // ) {
+      //   throw new AppError(
+      //     lang === "vi" ? "Trạng thái không hợp lệ" : "Invalid status",
+      //     400,
+      //     ErrorCode.INVALID_INPUT,
+      //   );
+      // }
+
+      // const updatedProperty = await this.propertyService.updateProperty(id, {
+      //   status: targetStatus,
+      // });
+
+      const io = req.io;
+      if (io) {
+        const ownerId = existingProperty.userId;
+
+        // io.to(ownerId).emit("property_status_update", {
+        //   message: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
+        //   propertyId: id,
+        //   status: targetStatus,
+        //   timestamp: new Date().toISOString(),
+        // });
+
+        this.noticeService.createNotice({
+          userId: ownerId,
+          type: NoticeTypeEnum.PROPERTY,
+          content: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
+          isRead: false,
+          title: "Property approved",
+        });
+        io.to(ownerId).emit("property_status_update", {
+          message: "property_status_update",
+        });
       }
 
-      const updatedProperty = await this.propertyService.updateProperty(id, {
-        status: targetStatus,
-      });
-
-      return updatedProperty;
+      return "success";
     });
   };
 
@@ -344,6 +397,20 @@ export class PropertyController extends BaseController {
       const updatedProperty = await this.propertyService.updateProperty(id, {
         status: targetStatus,
       });
+
+      const io = (req as any).io;
+      if (io) {
+        const ownerId = (existingProperty.userId as any)._id
+          ? (existingProperty.userId as any)._id.toString()
+          : existingProperty.userId.toString();
+
+        io.to(ownerId).emit("property_status_update", {
+          message: `Your property "${existingProperty.projectName || "Listing"}" has been rejected.`,
+          propertyId: id,
+          status: targetStatus,
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       return updatedProperty;
     });

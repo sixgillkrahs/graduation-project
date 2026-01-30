@@ -24,6 +24,7 @@ interface UserId {
   fullName: string;
   phone: string;
   isActive: boolean;
+  avatarUrl: string;
 }
 
 interface RoleId {
@@ -84,7 +85,7 @@ export const requireAuth = async (
         },
         {
           path: "userId",
-          select: "_id email fullName isActive phone",
+          select: "_id email fullName isActive phone avatarUrl",
         },
       ])) as Root;
       if (!user) {

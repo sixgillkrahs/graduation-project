@@ -1,13 +1,18 @@
 import { PropertyController } from "@/controllers/property.controller";
 import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
+import { NoticeService } from "@/services/notice.service";
 import { PropertyService } from "@/services/property.service";
 import { createPropertySchema } from "@/validators/property.validator";
 import { Router } from "express";
 
 const router = Router();
 const propertyService = new PropertyService();
-const propertyController = new PropertyController(propertyService);
+const noticeService = new NoticeService();
+const propertyController = new PropertyController(
+  propertyService,
+  noticeService,
+);
 
 /**
  * @swagger

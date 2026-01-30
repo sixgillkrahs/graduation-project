@@ -276,6 +276,7 @@ export class AgentController extends BaseController {
         prefixPhone: "+84",
         isActive: false,
         isDeleted: false,
+        avatarUrl: "default-avatar.jpg",
       });
       await this.authService.createAuth({
         userId: user.id,

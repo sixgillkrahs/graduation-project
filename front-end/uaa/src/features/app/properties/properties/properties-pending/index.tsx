@@ -10,6 +10,15 @@ import { useNavigate } from "react-router-dom";
 const PropertiesPending = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const PROPERTY_TYPES = ["APARTMENT", "HOUSE", "STREET_HOUSE", "VILLA", "LAND", "OTHER"].map(
+    (type) => ({ label: type, value: type }),
+  );
+
+  const DEMAND_TYPES = [
+    { label: t("common.sale"), value: "SALE" },
+    { label: t("common.rent"), value: "RENT" },
+  ];
+
   const columns: ColumnsType<any> = [
     {
       title: t("properties.propertyType"),
@@ -89,6 +98,35 @@ const PropertiesPending = () => {
       isDetail={true}
       useGetList={useGetPropertiesPending}
       onDetail={handleDetail}
+      filter={[
+        {
+          type: "input",
+          placeholder: t("properties.poster"),
+          name: ["userId", "fullName"],
+        },
+        {
+          type: "input",
+          placeholder: t("properties.phone"),
+          name: ["userId", "phone"],
+        },
+        {
+          name: "propertyType",
+          type: "select",
+          options: PROPERTY_TYPES,
+          placeholder: t("properties.propertyType"),
+        },
+        {
+          name: "demandType",
+          type: "select",
+          options: DEMAND_TYPES,
+          placeholder: t("properties.demandType"),
+        },
+        {
+          type: "date",
+          placeholder: t("properties.createdAt"),
+          name: ["createdAt"],
+        },
+      ]}
     />
   );
 };

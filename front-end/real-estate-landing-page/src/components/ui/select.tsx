@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Field, FieldError, FieldLabel } from "./field";
+import { Badge } from "./badge";
 
 function Select({
   ...props
@@ -189,11 +190,140 @@ interface CsSelectProps extends Omit<
   label?: string;
   placeholder?: string;
   options: SelectOption[];
-  value?: string | number;
-  onChange?: (value: string) => void;
+  value?: string | number | (string | number)[];
+  onChange?: (value: any) => void;
   className?: string; // Class for the wrapper
   triggerClassName?: string; // Class for the trigger
   error?: string;
+  multiple?: boolean;
+}
+
+function MultiSelect({
+  options,
+  value,
+  onChange,
+  placeholder,
+  className,
+  error,
+}: {
+  options: SelectOption[];
+  value?: (string | number)[];
+  onChange?: (val: (string | number)[]) => void;
+  placeholder?: string;
+  className?: string;
+  error?: boolean;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const handleSelect = (val: string | number) => {
+    const currentVal = value || [];
+    const newVal = currentVal.includes(val)
+      ? currentVal.filter((item) => item !== val)
+      : [...currentVal, val];
+    onChange?.(newVal);
+  };
+
+  const handleRemove = (e: React.MouseEvent, val: string | number) => {
+    e.stopPropagation();
+    const currentVal = value || [];
+    onChange?.(currentVal.filter((item) => item !== val));
+  };
+
+  const selectedValues = value || [];
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <div
+        onClick={() => setOpen(!open)}
+        className={cn(
+          "border-input data-placeholder:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex min-h-10.5 w-full items-center justify-between gap-2 rounded-xl border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none cursor-pointer",
+          className,
+          error && "border-destructive focus-visible:ring-destructive/20",
+        )}
+      >
+        <div className="flex flex-wrap gap-1">
+          {selectedValues.length > 0 ? (
+            selectedValues.map((val) => {
+              const option = options.find((o) => o.value === val);
+              return (
+                <Badge
+                  key={val}
+                  variant="secondary"
+                  className="mr-1 mb-1 hover:bg-secondary/80"
+                >
+                  {option?.label || val}
+                  <span
+                    className="ml-1 cursor-pointer ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleRemove(e as any, val);
+                      }
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={(e) => handleRemove(e, val)}
+                  >
+                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  </span>
+                </Badge>
+              );
+            })
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+        </div>
+        <ChevronDownIcon className="size-4 opacity-50 shrink-0" />
+      </div>
+      {open && (
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95">
+          <div className="p-1">
+            {options.length > 0 ? (
+              options.map((option) => {
+                const isSelected = selectedValues.includes(option.value);
+                return (
+                  <div
+                    key={option.value}
+                    onClick={() => handleSelect(option.value)}
+                    className={cn(
+                      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50",
+                      isSelected && "bg-accent text-accent-foreground",
+                    )}
+                  >
+                    <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary/50">
+                      {isSelected ? (
+                        <CheckIcon className="h-4 w-4 text-primary" />
+                      ) : null}
+                    </div>
+                    <span>{option.label}</span>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-2 text-sm text-muted-foreground text-center">
+                No options
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function CsSelect({
@@ -205,8 +335,29 @@ function CsSelect({
   className,
   triggerClassName,
   error,
+  multiple,
   ...props
 }: CsSelectProps) {
+  if (multiple) {
+    return (
+      <Field
+        data-invalid={!!error}
+        className={cn("w-full min-w-[120px]", className)}
+      >
+        {label && <FieldLabel>{label}</FieldLabel>}
+        <MultiSelect
+          options={options}
+          value={value as (string | number)[]}
+          onChange={onChange as any}
+          placeholder={placeholder}
+          className={triggerClassName}
+          error={!!error}
+        />
+        {error && <FieldError>{error}</FieldError>}
+      </Field>
+    );
+  }
+
   return (
     <Field
       data-invalid={!!error}

@@ -8,6 +8,7 @@ const collections = {
   properties: "properties",
   conversations: "conversations",
   messages: "messages",
+  notices: "notices",
 };
 
 export default collections;

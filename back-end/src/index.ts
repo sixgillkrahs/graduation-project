@@ -27,11 +27,6 @@ new EmailWorker(emailService);
 //   }
 // });
 
-app.use((req, res, next) => {
-  req.io = instance.getWss();
-  next();
-});
-
 const shutdown = async () => {
   logger.info("Shutdown signal received");
 

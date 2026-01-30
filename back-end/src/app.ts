@@ -1,5 +1,6 @@
 import monitoringRoutes from "@/routes/monitoring.routes";
 import userRoutes from "@/routes/user.routes";
+import { WebSocketService } from "@/services/websocket.service";
 import cors from "cors";
 import express, { ErrorRequestHandler } from "express";
 import swaggerUi from "swagger-ui-express";
@@ -22,6 +23,7 @@ import agentsRegistrationsRoutes from "./routes/agents-registrations.routes";
 import agentRoutes from "./routes/agents.routes";
 import chatRoutes from "./routes/chat.routes";
 import propertyRoutes from "./routes/property.routes";
+import noticeRoutes from "./routes/notice.routes";
 import roleRoutes from "./routes/role.routes";
 import uploadRoutes from "./routes/upload.routes";
 
@@ -30,6 +32,13 @@ const app = express();
 const setupMiddleware = (app: express.Application) => {
   // Security
   app.use(requestId);
+  app.use((req, res, next) => {
+    const io = WebSocketService.getInstance().getWss();
+    if (io) {
+      req.io = io;
+    }
+    next();
+  });
   setupSecurityHeaders(app as express.Express);
   app.use(
     cors({
@@ -77,6 +86,7 @@ app.use("/api/resources", resourcesRoutes);
 app.use("/api/agents-registrations", agentsRegistrationsRoutes);
 app.use("/api/agents", agentRoutes);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/notices", noticeRoutes);
 app.use("/api/chat", chatRoutes);
 
 const swaggerOptions = {

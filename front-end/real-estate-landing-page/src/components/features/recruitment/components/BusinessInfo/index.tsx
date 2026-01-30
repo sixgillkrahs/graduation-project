@@ -1,4 +1,7 @@
-import { Icon, Select, Upload } from "@/components/ui";
+import { CsButton } from "@/components/custom";
+import { Icon, Upload } from "@/components/ui";
+import { CsSelect } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
 import { AppDispatch, RootState } from "@/store";
@@ -6,10 +9,8 @@ import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
 import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useUploadImage } from "../../services/mutation";
-import { Input } from "@/components/ui/input";
-import { CsButton } from "@/components/custom";
 import { toast } from "sonner";
+import { useUploadImage } from "../../services/mutation";
 
 type BusinessInfoFormType = BusinessInfoType & {
   certificateImage: File[];
@@ -147,7 +148,7 @@ const BusinessInfo = () => {
               required: "Specialization is required",
             }}
             render={({ field }) => (
-              <Select
+              <CsSelect
                 label="Specialization"
                 error={errors.specialization?.message}
                 multiple
@@ -174,7 +175,7 @@ const BusinessInfo = () => {
               required: "Working area is required",
             }}
             render={({ field }) => (
-              <Select
+              <CsSelect
                 multiple
                 label="Working Area"
                 error={errors.workingArea?.message}

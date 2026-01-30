@@ -10,6 +10,7 @@ interface ListChatProps {
 }
 
 const ListChat = ({ onSelectConversation }: ListChatProps) => {
+  const router = useRouter();
   const { data, isLoading } = useConversations();
 
   if (isLoading) {
@@ -19,8 +20,6 @@ const ListChat = ({ onSelectConversation }: ListChatProps) => {
       </div>
     );
   }
-
-  const router = useRouter();
 
   const handleGetMessage = (item: any) => {
     if (onSelectConversation) {

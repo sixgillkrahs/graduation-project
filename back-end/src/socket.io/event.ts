@@ -4,8 +4,10 @@ import { ChatService } from "@/services/chat.service";
 import { UserService } from "@/services/user.service";
 import { Socket } from "socket.io";
 import { ChatEvent } from "./event-handlers/chat/chat.event";
+import { NoticeEvent } from "./event-handlers/notice/notice.event";
 
 const chatEvent = new ChatEvent(new ChatService(), new UserService());
+const noticeEvent = new NoticeEvent();
 
 export function socketEventHandle(socket: Socket) {
   eventProcess(socket, {
@@ -27,6 +29,12 @@ export function socketEventHandle(socket: Socket) {
     name: "chat:read",
     method: "POST",
     action: chatEvent.readMessage,
+  });
+
+  eventProcess(socket, {
+    name: "identity",
+    method: "POST",
+    action: noticeEvent.identity,
   });
 }
 
