@@ -3,6 +3,8 @@ export interface ListingFormData {
   demandType: "SALE" | "RENT";
   propertyType: "APARTMENT" | "HOUSE" | "VILLA" | "LAND" | "STREET_HOUSE";
   projectName: string;
+  title: string;
+  description: string;
 
   // Step 2: Location
   province: string;
@@ -25,4 +27,5 @@ export interface ListingFormData {
   images: string[];
   thumbnail: string;
   videoLink?: string;
+  virtualTourUrls?: string[];
 }

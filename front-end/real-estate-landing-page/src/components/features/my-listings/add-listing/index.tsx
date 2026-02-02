@@ -74,6 +74,9 @@ const AddListing = () => {
       videoLink:
         listingData.media?.videoLink ||
         PropertyService.defaultFormValues.videoLink,
+      virtualTourUrls:
+        listingData.media?.virtualTourUrls ||
+        PropertyService.defaultFormValues.virtualTourUrls,
     },
     mode: "onChange",
   });

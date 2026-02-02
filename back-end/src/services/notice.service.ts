@@ -40,6 +40,10 @@ export class NoticeService {
     return await NoticeModel.findByIdAndDelete(id).lean().exec();
   };
 
+  deleteAllNotices = async (userId: string) => {
+    return await NoticeModel.deleteMany({ userId }).exec();
+  };
+
   getNotices = async (
     options: {
       page: number;

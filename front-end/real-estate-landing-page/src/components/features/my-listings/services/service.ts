@@ -118,7 +118,8 @@ export default class PropertyService {
     demandType: "SALE",
     propertyType: "APARTMENT",
     projectName: "",
-
+    description: "",
+    title: "",
     // Step 2
     province: "",
 
@@ -140,10 +141,17 @@ export default class PropertyService {
     images: [],
     thumbnail: "",
     videoLink: "",
+    virtualTourUrls: [],
   };
 
   public static readonly stepFields = {
-    step1: ["demandType", "propertyType", "projectName"] as const,
+    step1: [
+      "demandType",
+      "propertyType",
+      "projectName",
+      "description",
+      "title",
+    ] as const,
     step2: ["province", "ward", "address", "latitude", "longitude"] as const,
     step3: [
       "area",
@@ -154,7 +162,7 @@ export default class PropertyService {
       "legalStatus",
       "furniture",
     ] as const,
-    step4: ["images", "thumbnail", "videoLink"] as const,
+    step4: ["images", "thumbnail", "videoLink", "virtualTourUrls"] as const,
   };
 
   public static readonly getProperties = (

@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Map } from "@/components/ui/Map";
+import { Badge } from "@/components/ui/badge";
 import { prevStep, resetListing } from "@/store/listing.store";
 import {
   ArrowLeft,
@@ -15,6 +16,7 @@ import {
   Images,
   LayoutGrid,
   MapPin,
+  Rotate3d,
   Ruler,
   Sofa,
   Tag,
@@ -22,14 +24,16 @@ import {
 } from "lucide-react";
 import NextImage from "next/image";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import toast from "react-hot-toast";
+import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useDispatch } from "react-redux";
 import { ListingFormData } from "../../dto/listingformdata.dto";
 import { useCreateProperty } from "../../services/mutate";
 import PropertyService from "../../services/service";
+import { Icon } from "@/components/ui";
 
 const Review = () => {
   const dispatch = useDispatch();
@@ -43,6 +47,9 @@ const Review = () => {
   const imageUrls = useMemo(() => {
     return data.images || [];
   }, [data.images]);
+
+  const [active360Index, setActive360Index] = React.useState(0);
+  const virtualTourUrls = data.virtualTourUrls || [];
 
   const onBack = () => {
     dispatch(prevStep());
@@ -279,105 +286,267 @@ const Review = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Section 4: Media */}
-      <div className="mb-0">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <Images className="w-5 h-5" />
-          Images ({imageUrls.length})
-        </h3>
-        {imageUrls.length > 0 ? (
-          <PhotoProvider>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {imageUrls.map((url, index) => (
-                <PhotoView key={url} src={url}>
-                  <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted cursor-pointer hover:opacity-90 transition-opacity">
-                    <NextImage
-                      src={url}
-                      alt={`Property image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </PhotoView>
-              ))}
+        <div className="mb-0">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Images className="w-5 h-5" />
+            Images ({imageUrls.length})
+          </h3>
+          {imageUrls.length > 0 ? (
+            <PhotoProvider>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {imageUrls.map((url, index) => (
+                  <PhotoView key={url} src={url}>
+                    <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted cursor-pointer hover:opacity-90 transition-opacity">
+                      <NextImage
+                        src={url}
+                        alt={`Property image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </PhotoView>
+                ))}
+              </div>
+            </PhotoProvider>
+          ) : (
+            <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
+              No images uploaded
             </div>
-          </PhotoProvider>
-        ) : (
-          <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
-            No images uploaded
+          )}
+        </div>
+
+        {/* Section 5: Thumbnail & Video */}
+        {(data.thumbnail || data.videoLink) && (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+            {data.thumbnail && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <LayoutGrid className="w-5 h-5" />
+                  Thumbnail Image
+                </h3>
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-gray-200">
+                  <NextImage
+                    src={data.thumbnail}
+                    alt="Property thumbnail"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            {data.videoLink && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <Video className="w-5 h-5" />
+                  Video Tour
+                </h3>
+                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-red-100 text-red-600 rounded-full">
+                      <Video className="w-5 h-5" />
+                    </div>
+                    <span className="font-medium text-gray-900 line-clamp-1">
+                      {data.videoLink}
+                    </span>
+                  </div>
+                  <a
+                    href={data.videoLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-700 hover:underline pl-12"
+                  >
+                    Watch Video Tour &rarr;
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         )}
-      </div>
 
-      {/* Section 5: Thumbnail & Video */}
-      {(data.thumbnail || data.videoLink) && (
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {data.thumbnail && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <LayoutGrid className="w-5 h-5" />
-                Thumbnail Image
-              </h3>
-              <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-gray-200">
+        {/* Section 6: 360 Virtual Tour */}
+        {virtualTourUrls.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Rotate3d className="w-5 h-5" />
+              360° Virtual Tour ({virtualTourUrls.length})
+            </h3>
+            <div className="bg-gray-50 rounded-xl p-0 overflow-hidden border border-gray-200">
+              <div className="aspect-video w-full relative">
+                <ReactPhotoSphereViewer
+                  src={virtualTourUrls[active360Index]}
+                  height={"100%"}
+                  width={"100%"}
+                />
+                {virtualTourUrls.length > 1 && (
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 px-4 overflow-x-auto">
+                    {virtualTourUrls.map((url, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActive360Index(idx);
+                        }}
+                        className={`w-16 h-10 rounded border-2 overflow-hidden transition-all flex-shrink-0 ${
+                          idx === active360Index
+                            ? "border-white scale-110 shadow-lg"
+                            : "border-white/50 hover:border-white/80 opacity-80 hover:opacity-100"
+                        }`}
+                      >
+                        <img
+                          src={url}
+                          alt={`360 thumbnail ${idx}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 7: Review */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            Review & Confirm
+          </h3>
+          <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300">
+            <div className="flex flex-col md:flex-row">
+              {/* Image Section */}
+              <div className="relative w-full md:w-[320px] h-[240px] md:h-auto shrink-0">
                 <NextImage
                   src={data.thumbnail}
                   alt="Property thumbnail"
                   fill
                   className="object-cover"
                 />
-              </div>
-            </div>
-          )}
-
-          {data.videoLink && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Video className="w-5 h-5" />
-                Video Tour
-              </h3>
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full flex flex-col justify-center">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-red-100 text-red-600 rounded-full">
-                    <Video className="w-5 h-5" />
-                  </div>
-                  <span className="font-medium text-gray-900 line-clamp-1">
-                    {data.videoLink}
-                  </span>
+                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <Badge className="bg-primary hover:bg-primary/90 text-white border-none px-3 py-1 shadow-sm">
+                    {formatDemandType(data.demandType)}
+                  </Badge>
+                  {virtualTourUrls.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-white/90 backdrop-blur-sm text-gray-900 shadow-sm border-none gap-1.5 pl-2 pr-3"
+                    >
+                      <Rotate3d className="w-3.5 h-3.5 text-blue-600" />
+                      <span className="text-xs font-semibold">360° Tour</span>
+                    </Badge>
+                  )}
+                  {data.videoLink && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-white/90 backdrop-blur-sm text-gray-900 shadow-sm border-none gap-1.5 pl-2 pr-3"
+                    >
+                      <Video className="w-3.5 h-3.5 text-red-600" />
+                      <span className="text-xs font-semibold">Video</span>
+                    </Badge>
+                  )}
                 </div>
-                <a
-                  href={data.videoLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-700 hover:underline pl-12"
-                >
-                  Watch Video Tour &rarr;
-                </a>
+                <div className="absolute bottom-3 left-3">
+                  <Badge className="bg-black/70 backdrop-blur-sm text-white border-white/20 px-3 py-1">
+                    {formatPropertyType(data.propertyType)}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Content Section */}
+              <div className="p-6 flex-1 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between items-start gap-4">
+                      <h4 className="font-bold text-xl text-gray-900 leading-tight line-clamp-2">
+                        {data.title}
+                      </h4>
+                      <div className="text-2xl font-bold text-primary whitespace-nowrap">
+                        {formatPrice(data.price)}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-500 mt-2 text-sm">
+                      <MapPin className="w-4 h-4 shrink-0" />
+                      <span className="line-clamp-1">
+                        {data.address}, {data.ward}, {data.province}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 py-4 border-y border-gray-100">
+                    <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
+                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <Icon.HotelBed className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {data.bedrooms} Beds
+                        </p>
+                        <p className="text-xs text-gray-500">Bedroom</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
+                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <Icon.BathRoom className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {data.bathrooms} Baths
+                        </p>
+                        <p className="text-xs text-gray-500">Bathroom</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                        <Icon.Shape className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {data.area} m²
+                        </p>
+                        <p className="text-xs text-gray-500">Area</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 flex items-center justify-between text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                    Ready to publish
+                  </div>
+                  <div className="text-xs uppercase tracking-wider font-semibold text-gray-400">
+                    Preview Mode
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      )}
 
-      {/* Footer */}
-      <div className="flex justify-between pt-6 border-t border-gray-100">
-        <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
-          Back
-        </CsButton>
-        <div className="flex gap-4">
-          <CsButton type="button">Save Draft</CsButton>
-          <CsButton
-            onClick={handleSubmit(onPublish)}
-            type="button"
-            className="bg-green-600 hover:bg-green-700"
-            loading={isCreatingProperty}
-          >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            Publish Listing
+        {/* Footer */}
+        <div className="flex justify-between pt-6">
+          <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
+            Back
           </CsButton>
+          <div className="flex gap-4">
+            <CsButton type="button">Save Draft</CsButton>
+            <CsButton
+              onClick={handleSubmit(onPublish)}
+              type="button"
+              className="bg-green-600 hover:bg-green-700"
+              loading={isCreatingProperty}
+            >
+              <CheckCircle className="w-5 h-5 mr-2" />
+              Publish Listing
+            </CsButton>
+          </div>
         </div>
       </div>
+
+      {/* Section 4: Media */}
     </div>
   );
 };

@@ -31,6 +31,7 @@ export class NoticeEvent extends BaseEvent {
           data: null,
         };
       }
+      console.log(`[NoticeEvent] Socket ${socket.id} joining room: ${userId}`);
       socket.join(userId);
       return {
         code: 200,

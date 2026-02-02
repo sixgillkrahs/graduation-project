@@ -57,7 +57,7 @@ const Card = ({
         <div className="bg-black/10 w-full h-px" />
         <div className="flex justify-start gap-4">
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Icon.HotelBed className="main-color-red" />3 beds
+            <Icon.HotelBed className="main-color-red" />3 Beds
           </span>
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
             <Icon.BathRoom className="main-color-red" />3 Bathrooms

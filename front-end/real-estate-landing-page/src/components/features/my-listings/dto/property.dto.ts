@@ -41,6 +41,7 @@ export interface IPropertyDto {
     thumbnail?: string;
     videoLink?: string;
   };
+  title: string;
   description: string;
   status: "DRAFT" | "PENDING" | "PUBLISHED" | "REJECTED" | "EXPIRED" | "SOLD";
   viewCount: number;

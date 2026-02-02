@@ -103,7 +103,10 @@ export interface IProperty {
     images: string[];
     thumbnail?: string;
     videoLink?: string;
+    virtualTourUrls?: string[];
   };
+
+  title: string;
 
   description: string;
 
@@ -169,6 +172,7 @@ const mediaSchema = new mongoose.Schema(
     images: { type: [String], default: [] },
     thumbnail: { type: String },
     videoLink: { type: String },
+    virtualTourUrls: { type: [String], default: [] },
   },
   { _id: false },
 );
@@ -213,6 +217,10 @@ const propertySchema = new mongoose.Schema<
     media: {
       type: mediaSchema,
       default: {},
+    },
+    title: {
+      type: String,
+      required: true,
     },
     description: {
       type: String,

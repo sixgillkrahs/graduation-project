@@ -11,6 +11,7 @@ export interface ListingState {
       images: string[];
       thumbnail?: string;
       videoLink?: string;
+      virtualTourUrls?: string[];
     };
     description?: string;
   };

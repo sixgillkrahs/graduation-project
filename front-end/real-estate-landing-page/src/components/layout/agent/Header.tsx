@@ -14,16 +14,28 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { RootState } from "@/store";
-import { Bell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bell, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
 
+import { INoticeDto } from "./dto/notice.dto";
+import {
+  useDeleteAllNotices,
+  useDeleteNotice,
+  useReadNotice,
+} from "./services/mutate";
+import { useGetMyNotices } from "./services/query";
+
+// Map backend notice to UI notification format if needed, or update interface
 interface Notification {
   message: string;
   status: string;
   timestamp: string;
-  propertyId: string;
+  propertyId?: string;
+  isRead: boolean;
+  type: string;
+  id: string; // Add ID for tracking
 }
 
 const Header = () => {
@@ -36,8 +48,106 @@ const Header = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Fetch initial notifications
+  const {
+    data: noticesData,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useGetMyNotices({
+    page: 1,
+    limit: 10, // Load 10 at a time
+  });
+
+  const { mutate: readNotice } = useReadNotice();
+  const { mutate: deleteNotice } = useDeleteNotice();
+  const { mutate: deleteAllNotices } = useDeleteAllNotices();
+
+  // Infinite Scroll Observer
+  const observerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const userId = user?._id;
+    if (!observerRef.current || !scrollContainerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        root: scrollContainerRef.current,
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(observerRef.current);
+
+    return () => observer.disconnect();
+  }, [
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    showNotifications,
+    notifications,
+  ]);
+
+  const handleDeleteNotice = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation(); // Prevent triggering readNotice
+    deleteNotice(id, {
+      onSuccess: () => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        // Recalculate unread count if deleted notice was unread
+        const deletedNotice = notifications.find((n) => n.id === id);
+        if (deletedNotice && !deletedNotice.isRead) {
+          setUnreadCount((prev) => Math.max(0, prev - 1));
+        }
+      },
+    });
+  };
+
+  const handleReadNotice = (notify: Notification) => {
+    if (!notify.isRead) {
+      readNotice(notify.id, {
+        onSuccess: () => {
+          // Optimistically update local state
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === notify.id ? { ...n, isRead: true } : n)),
+          );
+          setUnreadCount((prev) => Math.max(0, prev - 1));
+        },
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (noticesData?.pages) {
+      const allNotices = noticesData.pages.flatMap((page) => page.data.results);
+
+      const formattedNotices: Notification[] = allNotices.map(
+        (n: INoticeDto) => ({
+          message: n.content,
+          status: n.type,
+          timestamp: n.createdAt,
+          isRead: n.isRead,
+          type: n.type,
+          propertyId: n.metadata?.propertyId,
+          id: n.id,
+        }),
+      );
+      setNotifications(formattedNotices);
+
+      // Calculate unread (this might need adjustment if count is total from server)
+      // Ideally, unread count should come from a separate API or the first page metadata
+      const unread = formattedNotices.filter((n) => !n.isRead).length;
+      setUnreadCount(unread);
+    }
+  }, [noticesData]);
+
+  useEffect(() => {
+    const userId = user?.id || user?._id;
 
     if (socket && userId) {
       socket.emit("identity", {
@@ -53,10 +163,10 @@ const Header = () => {
 
   useEffect(() => {
     if (!socket) return;
-
     socket.on("property_status_update", (data: Notification) => {
       setNotifications((prev) => [data, ...prev]);
       setUnreadCount((prev) => prev + 1);
+      refetch(); // Refetch to sync state fully if needed
 
       toast.info(data.message, {
         description: `Status: ${data.status}`,
@@ -129,7 +239,14 @@ const Header = () => {
                 <h3 className="font-semibold text-sm">Notifications</h3>
                 {notifications.length > 0 && (
                   <button
-                    onClick={() => setNotifications([])}
+                    onClick={() => {
+                      deleteAllNotices(undefined, {
+                        onSuccess: () => {
+                          setNotifications([]);
+                          setUnreadCount(0);
+                        },
+                      });
+                    }}
                     className="text-xs text-blue-500 hover:text-blue-600"
                   >
                     Clear all
@@ -137,7 +254,10 @@ const Header = () => {
                 )}
               </div>
 
-              <div className="max-h-[300px] overflow-y-auto">
+              <div
+                className="max-h-[300px] overflow-y-auto"
+                ref={scrollContainerRef}
+              >
                 {notifications.length === 0 ? (
                   <div className="p-8 text-center text-gray-400 text-sm">
                     No notifications yet
@@ -147,9 +267,17 @@ const Header = () => {
                     {notifications.map((notif, index) => (
                       <div
                         key={index}
-                        className="p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer last:border-0"
+                        onClick={() => handleReadNotice(notif)}
+                        className={`group p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer last:border-0 relative ${
+                          !notif.isRead ? "bg-blue-50/50" : ""
+                        }`}
                       >
-                        <p className="text-sm text-gray-800 font-medium mb-1">
+                        {!notif.isRead && (
+                          <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-blue-500"></span>
+                        )}
+                        <p
+                          className={`text-sm text-gray-800 mb-1 ${!notif.isRead ? "font-semibold" : "font-medium"}`}
+                        >
                           {notif.message}
                         </p>
                         <div className="flex justify-between items-center mt-2">
@@ -157,7 +285,9 @@ const Header = () => {
                             variant={
                               notif.status === "PUBLISHED"
                                 ? "default"
-                                : "destructive"
+                                : notif.status === "REJECTED"
+                                  ? "destructive"
+                                  : "secondary"
                             }
                             className="text-[10px] h-5 px-2"
                           >
@@ -170,8 +300,22 @@ const Header = () => {
                             })}
                           </span>
                         </div>
+                        <button
+                          onClick={(e) => handleDeleteNotice(e, notif.id)}
+                          className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-red-100 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all z-10"
+                          title="Delete notification"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
+                    {/* Infinite Scroll Sentinel */}
+                    <div ref={observerRef} className="h-4 w-full" />
+                    {isFetchingNextPage && (
+                      <div className="p-2 text-center text-xs text-gray-500">
+                        Loading more...
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

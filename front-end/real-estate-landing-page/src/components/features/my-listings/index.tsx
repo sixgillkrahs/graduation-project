@@ -26,7 +26,7 @@ const MyListings = () => {
   const columns: TableColumn<IPropertyDto>[] = [
     {
       title: "Property details",
-      dataIndex: "projectName",
+      dataIndex: "title",
       width: "30%",
       render: (_, record) => (
         <div className="flex gap-3">
@@ -46,7 +46,7 @@ const MyListings = () => {
           </div>
           <div className="flex flex-col justify-center">
             <h4 className="font-semibold text-gray-900 line-clamp-1">
-              {record.projectName ||
+              {record.title ||
                 `${record.propertyType} - ${record.location.province}`}
             </h4>
             <p className="text-sm text-gray-500 line-clamp-2 mt-1">

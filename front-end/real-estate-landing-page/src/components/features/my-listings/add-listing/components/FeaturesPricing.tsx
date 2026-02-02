@@ -103,17 +103,6 @@ const FeaturesPricing = () => {
                 />
               )}
             />
-            <CsButton
-              type="button"
-              className="w-full"
-              icon={<Sparkles className="w-4 h-4" />}
-            >
-              AI Price Suggestion
-            </CsButton>
-          </div>
-
-          {/* Row 3: Bathrooms & Empty */}
-          <div className="grid grid-cols-2 gap-6">
             <Controller
               name="bathrooms"
               control={control}
@@ -127,7 +116,6 @@ const FeaturesPricing = () => {
                 />
               )}
             />
-            <div></div> {/* Empty column */}
           </div>
 
           {/* Row 4: Direction, Legal, Furniture */}

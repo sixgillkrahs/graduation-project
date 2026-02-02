@@ -86,7 +86,7 @@ export class NoticeController extends BaseController {
   markAsRead = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const user = (req as any).user;
+      const user = req.user;
       const lang = ApiRequest.getCurrentLang(req);
 
       const notice = await this.noticeService.getNoticeById(id);
@@ -98,7 +98,7 @@ export class NoticeController extends BaseController {
         );
       }
 
-      if (notice.userId.toString() !== user.userId) {
+      if (notice.userId.toString() !== user.userId._id.toString()) {
         throw new AppError(
           lang === "vi"
             ? "Bạn không có quyền sửa thông báo này"
@@ -141,6 +141,19 @@ export class NoticeController extends BaseController {
       }
 
       await this.noticeService.deleteNotice(id);
+      return { success: true };
+    });
+  };
+
+  deleteAllNotices = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const user = req.user;
+
+      if (!user || !user.userId._id) {
+        throw new AppError("Unauthorized", 401, ErrorCode.UNAUTHORIZED);
+      }
+
+      await this.noticeService.deleteAllNotices(user.userId._id);
       return { success: true };
     });
   };

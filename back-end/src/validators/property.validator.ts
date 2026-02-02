@@ -30,6 +30,8 @@ export const createPropertySchema = (lang: keyof typeof validationMessages) => {
       furniture: z.enum(PropertyFurnitureEnum).optional().or(z.literal("")),
       images: z.array(z.string()).optional(),
       thumbnail: z.string().optional(),
+      videoLink: z.string().optional(),
+      virtualTourUrls: z.array(z.string()).optional(),
       description: z.string().optional(),
     }),
   });

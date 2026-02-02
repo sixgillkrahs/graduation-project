@@ -9,6 +9,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import PropertyService from "../../services/service";
 import { ListingFormData } from "../../dto/listingformdata.dto";
+import { CsTextarea } from "@/components/ui/textarea";
 
 const BasicInfo = () => {
   const dispatch = useDispatch();
@@ -62,8 +63,46 @@ const BasicInfo = () => {
           <Info className="w-6 h-6" /> Step 1: Basic Information
         </h2>
         <div className="space-y-6">
+          <Controller
+            name="title"
+            control={control}
+            rules={{
+              required: "Listing title is required",
+            }}
+            render={({ field, fieldState }) => (
+              <>
+                <div className="">
+                  <Input
+                    label="Listing title"
+                    placeholder="Enter listing title"
+                    {...field}
+                    error={fieldState?.error?.message}
+                  />
+                </div>
+              </>
+            )}
+          />
+          <Controller
+            name="description"
+            control={control}
+            rules={{
+              required: "Listing description is required",
+            }}
+            render={({ field, fieldState }) => (
+              <>
+                <div className="">
+                  <CsTextarea
+                    label="Listing description"
+                    {...field}
+                    placeholder="Enter listing description"
+                    error={fieldState?.error?.message}
+                  />
+                </div>
+              </>
+            )}
+          />
           <div className="w-[400px]">
-            <label className="cs-paragraph-black text-[16px] font-semibold mb-2 block">
+            <label className="items-center text-sm font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50 has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4 has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10">
               Demand Type
             </label>
             <div className="mt-2">
@@ -81,7 +120,7 @@ const BasicInfo = () => {
             control={control}
             render={({ field }) => (
               <>
-                <label className="cs-paragraph-black text-[16px] font-semibold mb-2 block">
+                <label className="items-center text-sm font-medium select-none mb-3 block">
                   Property Type
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -126,7 +165,7 @@ const BasicInfo = () => {
                 <div className="">
                   <Input
                     label="Project Name (Optional)"
-                    placeholder="e.g. Vinhomes Central Park"
+                    placeholder="Enter project name"
                     {...field}
                   />
                 </div>

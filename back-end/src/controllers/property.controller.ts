@@ -75,6 +75,7 @@ export class PropertyController extends BaseController {
       const propertyData = {
         userId: user.userId._id as any,
         demandType: body.demandType,
+        title: body.title,
         propertyType: body.propertyType,
         projectName: body.projectName,
         location: {
@@ -102,6 +103,7 @@ export class PropertyController extends BaseController {
           images: body.images || [],
           thumbnail: body?.thumbnail || "",
           video: body?.video || "",
+          virtualTourUrls: body?.virtualTourUrls || [],
         },
         amenities: body.amenities || [],
         description: body.description || "No description",
@@ -320,7 +322,7 @@ export class PropertyController extends BaseController {
       }
 
       // Allow status to be PUBLISHED or REJECTED. Default to PUBLISHED if not provided.
-      // const targetStatus = PropertyStatusEnum.PUBLISHED;
+      const targetStatus = PropertyStatusEnum.PUBLISHED;
 
       // if (
       //   ![PropertyStatusEnum.PUBLISHED, PropertyStatusEnum.REJECTED].includes(
@@ -341,24 +343,29 @@ export class PropertyController extends BaseController {
       const io = req.io;
       if (io) {
         const ownerId = existingProperty.userId;
+        const roomName = ownerId.toString();
 
-        // io.to(ownerId).emit("property_status_update", {
-        //   message: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
-        //   propertyId: id,
-        //   status: targetStatus,
-        //   timestamp: new Date().toISOString(),
-        // });
+        console.log(`[ApproveProperty] Emitting to room: ${roomName}`);
+        console.log(`[ApproveProperty] IO instance exists: ${!!io}`);
 
-        // await this.noticeService.createNotice({
-        //   userId: ownerId,
-        //   type: NoticeTypeEnum.PROPERTY,
-        //   content: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
-        //   isRead: false,
-        //   title: "Property approved",
-        // });
-        io.to(ownerId).emit("property_status_update", {
-          message: "property_status_update",
+        io.to(roomName).emit("property_status_update", {
+          message: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
+          propertyId: id,
+          status: targetStatus,
+          timestamp: new Date().toISOString(),
         });
+
+        await this.noticeService.createNotice({
+          userId: ownerId,
+          type: NoticeTypeEnum.PROPERTY,
+          content: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
+          isRead: false,
+          title: "Property approved",
+        });
+      } else {
+        console.error(
+          "[ApproveProperty] Socket IO instance missing on request",
+        );
       }
 
       return "success";
