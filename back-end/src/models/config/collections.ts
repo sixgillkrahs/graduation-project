@@ -9,6 +9,7 @@ const collections = {
   conversations: "conversations",
   messages: "messages",
   notices: "notices",
+  landlords: "landlords",
 };
 
 export default collections;

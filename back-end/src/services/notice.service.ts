@@ -56,4 +56,8 @@ export class NoticeService {
   ) => {
     return await NoticeModel.paginate?.(options, filter, select);
   };
+
+  countUnreadNotices = async (userId: string) => {
+    return await NoticeModel.countDocuments({ userId, isRead: false }).exec();
+  };
 }

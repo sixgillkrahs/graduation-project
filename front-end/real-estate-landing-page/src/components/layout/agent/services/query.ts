@@ -1,12 +1,7 @@
 import { IParamsPagination } from "@/@types/service";
-import {
-  UseMutationResult,
-  useInfiniteQuery,
-  useMutation,
-} from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { NoticeKey } from "./config";
 import NoticeService from "./service";
-import { queryClient } from "@/lib/react-query/queryClient";
 
 export const useGetMyNotices = (params: IParamsPagination) => {
   return useInfiniteQuery({

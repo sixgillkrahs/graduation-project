@@ -26,6 +26,7 @@ import {
   useReadNotice,
 } from "./services/mutate";
 import { useGetMyNotices } from "./services/query";
+import { cn } from "@/lib/utils";
 
 // Map backend notice to UI notification format if needed, or update interface
 interface Notification {
@@ -112,7 +113,6 @@ const Header = () => {
     if (!notify.isRead) {
       readNotice(notify.id, {
         onSuccess: () => {
-          // Optimistically update local state
           setNotifications((prev) =>
             prev.map((n) => (n.id === notify.id ? { ...n, isRead: true } : n)),
           );
@@ -138,10 +138,7 @@ const Header = () => {
         }),
       );
       setNotifications(formattedNotices);
-
-      // Calculate unread (this might need adjustment if count is total from server)
-      // Ideally, unread count should come from a separate API or the first page metadata
-      const unread = formattedNotices.filter((n) => !n.isRead).length;
+      const unread = (noticesData.pages[0].data as any)?.totalUnread;
       setUnreadCount(unread);
     }
   }, [noticesData]);
@@ -166,7 +163,7 @@ const Header = () => {
     socket.on("property_status_update", (data: Notification) => {
       setNotifications((prev) => [data, ...prev]);
       setUnreadCount((prev) => prev + 1);
-      refetch(); // Refetch to sync state fully if needed
+      refetch();
 
       toast.info(data.message, {
         description: `Status: ${data.status}`,
@@ -178,6 +175,8 @@ const Header = () => {
       socket.off("property_status_update");
     };
   }, [socket]);
+
+  const hasUnread = unreadCount > 0;
 
   return (
     <header className="flex justify-between h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-2xs w-full pr-10 relative">
@@ -216,22 +215,52 @@ const Header = () => {
 
       <div className="flex items-center gap-4">
         <div className="relative">
-          <div
-            className="cursor-pointer relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+          <button
+            type="button"
+            className={cn(
+              "relative p-2 rounded-full transition-all duration-200",
+              "hover:bg-gray-100 active:bg-gray-200",
+              "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2",
+              "dark:hover:bg-gray-800 dark:active:bg-gray-700",
+            )}
             onClick={() => {
               setShowNotifications(!showNotifications);
               if (!showNotifications) {
                 setUnreadCount(0);
               }
             }}
+            aria-label={`Notifications ${hasUnread ? `(${unreadCount} unread)` : ""}`}
           >
-            <Bell className="w-5 h-5 text-gray-600" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-                {unreadCount}
+            {/* Icon Bell */}
+            <Bell
+              className={cn(
+                "w-5 h-5 transition-transform duration-300",
+                hasUnread ? "text-red-500" : "text-gray-600 dark:text-gray-300",
+                hasUnread && "animate-[ring_1.5s_ease-in-out_infinite]",
+              )}
+            />
+
+            {/* Badge unread */}
+            {hasUnread && (
+              <span
+                className={cn(
+                  "absolute top-0 right-0 flex items-center justify-center",
+                  "min-w-[18px] h-4.5 px-1.5 text-[10px] font-bold",
+                  "rounded-full bg-red-500 text-white",
+                  "shadow-sm border-2 border-white dark:border-gray-900",
+                  "transform translate-x-1/2 -translate-y-1/2",
+                  "transition-all duration-200",
+                  unreadCount > 9 && "px-2",
+                )}
+              >
+                {unreadCount > 99
+                  ? "99+"
+                  : unreadCount > 9
+                    ? "9+"
+                    : unreadCount}
               </span>
             )}
-          </div>
+          </button>
 
           {showNotifications && (
             <div className="absolute right-0 mt-2 w-80 rounded-lg border border-gray-200 bg-white shadow-lg z-50 animate-in fade-in zoom-in-95 duration-200">

@@ -324,29 +324,26 @@ export class PropertyController extends BaseController {
       // Allow status to be PUBLISHED or REJECTED. Default to PUBLISHED if not provided.
       const targetStatus = PropertyStatusEnum.PUBLISHED;
 
-      // if (
-      //   ![PropertyStatusEnum.PUBLISHED, PropertyStatusEnum.REJECTED].includes(
-      //     targetStatus,
-      //   )
-      // ) {
-      //   throw new AppError(
-      //     lang === "vi" ? "Trạng thái không hợp lệ" : "Invalid status",
-      //     400,
-      //     ErrorCode.INVALID_INPUT,
-      //   );
-      // }
+      if (
+        ![PropertyStatusEnum.PUBLISHED, PropertyStatusEnum.REJECTED].includes(
+          targetStatus,
+        )
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Trạng thái không hợp lệ" : "Invalid status",
+          400,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
 
-      // const updatedProperty = await this.propertyService.updateProperty(id, {
-      //   status: targetStatus,
-      // });
+      await this.propertyService.updateProperty(id, {
+        status: targetStatus,
+      });
 
       const io = req.io;
       if (io) {
         const ownerId = existingProperty.userId;
         const roomName = ownerId.toString();
-
-        console.log(`[ApproveProperty] Emitting to room: ${roomName}`);
-        console.log(`[ApproveProperty] IO instance exists: ${!!io}`);
 
         io.to(roomName).emit("property_status_update", {
           message: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
@@ -401,25 +398,36 @@ export class PropertyController extends BaseController {
         );
       }
 
-      const updatedProperty = await this.propertyService.updateProperty(id, {
+      await this.propertyService.updateProperty(id, {
         status: targetStatus,
       });
 
-      const io = (req as any).io;
+      const io = req.io;
       if (io) {
-        const ownerId = (existingProperty.userId as any)._id
-          ? (existingProperty.userId as any)._id.toString()
-          : existingProperty.userId.toString();
+        const ownerId = existingProperty.userId;
+        const roomName = ownerId.toString();
 
-        io.to(ownerId).emit("property_status_update", {
+        io.to(roomName).emit("property_status_update", {
           message: `Your property "${existingProperty.projectName || "Listing"}" has been rejected.`,
           propertyId: id,
           status: targetStatus,
           timestamp: new Date().toISOString(),
         });
+
+        await this.noticeService.createNotice({
+          userId: ownerId,
+          type: NoticeTypeEnum.PROPERTY,
+          content: `Your property "${existingProperty.projectName || "Listing"}" has been rejected.`,
+          isRead: false,
+          title: "Property rejected",
+        });
+      } else {
+        console.error(
+          "[ApproveProperty] Socket IO instance missing on request",
+        );
       }
 
-      return updatedProperty;
+      return "success";
     });
   };
 }

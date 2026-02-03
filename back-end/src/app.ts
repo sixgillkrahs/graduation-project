@@ -26,6 +26,7 @@ import propertyRoutes from "./routes/property.routes";
 import noticeRoutes from "./routes/notice.routes";
 import roleRoutes from "./routes/role.routes";
 import uploadRoutes from "./routes/upload.routes";
+import landlordRoutes from "./routes/landlord.routes";
 
 const app = express();
 
@@ -88,6 +89,7 @@ app.use("/api/agents", agentRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/landlords", landlordRoutes);
 
 const swaggerOptions = {
   explorer: true,

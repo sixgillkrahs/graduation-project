@@ -9,11 +9,11 @@ import {
 } from "@/components/animate-ui/components/buttons/ripple";
 import { CsButton } from "@/components/custom";
 import { Eye } from "lucide-react";
-import { Table } from "@/components/ui/table";
+import { Table, TableColumn } from "@/components/ui/table";
 
 export const Landlord = () => {
   const [openModalAdd, setOpenModalAdd] = useState(false);
-  const columns: any[] = [
+  const columns: TableColumn<IPropertyDto>[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -84,7 +84,7 @@ export const Landlord = () => {
         </RippleButton>
       </div>
       <div>
-        <Table columns={[]} dataSource={data} rowKey="id" />
+        <Table columns={columns} dataSource={data} rowKey="id" />
       </div>
       <ModalAdd open={openModalAdd} onCancel={handleClose} />
     </div>

@@ -44,11 +44,12 @@ export class NoticeController extends BaseController {
         userId: user.userId,
       };
 
-      const notices = await this.noticeService.getNotices(
-        options,
-        queryFilters,
-      );
-      return notices;
+      // use promise all
+      const [totalUnread, notices] = await Promise.all([
+        this.noticeService.countUnreadNotices(user.userId),
+        this.noticeService.getNotices(options, queryFilters),
+      ]);
+      return { totalUnread, ...notices };
     });
   };
 
@@ -118,7 +119,7 @@ export class NoticeController extends BaseController {
   deleteNotice = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const user = (req as any).user;
+      const user = req.user;
       const lang = ApiRequest.getCurrentLang(req);
 
       const notice = await this.noticeService.getNoticeById(id);
@@ -130,7 +131,7 @@ export class NoticeController extends BaseController {
         );
       }
 
-      if (notice.userId.toString() !== user.userId) {
+      if (notice.userId.toString() !== user.userId._id.toString()) {
         throw new AppError(
           lang === "vi"
             ? "Bạn không có quyền xóa thông báo này"

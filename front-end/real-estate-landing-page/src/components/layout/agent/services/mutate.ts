@@ -14,6 +14,10 @@ export const useDeleteAllNotices = (): UseMutationResult<
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [NoticeKey.getMyNotices] });
     },
+    meta: {
+      ERROR_SOURCE: "[Delete all notices failed]: Delete all notices failed",
+      SUCCESS_MESSAGE: "Delete all notices successfully",
+    },
   });
 };
 
@@ -41,6 +45,10 @@ export const useDeleteNotice = (): UseMutationResult<
     mutationFn: (id: string) => NoticeService.deleteNotice(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [NoticeKey.getMyNotices] });
+    },
+    meta: {
+      ERROR_SOURCE: "[Delete notice failed]: Delete notice failed",
+      SUCCESS_MESSAGE: "Delete notice successfully",
     },
   });
 };
