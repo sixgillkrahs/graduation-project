@@ -1,19 +1,16 @@
 "use client";
 
-import { Icon } from "@/components/ui";
-import ModalAdd from "./components/ModalAdd";
-import { useCallback, useState } from "react";
-import {
-  RippleButton,
-  RippleButtonRipples,
-} from "@/components/animate-ui/components/buttons/ripple";
 import { CsButton } from "@/components/custom";
-import { Eye } from "lucide-react";
-import { Table, TableColumn } from "@/components/ui/table";
+import { CsTable, TableColumn } from "@/components/ui/table";
+import { EditIcon, Trash } from "lucide-react";
+import { useCallback, useState } from "react";
+import ModalAdd from "./components/ModalAdd";
+import { useLandlords } from "./services/query";
 
 export const Landlord = () => {
+  const { data: landlords, isLoading } = useLandlords();
   const [openModalAdd, setOpenModalAdd] = useState(false);
-  const columns: TableColumn<IPropertyDto>[] = [
+  const columns: TableColumn<any>[] = [
     {
       title: "Name",
       dataIndex: "name",
@@ -31,20 +28,16 @@ export const Landlord = () => {
     },
     {
       title: "Action",
+      dataIndex: "action",
       key: "action",
-      render: () => (
-        <div className="flex gap-2">
-          <CsButton variant={"outline"} icon={<Eye className="w-4 h-4" />} />
-          <CsButton
-            variant={"outline"}
-            icon={<Icon.Edit className="w-4 h-4" />}
-          />
-          <CsButton
-            variant={"outline"}
-            icon={<Icon.DeleteBin className="text-red-500 w-4 h-4" />}
-          />
-        </div>
-      ),
+      render(_value, _record, _index) {
+        return (
+          <div className="flex gap-2">
+            <CsButton icon={<EditIcon />} />
+            <CsButton icon={<Trash />} className="bg-red-600!" />
+          </div>
+        );
+      },
     },
   ];
 
@@ -78,13 +71,16 @@ export const Landlord = () => {
           <h1 className="cs-typography text-2xl">List Landlord</h1>
           <span className="cs-paragraph-gray"> Landlord</span>
         </div>
-        <RippleButton className="cs-bg-black text-white" onClick={handleOpen}>
+        <CsButton className="cs-bg-black text-white" onClick={handleOpen}>
           Add Landlord
-          <RippleButtonRipples />
-        </RippleButton>
+        </CsButton>
       </div>
       <div>
-        <Table columns={columns} dataSource={data} rowKey="id" />
+        <CsTable
+          columns={columns}
+          dataSource={landlords?.data.results || data}
+          rowKey={(record: any) => record.id}
+        />
       </div>
       <ModalAdd open={openModalAdd} onCancel={handleClose} />
     </div>

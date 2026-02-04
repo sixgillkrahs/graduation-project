@@ -11,7 +11,11 @@ const router = Router();
 const userService = new UserService();
 const agentService = new AgentService();
 const authService = new AuthService();
-const userController = new UserController(userService, agentService, authService);
+const userController = new UserController(
+  userService,
+  agentService,
+  authService,
+);
 
 router.use(requireAuth);
 
@@ -89,7 +93,6 @@ router.get("/profile", userController.profile);
  */
 router.patch("/profile", userController.updateProfile);
 
-
 /**
  * @swagger
  * /users:
@@ -145,8 +148,6 @@ router.patch("/profile", userController.updateProfile);
  *         description: Forbidden - User role required
  */
 router.get("/", userController.getUsers);
-
-
 
 /**
  * @swagger

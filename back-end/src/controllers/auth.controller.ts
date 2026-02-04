@@ -315,7 +315,6 @@ export class AuthController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const user = req.user;
       const { password, passwordHistories, ...rest } = user;
-      
       return rest;
     });
   };

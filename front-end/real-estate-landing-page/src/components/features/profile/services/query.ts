@@ -1,4 +1,3 @@
-import { Id } from "@/@types/service";
 import { useQuery } from "@tanstack/react-query";
 import { ProfileQueryKey } from "./config";
 import ProfileService from "./service";
