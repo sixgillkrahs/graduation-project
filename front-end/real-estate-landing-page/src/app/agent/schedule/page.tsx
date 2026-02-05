@@ -1,7 +1,7 @@
-import React from "react";
+import Schedule from "@/components/features/schedule";
 
 const Page = () => {
-  return <div>Page</div>;
+  return <Schedule />;
 };
 
 export default Page;

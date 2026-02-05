@@ -10,6 +10,7 @@ const collections = {
   messages: "messages",
   notices: "notices",
   landlords: "landlords",
+  schedules: "schedules",
 };
 
 export default collections;

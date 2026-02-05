@@ -5,7 +5,7 @@ import { CsButton } from "@/components/custom";
 import { Input } from "@/components/ui/input";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import useDebounce from "@/hooks/useDebounce";
-import { EditIcon, EyeIcon, Trash } from "lucide-react";
+import { EditIcon, EyeIcon, Plus, Trash } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import ModalAdd from "./components/ModalAdd";
 import { useLandlords } from "./services/query";
@@ -119,7 +119,11 @@ export const Landlord = () => {
           <h1 className="cs-typography text-2xl">List Landlord</h1>
           <span className="cs-paragraph-gray"> Landlord</span>
         </div>
-        <CsButton className="cs-bg-black text-white" onClick={handleOpen}>
+        <CsButton
+          className="cs-bg-black text-white"
+          onClick={handleOpen}
+          icon={<Plus className="text-white! text-2xl" />}
+        >
           Add Landlord
         </CsButton>
       </div>

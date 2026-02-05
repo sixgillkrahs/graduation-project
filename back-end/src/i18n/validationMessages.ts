@@ -22,6 +22,7 @@ export const validationMessages = {
     confirmPassword: "Xác nhận mật khẩu không khớp",
     invalidUsername: "Tên đăng nhập không hợp lệ",
     invalidEmail: "Email không hợp lệ",
+    invalidDate: "Ngày không hợp lệ",
     userExist: "Người dùng đã tồn tại",
     usernameExist: "Tên đăng nhập đã tồn tại",
     passwordMismatch: "Mật khẩu không trùng khớp",

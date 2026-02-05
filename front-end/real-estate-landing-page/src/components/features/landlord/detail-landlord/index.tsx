@@ -146,7 +146,11 @@ const DetailLandlord = () => {
   if (!landlord) {
     return (
       <div className="space-y-4">
-        <CsButton icon={<ArrowLeft />} onClick={handleBack}>
+        <CsButton
+          icon={<ArrowLeft className="text-white!" />}
+          onClick={handleBack}
+          className="bg-white border hover:bg-gray-50 text-gray-700"
+        >
           Back
         </CsButton>
         <div className="p-8 text-center bg-gray-50 rounded-lg">
@@ -161,7 +165,7 @@ const DetailLandlord = () => {
       {/* Header */}
       <div className="flex items-center gap-4 border-b pb-4">
         <CsButton
-          icon={<ArrowLeft size={18} />}
+          icon={<ArrowLeft size={18} className="text-white!" />}
           onClick={handleBack}
           className="bg-white border hover:bg-gray-50 text-gray-700"
         ></CsButton>
