@@ -7,7 +7,7 @@ import request from "@/lib/axios/request";
 
 export default class VerifyEmailService {
   public static readonly verifyEmail = (
-    token: ParamValue
+    token: ParamValue,
   ): Promise<IResp<IVerifyEmailService.IResponseGetVerifyEmail>> => {
     return request({
       url: VerifyEmailEndpoint.verifyEmail(token),
@@ -16,7 +16,7 @@ export default class VerifyEmailService {
   };
 
   public static readonly createPassword = (
-    body: IVerifyEmailService.IBodyCreatePassword
+    body: IVerifyEmailService.IBodyCreatePassword,
   ): Promise<IResp<void>> => {
     const { token, ...rest } = body;
     return request({

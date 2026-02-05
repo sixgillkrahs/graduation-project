@@ -40,7 +40,7 @@ client.interceptors.request.use(
   },
   (error: AxiosError) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 client.interceptors.response.use(
@@ -99,5 +99,5 @@ client.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );

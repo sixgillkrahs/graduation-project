@@ -48,7 +48,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       onBlur,
       disabled,
     },
-    ref
+    ref,
   ) => {
     const [fileList, setFileList] = useState<FileWithStatus[]>([]);
     const [internalError, setInternalError] = useState<string>("");
@@ -142,15 +142,15 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
             .then(() => {
               setFileList((prev) =>
                 prev.map((f) =>
-                  f.id === item.id ? { ...f, status: "success" } : f
-                )
+                  f.id === item.id ? { ...f, status: "success" } : f,
+                ),
               );
             })
             .catch(() => {
               setFileList((prev) =>
                 prev.map((f) =>
-                  f.id === item.id ? { ...f, status: "error" } : f
-                )
+                  f.id === item.id ? { ...f, status: "error" } : f,
+                ),
               );
             });
         });
@@ -380,7 +380,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Upload.displayName = "Upload";

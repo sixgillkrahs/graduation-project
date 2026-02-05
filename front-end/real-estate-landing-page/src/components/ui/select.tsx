@@ -183,10 +183,11 @@ export interface SelectOption {
   value: string | number;
 }
 
-interface CsSelectProps extends Omit<
-  React.ComponentProps<typeof SelectPrimitive.Root>,
-  "value" | "onValueChange"
-> {
+interface CsSelectProps
+  extends Omit<
+    React.ComponentProps<typeof SelectPrimitive.Root>,
+    "value" | "onValueChange"
+  > {
   label?: string;
   placeholder?: string;
   options: SelectOption[];

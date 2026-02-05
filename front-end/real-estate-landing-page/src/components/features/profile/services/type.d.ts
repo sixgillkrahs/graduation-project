@@ -12,21 +12,20 @@ namespace IProfileService {
   }
 
   export interface ProfileUserDTO {
-    _id: string
-    email: string
-    fullName: string
-    prefixPhone: string
-    address: string
-    phone: string
-    isActive: boolean
-    isDeleted: boolean
-    createdAt: string
-    updatedAt: string
-    avatarUrl?: string
-    roleId: string
-    __v: number
+    _id: string;
+    email: string;
+    fullName: string;
+    prefixPhone: string;
+    address: string;
+    phone: string;
+    isActive: boolean;
+    isDeleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    avatarUrl?: string;
+    roleId: string;
+    __v: number;
   }
-
 
   export interface BasicInfo {
     nameRegister: string;

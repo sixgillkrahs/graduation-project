@@ -38,8 +38,8 @@ const CardStats = ({
             type === "increase"
               ? "text-green-500 bg-green-100"
               : type === "decrease"
-              ? "text-red-500 bg-red-100"
-              : "text-gray-500 bg-gray-100"
+                ? "text-red-500 bg-red-100"
+                : "text-gray-500 bg-gray-100",
           )}
         >
           {type === "increase" ? "+" : type === "decrease" ? "-" : ""}

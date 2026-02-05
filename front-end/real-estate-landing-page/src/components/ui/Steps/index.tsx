@@ -30,7 +30,7 @@ const Steps = ({ current, items, onChange, className }: StepsProps) => {
             key={index}
             className={clsx(
               "flex flex-1 items-start relative group",
-              index !== items.length - 1 && "mr-4" // Spacing for line
+              index !== items.length - 1 && "mr-4", // Spacing for line
             )}
             onClick={() => {
               if (onChange) onChange(index);
@@ -43,7 +43,7 @@ const Steps = ({ current, items, onChange, className }: StepsProps) => {
                 <div
                   className={clsx(
                     "absolute top-5 right-1/2 w-1/2 h-[2px] -z-10",
-                    isFinished || isActive ? "bg-black" : "bg-gray-200"
+                    isFinished || isActive ? "bg-black" : "bg-gray-200",
                   )}
                 />
               )}
@@ -51,7 +51,7 @@ const Steps = ({ current, items, onChange, className }: StepsProps) => {
                 <div
                   className={clsx(
                     "absolute top-5 left-1/2 w-1/2 h-[2px] -z-10",
-                    isFinished ? "bg-black" : "bg-gray-200"
+                    isFinished ? "bg-black" : "bg-gray-200",
                   )}
                 />
               )}
@@ -63,8 +63,8 @@ const Steps = ({ current, items, onChange, className }: StepsProps) => {
                   isFinished
                     ? "bg-white border-black text-black"
                     : isActive
-                    ? "bg-black border-black text-white"
-                    : "bg-white border-gray-200 text-gray-400 group-hover:border-black group-hover:text-black"
+                      ? "bg-black border-black text-white"
+                      : "bg-white border-gray-200 text-gray-400 group-hover:border-black group-hover:text-black",
                 )}
               >
                 {isFinished ? (
@@ -79,7 +79,7 @@ const Steps = ({ current, items, onChange, className }: StepsProps) => {
                 <div
                   className={clsx(
                     "text-sm font-semibold transition-colors duration-300",
-                    isFinished || isActive ? "text-gray-900" : "text-gray-400"
+                    isFinished || isActive ? "text-gray-900" : "text-gray-400",
                   )}
                 >
                   {item.title}

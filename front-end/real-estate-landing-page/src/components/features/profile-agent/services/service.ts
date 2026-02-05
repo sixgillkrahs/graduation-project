@@ -15,7 +15,7 @@ export default class ProfileService {
   };
 
   public static readonly changePassword = (
-    data: IProfileService.ChangePasswordRequest
+    data: IProfileService.ChangePasswordRequest,
   ): Promise<IResp<void>> => {
     return request({
       url: ProfileEndpoint.changePassword(),
@@ -34,7 +34,7 @@ export default class ProfileService {
   };
 
   public static readonly verifyPasskey = (
-    data: RegistrationResponseJSON
+    data: RegistrationResponseJSON,
   ): Promise<IResp<void>> => {
     return request({
       url: ProfileEndpoint.verifyPasskey(),

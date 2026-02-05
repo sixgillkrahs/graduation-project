@@ -72,7 +72,7 @@ const Modal = ({
         </div>
       </div>
     </>,
-    document.body
+    document.body,
   );
 };
 

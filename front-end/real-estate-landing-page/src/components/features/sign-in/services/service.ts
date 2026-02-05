@@ -5,7 +5,7 @@ import { SignInEndpoint } from "./config";
 
 export default class SignInService {
   public static readonly signIn = (
-    data: ISignInService.IBodySignIn
+    data: ISignInService.IBodySignIn,
   ): Promise<IResp<void>> => {
     return request({
       url: SignInEndpoint.signIn(),
@@ -15,7 +15,7 @@ export default class SignInService {
   };
 
   public static readonly signInPasskey = (
-    data: ISignInService.IBodySignInPasskey
+    data: ISignInService.IBodySignInPasskey,
   ): Promise<IResp<void>> => {
     return request({
       url: SignInEndpoint.signInPasskey(),

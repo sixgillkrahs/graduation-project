@@ -5,7 +5,7 @@ import { SignUpEndpoint } from "./config";
 
 export default class SignInService {
   public static readonly signUp = (
-    data: ISignUpService.IBodySignUp
+    data: ISignUpService.IBodySignUp,
   ): Promise<IResp<void>> => {
     return request({
       url: SignUpEndpoint.signUp(),

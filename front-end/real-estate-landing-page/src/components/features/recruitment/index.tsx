@@ -28,7 +28,7 @@ const steps = [
 
 const Recruitment = () => {
   const { currentStep, isSubmitSuccess } = useSelector(
-    (state: RootState) => state.form
+    (state: RootState) => state.form,
   );
 
   return (

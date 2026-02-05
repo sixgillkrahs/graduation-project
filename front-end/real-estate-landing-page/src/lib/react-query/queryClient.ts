@@ -1,4 +1,4 @@
-import { toast } from "sonner"
+import { toast } from "sonner";
 import {
   Mutation,
   MutationCache,
@@ -20,15 +20,17 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onSuccess: (
       _data: unknown,
-      query: Query<unknown, unknown, unknown, QueryKey>
+      query: Query<unknown, unknown, unknown, QueryKey>,
     ): void => {
       if (query.meta?.SUCCESS_MESSAGE) {
-        toast.success(`${query.meta.SUCCESS_MESSAGE}`, { position: "top-center" })
+        toast.success(`${query.meta.SUCCESS_MESSAGE}`, {
+          position: "top-center",
+        });
       }
     },
     onError: (
       error: any,
-      query: Query<unknown, unknown, unknown, QueryKey>
+      query: Query<unknown, unknown, unknown, QueryKey>,
     ): void => {
       const errorSource = (query.meta?.ERROR_SOURCE as string) || "Error";
       let errorMessage = "An unknown error occurred";
@@ -39,7 +41,9 @@ export const queryClient = new QueryClient({
         errorMessage = error.message;
       }
 
-      toast.error(`${errorSource}: ${errorMessage}`, { position: "top-center" });
+      toast.error(`${errorSource}: ${errorMessage}`, {
+        position: "top-center",
+      });
     },
   }),
   mutationCache: new MutationCache({
@@ -47,7 +51,7 @@ export const queryClient = new QueryClient({
       error: unknown,
       _variables: unknown,
       _context: unknown,
-      mutation: Mutation<unknown, unknown, unknown, unknown>
+      mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       const errorSource = (mutation.meta?.ERROR_SOURCE as string) || "Error";
       let errorMessage = "An unknown error occurred";
@@ -64,16 +68,20 @@ export const queryClient = new QueryClient({
         errorMessage = error.response?.data?.message || errorMessage;
       }
 
-      toast.error(`${errorSource}: ${errorMessage}`, { position: "top-center" });
+      toast.error(`${errorSource}: ${errorMessage}`, {
+        position: "top-center",
+      });
     },
     onSuccess: (
       _data: unknown,
       _variables: unknown,
       _context: unknown,
-      mutation: Mutation<unknown, unknown, unknown, unknown>
+      mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (mutation.meta?.SUCCESS_MESSAGE) {
-        toast.success(`${mutation.meta.SUCCESS_MESSAGE}`, { position: "top-center" })
+        toast.success(`${mutation.meta.SUCCESS_MESSAGE}`, {
+          position: "top-center",
+        });
       }
     },
   }),

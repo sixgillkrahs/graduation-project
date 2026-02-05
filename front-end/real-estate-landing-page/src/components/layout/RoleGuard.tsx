@@ -29,7 +29,7 @@ const RoleGuard = ({ children, allowedRoles }: RoleGuardProps) => {
 
   const userRoles = me?.data?.userId?.roles || [];
   const hasPermission = userRoles.some((role: string) =>
-    allowedRoles.includes(role)
+    allowedRoles.includes(role),
   );
 
   if (!me?.data?.userId || !hasPermission) {

@@ -22,7 +22,7 @@ export const Menu: React.FC<MenuProps> = ({
     <nav
       className={clsx(
         "flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-1",
-        className
+        className,
       )}
     >
       {items.map((item) => {
@@ -38,13 +38,13 @@ export const Menu: React.FC<MenuProps> = ({
               isActive
                 ? "bg-[#77777A] text-white border border-primary"
                 : "text-black hover:bg-white/5 hover:text-[#77777A]",
-              collapsed ? "justify-center" : ""
+              collapsed ? "justify-center" : "",
             )}
           >
             <span
               className={clsx(
                 "material-symbols-outlined transition-colors",
-                !isActive && "group-hover:text-primary"
+                !isActive && "group-hover:text-primary",
               )}
               style={{ fontSize: 22 }}
             >
@@ -55,7 +55,7 @@ export const Menu: React.FC<MenuProps> = ({
               <span
                 className={clsx(
                   "text-sm whitespace-nowrap",
-                  isActive ? "font-semibold" : "font-medium"
+                  isActive ? "font-semibold" : "font-medium",
                 )}
               >
                 {item.label}

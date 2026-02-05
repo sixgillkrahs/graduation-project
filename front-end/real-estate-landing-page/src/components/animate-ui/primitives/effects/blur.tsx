@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { motion, type HTMLMotionProps } from 'motion/react';
+import * as React from "react";
+import { motion, type HTMLMotionProps } from "motion/react";
 
+import { useIsInView, type UseIsInViewOptions } from "@/hooks/use-is-in-view";
 import {
-  useIsInView,
-  type UseIsInViewOptions,
-} from '@/hooks/use-is-in-view';
-import { Slot, type WithAsChild } from '@/components/animate-ui/primitives/animate/slot';
+  Slot,
+  type WithAsChild,
+} from "@/components/animate-ui/primitives/animate/slot";
 
 type BlurProps = WithAsChild<
   {
@@ -17,15 +17,15 @@ type BlurProps = WithAsChild<
     blur?: number;
     ref?: React.Ref<HTMLElement>;
   } & UseIsInViewOptions &
-    HTMLMotionProps<'div'>
+    HTMLMotionProps<"div">
 >;
 
 function Blur({
   ref,
-  transition = { type: 'spring', stiffness: 200, damping: 20 },
+  transition = { type: "spring", stiffness: 200, damping: 20 },
   delay = 0,
   inView = false,
-  inViewMargin = '0px',
+  inViewMargin = "0px",
   inViewOnce = true,
   initialBlur = 10,
   blur = 0,
@@ -47,7 +47,7 @@ function Blur({
     <Component
       ref={localRef as React.Ref<HTMLDivElement>}
       initial="hidden"
-      animate={isInView ? 'visible' : 'hidden'}
+      animate={isInView ? "visible" : "hidden"}
       exit="hidden"
       variants={{
         hidden: { filter: `blur(${initialBlur}px)` },
@@ -62,7 +62,7 @@ function Blur({
   );
 }
 
-type BlurListProps = Omit<BlurProps, 'children'> & {
+type BlurListProps = Omit<BlurProps, "children"> & {
   children: React.ReactElement | React.ReactElement[];
   holdDelay?: number;
 };

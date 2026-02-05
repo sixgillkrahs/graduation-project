@@ -5,7 +5,7 @@ import { ForgotPasswordEndpoint } from "./config";
 
 export default class ForgotPasswordService {
   public static readonly forgotPassword = (
-    data: IForgotPasswordService.IBodyForgotPassword
+    data: IForgotPasswordService.IBodyForgotPassword,
   ): Promise<IResp<void>> => {
     return request({
       url: ForgotPasswordEndpoint.forgotPassword(),
@@ -15,7 +15,7 @@ export default class ForgotPasswordService {
   };
 
   public static readonly verifyOTP = (
-    data: IForgotPasswordService.IBodyVerifyOTP
+    data: IForgotPasswordService.IBodyVerifyOTP,
   ): Promise<IResp<IForgotPasswordService.IRespVerifyOTP>> => {
     return request({
       url: ForgotPasswordEndpoint.verifyOTP(),
@@ -25,7 +25,7 @@ export default class ForgotPasswordService {
   };
 
   public static readonly resetPassword = (
-    data: IForgotPasswordService.IBodyResetPassword
+    data: IForgotPasswordService.IBodyResetPassword,
   ): Promise<IResp<void>> => {
     return request({
       url: ForgotPasswordEndpoint.resetPassword(),

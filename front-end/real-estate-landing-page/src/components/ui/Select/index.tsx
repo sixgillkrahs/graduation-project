@@ -49,7 +49,7 @@ const Select = forwardRef<
       onSearch,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const [open, setOpen] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -135,7 +135,7 @@ const Select = forwardRef<
           : placeholder;
       } else {
         const selectedOption = options.find(
-          (opt) => String(opt.value) === String(value)
+          (opt) => String(opt.value) === String(value),
         );
         return selectedOption ? selectedOption.label : placeholder;
       }
@@ -263,7 +263,7 @@ const Select = forwardRef<
         {error && <p className="text-red-500 text-sm! font-medium!">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = "Select";

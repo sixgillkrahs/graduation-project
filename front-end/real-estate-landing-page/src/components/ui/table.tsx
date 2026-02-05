@@ -278,7 +278,9 @@ function CsTable<T>({
   };
 
   return (
-    <div className={cn("rounded-lg border bg-white overflow-hidden", className)}>
+    <div
+      className={cn("rounded-lg border bg-white overflow-hidden", className)}
+    >
       <Table>
         <TableHeader>
           <TableRow className="bg-gray-50/50">

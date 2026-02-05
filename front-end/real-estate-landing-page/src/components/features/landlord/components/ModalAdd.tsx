@@ -2,18 +2,26 @@ import { CsDialog } from "@/components/custom/dialog";
 import { Icon } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { CreateLandlordRequest } from "@/components/features/landlord/dto/landlord.model";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useCreateLandlord } from "../services/mutate";
+import { useCreateLandlord, useUpdateLandlord } from "../services/mutate";
+import { useLandlordDetail } from "../services/query";
 
 const ModalAdd = ({
   open,
   onCancel,
+  id,
 }: {
   open: boolean;
   onCancel: () => void;
+  id?: string;
 }) => {
-  const { mutateAsync: createLandlord, isPending } = useCreateLandlord();
+  const { data: landlordDetail, isLoading: isLoadingLandlordDetail } =
+    useLandlordDetail(id || "");
+  const { mutateAsync: createLandlord, isPending: isCreating } =
+    useCreateLandlord();
+  const { mutateAsync: updateLandlord, isPending: isUpdating } =
+    useUpdateLandlord();
   const {
     control,
     handleSubmit,
@@ -28,20 +36,35 @@ const ModalAdd = ({
     },
   });
 
+  useEffect(() => {
+    if (landlordDetail && id) {
+      reset({
+        name: landlordDetail.data.name,
+        email: landlordDetail.data.email,
+        phoneNumber: landlordDetail.data.phoneNumber,
+        address: landlordDetail.data.address,
+      });
+    }
+  }, [landlordDetail, id, reset]);
+
   const onSubmit = async (data: CreateLandlordRequest) => {
-    await createLandlord(data);
+    if (id) {
+      await updateLandlord({ id, data });
+    } else {
+      await createLandlord(data);
+    }
     reset();
     onCancel();
   };
 
   return (
     <CsDialog
-      title="Add Landlord"
+      title={id ? "Update Landlord" : "Add Landlord"}
       open={open}
       onCancel={onCancel}
       onOk={handleSubmit(onSubmit)}
-      okText="Add Landlord"
-      loading={isPending}
+      okText={id ? "Update Landlord" : "Add Landlord"}
+      loading={isCreating || isUpdating || isLoadingLandlordDetail}
     >
       <form className="flex flex-col gap-4">
         <Controller

@@ -24,7 +24,7 @@ fetchAI.interceptors.request.use(
   },
   (error: AxiosError) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 fetchAI.interceptors.response.use(
@@ -51,5 +51,5 @@ fetchAI.interceptors.response.use(
     }
 
     return Promise.reject(err);
-  }
+  },
 );

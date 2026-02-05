@@ -10,7 +10,7 @@ export default class ExtractService {
   ];
 
   public static readonly ExtractID = (
-    file: FormData
+    file: FormData,
   ): Promise<IResp<string>> => {
     return fetchAI({
       url: ExtractEndpoint.extractID(),
@@ -20,7 +20,7 @@ export default class ExtractService {
   };
 
   public static readonly UploadImage = (
-    file: FormData
+    file: FormData,
   ): Promise<IResp<string>> => {
     return fetchAI({
       url: ExtractEndpoint.uploadImage(),
@@ -30,7 +30,7 @@ export default class ExtractService {
   };
 
   public static readonly registration = (
-    data: IExtractService.IRegistrationRequest
+    data: IExtractService.IRegistrationRequest,
   ): Promise<IResp<string>> => {
     return fetchAI({
       url: ExtractEndpoint.registration(),

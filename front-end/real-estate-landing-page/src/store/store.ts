@@ -61,13 +61,13 @@ const formSlice = createSlice({
     },
     updateBusinessInfo: (
       state,
-      action: PayloadAction<Partial<BusinessInfo>>
+      action: PayloadAction<Partial<BusinessInfo>>,
     ) => {
       state.businessInfo = { ...state.businessInfo, ...action.payload };
     },
     updateVerification: (
       state,
-      action: PayloadAction<Partial<Verification>>
+      action: PayloadAction<Partial<Verification>>,
     ) => {
       state.verification = { ...state.verification, ...action.payload };
     },

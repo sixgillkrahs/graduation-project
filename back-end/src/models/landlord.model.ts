@@ -117,10 +117,13 @@ class LandlordClass {
         page,
         limit,
         sortBy: "createdAt:desc",
-        populate: "userId",
       },
       {
-        $or: [{ "identityInfo.agentName": searchRegex }],
+        $or: [
+          { name: searchRegex },
+          { email: searchRegex },
+          { phoneNumber: searchRegex },
+        ],
       },
     );
   }

@@ -79,7 +79,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         {error && <p className="text-red-500 text-sm! font-medium!">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 Checkbox.displayName = "Checkbox";

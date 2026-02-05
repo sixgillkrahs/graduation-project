@@ -49,7 +49,7 @@ const OTP = ({
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    index: number
+    index: number,
   ) => {
     if (e.key === "Backspace") {
       if (values[index]) {
@@ -91,7 +91,7 @@ const OTP = ({
             className={clsx(
               "w-12 h-12 rounded-md border text-center text-xl outline-none transition",
               "focus:border-red-500",
-              error ? "border-red-500" : "border-gray-300"
+              error ? "border-red-500" : "border-gray-300",
             )}
             value={values[index] || ""}
             onChange={(e) => handleChange(e, index)}

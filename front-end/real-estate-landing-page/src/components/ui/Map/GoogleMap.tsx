@@ -44,9 +44,7 @@ const GoogleMap = ({
   const [markerPosition, setMarkerPosition] = useState<{
     lat: number;
     lng: number;
-  } | null>(
-    latitude && longitude ? { lat: latitude, lng: longitude } : null,
-  );
+  } | null>(latitude && longitude ? { lat: latitude, lng: longitude } : null);
 
   const center =
     latitude && longitude ? { lat: latitude, lng: longitude } : defaultCenter;

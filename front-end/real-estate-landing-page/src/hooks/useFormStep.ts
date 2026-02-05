@@ -7,7 +7,7 @@ import {
 } from "@/store/store";
 
 export const useFormStep = (
-  step: "basicInfo" | "businessInfo" | "verification"
+  step: "basicInfo" | "businessInfo" | "verification",
 ) => {
   const dispatch = useDispatch<AppDispatch>();
   const formData = useSelector((state: RootState) => state.form[step]);

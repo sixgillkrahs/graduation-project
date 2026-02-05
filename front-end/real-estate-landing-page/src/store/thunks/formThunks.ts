@@ -53,7 +53,7 @@ export const submitForm = createAsyncThunk(
 
       return rejectWithValue(errorMessage);
     }
-  }
+  },
 );
 
 function validateForm(formData: any): string[] {

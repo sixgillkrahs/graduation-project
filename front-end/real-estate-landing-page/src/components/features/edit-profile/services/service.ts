@@ -5,7 +5,7 @@ import { EditProfileEndpoint } from "./config";
 
 export default class EditProfileService {
   public static readonly editProfile = (
-    data: IEditProfileService.IFormData
+    data: IEditProfileService.IFormData,
   ): Promise<IResp<void>> => {
     return request({
       url: EditProfileEndpoint.editProfile(),

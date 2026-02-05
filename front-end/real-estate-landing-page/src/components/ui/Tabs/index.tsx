@@ -34,7 +34,7 @@ const Tabs = ({
             fullWidth && "flex-1 w-full text-center",
             activeTab === index
               ? "text-white"
-              : "text-black hover:text-gray-600"
+              : "text-black hover:text-gray-600",
           )}
           onClick={() => handleClick(index)}
         >

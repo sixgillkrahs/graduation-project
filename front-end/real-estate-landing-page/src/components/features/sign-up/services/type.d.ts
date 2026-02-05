@@ -7,7 +7,7 @@ namespace ISignUpService {
     phone: string;
     confirmPassword: string;
     verifyPolicy: boolean;
-    username?: string
-    roleCode: "USER"
+    username?: string;
+    roleCode: "USER";
   }
 }
