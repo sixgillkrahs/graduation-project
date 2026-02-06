@@ -8,8 +8,9 @@ export interface IScheduleDTO {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  startTime: Date;
-  endTime: Date;
+  date: Date;
+  startTime: string;
+  endTime: string;
   location: string;
   type: SCHEDULE_TYPE;
   status: SCHEDULE_STATUS;
@@ -18,4 +19,5 @@ export interface IScheduleDTO {
   createdAt?: Date;
   updatedAt?: Date;
   title: string;
+  color?: string;
 }

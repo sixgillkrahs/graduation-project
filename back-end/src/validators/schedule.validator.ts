@@ -20,8 +20,9 @@ export const validateBodyScheduleSchema = (
       customerEmail: z
         .string({ message: t.email })
         .min(1, { message: t.email }),
-      startTime: z.coerce.date({ message: t.required("startTime") }),
-      endTime: z.coerce.date({ message: t.required("endTime") }),
+      date: z.coerce.date({ message: t.required("date") }),
+      startTime: z.string({ message: t.required("startTime") }),
+      endTime: z.string({ message: t.required("endTime") }),
       location: z
         .string({ message: t.required("location") })
         .min(1, { message: t.required("location") }),
@@ -35,6 +36,7 @@ export const validateBodyScheduleSchema = (
         z.string({ message: t.required("customerNote") }),
       ),
       agentNote: z.optional(z.string({ message: t.required("agentNote") })),
+      color: z.optional(z.string()),
     }),
   });
 };

@@ -2,6 +2,7 @@
 @import "./variables.css";
 @import "./toast.css";
 @import "./tw-animate.css";
+@import "./schedule.css";
 
 @custom-variant dark (&:is(.dark *));
 

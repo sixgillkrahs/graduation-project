@@ -1,0 +1,59 @@
+.calendar-wrapper .fc {
+    font-family: inherit;
+}
+
+.calendar-wrapper .fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.calendar-wrapper .fc-button-primary {
+    background-color: transparent;
+    border-color: transparent;
+    color: #000;
+    box-shadow: none !important;
+    background-image: none !important;
+    text-shadow: none !important;
+
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    text-transform: capitalize;
+
+    padding: 6px 16px;
+    border-radius: 9999px !important;
+    transition: all 0.2s ease;
+    margin: 0 !important;
+}
+
+.calendar-wrapper .fc-button-primary:hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: #4b5563;
+}
+
+.calendar-wrapper .fc-button-primary:not(:disabled).fc-button-active,
+.calendar-wrapper .fc-button-primary:not(:disabled):active {
+    background-color: #000 !important;
+    border-color: #000 !important;
+    color: #fff !important;
+}
+
+.calendar-wrapper .fc-button-primary:focus {
+    box-shadow: none !important;
+}
+
+.calendar-wrapper .fc-today-button {
+    opacity: 1;
+    font-weight: 600;
+}
+
+.calendar-wrapper .fc-prev-button,
+.calendar-wrapper .fc-next-button {
+    padding: 6px 10px;
+}
+
+.calendar-wrapper .fc-daygrid-day.fc-day-today {
+    background-color: rgba(240, 248, 255, 0.4);
+}

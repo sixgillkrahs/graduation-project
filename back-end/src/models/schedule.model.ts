@@ -24,13 +24,15 @@ export interface ISchedule {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  startTime: Date;
-  endTime: Date;
+  date: Date;
+  startTime: string;
+  endTime: string;
   location: string;
   type: SCHEDULE_TYPE;
   status: SCHEDULE_STATUS;
   customerNote: string;
   agentNote: string;
+  color?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -108,12 +110,16 @@ const scheduleSchema = new mongoose.Schema<
       required: true,
       trim: true,
     },
-    startTime: {
+    date: {
       type: Date,
       required: true,
     },
+    startTime: {
+      type: String,
+      required: true,
+    },
     endTime: {
-      type: Date,
+      type: String,
       required: true,
     },
     location: {
@@ -140,6 +146,10 @@ const scheduleSchema = new mongoose.Schema<
       type: String,
       required: false,
       trim: true,
+    },
+    color: {
+      type: String,
+      required: false,
     },
   },
   {

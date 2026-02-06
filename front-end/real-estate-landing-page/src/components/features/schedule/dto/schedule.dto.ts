@@ -7,8 +7,9 @@ export interface IScheduleDTO {
   customerPhone: string;
   title: string;
   customerEmail: string;
-  startTime: Date;
-  endTime: Date;
+  date: Date;
+  startTime: string;
+  endTime: string;
   location: string;
   type: SCHEDULE_TYPE;
   status: SCHEDULE_STATUS;
@@ -16,6 +17,7 @@ export interface IScheduleDTO {
   agentNote: string;
   createdAt?: Date;
   updatedAt?: Date;
+  color?: string;
 }
 
 export enum SCHEDULE_TYPE {
@@ -38,11 +40,13 @@ export interface CreateScheduleRequest {
   customerPhone?: string;
   customerEmail?: string;
   title: string;
-  startTime: Date;
-  endTime: Date;
+  date: Date;
+  startTime: string;
+  endTime: string;
   location?: string;
   type: SCHEDULE_TYPE;
   status: SCHEDULE_STATUS;
   customerNote: string;
   agentNote: string;
+  color?: string;
 }
