@@ -50,3 +50,48 @@ export interface CreateScheduleRequest {
   agentNote: string;
   color?: string;
 }
+
+export interface ScheduleEvent {
+  title: string;
+  groupId: string;
+  publicId: string;
+  url: string;
+  recurringDef: any;
+  defId: string;
+  sourceId: string;
+  allDay: boolean;
+  hasEnd: boolean;
+  ui: Ui;
+  extendedProps: ExtendedProps;
+}
+
+export interface Ui {
+  display: any;
+  constraints: any[];
+  overlap: any;
+  allows: any[];
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
+  classNames: any[];
+}
+
+export interface ExtendedProps {
+  type: string;
+  status: string;
+  location: string;
+  customerName: string;
+  description: string;
+}
+
+export interface EventClickArgs {
+  _def: {
+    publicId: string;
+  };
+  _instance: {
+    range: {
+      start: Date;
+      end: Date;
+    };
+  };
+}

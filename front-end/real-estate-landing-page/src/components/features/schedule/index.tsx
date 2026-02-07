@@ -2,18 +2,8 @@
 
 import { CsButton } from "@/components/custom";
 import { cn } from "@/lib/utils";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import {
-  addHours,
-  endOfMonth,
-  format,
-  isSameDay,
-  startOfMonth,
-} from "date-fns";
+import { addHours, format, isSameDay } from "date-fns";
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
@@ -23,32 +13,37 @@ import {
   Plus,
   User,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import EventModal from "./components/EventModal";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import CalendarArea from "./components/CalendarArea";
 import { SCHEDULE_STATUS, SCHEDULE_TYPE } from "./dto/schedule.dto";
+import { reducer } from "./hooks/useReduce";
 import { useGetSchedulesMe } from "./services/query";
-import InputColor from "@/components/ui/input-color";
 
 const Schedule = () => {
-  const [currentRange, setCurrentRange] = useState({
-    start: startOfMonth(new Date()).toISOString(),
-    end: endOfMonth(new Date()).toISOString(),
+  const [state, dispatch] = useReducer(reducer, {
+    events: [],
+    filterType: "ALL",
   });
+  const [currentRange, setCurrentRange] = useState<{
+    start: string;
+    end: string;
+  }>();
+  const calendarRef = useRef<FullCalendar>(null);
 
-  const { data: schedulesData } = useGetSchedulesMe({
-    start: currentRange.start,
-    end: currentRange.end,
-  });
+  const { data: schedulesData } = useGetSchedulesMe(currentRange);
 
-  const [events, setEvents] = useState<any[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  // const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
-  const [filterType, setFilterType] = useState<SCHEDULE_TYPE | "ALL">("ALL");
-
-  const calendarRef = useRef<FullCalendar>(null);
   const selectedDateObj = new Date(selectedDate);
 
   useEffect(() => {
@@ -78,7 +73,6 @@ const Schedule = () => {
                 startTimeStr = format(startD, "HH:mm");
                 endTimeStr = format(endD, "HH:mm");
               } else {
-                console.warn("Skipping unrecognized event format:", s);
                 return null;
               }
 
@@ -97,7 +91,6 @@ const Schedule = () => {
                 endTimeStr = `0${endTimeStr}`.slice(-5);
               }
 
-              // Final robust check
               if (!dateStr || !startTimeStr) return null;
 
               const fullStart = `${dateStr}T${startTimeStr}`;
@@ -116,129 +109,58 @@ const Schedule = () => {
                 color: s.color,
               };
             } catch (err) {
-              console.error("Error mapping event:", s, err);
               return null;
             }
           })
           .filter(Boolean) as any[];
-        console.log("Mapped events:", mappedEvents);
-        setEvents(mappedEvents);
+        dispatch({ type: "SET_EVENTS", payload: mappedEvents });
       }
     }
   }, [schedulesData]);
 
-  const handleDatesSet = (dateInfo: any) => {
+  const handleDatesSet = useCallback((dateInfo: any) => {
     setCurrentRange({
       start: dateInfo.startStr,
       end: dateInfo.endStr,
     });
-  };
+  }, []);
 
-  const filteredEvents = events.filter(
-    (e) => filterType === "ALL" || e.type === filterType,
-  );
+  const filteredEvents = useMemo(() => {
+    return state.events.filter(
+      (e: any) => state.filterType === "ALL" || e.type === state.filterType,
+    );
+  }, [state.events, state.filterType]);
 
-  const dailyEvents = filteredEvents.filter((e) =>
+  const dailyEvents = filteredEvents.filter((e: any) =>
     isSameDay(new Date(e.start), selectedDateObj),
   );
 
-  const handleDateClick = (info: any) => {
+  const handleDateClick = useCallback((info: any) => {
     setSelectedEvent(null);
     setSelectedDate(info.dateStr);
-  };
+  }, []);
 
-  const handleEventClick = (info: any) => {
-    const event = events.find((e) => e.id === info.event.id);
-    if (event) {
-      setSelectedEvent(event);
-      setModalOpen(true);
-    }
-  };
+  // const handleEventClick = (info: any) => {
+  //   const event = events.find((e) => e.id === info.event.id);
+  //   if (event) {
+  //     setSelectedEvent(event);
+  //     setModalOpen(true);
+  //   }
+  // };
 
-  const handleSaveEvent = (newEvent: any) => {
-    setEvents((prev) => {
-      const exists = prev.find((e) => e.id === newEvent.id);
-      if (exists) {
-        return prev.map((e) => (e.id === newEvent.id ? newEvent : e));
-      }
-      return [...prev, newEvent];
-    });
-  };
+  // const handleSaveEvent = (newEvent: any) => {
+  //   setEvents((prev) => {
+  //     const exists = prev.find((e) => e.id === newEvent.id);
+  //     if (exists) {
+  //       return prev.map((e) => (e.id === newEvent.id ? newEvent : e));
+  //     }
+  //     return [...prev, newEvent];
+  //   });
+  // };
 
-  const handleDeleteEvent = (id: string) => {
-    setEvents((prev) => prev.filter((e) => e.id !== id));
-  };
-
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case SCHEDULE_TYPE.MEETING:
-        return "#3b82f6"; // Blue
-      case SCHEDULE_TYPE.VIEWING:
-        return "#10b981"; // Emerald
-      case SCHEDULE_TYPE.CALL:
-        return "#f59e0b"; // Amber
-      default:
-        return "#6b7280"; // Gray
-    }
-  };
-
-  const getEventIcon = (type: string, className?: string) => {
-    const props = { className: cn("w-4 h-4", className) };
-    switch (type) {
-      case SCHEDULE_TYPE.VIEWING:
-        return <MapPin {...props} />;
-      case SCHEDULE_TYPE.MEETING:
-        return <User {...props} />; // Face to face
-      case SCHEDULE_TYPE.CALL:
-        return <Phone {...props} />;
-      default:
-        return <CalendarIcon {...props} />;
-    }
-  };
-
-  const renderEventContent = (eventInfo: any) => {
-    const event = events.find((e) => e.id === eventInfo.event.id);
-    if (!event) return null;
-
-    const isMonthView = eventInfo.view.type === "dayGridMonth";
-    const color = event.color || getEventColor(event.type);
-
-    return (
-      <div className="w-full overflow-hidden">
-        {isMonthView ? (
-          <div className="flex items-center gap-1 px-1 py-0.5 text-xs truncate">
-            <div
-              className="w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ backgroundColor: color }}
-            />
-            <span className="font-medium text-gray-700 truncate">
-              {eventInfo.timeText} {event.title}
-            </span>
-          </div>
-        ) : (
-          <div
-            className="flex flex-col h-full p-1 border-l-4 rounded-sm shadow-sm transition-all hover:brightness-95"
-            style={{ borderLeftColor: color, backgroundColor: `${color}33` }}
-          >
-            <div className="font-bold text-xs text-gray-800 flex justify-between items-center">
-              <span>{event.title}</span>
-              {getEventIcon(event.type, "w-3 h-3 text-gray-500")}
-            </div>
-            {event.customerName && (
-              <div className="text-[10px] text-gray-600 truncate mt-0.5 flex items-center gap-1">
-                <User size={10} /> {event.customerName}
-              </div>
-            )}
-            {event.location && (
-              <div className="text-[10px] text-gray-500 truncate mt-auto flex items-center gap-1">
-                <MapPin size={10} /> {event.location}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  };
+  // const handleDeleteEvent = (id: string) => {
+  //   setEvents((prev) => prev.filter((e) => e.id !== id));
+  // };
 
   return (
     <div className="h-full flex flex-col gap-6 p-6 animate-in fade-in duration-500 bg-gray-50/50 font-sans">
@@ -261,10 +183,12 @@ const Schedule = () => {
           {/* Filter Pills */}
           <div className="flex bg-white p-1 rounded-lg border border-gray-200 shadow-sm">
             <button
-              onClick={() => setFilterType("ALL")}
+              onClick={() =>
+                dispatch({ type: "SET_FILTER_TYPE", payload: "ALL" })
+              }
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                filterType === "ALL"
+                state.filterType === "ALL"
                   ? "bg-gray-100 text-gray-900 shadow-sm"
                   : "text-gray-500 hover:text-gray-700",
               )}
@@ -272,10 +196,15 @@ const Schedule = () => {
               All
             </button>
             <button
-              onClick={() => setFilterType(SCHEDULE_TYPE.VIEWING)}
+              onClick={() =>
+                dispatch({
+                  type: "SET_FILTER_TYPE",
+                  payload: SCHEDULE_TYPE.VIEWING,
+                })
+              }
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1",
-                filterType === SCHEDULE_TYPE.VIEWING
+                state.filterType === SCHEDULE_TYPE.VIEWING
                   ? "bg-emerald-50 text-emerald-700 shadow-sm"
                   : "text-gray-500 hover:text-gray-700",
               )}
@@ -283,10 +212,15 @@ const Schedule = () => {
               <MapPin size={12} /> Viewings
             </button>
             <button
-              onClick={() => setFilterType(SCHEDULE_TYPE.MEETING)}
+              onClick={() =>
+                dispatch({
+                  type: "SET_FILTER_TYPE",
+                  payload: SCHEDULE_TYPE.MEETING,
+                })
+              }
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1",
-                filterType === SCHEDULE_TYPE.MEETING
+                state.filterType === SCHEDULE_TYPE.MEETING
                   ? "bg-blue-50 text-blue-700 shadow-sm"
                   : "text-gray-500 hover:text-gray-700",
               )}
@@ -294,10 +228,15 @@ const Schedule = () => {
               <User size={12} /> Meetings
             </button>
             <button
-              onClick={() => setFilterType(SCHEDULE_TYPE.CALL)}
+              onClick={() =>
+                dispatch({
+                  type: "SET_FILTER_TYPE",
+                  payload: SCHEDULE_TYPE.CALL,
+                })
+              }
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1",
-                filterType === SCHEDULE_TYPE.CALL
+                state.filterType === SCHEDULE_TYPE.CALL
                   ? "bg-amber-50 text-amber-700 shadow-sm"
                   : "text-gray-500 hover:text-gray-700",
               )}
@@ -308,9 +247,9 @@ const Schedule = () => {
 
           <CsButton
             icon={<Plus size={16} />}
-            onClick={() => {
-              setModalOpen(true);
-            }}
+            // onClick={() => {
+            //   setModalOpen(true);
+            // }}
             className="shadow-md hover:shadow-lg transition-all bg-gray-900 text-white hover:bg-gray-800"
           >
             New Schedule
@@ -345,10 +284,10 @@ const Schedule = () => {
               </h3>
               <CsButton
                 icon={<Plus size={16} />}
-                onClick={() => {
-                  setSelectedEvent(null);
-                  setModalOpen(true);
-                }}
+                // onClick={() => {
+                //   setSelectedEvent(null);
+                //   setModalOpen(true);
+                // }}
                 className="shadow-md hover:shadow-lg transition-all bg-gray-900 text-white hover:bg-gray-800"
               />
             </div>
@@ -357,10 +296,10 @@ const Schedule = () => {
               {dailyEvents.length > 0 ? (
                 dailyEvents
                   .sort(
-                    (a, b) =>
+                    (a: any, b: any) =>
                       new Date(a.start).getTime() - new Date(b.start).getTime(),
                   )
-                  .map((event, index) => {
+                  .map((event: any, index: number) => {
                     const isLast = index === dailyEvents.length - 1;
                     const statusColor =
                       event.status === SCHEDULE_STATUS.CONFIRMED
@@ -373,7 +312,6 @@ const Schedule = () => {
 
                     return (
                       <div key={event.id} className="flex gap-3 group">
-                        {/* Time Column */}
                         <div className="flex flex-col items-center min-w-[45px]">
                           <span className="text-xs font-bold text-gray-900">
                             {format(new Date(event.start), "HH:mm")}
@@ -383,21 +321,20 @@ const Schedule = () => {
                           )}
                         </div>
 
-                        {/* Card */}
                         <div
                           className="flex-1 bg-white border border-gray-100 rounded-xl p-3 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer relative overflow-hidden"
-                          onClick={() => {
-                            calendarRef.current?.getApi().gotoDate(event.start);
-                            setSelectedEvent(event);
-                            setModalOpen(true);
-                          }}
+                          // onClick={() => {
+                          //   calendarRef.current?.getApi().gotoDate(event.start);
+                          //   setSelectedEvent(event);
+                          //   setModalOpen(true);
+                          // }}
                         >
                           <div
                             className="absolute left-0 top-0 bottom-0 w-1"
-                            style={{
-                              backgroundColor:
-                                event.color || getEventColor(event.type),
-                            }}
+                            // style={{
+                            //   backgroundColor:
+                            //     event.color || getEventColor(event.type),
+                            // }}
                           />
                           <div className="pl-2">
                             <div className="flex justify-between items-start mb-1">
@@ -459,57 +396,12 @@ const Schedule = () => {
             </div>
           </div>
         </div>
-
-        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-1 overflow-hidden calendar-wrapper">
-          <FullCalendar
-            ref={calendarRef}
-            plugins={[
-              dayGridPlugin,
-              timeGridPlugin,
-              interactionPlugin,
-              listPlugin,
-            ]}
-            initialView="dayGridMonth"
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-            }}
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={3}
-            weekends={true}
-            dateClick={handleDateClick}
-            eventClick={handleEventClick}
-            datesSet={handleDatesSet} // Fetch data on view change
-            events={filteredEvents.map((e) => ({
-              ...e,
-              backgroundColor: "transparent",
-              borderColor: "transparent",
-              textColor: "#1f2937",
-            }))}
-            eventContent={renderEventContent}
-            height="100%"
-            slotLabelClassNames="text-xs text-gray-400 font-medium"
-            dayHeaderClassNames="text-sm font-semibold text-gray-600 py-4 uppercase tracking-wide"
-            businessHours={{
-              daysOfWeek: [1, 2, 3, 4, 5, 6], // Mon - Sat
-              startTime: "08:00",
-              endTime: "19:00",
-            }}
-            nowIndicator={true}
-            allDaySlot={false}
-          />
-        </div>
+        <CalendarArea
+          filteredEvents={filteredEvents}
+          handleDateClick={handleDateClick}
+          handleDatesSet={handleDatesSet}
+        />
       </div>
-
-      <EventModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        initialDate={selectedDate}
-        selectedEvent={selectedEvent}
-      />
     </div>
   );
 };

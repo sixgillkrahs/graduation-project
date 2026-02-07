@@ -2,16 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { ScheduleQueryKey } from "./config";
 import ScheduleService from "./service";
 import { IParamsPagination } from "@/@types/service";
+import { format } from "date-fns";
 
 export interface IParamsSchedule extends Partial<IParamsPagination> {
   start: string;
   end: string;
 }
 
-export const useGetSchedulesMe = (params: IParamsSchedule) => {
+export const useGetSchedulesMe = (params?: IParamsSchedule) => {
+  console.log(params);
   return useQuery({
     queryKey: [ScheduleQueryKey.getSchedules, params],
     queryFn: () => ScheduleService.getSchedulesMe(params),
+    enabled: !!params?.start && !!params?.end,
   });
 };
 
