@@ -1,4 +1,4 @@
-import { Card, Slider } from "@/components/ui";
+import { Slider } from "@/components/ui";
 
 const Earnings = () => {
   return (

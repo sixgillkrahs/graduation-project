@@ -23,12 +23,6 @@ export default class ScheduleService {
     { label: "Completed", value: SCHEDULE_STATUS.COMPLETED },
   ];
 
-  public static readonly TABS = [
-    { title: "General Info", value: 0 },
-    { title: "Customer", value: 1 },
-    { title: "Notes", value: 2 },
-  ];
-
   public static readonly EVENT_COLORS = [
     "#10b981",
     "#3b82f6",

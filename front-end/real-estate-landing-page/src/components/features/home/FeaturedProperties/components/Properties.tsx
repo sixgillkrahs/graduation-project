@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Icon, Tag } from "@/components/ui";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const categories = [
@@ -34,6 +35,12 @@ const Card = ({
   location: string;
   price: string;
 }) => {
+  const router = useRouter();
+
+  const handleViewDetails = () => {
+    router.push("/properties/1");
+  };
+
   return (
     <div className="bg-white p-4 rounded-2xl cs-outline-gray shadow-md flex flex-col justify-between gap-8">
       <img
@@ -46,7 +53,10 @@ const Card = ({
           <span className="cs-paragraph text-xl! font-semibold!">
             ${price}/<span className="text-sm text-gray-500">month</span>
           </span>
-          <CsButton className="cs-outline-black text-sm text-black font-semibold border-none">
+          <CsButton
+            className="cs-outline-black text-sm font-semibold border-none rounded-full"
+            onClick={handleViewDetails}
+          >
             View Details
           </CsButton>
         </div>
@@ -93,12 +103,12 @@ const Properties = () => {
         </div>
         <div className="flex gap-2">
           <CsButton
-            className="bg-black/10 main-color-black font-medium border-none"
+            className="font-medium border-none rounded-full"
             icon={<Icon.ArrowLeft />}
             onClick={() => setIsActive(isActive - 1)}
           />
           <CsButton
-            className="bg-black/10 main-color-black font-medium border-none"
+            className="font-medium border-none rounded-full"
             icon={<Icon.ArrowRight />}
             onClick={() => setIsActive(isActive + 1)}
           ></CsButton>

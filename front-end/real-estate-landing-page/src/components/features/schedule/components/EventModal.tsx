@@ -69,31 +69,39 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
       customerNote: "",
       agentNote: "",
       title: "",
-      color: ScheduleService.EVENT_COLORS[0],
     },
   });
 
+  const currentStatus = watch("status");
+  console.log("Current Status Render:", currentStatus);
+
   useEffect(() => {
-    if (open) {
-      if (scheduleDetail?.data) {
-        reset({
-          title: scheduleDetail?.data.title,
-          color: scheduleDetail?.data.color,
-          date: scheduleDetail?.data.date,
-          startTime: scheduleDetail?.data.startTime,
-          endTime: scheduleDetail?.data.endTime,
-          location: scheduleDetail?.data.location,
-          type: scheduleDetail?.data.type,
-          status: scheduleDetail?.data.status as SCHEDULE_STATUS,
-          customerNote: scheduleDetail?.data.customerNote,
-          agentNote: scheduleDetail?.data.agentNote,
-          customerName: scheduleDetail?.data.customerName,
-          customerPhone: scheduleDetail?.data.customerPhone,
-          customerEmail: scheduleDetail?.data.customerEmail,
-        });
-      }
+    if (open && scheduleDetail?.data) {
+      console.log("Resetting form with:", scheduleDetail.data);
+      const statusToSet = scheduleDetail.data.status || SCHEDULE_STATUS.PENDING;
+      setValue("title", scheduleDetail.data.title || "");
+      setValue(
+        "color",
+        scheduleDetail.data.color || ScheduleService.EVENT_COLORS[0],
+      );
+      setValue(
+        "date",
+        scheduleDetail.data.date
+          ? new Date(scheduleDetail.data.date)
+          : new Date(),
+      );
+      setValue("startTime", scheduleDetail.data.startTime || "09:00");
+      setValue("endTime", scheduleDetail.data.endTime || "10:00");
+      setValue("location", scheduleDetail.data.location || "");
+      setValue("type", scheduleDetail.data.type || SCHEDULE_TYPE.VIEWING);
+      setValue("status", statusToSet);
+      setValue("customerNote", scheduleDetail.data.customerNote || "");
+      setValue("agentNote", scheduleDetail.data.agentNote || "");
+      setValue("customerName", scheduleDetail.data.customerName || "");
+      setValue("customerPhone", scheduleDetail.data.customerPhone || "");
+      setValue("customerEmail", scheduleDetail.data.customerEmail || "");
     }
-  }, [open, scheduleDetail?.data, reset]);
+  }, [open, scheduleDetail?.data, setValue]);
 
   const onTimeChange = (type: "start" | "end", timeStr: string) => {
     if (!timeStr) return;
@@ -211,11 +219,7 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
       }
     >
       <div className="flex justify-center mb-6">
-        <Tabs
-          items={ScheduleService.TABS}
-          current={activeTab}
-          onChange={setActiveTab}
-        />
+        <Tabs items={[]} current={activeTab} onChange={setActiveTab} />
       </div>
 
       {isLoadingDetail || !scheduleDetail ? (
@@ -382,30 +386,37 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
                 name="type"
                 control={control}
                 rules={{ required: "Type is required" }}
-                render={({ field }) => (
-                  <CsSelect
-                    label="Type"
-                    placeholder="Select type"
-                    options={ScheduleService.SCHEDULE_TYPE_OPTIONS}
-                    error={errors.type?.message}
-                    {...field}
-                  />
-                )}
+                render={({ field }) => {
+                  return (
+                    <CsSelect
+                      label="Type"
+                      placeholder="Select type"
+                      options={ScheduleService.SCHEDULE_TYPE_OPTIONS}
+                      error={errors.type?.message}
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
+                    />
+                  );
+                }}
               />
 
               <Controller
                 name="status"
                 control={control}
                 rules={{ required: "Status is required" }}
-                render={({ field }) => (
-                  <CsSelect
-                    label="Status"
-                    placeholder="Select status"
-                    options={ScheduleService.SCHEDULE_STATUS_OPTIONS}
-                    error={errors.status?.message}
-                    {...field}
-                  />
-                )}
+                render={({ field }) => {
+                  console.log(field.value);
+                  return (
+                    <CsSelect
+                      label="Status"
+                      placeholder="Select status"
+                      options={ScheduleService.SCHEDULE_STATUS_OPTIONS}
+                      error={errors.status?.message}
+                      value={field.value}
+                      onChange={(value) => field.onChange(value)}
+                    />
+                  );
+                }}
               />
             </div>
 

@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui";
+import { CsCard } from "@/components/custom/card";
 import React from "react";
 
 const WhyUs = () => {
@@ -13,17 +13,17 @@ const WhyUs = () => {
         step of the way
       </span>
       <div className="w-full md:h-auto lg:h-[300px] grid grid-cols-1 md:grid-cols-3 gap-4 rounded-[16px] ">
-        <Card
+        <CsCard
           image="/icons/clock.svg"
           title="Everything In One Place"
           tag="Comfort"
         />
-        <Card
+        <CsCard
           image="/icons/handshake.svg"
           title="We're With You Every Step Of The Way"
           tag="Trust"
         />
-        <Card
+        <CsCard
           image="/icons/phone.svg"
           title="Stress-Free Renting Made Simple"
           tag="Simplicity"

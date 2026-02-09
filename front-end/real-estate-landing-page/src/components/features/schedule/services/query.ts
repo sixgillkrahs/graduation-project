@@ -10,7 +10,6 @@ export interface IParamsSchedule extends Partial<IParamsPagination> {
 }
 
 export const useGetSchedulesMe = (params?: IParamsSchedule) => {
-  console.log(params);
   return useQuery({
     queryKey: [ScheduleQueryKey.getSchedules, params],
     queryFn: () => ScheduleService.getSchedulesMe(params),

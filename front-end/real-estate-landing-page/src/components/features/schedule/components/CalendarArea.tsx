@@ -4,9 +4,9 @@ import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { memo, useCallback, useRef, useState } from "react";
-import { EventClickArgs } from "../dto/schedule.dto";
 import { renderEventContent } from "./EventItem";
-import EventModal from "./EventModal";
+import EventDialog from "./EventDialog";
+import { EventClickArgs } from "../dto/schedule.dto";
 
 const CalendarArea = ({
   filteredEvents,
@@ -18,18 +18,22 @@ const CalendarArea = ({
   handleDatesSet: (dateInfo: any) => void;
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EventClickArgs | null>(
     null,
   );
 
   const handleEventClick = (info: any) => {
+    setOpen(true);
+    console.log(info.event);
     setSelectedEvent(info.event);
-    setModalOpen(true);
+    // setModalOpen(true);
   };
 
-  const handleCloseModal = useCallback(() => {
-    setModalOpen(false);
+  console.log("first");
+
+  const handleClose = useCallback(() => {
+    setOpen(false);
   }, []);
 
   return (
@@ -77,12 +81,12 @@ const CalendarArea = ({
           nowIndicator={true}
           allDaySlot={false}
         />
+        <EventDialog
+          open={open}
+          onClose={handleClose}
+          id={selectedEvent?._def.publicId || ""}
+        />
       </div>
-      <EventModal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        selectedEvent={selectedEvent!}
-      />
     </>
   );
 };

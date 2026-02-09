@@ -2,7 +2,6 @@
 
 import { CsButton } from "@/components/custom";
 import { cn } from "@/lib/utils";
-import FullCalendar from "@fullcalendar/react";
 import { addHours, format, isSameDay } from "date-fns";
 import {
   Calendar as CalendarIcon,
@@ -13,14 +12,7 @@ import {
   Plus,
   User,
 } from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import CalendarArea from "./components/CalendarArea";
 import { SCHEDULE_STATUS, SCHEDULE_TYPE } from "./dto/schedule.dto";
 import { reducer } from "./hooks/useReduce";
@@ -35,12 +27,9 @@ const Schedule = () => {
     start: string;
     end: string;
   }>();
-  const calendarRef = useRef<FullCalendar>(null);
 
   const { data: schedulesData } = useGetSchedulesMe(currentRange);
 
-  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
-  // const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
@@ -136,31 +125,8 @@ const Schedule = () => {
   );
 
   const handleDateClick = useCallback((info: any) => {
-    setSelectedEvent(null);
     setSelectedDate(info.dateStr);
   }, []);
-
-  // const handleEventClick = (info: any) => {
-  //   const event = events.find((e) => e.id === info.event.id);
-  //   if (event) {
-  //     setSelectedEvent(event);
-  //     setModalOpen(true);
-  //   }
-  // };
-
-  // const handleSaveEvent = (newEvent: any) => {
-  //   setEvents((prev) => {
-  //     const exists = prev.find((e) => e.id === newEvent.id);
-  //     if (exists) {
-  //       return prev.map((e) => (e.id === newEvent.id ? newEvent : e));
-  //     }
-  //     return [...prev, newEvent];
-  //   });
-  // };
-
-  // const handleDeleteEvent = (id: string) => {
-  //   setEvents((prev) => prev.filter((e) => e.id !== id));
-  // };
 
   return (
     <div className="h-full flex flex-col gap-6 p-6 animate-in fade-in duration-500 bg-gray-50/50 font-sans">

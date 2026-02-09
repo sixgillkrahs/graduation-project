@@ -1,4 +1,4 @@
-export const Card = ({
+export const CsCard = ({
   image,
   title,
   tag,
