@@ -86,12 +86,12 @@ const Header = () => {
         </div>
       </div>
       <div className="min-w-[180px] flex justify-end">
-        {isLoading ? (
+            {isLoading ? (
           <div className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1 cs-outline-gray animate-pulse">
             <div className="h-4 w-24 rounded bg-gray-200" />
             <div className="w-8 h-8 rounded-full bg-gray-300" />
-          </div>
-        ) : me?.data?.userId ? (
+              </div>
+            ) : me?.data?.userId ? (
           <div className="hidden md:flex items-center gap-2">
             {me.data.roleId.code === "AGENT" && (
               <Link href="/agent/dashboard">
@@ -101,50 +101,50 @@ const Header = () => {
                 >
                   Agent space
                 </CsButton>
-              </Link>
+                </Link>
             )}
-            <Dropdown
-              trigger={
+                <Dropdown
+                  trigger={
                 <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 cs-outline-gray cursor-pointer">
                   <span className="whitespace-nowrap">
                     {me?.data?.userId?.fullName}
-                  </span>
+                      </span>
                   <Icon.User className="w-8 h-8 rounded-full bg-black text-white p-1.5" />
-                </div>
-              }
-            >
-              <DropdownItem
-                onClick={() => router.push(`/profile`)}
-                icon={<Icon.User className="w-4 h-4" />}
-              >
-                Profile
-              </DropdownItem>
-              <DropdownItem
-                onClick={() => router.push("/settings")}
-                icon={<Icon.Settings className="w-4 h-4" />}
-              >
-                Settings
-              </DropdownItem>
+                    </div>
+                  }
+                >
+                  <DropdownItem
+                    onClick={() => router.push(`/profile`)}
+                    icon={<Icon.User className="w-4 h-4" />}
+                  >
+                    Profile
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() => router.push("/settings")}
+                    icon={<Icon.Settings className="w-4 h-4" />}
+                  >
+                    Settings
+                  </DropdownItem>
               <div className="my-1 border-t border-gray-200" />
-              <DropdownItem
-                danger
-                onClick={handleLogout}
-                icon={<Icon.LogoutCircle className="w-4 h-4" />}
-              >
-                Logout
-              </DropdownItem>
-            </Dropdown>
+                  <DropdownItem
+                    danger
+                    onClick={handleLogout}
+                    icon={<Icon.LogoutCircle className="w-4 h-4" />}
+                  >
+                    Logout
+                  </DropdownItem>
+                </Dropdown>
           </div>
-        ) : (
+            ) : (
           <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2 w-35!">
             <Icon.User className="bg-black w-8 h-8 p-1.5 rounded-full text-white" />
-            <CsButton
+                <CsButton
               type="button"
               className="bg-white! outline-none! border-none! shadow-none! text-black"
-              onClick={handleLogin}
+                  onClick={handleLogin}
             >
               Login
-            </CsButton>
+                </CsButton>
           </div>
         )}
       </div>
