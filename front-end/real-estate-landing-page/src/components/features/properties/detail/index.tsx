@@ -1,6 +1,9 @@
 "use client";
 
 import { CsButton } from "@/components/custom";
+import CsTabs from "@/components/custom/tabs";
+import { Zalo } from "@/components/ui/Icon/Zalo";
+import { Map } from "@/components/ui/Map";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -8,14 +11,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   Bath,
   Bed,
   Calendar as CalendarIcon,
   CheckCircle2,
-  ChevronRight,
   Compass,
-  MapPin,
   Maximize,
   MessageSquare,
   Phone,
@@ -23,14 +26,11 @@ import {
   Star,
   Video,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { usePropertyDetail } from "../services/query";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import CsTabs from "@/components/custom/tabs";
-import dynamic from "next/dynamic";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 
@@ -60,7 +60,6 @@ const PropertyDetail = () => {
 
   const prop = property.data;
 
-  // Mock amenities for display
   const AMENITIES = [
     { name: "Swimming Pool", icon: "🏊‍♂️" },
     { name: "Gym & Fitness", icon: "💪" },
@@ -72,10 +71,8 @@ const PropertyDetail = () => {
 
   return (
     <div className="bg-white min-h-screen pb-20">
-      {/* 1. Media Gallery (Bento Grid) */}
       <div className="container mx-auto px-4 md:px-20 pt-6 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 h-[400px] md:h-[500px] rounded-2xl overflow-hidden relative">
-          {/* Main Large Image */}
           <div className="md:col-span-2 md:row-span-2 relative h-full group cursor-pointer">
             <Image
               src={prop.media.thumbnail || "/placeholder.jpg"}
@@ -94,7 +91,6 @@ const PropertyDetail = () => {
               )}
             </div>
 
-            {/* 3D Tour Button Overlay */}
             {prop.media.virtualTourUrls?.length > 0 && (
               <button className="absolute bottom-4 right-4 bg-white text-gray-900 px-4 py-2 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-50 transition-colors z-20">
                 <Video className="w-5 h-5 main-color-red" />
@@ -260,12 +256,13 @@ const PropertyDetail = () => {
               </h3>
               <div className="w-full h-[300px] bg-red-50 rounded-2xl border border-red-100 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                <div className="text-center z-10">
-                  <MapPin className="w-10 h-10 main-color-red mx-auto mb-2 animate-bounce" />
-                  <p className="main-color-red font-medium">
-                    Map View Placeholder
-                  </p>
-                </div>
+                <Map
+                  latitude={prop.location.coordinates.lat}
+                  longitude={prop.location.coordinates.long}
+                  interactive={false}
+                  onLocationSelect={undefined}
+                  height={"300px"}
+                />
               </div>
             </section>
           </div>
@@ -332,7 +329,7 @@ const PropertyDetail = () => {
                     </CsButton>
                     <CsButton
                       className="w-full"
-                      icon={<MessageSquare className="w-4 h-4 mr-2" />}
+                      icon={<Zalo className="w-4 h-4 mr-2" />}
                     >
                       Zalo
                     </CsButton>
@@ -410,7 +407,6 @@ const PropertyDetail = () => {
                 </div>
               </div>
 
-              {/* Share Button Block */}
               <div className="mt-4 flex justify-center">
                 <button className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 text-sm font-medium transition-colors">
                   <Share2 className="w-4 h-4" /> Share this listing
