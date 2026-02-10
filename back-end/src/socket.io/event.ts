@@ -5,9 +5,11 @@ import { UserService } from "@/services/user.service";
 import { Socket } from "socket.io";
 import { ChatEvent } from "./event-handlers/chat/chat.event";
 import { NoticeEvent } from "./event-handlers/notice/notice.event";
+import { CallEvent } from "./event-handlers/call/call.event";
 
 const chatEvent = new ChatEvent(new ChatService(), new UserService());
 const noticeEvent = new NoticeEvent();
+const callEvent = new CallEvent();
 
 export function socketEventHandle(socket: Socket) {
   eventProcess(socket, {
@@ -35,6 +37,33 @@ export function socketEventHandle(socket: Socket) {
     name: "identity",
     method: "POST",
     action: noticeEvent.identity,
+  });
+
+  // Call events
+  eventProcess(socket, {
+    name: "call:initiate",
+    method: "POST",
+    action: callEvent.initiateCall,
+  });
+  eventProcess(socket, {
+    name: "call:answer",
+    method: "POST",
+    action: callEvent.answerCall,
+  });
+  eventProcess(socket, {
+    name: "call:reject",
+    method: "POST",
+    action: callEvent.rejectCall,
+  });
+  eventProcess(socket, {
+    name: "call:end",
+    method: "POST",
+    action: callEvent.endCall,
+  });
+  eventProcess(socket, {
+    name: "call:signal",
+    method: "POST",
+    action: callEvent.exchangeSignal,
   });
 }
 

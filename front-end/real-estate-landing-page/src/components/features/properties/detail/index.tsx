@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { useCall } from "@/components/features/call/CallProvider";
 import {
   Bath,
   Bed,
@@ -40,6 +41,7 @@ const PropertyDetail = () => {
   const { data: property, isLoading } = usePropertyDetail(id);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [show3D, setShow3D] = useState(false);
+  const { initiateCall } = useCall();
 
   if (isLoading) {
     return (
@@ -314,7 +316,16 @@ const PropertyDetail = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <CsButton
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-200 shadow-indigo-100"
+                      icon={<Video className="w-4 h-4 mr-2" />}
+                      onClick={() =>
+                        prop.userId && initiateCall(prop.userId.id, prop.userId)
+                      }
+                    >
+                      Video Call
+                    </CsButton>
                     <CsButton
                       className="w-full"
                       icon={<Phone className="w-4 h-4 mr-2" />}

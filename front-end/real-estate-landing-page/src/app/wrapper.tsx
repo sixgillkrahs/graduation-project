@@ -9,14 +9,17 @@ import { Provider } from "react-redux";
 import { Toaster } from "sonner";
 
 import { SocketProvider } from "@/components/features/message/services/socket-context";
+import { CallProvider } from "@/components/features/call/CallProvider";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <SocketProvider>
-          <PhotoProvider>{children}</PhotoProvider>
-          <Toaster />
+          <CallProvider>
+            <PhotoProvider>{children}</PhotoProvider>
+            <Toaster />
+          </CallProvider>
         </SocketProvider>
       </Provider>
     </QueryClientProvider>
