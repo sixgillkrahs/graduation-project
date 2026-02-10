@@ -10,3 +10,11 @@ export const useOnSale = (params: IParamsPagination) => {
     placeholderData: keepPreviousData,
   });
 };
+
+export const usePropertyDetail = (id: string) => {
+  return useQuery({
+    queryKey: [PropertyQueryKey.detail, id],
+    queryFn: () => PropertyService.getById(id),
+    enabled: !!id,
+  });
+};

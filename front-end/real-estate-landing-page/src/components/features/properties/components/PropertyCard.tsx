@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export interface PropertyCardProps {
@@ -42,7 +43,9 @@ const PropertyCard = ({
   postedAt,
   className,
   type,
+  id,
 }: PropertyCardProps) => {
+  const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(false);
 
   return (
@@ -51,6 +54,7 @@ const PropertyCard = ({
         "group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full relative",
         className,
       )}
+      onClick={() => router.push(`/properties/${id}`)}
     >
       {/* Image Container */}
       <div className="relative h-64 w-full overflow-hidden bg-gray-100">

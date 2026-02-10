@@ -1,4 +1,4 @@
-import { IPaginationResp, IParamsPagination } from "@/@types/service";
+import { IPaginationResp, IParamsPagination, IResp } from "@/@types/service";
 import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
 import { PropertyDto } from "../dto/property.dto";
@@ -12,6 +12,15 @@ export default class PropertyService {
       url: PropertyEndpoint.onSale(),
       method: AxiosMethod.GET,
       params,
+    });
+  };
+
+  public static readonly getById = (
+    id: string,
+  ): Promise<IResp<PropertyDto>> => {
+    return request({
+      url: PropertyEndpoint.getById(id),
+      method: AxiosMethod.GET,
     });
   };
 }

@@ -1,7 +1,7 @@
-import React from "react";
+import PropertyDetail from "@/components/features/properties/detail";
 
 const Page = () => {
-  return <div>Page</div>;
+  return <PropertyDetail />;
 };
 
 export default Page;
