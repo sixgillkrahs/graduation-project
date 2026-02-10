@@ -430,4 +430,34 @@ export class PropertyController extends BaseController {
       return "success";
     });
   };
+
+  getOnSaleProperties = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { limit, page, sortField, sortOrder, ...filters } = req.query;
+
+      const options = {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 9,
+        sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        populate: "userId", // Populate owner info if needed
+      };
+
+      const filterQuery = {
+        ...filters,
+        status: PropertyStatusEnum.PUBLISHED,
+      };
+
+      // Transform filters if necessary (e.g., regex search for address)
+      // For now pass filters directly, assuming they match model fields or processed later.
+      // But typically req.query contains strings, so numbers need conversion if strict matching.
+      // However, usually detailed filtering requires more parsing.
+      // I'll leave basic filtering for now.
+
+      const properties = await this.propertyService.getProperties(
+        options,
+        filterQuery,
+      );
+      return properties;
+    });
+  };
 }

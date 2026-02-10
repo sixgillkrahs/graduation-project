@@ -19,7 +19,7 @@ const PROPERTY_TYPES = [
 ];
 
 const AdvancedSearch = () => {
-  const [maxPrice, setMaxPrice] = useState(5); // Billion VND
+  const [maxPrice, setMaxPrice] = useState(5);
 
   return (
     <div className="sticky top-16 z-40 bg-white border-b border-gray-100 shadow-sm py-4">
@@ -29,7 +29,7 @@ const AdvancedSearch = () => {
           <div className="w-full md:flex-1 relative group">
             <Input
               placeholder="Search City, District, or Project..."
-              preIcon={<MapPin className="w-5 h-5 text-emerald-600" />}
+              preIcon={<MapPin className="w-5 h-5 main-color-red" />}
               className="border-none shadow-none bg-transparent h-12 text-base placeholder:text-gray-400 focus-visible:ring-0 px-0 md:px-4 pl-10!"
             />
             {/* Mobile separator */}
@@ -54,7 +54,7 @@ const AdvancedSearch = () => {
           <div className="w-full md:w-64">
             <Popover>
               <PopoverTrigger asChild>
-                <button className="w-full h-12 flex items-center justify-between px-3 text-left text-gray-700 hover:text-emerald-700 transition-colors">
+                <button className="w-full h-12 flex items-center justify-between px-3 text-left text-gray-700 hover:text-red-500 transition-colors">
                   <span className="truncate font-medium">
                     Up to {maxPrice} Billion VND
                   </span>
@@ -64,7 +64,7 @@ const AdvancedSearch = () => {
               <PopoverContent className="w-80 p-4" align="center">
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-900">Max Price</h4>
-                  <div className="pt-2 pb-6 px-2">
+                  <div className="pt-2 px-2">
                     <Slider
                       min={0}
                       max={20}
@@ -73,10 +73,6 @@ const AdvancedSearch = () => {
                       onChange={(val) => setMaxPrice(val)}
                     />
                   </div>
-                  <div className="flex justify-between items-center text-sm font-medium text-emerald-700">
-                    <span>0</span>
-                    <span>{maxPrice} Billion</span>
-                  </div>
                 </div>
               </PopoverContent>
             </Popover>
@@ -84,7 +80,7 @@ const AdvancedSearch = () => {
 
           <div className="w-full md:w-auto mt-2 md:mt-0">
             <CsButton
-              className="w-full md:w-auto rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base h-12 px-8 shadow-lg shadow-emerald-200"
+              className="w-full md:w-auto rounded-full text-white font-bold text-base h-12 px-8 shadow-lg"
               icon={<Search className="w-5 h-5 mr-1" />}
             >
               Search

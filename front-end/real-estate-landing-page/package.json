@@ -34,7 +34,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.26",
-    "gra-helper": "^1.0.0",
+    "gra-helper": "^1.0.1",
     "highcharts": "^12.4.0",
     "highcharts-react-official": "^3.2.3",
     "input-otp": "^1.4.2",

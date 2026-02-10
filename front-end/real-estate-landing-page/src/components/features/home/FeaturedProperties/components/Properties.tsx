@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Icon, Tag } from "@/components/ui";
+import { Bath, Bed, Maximize } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -67,13 +68,13 @@ const Card = ({
         <div className="bg-black/10 w-full h-px" />
         <div className="flex justify-start gap-4">
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Icon.HotelBed className="main-color-red" />3 Beds
+            <Bed className="main-color-red w-5 h-5" />3 Beds
           </span>
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Icon.BathRoom className="main-color-red" />3 Bathrooms
+            <Bath className="main-color-red w-5 h-5" />3 Bathrooms
           </span>
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1 ">
-            <Icon.Shape className="main-color-red" />3 m<sup>2</sup>
+            <Maximize className="main-color-red w-5 h-5" />3 m<sup>2</sup>
           </span>
         </div>
       </div>

@@ -1,9 +1,9 @@
 "use client";
 
-import { Bath, Bed, Heart, MapPin, Maximize, User, Video } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 export interface PropertyCardProps {
   id: string;
@@ -27,6 +27,7 @@ export interface PropertyCardProps {
   };
   postedAt: string;
   className?: string;
+  type: "rent" | "sale";
 }
 
 const PropertyCard = ({
@@ -40,6 +41,7 @@ const PropertyCard = ({
   agent,
   postedAt,
   className,
+  type,
 }: PropertyCardProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -67,7 +69,7 @@ const PropertyCard = ({
             </span>
           )}
           <span className="bg-white/90 backdrop-blur-md text-gray-800 text-[10px] font-bold px-2 py-1 rounded-lg">
-            For Rent
+            For {type === "rent" ? "Rent" : "Sale"}
           </span>
         </div>
 
@@ -102,14 +104,14 @@ const PropertyCard = ({
         {/* Price & Title */}
         <div>
           <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-xl md:text-2xl font-bold text-emerald-600">
+            <span className="text-xl md:text-2xl font-bold main-color-red">
               {price}
             </span>
             {unit && (
               <span className="text-sm font-medium text-gray-400">/{unit}</span>
             )}
           </div>
-          <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+          <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-red-500 transition-colors">
             {title}
           </h3>
           <div className="flex items-center gap-1.5 text-gray-500 text-sm mt-1">
@@ -121,17 +123,17 @@ const PropertyCard = ({
         {/* Specs Row */}
         <div className="flex items-center gap-4 py-3 border-t border-b border-gray-50">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Bed className="w-4 h-4 text-emerald-500" />
+            <Bed className="w-4 h-4 main-color-red" />
             <span className="font-medium">{specs.beds} Beds</span>
           </div>
           <div className="w-[1px] h-4 bg-gray-200"></div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Bath className="w-4 h-4 text-emerald-500" />
+            <Bath className="w-4 h-4 main-color-red" />
             <span className="font-medium">{specs.baths} Baths</span>
           </div>
           <div className="w-[1px] h-4 bg-gray-200"></div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Maximize className="w-4 h-4 text-emerald-500" />
+            <Maximize className="w-4 h-4 main-color-red" />
             <span className="font-medium">{specs.area} m²</span>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { FilterX } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
+import { CsCheckbox } from "@/components/custom";
 
 const AMENITIES = [
   { id: "pool", label: "Swimming Pool" },
@@ -29,7 +30,7 @@ const FilterSidebar = () => {
     <aside className="w-full lg:w-1/4 min-w-[280px] bg-white rounded-xl border border-gray-100 p-6 sticky top-24 h-fit shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <FilterX className="w-5 h-5 text-emerald-600" />
+          <FilterX className="w-5 h-5 main-color-red" />
           Filters
         </h2>
         <button
@@ -58,7 +59,7 @@ const FilterSidebar = () => {
               { value: "4+", label: "4+" },
             ]}
             className="flex flex-wrap gap-2 w-full justify-start"
-            classNameItem="flex-1 min-w-[3rem] text-sm data-[state=on]:bg-emerald-600 data-[state=on]:text-white data-[state=on]:border-emerald-600 hover:border-emerald-200 transition-all font-medium py-2"
+            classNameItem="flex-1 min-w-[3rem] text-sm data-[state=on]:bg-red-500 data-[state=on]:text-white! data-[state=on]:border-red-500 hover:border-red-200 transition-all font-medium py-2"
           />
         </div>
 
@@ -78,7 +79,7 @@ const FilterSidebar = () => {
               { value: "3+", label: "3+" },
             ]}
             className="flex flex-wrap gap-2 w-full justify-start"
-            classNameItem="flex-1 min-w-[3rem] text-sm data-[state=on]:bg-emerald-600 data-[state=on]:text-white data-[state=on]:border-emerald-600 hover:border-emerald-200 transition-all font-medium py-2"
+            classNameItem="flex-1 min-w-[3rem] text-sm data-[state=on]:bg-emerald-600 data-[state=on]:text-white! data-[state=on]:border-emerald-600 hover:border-emerald-200 transition-all font-medium py-2"
           />
         </div>
 
@@ -111,13 +112,14 @@ const FilterSidebar = () => {
           <div className="grid grid-cols-1 gap-3">
             {AMENITIES.map((amenity) => (
               <div key={amenity.id} className="flex items-center">
-                <Checkbox
+                {/* <Checkbox
                   id={amenity.id}
                   checked={selectedAmenities.includes(amenity.id)}
                   onChange={() => toggleAmenity(amenity.id)}
                   // label={amenity.label}
                   className="w-full"
-                />
+                /> */}
+                <CsCheckbox label={amenity.label} />
               </div>
             ))}
           </div>
