@@ -1,18 +1,17 @@
 import { AgentController } from "@/controllers/agent.controller";
 import { requireAuth } from "@/middleware/authMiddleware";
-import { validateRequest } from "@/middleware/validateRequest";
 import { EmailQueue } from "@/queues/email.queue";
 import { AgentService } from "@/services/agent.service";
 import { AuthService } from "@/services/auth.service";
 import { EmailService } from "@/services/email.service";
+import { PropertyService } from "@/services/property.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
-import { applicationSchema } from "@/validators/agent.validator";
-import { validateIdHeaderSchema } from "@/validators/base.validator";
 import { Router } from "express";
 
 const router = Router();
 
+const propertyService = new PropertyService();
 const agentService = new AgentService();
 const userService = new UserService();
 const emailService = new EmailService();
@@ -21,20 +20,20 @@ const roleService = new RoleService();
 const emailQueue = new EmailQueue();
 
 const agentController = new AgentController(
-    agentService,
-    userService,
-    emailService,
-    authService,
-    roleService,
-    emailQueue,
+  agentService,
+  userService,
+  emailService,
+  authService,
+  roleService,
+  emailQueue,
+  propertyService,
 );
-
 
 /**
  * @swagger
  * /agents:
  *   get:
- *     summary: Get agent 
+ *     summary: Get agent
  *     tags: [Agent]
  *     parameters:
  *       - in: query
@@ -106,5 +105,29 @@ const agentController = new AgentController(
  *                     type: string
  */
 router.get("/", agentController.getAgents);
+
+/**
+ * @swagger
+ * /agents/me/properties/count:
+ *   get:
+ *     summary: Get total count of published properties by agent
+ *     tags: [Agent]
+ *     responses:
+ *       200:
+ *         description: Total count of properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: integer
+ *                   example: 15
+ */
+router.get(
+  "/me/properties/count",
+  requireAuth,
+  agentController.countPropertiesByAgent,
+);
 
 export default router;

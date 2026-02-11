@@ -460,4 +460,13 @@ export class PropertyController extends BaseController {
       return properties;
     });
   };
+
+  incrementViewProperty = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      // Future: Add Redis cache check here based on IP + PropertyID with TTL 30m
+      const result = await this.propertyService.increaseViewCount(id, 1);
+      return result;
+    });
+  };
 }

@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { formatChatTime } from "@/shared/helper/formatChatTime";
 import { CheckCheck } from "lucide-react";
+import { formatChatTime } from "gra-helper";
 
 const MessageItem = ({
   title,

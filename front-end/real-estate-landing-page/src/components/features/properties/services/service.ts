@@ -23,4 +23,11 @@ export default class PropertyService {
       method: AxiosMethod.GET,
     });
   };
+  
+  public static readonly increaseView = (id: string): Promise<any> => {
+    return request({
+      url: PropertyEndpoint.increaseView(id),
+      method: AxiosMethod.PATCH,
+    });
+  };
 }

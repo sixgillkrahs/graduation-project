@@ -13,6 +13,7 @@ import { ENV } from "@/config/env";
 import bcrypt from "bcrypt";
 import { EmailQueue } from "@/queues/email.queue";
 import { IAuth } from "@/models/auth.model";
+import { PropertyService } from "@/services/property.service";
 
 export class AgentController extends BaseController {
   constructor(
@@ -22,6 +23,7 @@ export class AgentController extends BaseController {
     private authService: AuthService,
     private roleService: RoleService,
     private emailQueue: EmailQueue,
+    private propertyService: PropertyService,
   ) {
     super();
   }
@@ -481,6 +483,21 @@ export class AgentController extends BaseController {
         ],
       });
       return true;
+    });
+  };
+
+  countPropertiesByAgent = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+      const count = await this.propertyService.count({
+        userId: currentUser?.userId._id.toString(),
+        status: "PUBLISHED",
+      });
+      return { count };
     });
   };
 }

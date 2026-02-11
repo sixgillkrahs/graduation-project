@@ -40,6 +40,16 @@ export class PropertyService {
     return await PropertyModel.findByIdAndDelete(id).lean().exec();
   };
 
+  increaseViewCount = async (id: string, amount: number = 1) => {
+    return await PropertyModel.findByIdAndUpdate(
+      id,
+      { $inc: { viewCount: amount } },
+      { new: true },
+    )
+      .select("viewCount")
+      .lean();
+  };
+
   getProperties = async (
     options: {
       page: number;
@@ -51,5 +61,9 @@ export class PropertyService {
     select?: string,
   ) => {
     return await PropertyModel.paginate?.(options, filter, select);
+  };
+
+  count = async (filter: Record<string, any> = {}) => {
+    return await PropertyModel.countDocuments(filter).exec();
   };
 }

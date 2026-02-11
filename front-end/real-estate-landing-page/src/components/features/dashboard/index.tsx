@@ -1,13 +1,21 @@
-import { Icon } from "@/components/ui";
+"use client";
+
+import { BadgeCheck, Building2, Eye, Users } from "lucide-react";
 import CardStats, { CardStatsProps } from "./components/CardStats";
 import ChartLine from "./components/ChartLine";
-import { BadgeCheck, Building2, Eye, Users } from "lucide-react";
+import { useCountPropertiesByAgent } from "./services/query";
 
 const Dashboard = () => {
+  const {
+    data: countPropertiesByAgent,
+    isLoading: isLoadingCountPropertiesByAgent,
+  } = useCountPropertiesByAgent();
   const stats: CardStatsProps[] = [
     {
       title: "Total Views",
-      value: "1240",
+      value: isLoadingCountPropertiesByAgent
+        ? "..."
+        : countPropertiesByAgent?.data?.count?.toString() || "0",
       icon: <Eye className="text-blue-800" />,
       color: "blue",
       percentage: 10,

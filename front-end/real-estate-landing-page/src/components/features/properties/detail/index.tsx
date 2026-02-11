@@ -13,12 +13,14 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import {
   Bath,
   Bed,
   Calendar as CalendarIcon,
   CheckCircle2,
   Compass,
+  Map as MapIcon,
   Maximize,
   MessageSquare,
   Phone,
@@ -29,7 +31,8 @@ import {
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useIncreaseView } from "../services/mutate";
 import { usePropertyDetail } from "../services/query";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
@@ -40,6 +43,15 @@ const PropertyDetail = () => {
   const { data: property, isLoading } = usePropertyDetail(id);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [show3D, setShow3D] = useState(false);
+  const { mutate: increaseView } = useIncreaseView();
+
+  useEffect(() => {
+    if (id) {
+      setTimeout(() => {
+        increaseView(id);
+      }, 3000);
+    }
+  }, [id, increaseView]);
 
   if (isLoading) {
     return (
@@ -130,6 +142,63 @@ const PropertyDetail = () => {
           {/* 2. Left Column (Content - 65%) */}
           <div className="w-full lg:w-[65%] space-y-10">
             {/* Header */}
+            <div className="space-y-4">
+              <nav className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                <span className="hover:text-emerald-600 cursor-pointer">
+                  Home
+                </span>
+                <span>/</span>
+                <span className="hover:text-emerald-600 cursor-pointer">
+                  {findOptionLabel(prop.location.province, LIST_PROVINCE)}
+                </span>
+                <span>/</span>
+                <span className="hover:text-emerald-600 cursor-pointer">
+                  {findOptionLabel(prop.location.ward, LIST_WARD)}
+                </span>
+              </nav>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight">
+                {prop.title}
+              </h1>
+              <div className="flex flex-col md:flex-row md:items-center gap-4 text-gray-500">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-gray-100 rounded-full">
+                    <MapIcon className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <span>
+                    {prop.location.address},{" "}
+                    {findOptionLabel(prop.location.ward, LIST_WARD)},{" "}
+                    {findOptionLabel(prop.location.province, LIST_PROVINCE)}
+                  </span>
+                </div>
+                <div className="hidden md:block w-1 h-1 rounded-full bg-gray-300"></div>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4" />
+                  <span>
+                    Posted {format(new Date(prop.createdAt), "MMM dd, yyyy")}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Badge
+                  variant="outline"
+                  className="border-emerald-200 text-emerald-700 bg-emerald-50"
+                >
+                  {prop.propertyType}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="border-blue-200 text-blue-700 bg-blue-50"
+                >
+                  {prop.features.legalStatus}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className="border-orange-200 text-orange-700 bg-orange-50"
+                >
+                  {prop.features.furniture}
+                </Badge>
+              </div>
+            </div>
 
             {/* Key Specs Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-t border-b border-gray-100">
@@ -415,6 +484,31 @@ const PropertyDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Similar Homes Section */}
+        <section className="mt-20 pt-10 border-t border-gray-200">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Similar Homes You Might Like
+            </h2>
+            <button className="text-emerald-600 font-bold hover:underline">
+              View All
+            </button>
+          </div>
+          {/* Placeholder for Similar Properties Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Using skeleton or mock cards if no data, logic to fetch similar items needed */}
+            <div className="bg-gray-50 h-80 rounded-2xl flex items-center justify-center border border-dashed border-gray-300">
+              <p className="text-gray-400 font-medium">Similar Property #1</p>
+            </div>
+            <div className="bg-gray-50 h-80 rounded-2xl flex items-center justify-center border border-dashed border-gray-300">
+              <p className="text-gray-400 font-medium">Similar Property #2</p>
+            </div>
+            <div className="bg-gray-50 h-80 rounded-2xl flex items-center justify-center border border-dashed border-gray-300">
+              <p className="text-gray-400 font-medium">Similar Property #3</p>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

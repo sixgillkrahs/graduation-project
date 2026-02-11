@@ -555,4 +555,27 @@ router.get(
   propertyController.getPendingProperties,
 );
 
+/**
+ * @swagger
+ * /properties/{id}/view:
+ *   patch:
+ *     summary: Increment view count of a property
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *     responses:
+ *       200:
+ *         description: View count incremented
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Property not found
+ */
+router.patch("/:id/view", propertyController.incrementViewProperty);
+
 export default router;

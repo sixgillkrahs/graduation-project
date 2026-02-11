@@ -5,6 +5,7 @@ import { EmailQueue } from "@/queues/email.queue";
 import { AgentService } from "@/services/agent.service";
 import { AuthService } from "@/services/auth.service";
 import { EmailService } from "@/services/email.service";
+import { PropertyService } from "@/services/property.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
 import { applicationSchema } from "@/validators/agent.validator";
@@ -12,6 +13,7 @@ import { validateIdHeaderSchema } from "@/validators/base.validator";
 import { Router } from "express";
 
 const router = Router();
+const propertyService = new PropertyService();
 
 const agentService = new AgentService();
 const userService = new UserService();
@@ -27,6 +29,7 @@ const agentController = new AgentController(
   authService,
   roleService,
   emailQueue,
+  propertyService,
 );
 
 /**

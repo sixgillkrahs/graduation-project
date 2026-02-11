@@ -1,11 +1,11 @@
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { formatChatTime } from "@/shared/helper/formatChatTime";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../services/socket-context";
 import { CsButton } from "@/components/custom";
 import { useGetMe } from "@/shared/auth/query";
+import { formatChatTime } from "gra-helper";
 
 interface ChatDetailProps {
   messages: IConversationService.ConversationDetailDTO[];
