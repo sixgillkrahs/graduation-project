@@ -1,9 +1,12 @@
 import { BaseEvent } from "@/socket.io/base.event";
 import { Socket } from "socket.io";
+import { UserService } from "@/services/user.service";
 
 export class NoticeEvent extends BaseEvent {
-  constructor() {
+  userService: UserService;
+  constructor(userService: UserService) {
     super();
+    this.userService = userService;
   }
 
   identity = async (req: {
@@ -31,8 +34,20 @@ export class NoticeEvent extends BaseEvent {
           data: null,
         };
       }
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        return {
+          code: 404,
+          state: 0,
+          message: "User not found",
+          data: null,
+        };
+      }
+
       console.log(`[NoticeEvent] Socket ${socket.id} joining room: ${userId}`);
       socket.join(userId);
+      socket.data.user = user;
+
       return {
         code: 200,
         state: 1,

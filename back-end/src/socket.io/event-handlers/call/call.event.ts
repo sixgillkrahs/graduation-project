@@ -12,6 +12,10 @@ export class CallEvent extends BaseEvent {
       const { targetUserId, ...callData } = req.body;
       const { user } = req; // Assuming user info is attached to socket req by middleware
 
+      if (!user) {
+        throw new Error("Missing user info");
+      }
+
       if (!targetUserId) {
         throw new Error("Missing targetUserId");
       }

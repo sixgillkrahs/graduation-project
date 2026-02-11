@@ -8,7 +8,7 @@ import { NoticeEvent } from "./event-handlers/notice/notice.event";
 import { CallEvent } from "./event-handlers/call/call.event";
 
 const chatEvent = new ChatEvent(new ChatService(), new UserService());
-const noticeEvent = new NoticeEvent();
+const noticeEvent = new NoticeEvent(new UserService());
 const callEvent = new CallEvent();
 
 export function socketEventHandle(socket: Socket) {

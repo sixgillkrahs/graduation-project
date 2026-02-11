@@ -3,7 +3,7 @@
 import { useCall } from "./CallProvider";
 import { Mic, MicOff, Phone, PhoneOff, Video, VideoOff } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const CallDialog = () => {
@@ -26,6 +26,12 @@ const CallDialog = () => {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
@@ -38,10 +44,10 @@ const CallDialog = () => {
     }
   }, [remoteStream, callState]);
 
-  if (callState === "IDLE" || callState === "ENDED") return null;
+  if (!mounted || callState === "IDLE" || callState === "ENDED") return null;
 
   const content = (
-    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-auto">
       {/* Incoming Call UI */}
       {callState === "INCOMING" && (
         <div className="bg-white rounded-2xl p-8 flex flex-col items-center gap-6 shadow-2xl w-full max-w-sm animate-in fade-in zoom-in duration-300">

@@ -27,6 +27,7 @@ export interface UserId {
   updatedAt: string;
   avatarUrl: string;
   id: string;
+  _id?: string;
 }
 
 export interface Location {

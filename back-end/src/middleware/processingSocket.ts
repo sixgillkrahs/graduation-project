@@ -25,6 +25,7 @@ export const processingSocket = (
       method: data.header.method,
       clientIP: socket.handshake.address || "unknown",
       socket: socket,
+      user: socket.data.user,
     },
   };
 };

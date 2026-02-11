@@ -320,9 +320,14 @@ const PropertyDetail = () => {
                     <CsButton
                       className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-200 shadow-indigo-100"
                       icon={<Video className="w-4 h-4 mr-2" />}
-                      onClick={() =>
-                        prop.userId && initiateCall(prop.userId.id, prop.userId)
-                      }
+                      onClick={() => {
+                        const targetId = prop.userId?._id || prop.userId?.id;
+                        if (targetId) {
+                          initiateCall(targetId, prop.userId);
+                        } else {
+                          console.error("Missing agent ID", prop.userId);
+                        }
+                      }}
                     >
                       Video Call
                     </CsButton>
