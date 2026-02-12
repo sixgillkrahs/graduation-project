@@ -14,6 +14,7 @@ import bcrypt from "bcrypt";
 import { EmailQueue } from "@/queues/email.queue";
 import { IAuth } from "@/models/auth.model";
 import { PropertyService } from "@/services/property.service";
+import { PropertyStatusEnum } from "@/models/property.model";
 
 export class AgentController extends BaseController {
   constructor(
@@ -493,11 +494,73 @@ export class AgentController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const currentUser = req.user;
-      const count = await this.propertyService.count({
+      const filter: any = {
         userId: currentUser?.userId._id.toString(),
-        status: "PUBLISHED",
-      });
+        status: PropertyStatusEnum.PUBLISHED,
+      };
+
+      const count = await this.propertyService.count(filter);
       return { count };
+    });
+  };
+
+  getAgentTotalViews = (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const totalViews = await this.propertyService.getTotalViews(id);
+      return { totalViews };
+    });
+  };
+
+  countTotalView = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+      const totalViews = await this.propertyService.getTotalViews(
+        currentUser.userId._id,
+      );
+      return { totalViews };
+    });
+  };
+
+  countSoldPropertiesByAgent = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+
+      const filter: any = {
+        userId: currentUser?.userId._id.toString(),
+        status: PropertyStatusEnum.SOLD,
+      };
+
+      const count = await this.propertyService.count(filter);
+      return { count };
+    });
+  };
+
+  getAnalytics = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { period } = req.query as { period?: string };
+      const groupBy = period === "year" ? "year" : "month";
+
+      const viewsData = await this.propertyService.getViewsAnalytics(
+        req.user.userId._id,
+        groupBy,
+      );
+
+      const formattedData = viewsData.map((item: any) => ({
+        label: item._id,
+        views: item.views,
+        leads: Math.max(0, Math.floor(item.views * 0.1 - Math.random() * 2)), // Mock leads ~10% views
+      }));
+
+      return formattedData;
     });
   };
 }

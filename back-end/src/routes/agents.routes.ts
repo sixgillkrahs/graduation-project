@@ -130,4 +130,70 @@ router.get(
   agentController.countPropertiesByAgent,
 );
 
+/**
+ * @swagger
+ * /agents/me/properties/count-view:
+ *   get:
+ *     summary: Get total count of views by agent
+ *     tags: [Agent]
+ *     responses:
+ *       200:
+ *         description: Total count of views
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalViews:
+ *                   type: integer
+ *                   example: 15
+ */
+router.get(
+  "/me/properties/count-view",
+  requireAuth,
+  agentController.countTotalView,
+);
+
+/**
+ * @swagger
+ * /agents/me/properties/count-sold:
+ *   get:
+ *     summary: Get total count of sold properties by agent
+ *     tags: [Agent]
+ *     responses:
+ *       200:
+ *         description: Total count of sold properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: integer
+ *                   example: 15
+ */
+router.get(
+  "/me/properties/count-sold",
+  requireAuth,
+  agentController.countSoldPropertiesByAgent,
+);
+
+/**
+ * @swagger
+ * /agents/me/analytics:
+ *   get:
+ *     summary: Get analytics for dashboard chart
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [month, year]
+ *     responses:
+ *       200:
+ *         description: Chart data
+ */
+router.get("/me/analytics", requireAuth, agentController.getAnalytics);
+
 export default router;

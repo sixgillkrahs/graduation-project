@@ -72,7 +72,9 @@ function CsSidebar({
               {logo}
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{info?.name}</span>
+              <span className="truncate font-semibold text-base">
+                {info?.name}
+              </span>
               <span className="truncate text-xs">{info?.plan}</span>
             </div>
           </SidebarMenuButton>
@@ -103,7 +105,9 @@ function CsSidebar({
                           )}
                         >
                           {item.icon && item.icon}
-                          <span className="truncate">{item.title}</span>
+                          <span className="truncate text-base">
+                            {item.title}
+                          </span>
                           {item.children && (
                             <ChevronRight className="ml-auto transition-transform duration-300 group-data-[state=open]/collapsible:rotate-90" />
                           )}
@@ -145,7 +149,7 @@ function CsSidebar({
             className="m-2 cursor-pointer"
           >
             <ArrowLeft />
-            <span className="truncate">Client Mode</span>
+            <span className="truncate text-base">Client Mode</span>
           </SidebarMenuButton>
         </SidebarFooter>
         <SidebarRail />

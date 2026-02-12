@@ -238,6 +238,18 @@ export class PropertyController extends BaseController {
           ErrorCode.NOT_FOUND,
         );
       }
+
+      // Record View
+      const user = (req as any).user;
+      const ip = req.ip || req.socket.remoteAddress;
+      const userAgent = req.get("User-Agent");
+
+      // Non-blocking call to record view
+      this.propertyService.recordView(id, user?.userId, {
+        ip: typeof ip === "string" ? ip : "",
+        userAgent,
+      });
+
       return property;
     });
   };
