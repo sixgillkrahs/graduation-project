@@ -1,5 +1,5 @@
 import { PropertyController } from "@/controllers/property.controller";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { optionalAuth, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { NoticeService } from "@/services/notice.service";
 import { PropertyService } from "@/services/property.service";
@@ -322,7 +322,7 @@ router.get("/on-sale", propertyController.getOnSaleProperties);
  *       404:
  *         description: Property not found
  */
-router.get("/:id", propertyController.getPropertyById);
+router.get("/:id", optionalAuth, propertyController.getPropertyById);
 
 /**
  * @swagger
@@ -576,6 +576,10 @@ router.get(
  *       404:
  *         description: Property not found
  */
-router.patch("/:id/view", propertyController.incrementViewProperty);
+router.patch(
+  "/:id/view",
+  optionalAuth,
+  propertyController.incrementViewProperty,
+);
 
 export default router;

@@ -111,25 +111,33 @@ export class PropertyService {
     userId: string,
     groupBy: "day" | "month" | "year" = "day",
   ) => {
-    const userProperties = await PropertyModel.find({ userId: userId }).select(
-      "_id",
-    );
+    // 1. Get user's properties
+    const userProperties = await PropertyModel.find({
+      userId: new mongoose.Types.ObjectId(userId),
+    }).select("_id");
+
     const propertyIds = userProperties.map((p) => p._id);
+
+    // If no properties, return empty result
+    if (propertyIds.length === 0) {
+      return [];
+    }
 
     let dateFormat = "%Y-%m-%d";
     if (groupBy === "month") dateFormat = "%Y-%m-%d"; // Daily in month
     if (groupBy === "year") dateFormat = "%Y-%m"; // Monthly in year
 
-    // Filter date range based on groupBy
-    const matchFilter: any = { propertyId: { $in: propertyIds } };
-    const now = new Date();
+    const matchFilter: any = {
+      propertyId: { $in: propertyIds },
+    };
 
+    const now = new Date();
     if (groupBy === "month") {
       // Last 30 days
       const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       matchFilter.createdAt = { $gte: last30Days };
     } else if (groupBy === "year") {
-      // This year (Jan-Dec) or Last 12 months? Usually "This Year".
+      // This year (Jan-Dec)
       const startOfYear = new Date(now.getFullYear(), 0, 1);
       matchFilter.createdAt = { $gte: startOfYear };
     }

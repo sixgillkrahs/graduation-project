@@ -13,6 +13,7 @@ import { ErrorCode } from "@/utils/errorCodes";
 import UserModel from "@/models/user.model";
 import { NoticeService } from "@/services/notice.service";
 import { NoticeTypeEnum } from "@/models/notice.model";
+import { redisConnection } from "@/config/redis.connection";
 
 export class PropertyController extends BaseController {
   constructor(
@@ -239,16 +240,22 @@ export class PropertyController extends BaseController {
         );
       }
 
-      // Record View
-      const user = (req as any).user;
-      const ip = req.ip || req.socket.remoteAddress;
-      const userAgent = req.get("User-Agent");
+      // // Record View
+      // const user = (req as any).user;
+      // const ip = req.ip || req.socket.remoteAddress;
+      // const userAgent = req.get("User-Agent");
+      // const cacheKey = `view:${ip}:${id}`;
+      // const cached = await redisConnection.get(cacheKey);
+      // if (cached) {
+      //   return property;
+      // }
+      // await redisConnection.set(cacheKey, "1", "EX", 30 * 60);
 
-      // Non-blocking call to record view
-      this.propertyService.recordView(id, user?.userId, {
-        ip: typeof ip === "string" ? ip : "",
-        userAgent,
-      });
+      // // Non-blocking call to record view
+      // this.propertyService.recordView(id, user?.userId, {
+      //   ip: typeof ip === "string" ? ip : "",
+      //   userAgent,
+      // });
 
       return property;
     });
@@ -476,9 +483,22 @@ export class PropertyController extends BaseController {
   incrementViewProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      // Future: Add Redis cache check here based on IP + PropertyID with TTL 30m
-      const result = await this.propertyService.increaseViewCount(id, 1);
-      return result;
+      const user = (req as any).user;
+      const ip = req.ip || req.socket.remoteAddress;
+      const userAgent = req.get("User-Agent");
+      const cacheKey = `view:${ip}:${id}`;
+      const cached = await redisConnection.get(cacheKey);
+      if (cached) {
+        return;
+      }
+      await redisConnection.set(cacheKey, "1", "EX", 30 * 60);
+
+      // Non-blocking call to record view
+      this.propertyService.recordView(id, user?.userId, {
+        ip: typeof ip === "string" ? ip : "",
+        userAgent,
+      });
+      return true;
     });
   };
 }

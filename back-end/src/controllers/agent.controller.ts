@@ -549,8 +549,14 @@ export class AgentController extends BaseController {
       const { period } = req.query as { period?: string };
       const groupBy = period === "year" ? "year" : "month";
 
+      const userId = req.user?.userId?._id;
+
+      if (!userId) {
+        return [];
+      }
+
       const viewsData = await this.propertyService.getViewsAnalytics(
-        req.user.userId._id,
+        userId,
         groupBy,
       );
 

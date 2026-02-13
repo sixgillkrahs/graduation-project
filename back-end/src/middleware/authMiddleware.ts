@@ -133,3 +133,55 @@ export const requireRole = (roles: string[]) => {
     }
   };
 };
+
+export const optionalAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const cookieHeader = req.headers.cookie;
+    // Check Authorization header as fallback if no cookie
+    const authHeader = req.headers.authorization;
+
+    let token;
+
+    if (cookieHeader) {
+      const cookies = parse(cookieHeader);
+      token = cookies.accessToken;
+    }
+
+    if (!token && authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+
+    if (!token) {
+      return next();
+    }
+
+    try {
+      const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
+      const authService = new AuthService();
+      const user = (await authService.getAuthByUserId(decoded.user._id, [
+        {
+          path: "roleId",
+          select: "_id name code permissionIds",
+        },
+        {
+          path: "userId",
+          select: "_id email fullName isActive phone avatarUrl",
+        },
+      ])) as Root;
+
+      if (user) {
+        req.user = user;
+      }
+      next();
+    } catch (error) {
+      // Token invalid or expired - just ignore and proceed as guest
+      next();
+    }
+  } catch (error) {
+    next();
+  }
+};
