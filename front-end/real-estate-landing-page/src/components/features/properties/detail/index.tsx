@@ -87,7 +87,7 @@ const PropertyDetail = () => {
   ];
 
   const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) {
       setShowLoginDialog(true);
       return;
