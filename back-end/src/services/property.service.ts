@@ -2,6 +2,10 @@ import { singleton } from "@/decorators/singleton";
 import PropertyModel, { IProperty } from "@/models/property.model";
 import { PropertyViewModel } from "@/models/property-view.model";
 import mongoose, { PopulateOptions } from "mongoose";
+import {
+  InteractionType,
+  PropertyInteractionModel,
+} from "@/models/property-interaction.model";
 
 @singleton
 export class PropertyService {
@@ -107,6 +111,20 @@ export class PropertyService {
     await this.increaseViewCount(propertyId, 1);
   };
 
+  recordInteraction = async (
+    propertyId: string,
+    type: InteractionType,
+    userId?: string,
+    metadata: any = {},
+  ) => {
+    return await PropertyInteractionModel.create({
+      propertyId,
+      type,
+      userId: userId ? new mongoose.Types.ObjectId(userId) : undefined,
+      metadata,
+    });
+  };
+
   getViewsAnalytics = async (
     userId: string,
     groupBy: "day" | "month" | "year" = "day",
@@ -142,7 +160,7 @@ export class PropertyService {
       matchFilter.createdAt = { $gte: startOfYear };
     }
 
-    return await PropertyViewModel.aggregate([
+    const viewsData = await PropertyViewModel.aggregate([
       { $match: matchFilter },
       {
         $group: {
@@ -152,5 +170,46 @@ export class PropertyService {
       },
       { $sort: { _id: 1 } },
     ]);
+
+    const leadsData = await PropertyInteractionModel.aggregate([
+      { $match: matchFilter },
+      {
+        $group: {
+          _id: { $dateToString: { format: dateFormat, date: "$createdAt" } },
+          leads: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Merge data
+    const mergedData = new Map();
+
+    // Populate Views
+    viewsData.forEach((item: any) => {
+      mergedData.set(item._id, {
+        label: item._id,
+        views: item.views,
+        leads: 0,
+      });
+    });
+
+    // Populate/Merge Leads
+    leadsData.forEach((item: any) => {
+      if (mergedData.has(item._id)) {
+        mergedData.get(item._id).leads = item.leads;
+      } else {
+        mergedData.set(item._id, {
+          label: item._id,
+          views: 0,
+          leads: item.leads,
+        });
+      }
+    });
+
+    // Convert Map to sorted Array
+    return Array.from(mergedData.values()).sort((a, b) =>
+      a.label.localeCompare(b.label),
+    );
   };
 }

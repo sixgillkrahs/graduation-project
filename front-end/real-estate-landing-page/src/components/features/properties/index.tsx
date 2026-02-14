@@ -16,6 +16,7 @@ import { useOnSale } from "./services/query";
 import { IParamsPagination } from "@/@types/service";
 import { useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRecordInteraction } from "./services/mutate";
 
 const Properties = () => {
   const [params, setParams] = useState<IParamsPagination>({
@@ -23,11 +24,16 @@ const Properties = () => {
     limit: 6,
   });
   const { data: onSale, isLoading, isFetching } = useOnSale(params);
+  const { mutateAsync: recordInteraction } = useRecordInteraction();
   const gridRef = useRef<HTMLDivElement>(null);
 
   const handlePageChange = (page: number) => {
     setParams({ ...params, page });
     gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleSaveProperty = async (id: string) => {
+    await recordInteraction({ id, type: "FAVORITE" });
   };
 
   return (

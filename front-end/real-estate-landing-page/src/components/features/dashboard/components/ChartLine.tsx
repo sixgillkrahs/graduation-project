@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -12,11 +10,14 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useState } from "react";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { useGetAnalytics } from "../services/query";
 
 const chartDataYear = [
   { label: "Jan", views: 186, leads: 80 },
@@ -52,8 +53,9 @@ const chartConfig = {
 
 const ChartLine = () => {
   const [timeRange, setTimeRange] = useState<"month" | "year">("year");
+  const { data: response } = useGetAnalytics(timeRange);
 
-  const data = timeRange === "year" ? chartDataYear : chartDataMonth;
+  const data = response?.data || [];
 
   return (
     <Card className="rounded-2xl shadow-sm border cs-outline-gray">
@@ -95,7 +97,7 @@ const ChartLine = () => {
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <AreaChart
             accessibilityLayer
-            data={data}
+            data={data || []}
             margin={{
               left: 12,
               right: 12,

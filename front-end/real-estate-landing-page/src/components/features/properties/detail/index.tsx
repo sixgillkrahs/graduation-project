@@ -1,6 +1,7 @@
 "use client";
 
 import { CsButton } from "@/components/custom";
+import { AuthActionDialog } from "@/components/custom/auth/AuthActionDialog";
 import CsTabs from "@/components/custom/tabs";
 import { Zalo } from "@/components/ui/Icon/Zalo";
 import { Map } from "@/components/ui/Map";
@@ -20,6 +21,7 @@ import {
   Calendar as CalendarIcon,
   CheckCircle2,
   Compass,
+  Heart,
   Map as MapIcon,
   Maximize,
   MessageSquare,
@@ -32,8 +34,9 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useIncreaseView } from "../services/mutate";
+import { useIncreaseView, useRecordInteraction } from "../services/mutate";
 import { usePropertyDetail } from "../services/query";
+import { toast } from "sonner";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 
@@ -43,7 +46,9 @@ const PropertyDetail = () => {
   const { data: property, isLoading } = usePropertyDetail(id);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [show3D, setShow3D] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { mutate: increaseView } = useIncreaseView();
+  const { mutateAsync: recordInteraction } = useRecordInteraction();
 
   useEffect(() => {
     if (id) {
@@ -80,6 +85,15 @@ const PropertyDetail = () => {
     { name: "24/7 Security", icon: "🛡️" },
     { name: "Wifi & Internet", icon: "📶" },
   ];
+
+  const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (!isLoggedIn) {
+      setShowLoginDialog(true);
+      return;
+    }
+    await recordInteraction({ id, type: "FAVORITE", metadata });
+  };
 
   return (
     <div className="bg-white min-h-screen pb-20">
@@ -476,7 +490,29 @@ const PropertyDetail = () => {
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 flex justify-center gap-4">
+                {/* <button
+                  onClick={handleSaveProperty}
+                  className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-sm font-medium transition-colors"
+                >
+                  <Heart className="w-4 h-4" /> Save this home
+                </button> */}
+                {prop.isFavorite ? (
+                  <button
+                    onClick={() => handleSaveProperty({ action: "UNSAVE" })}
+                    className="flex items-center gap-2 text-red-500 hover:text-red-600 text-sm font-medium transition-colors"
+                  >
+                    <Heart className="w-4 h-4" /> Saved
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleSaveProperty()}
+                    className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-sm font-medium transition-colors"
+                  >
+                    <Heart className="w-4 h-4" /> Save this home
+                  </button>
+                )}
+                <div className="w-px h-4 bg-gray-300"></div>
                 <button className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 text-sm font-medium transition-colors">
                   <Share2 className="w-4 h-4" /> Share this listing
                 </button>
@@ -510,6 +546,13 @@ const PropertyDetail = () => {
           </div>
         </section>
       </main>
+
+      <AuthActionDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        title="Đăng nhập để lưu tin"
+        description="Hãy đăng nhập để lưu lại tin đăng này và dễ dàng tìm lại trong danh sách yêu thích của bạn!"
+      />
     </div>
   );
 };

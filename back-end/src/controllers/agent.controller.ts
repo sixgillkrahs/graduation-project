@@ -555,18 +555,13 @@ export class AgentController extends BaseController {
         return [];
       }
 
-      const viewsData = await this.propertyService.getViewsAnalytics(
+      const analyticsData = await this.propertyService.getViewsAnalytics(
         userId,
         groupBy,
       );
 
-      const formattedData = viewsData.map((item: any) => ({
-        label: item._id,
-        views: item.views,
-        leads: Math.max(0, Math.floor(item.views * 0.1 - Math.random() * 2)), // Mock leads ~10% views
-      }));
-
-      return formattedData;
+      // Service now returns full merged array { label, views, leads }
+      return analyticsData;
     });
   };
 }

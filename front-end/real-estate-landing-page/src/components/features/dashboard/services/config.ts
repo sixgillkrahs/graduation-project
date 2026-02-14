@@ -6,6 +6,8 @@ export const DashboardEndpoint = {
   countSoldPropertiesByAgent: (period?: string) =>
     `/agents/me/properties/count-sold?period=${period}`,
   getSchedulesToday: () => "/schedules/me",
+  analytics: (period?: string) =>
+    `/agents/me/analytics?period=${period || "month"}`,
 } as const;
 
 export const DashboardQueryKey = {
@@ -13,4 +15,5 @@ export const DashboardQueryKey = {
   countTotalView: "countTotalView",
   countSoldPropertiesByAgent: "countSoldPropertiesByAgent",
   getSchedulesToday: "getSchedulesToday",
+  analytics: "analytics",
 } as const;

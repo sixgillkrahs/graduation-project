@@ -2,6 +2,7 @@ import { PropertyController } from "@/controllers/property.controller";
 import { optionalAuth, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { NoticeService } from "@/services/notice.service";
+import { PropertyInteractionService } from "@/services/property-interaction.service";
 import { PropertyService } from "@/services/property.service";
 import { createPropertySchema } from "@/validators/property.validator";
 import { Router } from "express";
@@ -9,9 +10,11 @@ import { Router } from "express";
 const router = Router();
 const propertyService = new PropertyService();
 const noticeService = new NoticeService();
+const propertyInteractionService = new PropertyInteractionService();
 const propertyController = new PropertyController(
   propertyService,
   noticeService,
+  propertyInteractionService,
 );
 
 /**
@@ -322,7 +325,36 @@ router.get("/on-sale", propertyController.getOnSaleProperties);
  *       404:
  *         description: Property not found
  */
-router.get("/:id", optionalAuth, propertyController.getPropertyById);
+router.get("/:id", requireAuth, propertyController.getPropertyById);
+
+/**
+ * @swagger
+ * /properties/{id}/view:
+ *   get:
+ *     summary: Get property details by ID for landing page
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *     responses:
+ *       200:
+ *         description: Property details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Property'
+ *       404:
+ *         description: Property not found
+ */
+router.get(
+  "/:id/view",
+  optionalAuth,
+  propertyController.getPropertyForLandingPage,
+);
 
 /**
  * @swagger
@@ -580,6 +612,40 @@ router.patch(
   "/:id/view",
   optionalAuth,
   propertyController.incrementViewProperty,
+);
+
+/**
+ * @swagger
+ * /properties/{id}/interact:
+ *   post:
+ *     summary: Record user interaction (Lead)
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [VIEW_PHONE, CONTACT_FORM, SCHEDULE_REQUEST]
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Interaction recorded
+ */
+router.post(
+  "/:id/interact",
+  optionalAuth,
+  propertyController.recordInteraction,
 );
 
 export default router;

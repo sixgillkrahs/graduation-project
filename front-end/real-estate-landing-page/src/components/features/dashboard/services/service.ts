@@ -53,4 +53,21 @@ export default class DashboardService {
       params,
     });
   };
+
+  public static readonly getAnalytics = (
+    period?: string,
+  ): Promise<
+    IResp<
+      {
+        label: string;
+        views: number;
+        leads: number;
+      }[]
+    >
+  > => {
+    return request({
+      url: DashboardEndpoint.analytics(period),
+      method: AxiosMethod.GET,
+    });
+  };
 }

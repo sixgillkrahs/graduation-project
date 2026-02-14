@@ -14,11 +14,14 @@ import UserModel from "@/models/user.model";
 import { NoticeService } from "@/services/notice.service";
 import { NoticeTypeEnum } from "@/models/notice.model";
 import { redisConnection } from "@/config/redis.connection";
+import { PropertyInteractionService } from "@/services/property-interaction.service";
+import { InteractionType } from "@/models/property-interaction.model";
 
 export class PropertyController extends BaseController {
   constructor(
     private propertyService: PropertyService,
     private noticeService: NoticeService,
+    private propertyInteractionService: PropertyInteractionService,
   ) {
     super();
   }
@@ -499,6 +502,56 @@ export class PropertyController extends BaseController {
         userAgent,
       });
       return true;
+    });
+  };
+
+  recordInteraction = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const { type, metadata } = req.body;
+      const user = (req as any).user;
+
+      return await this.propertyService.recordInteraction(
+        id,
+        type,
+        user?.userId?._id?.toString(),
+        metadata,
+      );
+    });
+  };
+
+  getPropertyForLandingPage = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const lang = ApiRequest.getCurrentLang(req);
+      const user = (req as any).user;
+      const property = await this.propertyService.getPropertyById(id, "userId");
+      if (!property) {
+        throw new AppError(
+          lang === "vi" ? "Bất động sản không tồn tại" : "Property not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+      const interactions =
+        await this.propertyInteractionService.getInteractions(
+          id,
+          InteractionType.FAVORITE,
+          user?.userId?._id?.toString(),
+        );
+
+      const latestInteraction = interactions[0];
+      const isFavorite =
+        !!latestInteraction && latestInteraction.metadata?.action !== "UNSAVE";
+
+      return {
+        ...property,
+        isFavorite,
+      };
     });
   };
 }
