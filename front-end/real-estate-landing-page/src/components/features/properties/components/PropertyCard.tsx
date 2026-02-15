@@ -1,10 +1,14 @@
 "use client";
 
+import { useAppDispatch } from "@/lib/hooks";
+import { queryClient } from "@/lib/react-query/queryClient";
 import { cn } from "@/lib/utils";
+import { showAuthDialog } from "@/store/auth-dialog.store";
 import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { PropertyQueryKey } from "../services/config";
+import { useRecordInteraction } from "../services/mutate";
 
 export interface PropertyCardProps {
   id: string;
@@ -29,6 +33,7 @@ export interface PropertyCardProps {
   postedAt: string;
   className?: string;
   type: "rent" | "sale";
+  isFavorite: boolean;
 }
 
 const PropertyCard = ({
@@ -44,9 +49,30 @@ const PropertyCard = ({
   className,
   type,
   id,
+  isFavorite,
 }: PropertyCardProps) => {
   const router = useRouter();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const dispatch = useAppDispatch();
+  const { mutateAsync: recordInteraction } = useRecordInteraction();
+
+  const handleToggleFavorite = async () => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (!isLoggedIn) {
+      dispatch(
+        showAuthDialog({
+          title: "Đăng nhập để lưu tin",
+          description:
+            "Hãy đăng nhập để lưu lại tin đăng này và dễ dàng tìm lại trong danh sách yêu thích của bạn!",
+        }),
+      );
+      return;
+    }
+    let metadata = {
+      action: isFavorite ? "UNSAVE" : "SAVE",
+    };
+    await recordInteraction({ id, type: "FAVORITE", metadata });
+    queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.onSale] });
+  };
 
   return (
     <div
@@ -80,7 +106,7 @@ const PropertyCard = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            setIsFavorite(!isFavorite);
+            handleToggleFavorite();
           }}
           className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white text-gray-500 hover:text-red-500 transition-all shadow-sm z-10"
         >

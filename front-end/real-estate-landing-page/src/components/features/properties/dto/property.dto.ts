@@ -13,7 +13,7 @@ export interface PropertyDto {
   viewCount: number;
   createdAt: string;
   updatedAt: string;
-  id: string;
+  _id: string;
 }
 
 export interface UserId {

@@ -88,10 +88,10 @@ export function AuthActionDialog({
           </AnimatePresence>
 
           <DialogHeader className="mt-6 text-center space-y-2">
-            <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+            <DialogTitle className="text-2xl font-bold tracking-tight text-foreground text-center">
               {title}
             </DialogTitle>
-            <DialogDescription className="text-base text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
+            <DialogDescription className="text-base text-muted-foreground max-w-full mx-auto leading-relaxed text-center">
               {description}
             </DialogDescription>
           </DialogHeader>

@@ -4,6 +4,7 @@ import Logo from "@/assets/Logo.svg";
 import { queryClient } from "@/lib/react-query/queryClient";
 import AuthService from "@/shared/auth/AuthService";
 import { useGetMe } from "@/shared/auth/query";
+import { useLogout } from "@/shared/auth/mutate";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ const Header = () => {
   const { data: me, isLoading, isError, isSuccess } = useGetMe();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { mutateAsync: logout } = useLogout();
 
   useEffect(() => {
     if (isSuccess && me?.data) {
@@ -30,13 +32,9 @@ const Header = () => {
   };
 
   const handleLogout = async () => {
-    const resp = await AuthService.logout();
-    if (resp.success) {
-      toast.success(resp.data.message);
-      queryClient.setQueryData(["me"], null);
-      localStorage.setItem("isLoggedIn", "false");
-      router.refresh();
-    }
+    await logout();
+    localStorage.setItem("isLoggedIn", "false");
+    router.refresh();
   };
 
   return (

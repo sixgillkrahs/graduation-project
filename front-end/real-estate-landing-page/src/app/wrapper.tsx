@@ -9,6 +9,7 @@ import { Provider } from "react-redux";
 import { Toaster } from "sonner";
 
 import { SocketProvider } from "@/components/features/message/services/socket-context";
+import { GlobalAuthDialog } from "@/components/custom/auth/GlobalAuthDialog";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -17,6 +18,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
         <SocketProvider>
           <PhotoProvider>{children}</PhotoProvider>
           <Toaster />
+          <GlobalAuthDialog />
         </SocketProvider>
       </Provider>
     </QueryClientProvider>

@@ -7,7 +7,7 @@ import { PropertyEndpoint } from "./config";
 export default class PropertyService {
   public static readonly onSale = (
     params: IParamsPagination,
-  ): Promise<IPaginationResp<PropertyDto>> => {
+  ): Promise<IPaginationResp<PropertyDto & { isFavorite: boolean }>> => {
     return request({
       url: PropertyEndpoint.onSale(),
       method: AxiosMethod.GET,

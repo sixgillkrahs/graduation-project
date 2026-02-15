@@ -456,6 +456,8 @@ export class PropertyController extends BaseController {
   getOnSaleProperties = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { limit, page, sortField, sortOrder, ...filters } = req.query;
+      const lang = ApiRequest.getCurrentLang(req);
+      const user = (req as any).user;
 
       const options = {
         page: page ? Number(page) : 1,
@@ -475,11 +477,47 @@ export class PropertyController extends BaseController {
       // However, usually detailed filtering requires more parsing.
       // I'll leave basic filtering for now.
 
-      const properties = await this.propertyService.getProperties(
+      const properties = (await this.propertyService.getProperties(
         options,
         filterQuery,
-      );
-      return properties;
+      )) as any;
+
+      let favoritedPropertyIds = new Set<string>();
+      if (user && properties.results && properties.results.length > 0) {
+        const propertyIds = properties.results.map(
+          (p: any) => p._id || p.id,
+        ) as string[];
+        const userId = user.userId._id
+          ? user.userId._id.toString()
+          : user.userId.toString();
+        const interactions =
+          await this.propertyInteractionService.getLatestInteractionsForUser(
+            userId,
+            propertyIds,
+            InteractionType.FAVORITE,
+          );
+
+        interactions.forEach((i: any) => {
+          if (
+            i.latestInteraction &&
+            i.latestInteraction.metadata?.action !== "UNSAVE"
+          ) {
+            favoritedPropertyIds.add(i._id.toString());
+          }
+        });
+      }
+
+      const resultsWithFavorite = properties.results
+        ? properties.results.map((p: any) => {
+            const doc = p.toObject ? p.toObject() : p;
+            return {
+              ...doc,
+              isFavorite: favoritedPropertyIds.has(doc._id.toString()),
+            };
+          })
+        : [];
+
+      return { ...properties, results: resultsWithFavorite };
     });
   };
 

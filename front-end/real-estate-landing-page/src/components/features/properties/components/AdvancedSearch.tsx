@@ -22,7 +22,7 @@ const AdvancedSearch = () => {
   const [maxPrice, setMaxPrice] = useState(5);
 
   return (
-    <div className="sticky top-16 z-40 bg-white border-b border-gray-100 shadow-sm py-4">
+    <div className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm py-4">
       <div className="container mx-auto px-4 md:px-20">
         <div className="flex flex-col md:flex-row items-center gap-4 bg-white md:bg-gray-50 md:p-2 md:rounded-full border border-gray-100 md:border-gray-200">
           {/* Location Input */}

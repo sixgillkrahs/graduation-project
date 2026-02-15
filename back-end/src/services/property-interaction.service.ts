@@ -34,4 +34,29 @@ export class PropertyInteractionService {
       userId,
     }).sort({ createdAt: -1 });
   };
+
+  getLatestInteractionsForUser = async (
+    userId: string,
+    propertyIds: string[],
+    type: InteractionType,
+  ) => {
+    return await PropertyInteractionModel.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          type,
+          propertyId: {
+            $in: propertyIds.map((id) => new mongoose.Types.ObjectId(id)),
+          },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$propertyId",
+          latestInteraction: { $first: "$$ROOT" },
+        },
+      },
+    ]);
+  };
 }

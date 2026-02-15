@@ -187,7 +187,7 @@ router.post(
  *                 totalResults:
  *                   type: integer
  */
-router.get("/", propertyController.getProperties);
+router.get("/", requireAuth, propertyController.getProperties);
 
 /**
  * @swagger
@@ -300,7 +300,7 @@ router.get("/me", requireAuth, propertyController.getMyProperties);
  *                 totalResults:
  *                   type: integer
  */
-router.get("/on-sale", propertyController.getOnSaleProperties);
+router.get("/on-sale", optionalAuth, propertyController.getOnSaleProperties);
 
 /**
  * @swagger

@@ -1,5 +1,6 @@
 "use client";
 
+import { IParamsPagination } from "@/@types/service";
 import { CsPagination } from "@/components/custom";
 import { CsSelect } from "@/components/ui/select";
 import {
@@ -8,15 +9,13 @@ import {
   findOptionLabel,
   formatChatTime,
 } from "gra-helper";
+import { Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
 import AdvancedSearch from "./components/AdvancedSearch";
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
 import PropertyCardSkeleton from "./components/PropertyCardSkeleton";
 import { useOnSale } from "./services/query";
-import { IParamsPagination } from "@/@types/service";
-import { useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
-import { useRecordInteraction } from "./services/mutate";
 
 const Properties = () => {
   const [params, setParams] = useState<IParamsPagination>({
@@ -24,16 +23,11 @@ const Properties = () => {
     limit: 6,
   });
   const { data: onSale, isLoading, isFetching } = useOnSale(params);
-  const { mutateAsync: recordInteraction } = useRecordInteraction();
   const gridRef = useRef<HTMLDivElement>(null);
 
   const handlePageChange = (page: number) => {
     setParams({ ...params, page });
     gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const handleSaveProperty = async (id: string) => {
-    await recordInteraction({ id, type: "FAVORITE" });
   };
 
   return (
@@ -103,9 +97,8 @@ const Properties = () => {
                     ))
                   : onSale?.data?.results?.map((prop) => (
                       <PropertyCard
-                        key={prop.id}
-                        {...prop}
-                        id={prop.id}
+                        key={prop._id}
+                        id={prop._id}
                         image={prop.media.thumbnail}
                         title={prop.title}
                         badges={{
@@ -126,6 +119,7 @@ const Properties = () => {
                         }}
                         postedAt={formatChatTime(prop.createdAt)}
                         type={prop.demandType === "sale" ? "sale" : "rent"}
+                        isFavorite={prop.isFavorite}
                       />
                     ))}
               </div>

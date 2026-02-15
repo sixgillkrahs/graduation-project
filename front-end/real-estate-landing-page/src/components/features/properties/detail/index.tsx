@@ -1,7 +1,6 @@
 "use client";
 
 import { CsButton } from "@/components/custom";
-import { AuthActionDialog } from "@/components/custom/auth/AuthActionDialog";
 import CsTabs from "@/components/custom/tabs";
 import { Zalo } from "@/components/ui/Icon/Zalo";
 import { Map } from "@/components/ui/Map";
@@ -12,7 +11,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useAppDispatch } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+import { showAuthDialog } from "@/store/auth-dialog.store";
 import { format } from "date-fns";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import {
@@ -36,7 +37,6 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
 import { usePropertyDetail } from "../services/query";
-import { toast } from "sonner";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 
@@ -44,9 +44,9 @@ const PropertyDetail = () => {
   const params = useParams();
   const id = params?.id as string;
   const { data: property, isLoading } = usePropertyDetail(id);
+  const dispatch = useAppDispatch();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [show3D, setShow3D] = useState(false);
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { mutate: increaseView } = useIncreaseView();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
 
@@ -89,7 +89,13 @@ const PropertyDetail = () => {
   const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) {
-      setShowLoginDialog(true);
+      dispatch(
+        showAuthDialog({
+          title: "Đăng nhập để lưu tin",
+          description:
+            "Hãy đăng nhập để lưu lại tin đăng này và dễ dàng tìm lại trong danh sách yêu thích của bạn!",
+        }),
+      );
       return;
     }
     await recordInteraction({ id, type: "FAVORITE", metadata });
@@ -491,12 +497,6 @@ const PropertyDetail = () => {
               </div>
 
               <div className="mt-4 flex justify-center gap-4">
-                {/* <button
-                  onClick={handleSaveProperty}
-                  className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-sm font-medium transition-colors"
-                >
-                  <Heart className="w-4 h-4" /> Save this home
-                </button> */}
                 {prop.isFavorite ? (
                   <button
                     onClick={() => handleSaveProperty({ action: "UNSAVE" })}
@@ -546,13 +546,6 @@ const PropertyDetail = () => {
           </div>
         </section>
       </main>
-
-      <AuthActionDialog
-        open={showLoginDialog}
-        onOpenChange={setShowLoginDialog}
-        title="Đăng nhập để lưu tin"
-        description="Hãy đăng nhập để lưu lại tin đăng này và dễ dàng tìm lại trong danh sách yêu thích của bạn!"
-      />
     </div>
   );
 };
