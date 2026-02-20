@@ -5,6 +5,7 @@ import { queryClient } from "@/lib/react-query/queryClient";
 import AuthService from "@/shared/auth/AuthService";
 import { useGetMe } from "@/shared/auth/query";
 import { useLogout } from "@/shared/auth/mutate";
+import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -110,6 +111,13 @@ const Header = () => {
                 </CsButton>
               </Link>
             )}
+            <Link
+              href="/properties?tab=favorites"
+              className="relative group/fav p-2.5 rounded-full cs-outline-gray hover:bg-red-50 transition-all duration-200 cursor-pointer"
+              title="My Favorites"
+            >
+              <Heart className="w-5 h-5 text-gray-500 group-hover/fav:text-red-500 transition-colors duration-200" />
+            </Link>
             <Dropdown
               trigger={
                 <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 cs-outline-gray cursor-pointer">
@@ -125,6 +133,12 @@ const Header = () => {
                 icon={<Icon.User className="w-4 h-4" />}
               >
                 Profile
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => router.push(`/properties?tab=favorites`)}
+                icon={<Heart className="w-4 h-4" />}
+              >
+                My Favorites
               </DropdownItem>
               <DropdownItem
                 onClick={() => router.push("/settings")}

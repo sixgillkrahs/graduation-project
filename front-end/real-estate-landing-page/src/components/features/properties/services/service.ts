@@ -15,6 +15,16 @@ export default class PropertyService {
     });
   };
 
+  public static readonly favorites = (
+    params: IParamsPagination,
+  ): Promise<IPaginationResp<PropertyDto & { isFavorite: boolean }>> => {
+    return request({
+      url: PropertyEndpoint.favorites(),
+      method: AxiosMethod.GET,
+      params,
+    });
+  };
+
   public static readonly getById = (
     id: string,
   ): Promise<IResp<PropertyDto & { isFavorite: boolean }>> => {

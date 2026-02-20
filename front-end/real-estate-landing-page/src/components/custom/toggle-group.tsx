@@ -18,6 +18,8 @@ interface CsToggleGroupProps {
   items: { value: string; label: string }[];
   className?: string;
   classNameItem?: string;
+  value?: string | string[];
+  onValueChange?: (value: any) => void;
 }
 
 const CsToggleGroup = ({
@@ -29,6 +31,8 @@ const CsToggleGroup = ({
   items,
   className,
   classNameItem,
+  value,
+  onValueChange,
 }: CsToggleGroupProps) => {
   const id = useId();
   return (
@@ -39,6 +43,8 @@ const CsToggleGroup = ({
         variant={variant}
         size={size}
         className={className}
+        value={value as any}
+        onValueChange={onValueChange}
       >
         {items.map((item) => (
           <ToggleGroupItem

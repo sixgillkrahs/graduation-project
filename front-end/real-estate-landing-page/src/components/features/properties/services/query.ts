@@ -11,6 +11,14 @@ export const useOnSale = (params: IParamsPagination) => {
   });
 };
 
+export const useFavoriteProperties = (params: IParamsPagination) => {
+  return useQuery({
+    queryKey: [PropertyQueryKey.favorites, params],
+    queryFn: () => PropertyService.favorites(params),
+    placeholderData: keepPreviousData,
+  });
+};
+
 export const usePropertyDetail = (id: string) => {
   return useQuery({
     queryKey: [PropertyQueryKey.detail, id],

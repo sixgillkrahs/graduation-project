@@ -1,10 +1,8 @@
+import { CsCheckbox } from "@/components/custom";
 import CsToggleGroup from "@/components/custom/toggle-group";
 import { CsSelect } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { FilterX } from "lucide-react";
 import { useState } from "react";
-import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
-import { CsCheckbox } from "@/components/custom";
 
 const AMENITIES = [
   { id: "pool", label: "Swimming Pool" },
@@ -17,13 +15,115 @@ const AMENITIES = [
   { id: "furnished", label: "Fully Furnished" },
 ];
 
-const FilterSidebar = () => {
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+export interface FilterValues {
+  "features.bedrooms"?: number;
+  "features.bathrooms"?: number;
+  "features.direction"?: string;
+  [key: string]: any;
+}
+
+interface FilterSidebarProps {
+  onReset?: () => void;
+  onFilterChange?: (filters: FilterValues) => void;
+}
+
+const DIRECTION_MAP: Record<string, string> = {
+  north: "NORTH",
+  south: "SOUTH",
+  east: "EAST",
+  west: "WEST",
+  northeast: "NORTH_EAST",
+  northwest: "NORTH_WEST",
+  southeast: "SOUTH_EAST",
+  southwest: "SOUTH_WEST",
+};
+
+const INITIAL_STATE = {
+  bedrooms: "any",
+  bathrooms: "any",
+  direction: "",
+  amenities: [] as string[],
+};
+
+const buildFilters = (
+  bedrooms: string,
+  bathrooms: string,
+  direction: string,
+): FilterValues => {
+  const filters: FilterValues = {};
+
+  if (bedrooms && bedrooms !== "any") {
+    if (bedrooms === "4+") {
+      filters["minBedrooms"] = 4;
+    } else {
+      filters["features.bedrooms"] = Number(bedrooms);
+    }
+  }
+
+  if (bathrooms && bathrooms !== "any") {
+    if (bathrooms === "3+") {
+      filters["minBathrooms"] = 3;
+    } else {
+      filters["features.bathrooms"] = Number(bathrooms);
+    }
+  }
+
+  if (direction && DIRECTION_MAP[direction]) {
+    filters["features.direction"] = DIRECTION_MAP[direction];
+  }
+
+  return filters;
+};
+
+const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
+  const [bedrooms, setBedrooms] = useState(INITIAL_STATE.bedrooms);
+  const [bathrooms, setBathrooms] = useState(INITIAL_STATE.bathrooms);
+  const [direction, setDirection] = useState(INITIAL_STATE.direction);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(
+    INITIAL_STATE.amenities,
+  );
+  // Radix Select can't clear value to undefined, so we force remount with a key
+  const [resetKey, setResetKey] = useState(0);
+
+  const emitFilterChange = (
+    newBedrooms: string,
+    newBathrooms: string,
+    newDirection: string,
+  ) => {
+    const filters = buildFilters(newBedrooms, newBathrooms, newDirection);
+    onFilterChange?.(filters);
+  };
+
+  const handleBedroomChange = (val: string) => {
+    if (!val) return;
+    setBedrooms(val);
+    emitFilterChange(val, bathrooms, direction);
+  };
+
+  const handleBathroomChange = (val: string) => {
+    if (!val) return;
+    setBathrooms(val);
+    emitFilterChange(bedrooms, val, direction);
+  };
+
+  const handleDirectionChange = (val: string) => {
+    setDirection(val);
+    emitFilterChange(bedrooms, bathrooms, val);
+  };
 
   const toggleAmenity = (id: string) => {
     setSelectedAmenities((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  };
+
+  const handleResetAll = () => {
+    setBedrooms(INITIAL_STATE.bedrooms);
+    setBathrooms(INITIAL_STATE.bathrooms);
+    setDirection(INITIAL_STATE.direction);
+    setSelectedAmenities(INITIAL_STATE.amenities);
+    setResetKey((prev) => prev + 1);
+    onReset?.();
   };
 
   return (
@@ -34,7 +134,7 @@ const FilterSidebar = () => {
           Filters
         </h2>
         <button
-          onClick={() => setSelectedAmenities([])}
+          onClick={handleResetAll}
           className="text-sm font-medium text-red-500 hover:text-red-600 hover:underline transition-colors"
         >
           Reset All
@@ -51,6 +151,8 @@ const FilterSidebar = () => {
             type="single"
             variant="outline"
             size="sm"
+            value={bedrooms}
+            onValueChange={handleBedroomChange}
             items={[
               { value: "any", label: "Any" },
               { value: "1", label: "1" },
@@ -72,6 +174,8 @@ const FilterSidebar = () => {
             type="single"
             variant="outline"
             size="sm"
+            value={bathrooms}
+            onValueChange={handleBathroomChange}
             items={[
               { value: "any", label: "Any" },
               { value: "1", label: "1" },
@@ -79,7 +183,7 @@ const FilterSidebar = () => {
               { value: "3+", label: "3+" },
             ]}
             className="flex flex-wrap gap-2 w-full justify-start"
-            classNameItem="flex-1 min-w-[3rem] text-sm data-[state=on]:bg-emerald-600 data-[state=on]:text-white! data-[state=on]:border-emerald-600 hover:border-emerald-200 transition-all font-medium py-2"
+            classNameItem="flex-1 min-w-[3rem] text-sm data-[state=on]:bg-red-500 data-[state=on]:text-white! data-[state=on]:border-red-500 hover:border-red-200 transition-all font-medium py-2"
           />
         </div>
 
@@ -89,7 +193,10 @@ const FilterSidebar = () => {
             Property Direction
           </h3>
           <CsSelect
+            key={resetKey}
             placeholder="Select Direction"
+            value={direction || undefined}
+            onChange={handleDirectionChange}
             options={[
               { value: "north", label: "North" },
               { value: "south", label: "South" },
@@ -112,14 +219,11 @@ const FilterSidebar = () => {
           <div className="grid grid-cols-1 gap-3">
             {AMENITIES.map((amenity) => (
               <div key={amenity.id} className="flex items-center">
-                {/* <Checkbox
-                  id={amenity.id}
+                <CsCheckbox
+                  label={amenity.label}
                   checked={selectedAmenities.includes(amenity.id)}
-                  onChange={() => toggleAmenity(amenity.id)}
-                  // label={amenity.label}
-                  className="w-full"
-                /> */}
-                <CsCheckbox label={amenity.label} />
+                  onCheckedChange={() => toggleAmenity(amenity.id)}
+                />
               </div>
             ))}
           </div>

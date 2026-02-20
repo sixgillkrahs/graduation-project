@@ -72,6 +72,7 @@ const PropertyCard = ({
     };
     await recordInteraction({ id, type: "FAVORITE", metadata });
     queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.onSale] });
+    queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.favorites] });
   };
 
   return (

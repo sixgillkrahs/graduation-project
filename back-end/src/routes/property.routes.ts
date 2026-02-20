@@ -243,6 +243,61 @@ router.get("/me", requireAuth, propertyController.getMyProperties);
 
 /**
  * @swagger
+ * /properties/favorites:
+ *   get:
+ *     summary: Get all favorite properties of the current user
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *     responses:
+ *       200:
+ *         description: List of favorite properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ *       401:
+ *         description: Unauthorized - User must be logged in
+ */
+router.get("/favorites", requireAuth, propertyController.getFavoriteProperties);
+
+/**
+ * @swagger
  * /properties/on-sale:
  *   get:
  *     summary: Get all properties on sale with pagination and filtering

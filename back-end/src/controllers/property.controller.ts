@@ -26,6 +26,25 @@ export class PropertyController extends BaseController {
     super();
   }
 
+  /**
+   * Parse custom filter params (minBedrooms, minBathrooms) into MongoDB queries.
+   */
+  private parseFilters(filters: Record<string, any>): Record<string, any> {
+    const parsed = { ...filters };
+
+    if (parsed.minBedrooms) {
+      parsed["features.bedrooms"] = { $gte: Number(parsed.minBedrooms) };
+      delete parsed.minBedrooms;
+    }
+
+    if (parsed.minBathrooms) {
+      parsed["features.bathrooms"] = { $gte: Number(parsed.minBathrooms) };
+      delete parsed.minBathrooms;
+    }
+
+    return parsed;
+  }
+
   createProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       // Assuming req.user is populated by auth middleware
@@ -139,7 +158,7 @@ export class PropertyController extends BaseController {
 
       const properties = await this.propertyService.getProperties(
         options,
-        filters,
+        this.parseFilters(filters as Record<string, any>),
       );
       return properties;
     });
@@ -467,7 +486,7 @@ export class PropertyController extends BaseController {
       };
 
       const filterQuery = {
-        ...filters,
+        ...this.parseFilters(filters as Record<string, any>),
         status: PropertyStatusEnum.PUBLISHED,
       };
 
@@ -535,7 +554,7 @@ export class PropertyController extends BaseController {
       await redisConnection.set(cacheKey, "1", "EX", 30 * 60);
 
       // Non-blocking call to record view
-      this.propertyService.recordView(id, user?.userId, {
+      this.propertyService.recordView(id, user?.userId?._id?.toString(), {
         ip: typeof ip === "string" ? ip : "",
         userAgent,
       });
@@ -590,6 +609,67 @@ export class PropertyController extends BaseController {
         ...property,
         isFavorite,
       };
+    });
+  };
+
+  /**
+   * Get all favorite properties for the current user.
+   * This endpoint is called from the landing page.
+   */
+  getFavoriteProperties = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const user = req.user;
+
+      const userId = user.userId._id.toString();
+
+      // 1. Get all currently-favorited property IDs
+      const favoritePropertyIds =
+        await this.propertyInteractionService.getFavoritePropertyIdsForUser(
+          userId,
+        );
+
+      if (favoritePropertyIds.length === 0) {
+        return {
+          results: [],
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+          totalResults: 0,
+        };
+      }
+
+      const { limit, page, sortField, sortOrder, ...filters } = req.query;
+
+      const options = {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 10,
+        sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        populate: "userId",
+      };
+
+      const filter = {
+        ...this.parseFilters(filters as Record<string, any>),
+        _id: { $in: favoritePropertyIds },
+        status: PropertyStatusEnum.PUBLISHED,
+      };
+
+      const properties = (await this.propertyService.getProperties(
+        options,
+        filter,
+      )) as any;
+
+      // Mark all as favorite since they come from the favorites list
+      const resultsWithFavorite = properties.results
+        ? properties.results.map((p: any) => {
+            const doc = p.toObject ? p.toObject() : p;
+            return {
+              ...doc,
+              isFavorite: true,
+            };
+          })
+        : [];
+
+      return { ...properties, results: resultsWithFavorite };
     });
   };
 }
