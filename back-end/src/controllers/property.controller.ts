@@ -27,7 +27,8 @@ export class PropertyController extends BaseController {
   }
 
   /**
-   * Parse custom filter params (minBedrooms, minBathrooms) into MongoDB queries.
+   * Parse custom filter params into MongoDB queries.
+   * Handles: minBedrooms, minBathrooms, maxPrice, query (text search)
    */
   private parseFilters(filters: Record<string, any>): Record<string, any> {
     const parsed = { ...filters };
@@ -40,6 +41,27 @@ export class PropertyController extends BaseController {
     if (parsed.minBathrooms) {
       parsed["features.bathrooms"] = { $gte: Number(parsed.minBathrooms) };
       delete parsed.minBathrooms;
+    }
+
+    if (parsed.maxPrice) {
+      parsed["features.totalPrice"] = {
+        $lte: Number(parsed.maxPrice) * 1_000_000_000,
+      };
+      delete parsed.maxPrice;
+    }
+
+    // Text search across multiple fields
+    if (parsed.query) {
+      const searchRegex = { $regex: parsed.query, $options: "i" };
+      parsed["$or"] = [
+        { title: searchRegex },
+        { "location.address": searchRegex },
+        { "location.province": searchRegex },
+        { "location.district": searchRegex },
+        { "location.ward": searchRegex },
+        { projectName: searchRegex },
+      ];
+      delete parsed.query;
     }
 
     return parsed;

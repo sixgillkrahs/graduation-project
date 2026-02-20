@@ -12,7 +12,7 @@ import {
 import { Heart, Loader2, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import AdvancedSearch from "./components/AdvancedSearch";
+import AdvancedSearch, { SearchFilters } from "./components/AdvancedSearch";
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
 import PropertyCardSkeleton from "./components/PropertyCardSkeleton";
@@ -64,14 +64,35 @@ const Properties = () => {
   };
 
   const handleResetFilters = () => {
-    setParams({ page: 1, limit: 6 });
+    sidebarFiltersRef.current = {};
+    setParams((prev) => {
+      const { limit } = prev;
+      return { page: 1, limit, ...searchFiltersRef.current };
+    });
   };
 
+  // Refs to track current sidebar and search filters separately
+  const sidebarFiltersRef = useRef<Record<string, any>>({});
+  const searchFiltersRef = useRef<Record<string, any>>({});
+
   const handleFilterChange = (filters: Record<string, any>) => {
+    sidebarFiltersRef.current = filters;
     setParams((prev) => {
-      // Strip old filter keys (keep only page & limit)
-      const { page, limit } = prev;
-      return { page: 1, limit, ...filters };
+      const { limit } = prev;
+      return { page: 1, limit, ...searchFiltersRef.current, ...filters };
+    });
+  };
+
+  const handleSearchChange = (filters: SearchFilters) => {
+    const searchParams: Record<string, any> = {};
+    if (filters.demandType) searchParams.demandType = filters.demandType;
+    if (filters.propertyType) searchParams.propertyType = filters.propertyType;
+    if (filters.maxPrice) searchParams.maxPrice = filters.maxPrice;
+    if (filters.query) searchParams.query = filters.query;
+    searchFiltersRef.current = searchParams;
+    setParams((prev) => {
+      const { limit } = prev;
+      return { page: 1, limit, ...sidebarFiltersRef.current, ...searchParams };
     });
   };
 
@@ -83,7 +104,7 @@ const Properties = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <AdvancedSearch />
+      <AdvancedSearch onSearchChange={handleSearchChange} />
 
       <main className="container mx-auto px-4 md:px-20 py-8">
         <div className="flex flex-col lg:flex-row gap-8">

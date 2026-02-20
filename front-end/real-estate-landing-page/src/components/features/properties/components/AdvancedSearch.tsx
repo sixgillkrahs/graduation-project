@@ -1,60 +1,148 @@
 import { CsButton } from "@/components/custom";
 import { CsSelect } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Slider } from "@/components/ui"; // Changed to correct import
-import { ChevronDown, MapPin, Search } from "lucide-react";
-import { useState } from "react";
+import { Slider } from "@/components/ui";
+import { ChevronDown, Search } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import LocationAutocomplete from "./LocationAutocomplete";
 
-const PROPERTY_TYPES = [
-  { value: "apartment", label: "Apartment" },
-  { value: "villa", label: "Villa" },
-  { value: "land", label: "Land/Plot" },
-  { value: "house", label: "Townhouse" },
-  { value: "commercial", label: "Commercial" },
+const DEMAND_TYPES = [
+  { value: "all", label: "All" },
+  { value: "SALE", label: "For Sale" },
+  { value: "RENT", label: "For Rent" },
 ];
 
-const AdvancedSearch = () => {
-  const [maxPrice, setMaxPrice] = useState(5);
+const PROPERTY_TYPES = [
+  { value: "all", label: "All Types" },
+  { value: "APARTMENT", label: "Apartment" },
+  { value: "HOUSE", label: "House" },
+  { value: "STREET_HOUSE", label: "Street House" },
+  { value: "VILLA", label: "Villa" },
+  { value: "LAND", label: "Land/Plot" },
+  { value: "OTHER", label: "Other" },
+];
+
+interface SearchFormValues {
+  query: string;
+  demandType: string;
+  propertyType: string;
+  maxPrice: number;
+}
+
+export interface SearchFilters {
+  demandType?: string;
+  propertyType?: string;
+  maxPrice?: number;
+  query?: string;
+}
+
+interface AdvancedSearchProps {
+  onSearchChange?: (filters: SearchFilters) => void;
+}
+
+const buildSearchFilters = (data: SearchFormValues): SearchFilters => {
+  const filters: SearchFilters = {};
+  if (data.demandType && data.demandType !== "all")
+    filters.demandType = data.demandType;
+  if (data.propertyType && data.propertyType !== "all")
+    filters.propertyType = data.propertyType;
+  if (data.maxPrice < 20) filters.maxPrice = data.maxPrice;
+  if (data.query.trim()) filters.query = data.query.trim();
+  return filters;
+};
+
+const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
+  const { control, handleSubmit, watch } = useForm<SearchFormValues>({
+    defaultValues: {
+      query: "",
+      demandType: "all",
+      propertyType: "all",
+      maxPrice: 5,
+    },
+  });
+
+  const maxPrice = watch("maxPrice");
+
+  const onSubmit = (data: SearchFormValues) => {
+    onSearchChange?.(buildSearchFilters(data));
+  };
 
   return (
     <div className="sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm py-4">
       <div className="container mx-auto px-4 md:px-20">
-        <div className="flex flex-col md:flex-row items-center gap-4 bg-white md:bg-gray-50 md:p-2 md:rounded-full border border-gray-100 md:border-gray-200">
-          {/* Location Input */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col md:flex-row items-center gap-4 bg-white md:bg-gray-50 md:p-2 md:rounded-full border border-gray-100 md:border-gray-200"
+        >
+          {/* Location Input with Autocomplete */}
           <div className="w-full md:flex-1 relative group">
-            <Input
-              placeholder="Search City, District, or Project..."
-              preIcon={<MapPin className="w-5 h-5 main-color-red" />}
-              className="border-none shadow-none bg-transparent h-12 text-base placeholder:text-gray-400 focus-visible:ring-0 px-0 md:px-4 pl-10!"
+            <Controller
+              name="query"
+              control={control}
+              render={({ field }) => (
+                <LocationAutocomplete
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
-            {/* Mobile separator */}
-            <div className="md:hidden h-[1px] w-full bg-gray-100 my-2"></div>
+            <div className="md:hidden h-px w-full bg-gray-100 my-2"></div>
           </div>
 
-          <div className="hidden md:block w-[1px] h-8 bg-gray-300"></div>
+          <div className="hidden md:block w-px h-8 bg-gray-300"></div>
 
-          {/* Type Dropdown */}
+          {/* Demand Type */}
+          <div className="w-full md:w-40">
+            <Controller
+              name="demandType"
+              control={control}
+              render={({ field }) => (
+                <CsSelect
+                  placeholder="Demand Type"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={DEMAND_TYPES}
+                  className="border-none shadow-none bg-transparent focus:ring-0 h-auto!"
+                />
+              )}
+            />
+            <div className="md:hidden h-px w-full bg-gray-100 my-2"></div>
+          </div>
+
+          <div className="hidden md:block w-px h-8 bg-gray-300"></div>
+
+          {/* Property Type */}
           <div className="w-full md:w-48">
-            <CsSelect
-              placeholder="Property Type"
-              options={PROPERTY_TYPES}
-              className="border-none shadow-none bg-transparent h-12 focus:ring-0"
+            <Controller
+              name="propertyType"
+              control={control}
+              render={({ field }) => (
+                <CsSelect
+                  placeholder="Property Type"
+                  value={field.value}
+                  onChange={field.onChange}
+                  options={PROPERTY_TYPES}
+                  className="border-none shadow-none bg-transparent h-auto! focus:ring-0"
+                />
+              )}
             />
-            <div className="md:hidden h-[1px] w-full bg-gray-100 my-2"></div>
+            <div className="md:hidden h-px w-full bg-gray-100 my-2"></div>
           </div>
 
-          <div className="hidden md:block w-[1px] h-8 bg-gray-300"></div>
+          <div className="hidden md:block w-px h-8 bg-gray-300"></div>
 
-          {/* Price Range Dropdown/Popover */}
+          {/* Price Range */}
           <div className="w-full md:w-64">
             <Popover>
               <PopoverTrigger asChild>
-                <button className="w-full h-12 flex items-center justify-between px-3 text-left text-gray-700 hover:text-red-500 transition-colors">
+                <button
+                  type="button"
+                  className="w-full h-12 flex items-center justify-between px-3 text-left text-gray-700 hover:text-red-500 transition-colors"
+                >
                   <span className="truncate font-medium">
                     Up to {maxPrice} Billion VND
                   </span>
@@ -65,12 +153,18 @@ const AdvancedSearch = () => {
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-900">Max Price</h4>
                   <div className="pt-2 px-2">
-                    <Slider
-                      min={0}
-                      max={20}
-                      step={0.5}
-                      currentValue={maxPrice}
-                      onChange={(val) => setMaxPrice(val)}
+                    <Controller
+                      name="maxPrice"
+                      control={control}
+                      render={({ field }) => (
+                        <Slider
+                          min={0}
+                          max={20}
+                          step={0.5}
+                          currentValue={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
                     />
                   </div>
                 </div>
@@ -80,13 +174,14 @@ const AdvancedSearch = () => {
 
           <div className="w-full md:w-auto mt-2 md:mt-0">
             <CsButton
+              type="submit"
               className="w-full md:w-auto rounded-full text-white font-bold text-base h-12 px-8 shadow-lg"
               icon={<Search className="w-5 h-5 mr-1" />}
             >
               Search
             </CsButton>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
