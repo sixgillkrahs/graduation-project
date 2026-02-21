@@ -13,8 +13,8 @@ export const useUploadImages = (): UseMutationResult<
       return UploadService.uploadImages(data);
     },
     meta: {
-      ERROR_SOURCE: "[Upload images failed]: The old password is incorrect",
-      SUCCESS_MESSAGE: "Upload images successfully",
+      ERROR_SOURCE: "notifications.uploadFailed",
+      SUCCESS_MESSAGE: "notifications.uploadSuccess",
     },
   });
 };

@@ -7,8 +7,8 @@ export const useLogout = () => {
   return useMutation({
     mutationFn: () => AuthService.logout(),
     meta: {
-      ERROR_SOURCE: "[Logout failed]",
-      SUCCESS_MESSAGE: "The logout has been successfully",
+      ERROR_SOURCE: "notifications.logoutFailed",
+      SUCCESS_MESSAGE: "notifications.logoutSuccess",
     },
     onSuccess: () => {
       queryClient.setQueryData(["me"], null);

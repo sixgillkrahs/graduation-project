@@ -15,8 +15,8 @@ export const useCreateProperty = (): UseMutationResult<
       return PropertyService.createProperty(data);
     },
     meta: {
-      ERROR_SOURCE: "[Create property failed]: The old password is incorrect",
-      SUCCESS_MESSAGE: "Create property successfully",
+      ERROR_SOURCE: "notifications.createPropertyFailed",
+      SUCCESS_MESSAGE: "notifications.createPropertySuccess",
     },
   });
 };

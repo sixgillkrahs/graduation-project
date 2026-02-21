@@ -13,8 +13,8 @@ export const useSignUp = (): UseMutationResult<
       return SignUpService.signUp(data);
     },
     meta: {
-      ERROR_SOURCE: "[Sign up failed]: The username or password is incorrect",
-      SUCCESS_MESSAGE: "Sign up successfully",
+      ERROR_SOURCE: "notifications.signUpFailed",
+      SUCCESS_MESSAGE: "notifications.signUpSuccess",
     },
   });
 };

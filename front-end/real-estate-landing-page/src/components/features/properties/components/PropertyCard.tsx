@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { PropertyQueryKey } from "../services/config";
 import { useRecordInteraction } from "../services/mutate";
+import { useTranslations } from "next-intl";
 
 export interface PropertyCardProps {
   id: string;
@@ -54,15 +55,15 @@ const PropertyCard = ({
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
+  const t = useTranslations("PropertiesPage");
 
   const handleToggleFavorite = async () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) {
       dispatch(
         showAuthDialog({
-          title: "Đăng nhập để lưu tin",
-          description:
-            "Hãy đăng nhập để lưu lại tin đăng này và dễ dàng tìm lại trong danh sách yêu thích của bạn!",
+          title: t("card.loginToSave"),
+          description: t("card.loginToSaveDesc"),
         }),
       );
       return;
@@ -96,11 +97,11 @@ const PropertyCard = ({
         <div className="absolute top-3 left-3 flex gap-2 z-10">
           {badges?.aiRecommended && (
             <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg flex items-center gap-1 backdrop-blur-md">
-              ✨ AI Pick
+              ✨ {t("card.aiPick")}
             </span>
           )}
           <span className="bg-white/90 backdrop-blur-md text-gray-800 text-[10px] font-bold px-2 py-1 rounded-lg">
-            For {type === "rent" ? "Rent" : "Sale"}
+            For {type === "rent" ? t("card.forRent") : t("card.forSale")}
           </span>
         </div>
 
@@ -139,7 +140,9 @@ const PropertyCard = ({
               {price}
             </span>
             {unit && (
-              <span className="text-sm font-medium text-gray-400">/{unit}</span>
+              <span className="text-sm font-medium text-gray-400">
+                /{t("card.month")}
+              </span>
             )}
           </div>
           <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-red-500 transition-colors">
@@ -155,14 +158,18 @@ const PropertyCard = ({
         <div className="flex items-center gap-4 py-3 border-t border-b border-gray-50">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Bed className="w-4 h-4 main-color-red" />
-            <span className="font-medium">{specs.beds} Beds</span>
+            <span className="font-medium">
+              {specs.beds} {t("beds")}
+            </span>
           </div>
-          <div className="w-[1px] h-4 bg-gray-200"></div>
+          <div className="w-px h-4 bg-gray-200"></div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Bath className="w-4 h-4 main-color-red" />
-            <span className="font-medium">{specs.baths} Baths</span>
+            <span className="font-medium">
+              {specs.baths} {t("baths")}
+            </span>
           </div>
-          <div className="w-[1px] h-4 bg-gray-200"></div>
+          <div className="w-px h-4 bg-gray-200"></div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Maximize className="w-4 h-4 main-color-red" />
             <span className="font-medium">{specs.area} m²</span>
@@ -190,7 +197,9 @@ const PropertyCard = ({
               {agent.name}
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium">{postedAt}</span>
+          <span className="text-xs text-gray-400 font-medium">
+            {t("detail.posted", { date: postedAt })}
+          </span>
         </div>
       </div>
     </div>

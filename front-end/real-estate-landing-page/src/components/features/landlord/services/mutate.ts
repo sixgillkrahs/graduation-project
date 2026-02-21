@@ -15,8 +15,8 @@ export const useCreateLandlord = () => {
       });
     },
     meta: {
-      ERROR_SOURCE: "[Create landlord failed]",
-      SUCCESS_MESSAGE: "The landlord has been successfully created",
+      ERROR_SOURCE: "notifications.createLandlordFailed",
+      SUCCESS_MESSAGE: "notifications.createLandlordSuccess",
     },
   });
 };
@@ -32,8 +32,8 @@ export const useDeleteLandlord = () => {
       });
     },
     meta: {
-      ERROR_SOURCE: "[Delete landlord failed]",
-      SUCCESS_MESSAGE: "The landlord has been successfully deleted",
+      ERROR_SOURCE: "notifications.deleteLandlordFailed",
+      SUCCESS_MESSAGE: "notifications.deleteLandlordSuccess",
     },
   });
 };
@@ -52,8 +52,8 @@ export const useUpdateLandlord = () => {
       });
     },
     meta: {
-      ERROR_SOURCE: "[Update landlord failed]",
-      SUCCESS_MESSAGE: "The landlord has been successfully updated",
+      ERROR_SOURCE: "notifications.updateLandlordFailed",
+      SUCCESS_MESSAGE: "notifications.updateLandlordSuccess",
     },
   });
 };

@@ -16,8 +16,8 @@ export const useCreateSchedule = (): UseMutationResult<
       return ScheduleService.createSchedule(data);
     },
     meta: {
-      ERROR_SOURCE: "[Create schedule failed]",
-      SUCCESS_MESSAGE: "The schedule has been successfully created",
+      ERROR_SOURCE: "notifications.createScheduleFailed",
+      SUCCESS_MESSAGE: "notifications.createScheduleSuccess",
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -38,8 +38,8 @@ export const useDeleteSchedule = (): UseMutationResult<
       return ScheduleService.deleteSchedule(id);
     },
     meta: {
-      ERROR_SOURCE: "[Delete schedule failed]",
-      SUCCESS_MESSAGE: "The schedule has been successfully deleted",
+      ERROR_SOURCE: "notifications.deleteScheduleFailed",
+      SUCCESS_MESSAGE: "notifications.deleteScheduleSuccess",
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -60,8 +60,8 @@ export const useUpdateSchedule = (): UseMutationResult<
       return ScheduleService.updateSchedule(id, data);
     },
     meta: {
-      ERROR_SOURCE: "[Update schedule failed]",
-      SUCCESS_MESSAGE: "The schedule has been successfully updated",
+      ERROR_SOURCE: "notifications.updateScheduleFailed",
+      SUCCESS_MESSAGE: "notifications.updateScheduleSuccess",
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

@@ -14,8 +14,8 @@ export const useForgotPassword = (): UseMutationResult<
       return ForgotPasswordService.forgotPassword(data);
     },
     meta: {
-      ERROR_SOURCE: "[Forgot password failed]: send OTP failed",
-      SUCCESS_MESSAGE: "send OTP successfully",
+      ERROR_SOURCE: "notifications.forgotPasswordFailed",
+      SUCCESS_MESSAGE: "notifications.forgotPasswordSuccess",
     },
   });
 };
@@ -31,8 +31,8 @@ export const useVerifyOTP = (): UseMutationResult<
       return ForgotPasswordService.verifyOTP(data);
     },
     meta: {
-      ERROR_SOURCE: "[Verify OTP failed]: The OTP is invalid",
-      SUCCESS_MESSAGE: "The OTP is valid",
+      ERROR_SOURCE: "notifications.verifyOtpFailed",
+      SUCCESS_MESSAGE: "notifications.verifyOtpSuccess",
     },
   });
 };
@@ -48,8 +48,8 @@ export const useResetPassword = (): UseMutationResult<
       return ForgotPasswordService.resetPassword(data);
     },
     meta: {
-      ERROR_SOURCE: "[Reset password failed]: The password is invalid",
-      SUCCESS_MESSAGE: "The password is valid",
+      ERROR_SOURCE: "notifications.resetPasswordFailed",
+      SUCCESS_MESSAGE: "notifications.resetPasswordSuccess",
     },
   });
 };

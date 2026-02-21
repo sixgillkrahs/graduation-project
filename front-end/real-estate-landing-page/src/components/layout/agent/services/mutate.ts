@@ -15,8 +15,8 @@ export const useDeleteAllNotices = (): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: [NoticeKey.getMyNotices] });
     },
     meta: {
-      ERROR_SOURCE: "[Delete all notices failed]: Delete all notices failed",
-      SUCCESS_MESSAGE: "Delete all notices successfully",
+      ERROR_SOURCE: "notifications.deleteAllNoticesFailed",
+      SUCCESS_MESSAGE: "notifications.deleteAllNoticesSuccess",
     },
   });
 };
@@ -47,8 +47,8 @@ export const useDeleteNotice = (): UseMutationResult<
       queryClient.invalidateQueries({ queryKey: [NoticeKey.getMyNotices] });
     },
     meta: {
-      ERROR_SOURCE: "[Delete notice failed]: Delete notice failed",
-      SUCCESS_MESSAGE: "Delete notice successfully",
+      ERROR_SOURCE: "notifications.deleteNoticeFailed",
+      SUCCESS_MESSAGE: "notifications.deleteNoticeSuccess",
     },
   });
 };

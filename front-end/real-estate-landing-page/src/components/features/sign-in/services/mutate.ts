@@ -13,8 +13,8 @@ export const useSignIn = (): UseMutationResult<
       return SignInService.signIn(data);
     },
     meta: {
-      ERROR_SOURCE: "[Sign in failed]: The username or password is incorrect",
-      SUCCESS_MESSAGE: "Sign in successfully",
+      ERROR_SOURCE: "notifications.signInFailed",
+      SUCCESS_MESSAGE: "notifications.signInSuccess",
     },
   });
 };
@@ -30,8 +30,8 @@ export const useSignInPasskey = (): UseMutationResult<
       return SignInService.signInPasskey(data);
     },
     meta: {
-      ERROR_SOURCE: "[Sign in failed]: The passkey is incorrect",
-      SUCCESS_MESSAGE: "Sign in successfully",
+      ERROR_SOURCE: "notifications.signInPasskeyFailed",
+      SUCCESS_MESSAGE: "notifications.signInSuccess",
     },
   });
 };

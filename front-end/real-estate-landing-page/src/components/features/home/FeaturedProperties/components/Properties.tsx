@@ -54,7 +54,10 @@ const Card = ({
       <div className="px-2 flex flex-col justify-between gap-4">
         <div className="flex justify-between items-center">
           <span className="cs-paragraph text-xl! font-semibold!">
-            ${price}/<span className="text-sm text-gray-500">month</span>
+            ${price}
+            <span className="text-sm text-gray-500">
+              {t("currency.perMonth")}
+            </span>
           </span>
           <CsButton
             className="cs-outline-black text-sm font-semibold border-none rounded-full"

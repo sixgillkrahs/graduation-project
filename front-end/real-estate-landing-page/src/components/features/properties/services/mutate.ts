@@ -21,8 +21,8 @@ export const useRecordInteraction = () => {
       metadata?: any;
     }) => PropertyService.recordInteraction(id, type, metadata),
     meta: {
-      ERROR_SOURCE: "[Record interaction failed]",
-      SUCCESS_MESSAGE: "The interaction has been successfully recorded",
+      ERROR_SOURCE: "notifications.recordInteractionFailed",
+      SUCCESS_MESSAGE: "notifications.recordInteractionSuccess",
     },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({

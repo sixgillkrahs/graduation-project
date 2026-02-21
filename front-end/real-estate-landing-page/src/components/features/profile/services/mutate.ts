@@ -14,8 +14,8 @@ export const useChangePassword = (): UseMutationResult<
       return ProfileService.changePassword(data);
     },
     meta: {
-      ERROR_SOURCE: "[Change password failed]: The old password is incorrect",
-      SUCCESS_MESSAGE: "Change password successfully",
+      ERROR_SOURCE: "notifications.changePasswordFailed",
+      SUCCESS_MESSAGE: "notifications.changePasswordSuccess",
     },
   });
 };
@@ -31,8 +31,8 @@ export const useRegisterPasskey = (): UseMutationResult<
       return ProfileService.registerPasskey();
     },
     meta: {
-      ERROR_SOURCE: "[Register passkey failed]: The old password is incorrect",
-      SUCCESS_MESSAGE: "Register passkey successfully",
+      ERROR_SOURCE: "notifications.registerPasskeyFailed",
+      SUCCESS_MESSAGE: "notifications.registerPasskeySuccess",
     },
   });
 };
@@ -48,8 +48,8 @@ export const useVerifyPasskey = (): UseMutationResult<
       return ProfileService.verifyPasskey(data);
     },
     meta: {
-      ERROR_SOURCE: "[Verify passkey failed]: The passkey is incorrect",
-      SUCCESS_MESSAGE: "Verify passkey successfully",
+      ERROR_SOURCE: "notifications.verifyPasskeyFailed",
+      SUCCESS_MESSAGE: "notifications.verifyPasskeySuccess",
     },
   });
 };

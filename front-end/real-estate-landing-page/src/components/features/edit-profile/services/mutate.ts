@@ -13,9 +13,8 @@ export const useEditProfile = (): UseMutationResult<
       return EditProfileService.editProfile(data);
     },
     meta: {
-      ERROR_SOURCE:
-        "[Edit profile failed]: The profile has been successfully updated",
-      SUCCESS_MESSAGE: "The profile has been successfully updated",
+      ERROR_SOURCE: "notifications.editProfileFailed",
+      SUCCESS_MESSAGE: "notifications.editProfileSuccess",
     },
   });
 };

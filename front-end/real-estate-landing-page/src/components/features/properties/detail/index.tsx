@@ -35,6 +35,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
 import { usePropertyDetail } from "../services/query";
 
@@ -49,6 +50,7 @@ const PropertyDetail = () => {
   const [show3D, setShow3D] = useState(false);
   const { mutate: increaseView } = useIncreaseView();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
+  const t = useTranslations("PropertiesPage");
 
   useEffect(() => {
     if (id) {
@@ -69,8 +71,12 @@ const PropertyDetail = () => {
   if (!property?.data) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">Property Not Found</h2>
-        <CsButton onClick={() => window.history.back()}>Go Back</CsButton>
+        <h2 className="text-2xl font-bold text-gray-900">
+          {t("detail.notFound")}
+        </h2>
+        <CsButton onClick={() => window.history.back()}>
+          {t("detail.goBack")}
+        </CsButton>
       </div>
     );
   }
@@ -78,12 +84,12 @@ const PropertyDetail = () => {
   const prop = property.data;
 
   const AMENITIES = [
-    { name: "Swimming Pool", icon: "🏊‍♂️" },
-    { name: "Gym & Fitness", icon: "💪" },
-    { name: "Parking", icon: "🚗" },
-    { name: "Elevator", icon: "🛗" },
-    { name: "24/7 Security", icon: "🛡️" },
-    { name: "Wifi & Internet", icon: "📶" },
+    { name: t("detail.swimmingPool"), icon: "🏊‍♂️" },
+    { name: t("detail.gymFitness"), icon: "💪" },
+    { name: t("detail.parking"), icon: "🚗" },
+    { name: t("detail.elevator"), icon: "🛗" },
+    { name: t("detail.security"), icon: "🛡️" },
+    { name: t("detail.wifi"), icon: "📶" },
   ];
 
   const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
@@ -91,9 +97,8 @@ const PropertyDetail = () => {
     if (!isLoggedIn) {
       dispatch(
         showAuthDialog({
-          title: "Đăng nhập để lưu tin",
-          description:
-            "Hãy đăng nhập để lưu lại tin đăng này và dễ dàng tìm lại trong danh sách yêu thích của bạn!",
+          title: t("card.loginToSave"),
+          description: t("card.loginToSaveDesc"),
         }),
       );
       return;
@@ -114,7 +119,10 @@ const PropertyDetail = () => {
             />
             <div className="absolute top-4 left-4 flex gap-2">
               <Badge className="cs-bg-red hover:bg-emerald-700 text-white font-semibold">
-                For {prop.demandType === "sale" ? "Sale" : "Rent"}
+                For{" "}
+                {prop.demandType === "sale"
+                  ? t("card.forSale")
+                  : t("card.forRent")}
               </Badge>
               {prop.status === "verified" && (
                 <Badge className="bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center gap-1">
@@ -126,7 +134,7 @@ const PropertyDetail = () => {
             {prop.media.virtualTourUrls?.length > 0 && (
               <button className="absolute bottom-4 right-4 bg-white text-gray-900 px-4 py-2 rounded-lg font-bold shadow-lg flex items-center gap-2 hover:bg-gray-50 transition-colors z-20">
                 <Video className="w-5 h-5 main-color-red" />
-                View 3D Tour 360°
+                {t("detail.view3DTour")}
               </button>
             )}
           </div>
@@ -147,7 +155,7 @@ const PropertyDetail = () => {
                 {idx === 3 && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors">
                     <span className="text-white font-bold text-lg">
-                      View all photos
+                      {t("detail.viewAllPhotos")}
                     </span>
                   </div>
                 )}
@@ -165,7 +173,7 @@ const PropertyDetail = () => {
             <div className="space-y-4">
               <nav className="flex items-center gap-2 text-sm text-gray-500 mb-2">
                 <span className="hover:text-emerald-600 cursor-pointer">
-                  Home
+                  {t("detail.home")}
                 </span>
                 <span>/</span>
                 <span className="hover:text-emerald-600 cursor-pointer">
@@ -194,7 +202,9 @@ const PropertyDetail = () => {
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4" />
                   <span>
-                    Posted {format(new Date(prop.createdAt), "MMM dd, yyyy")}
+                    {t("detail.posted", {
+                      date: format(new Date(prop.createdAt), "MMM dd, yyyy"),
+                    })}
                   </span>
                 </div>
               </div>
@@ -227,7 +237,9 @@ const PropertyDetail = () => {
                   <Bed className="w-6 h-6 main-color-red" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Bedrooms</p>
+                  <p className="text-sm text-gray-500">
+                    {t("detail.bedrooms")}
+                  </p>
                   <p className="font-bold text-gray-900">
                     {prop.features.bedrooms}
                   </p>
@@ -238,7 +250,9 @@ const PropertyDetail = () => {
                   <Bath className="w-6 h-6 main-color-red" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Bathrooms</p>
+                  <p className="text-sm text-gray-500">
+                    {t("detail.bathrooms")}
+                  </p>
                   <p className="font-bold text-gray-900">
                     {prop.features.bathrooms}
                   </p>
@@ -249,7 +263,7 @@ const PropertyDetail = () => {
                   <Maximize className="w-6 h-6 main-color-red" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Area</p>
+                  <p className="text-sm text-gray-500">{t("detail.area")}</p>
                   <p className="font-bold text-gray-900">
                     {prop.features.area} m²
                   </p>
@@ -260,7 +274,9 @@ const PropertyDetail = () => {
                   <Compass className="w-6 h-6 main-color-red" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Direction</p>
+                  <p className="text-sm text-gray-500">
+                    {t("detail.direction")}
+                  </p>
                   <p className="font-bold text-gray-900 capitalize">
                     {prop.features.direction || "N/A"}
                   </p>
@@ -273,7 +289,7 @@ const PropertyDetail = () => {
               <section className="scroll-mt-24" id="virtual-tour">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Video className="w-6 h-6 main-color-red" />
-                  3D Virtual Tour
+                  {t("detail.virtualTour")}
                 </h3>
                 <div className="relative aspect-[2/1] bg-gray-900 rounded-2xl overflow-hidden shadow-lg">
                   {!show3D ? (
@@ -293,10 +309,10 @@ const PropertyDetail = () => {
                         </div>
                         <div className="text-center">
                           <h4 className="text-white font-bold text-xl mb-1">
-                            Click to Explore 360°
+                            {t("detail.clickExplore")}
                           </h4>
                           <p className="text-white/80 text-sm">
-                            Walk through the property from home
+                            {t("detail.walkThrough")}
                           </p>
                         </div>
                       </div>
@@ -311,20 +327,20 @@ const PropertyDetail = () => {
             {/* Description */}
             <section>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Description
+                {t("detail.description")}
               </h3>
               <div className="prose prose-emerald max-w-none text-gray-600 leading-relaxed">
                 <p>{prop.description}</p>
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-gray-400 border-t border-gray-50 pt-3 italic">
-                <span>✨ Description enhanced by AI</span>
+                <span>✨ {t("detail.aiEnhanced")}</span>
               </div>
             </section>
 
             {/* Amenities */}
             <section>
               <h3 className="text-xl font-bold text-gray-900 mb-6">
-                Amenities & Features
+                {t("detail.amenities")}
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
                 {AMENITIES.map((item, idx) => (
@@ -341,7 +357,7 @@ const PropertyDetail = () => {
             {/* Map Location Placeholder */}
             <section>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Location on Map
+                {t("detail.locationOnMap")}
               </h3>
               <div className="w-full h-[300px] bg-red-50 rounded-2xl border border-red-100 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
@@ -362,16 +378,24 @@ const PropertyDetail = () => {
               {/* Action Card */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-6">
                 <div className="mb-6">
-                  <p className="text-gray-500 text-sm mb-1">Price</p>
+                  <p className="text-gray-500 text-sm mb-1">
+                    {t("detail.price")}
+                  </p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold main-color-red">
-                      {prop.features.price} Billion
+                      {t("currency.priceMain", { price: prop.features.price })}
                     </span>
-                    <span className="text-gray-400 font-medium">VND</span>
+                    <span className="text-gray-400 font-medium">
+                      {t("currency.priceSuffix")}
+                    </span>
                   </div>
                   <p className="text-sm text-gray-400 mt-1">
-                    ~{(prop.features.price * 1000) / prop.features.area} Million
-                    VND / m²
+                    {t("currency.pricePerSqm", {
+                      price: (
+                        (prop.features.price * 1000) /
+                        prop.features.area
+                      ).toFixed(0),
+                    })}
                   </p>
                 </div>
 
@@ -408,13 +432,13 @@ const PropertyDetail = () => {
                       className="w-full"
                       icon={<Phone className="w-4 h-4 mr-2" />}
                     >
-                      Call
+                      {t("detail.call")}
                     </CsButton>
                     <CsButton
                       className="w-full"
                       icon={<MessageSquare className="w-4 h-4 mr-2" />}
                     >
-                      Message
+                      {t("detail.message")}
                     </CsButton>
                     <CsButton
                       className="w-full"
@@ -431,7 +455,7 @@ const PropertyDetail = () => {
                     item={[
                       {
                         value: "tour",
-                        label: "Schedule Tour",
+                        label: t("detail.scheduleTour"),
                         content: (
                           <div className="pt-4 space-y-4">
                             <Popover>
@@ -446,7 +470,7 @@ const PropertyDetail = () => {
                                   {date ? (
                                     format(date, "PPP")
                                   ) : (
-                                    <span>Pick a date</span>
+                                    <span>{t("detail.pickDate")}</span>
                                   )}
                                 </button>
                               </PopoverTrigger>
@@ -468,25 +492,25 @@ const PropertyDetail = () => {
                             </select>
 
                             <CsButton className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-200">
-                              Request Booking
+                              {t("detail.requestBooking")}
                             </CsButton>
                             <p className="text-xs text-center text-gray-400">
-                              You won&apos;t be charged yet
+                              {t("detail.notChargedYet")}
                             </p>
                           </div>
                         ),
                       },
                       {
                         value: "info",
-                        label: "Request Info",
+                        label: t("detail.requestInfo"),
                         content: (
                           <div className="pt-4 space-y-4">
                             <textarea
                               className="w-full h-32 rounded-xl border border-gray-200 p-4 text-sm outline-none focus:border-emerald-500 resize-none"
-                              placeholder="Hello, I am interested in [Property Name]..."
+                              placeholder={t("detail.messagePlaceholder")}
                             ></textarea>
                             <CsButton className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-                              Send Message
+                              {t("detail.sendMessage")}
                             </CsButton>
                           </div>
                         ),
@@ -502,19 +526,19 @@ const PropertyDetail = () => {
                     onClick={() => handleSaveProperty({ action: "UNSAVE" })}
                     className="flex items-center gap-2 text-red-500 hover:text-red-600 text-sm font-medium transition-colors"
                   >
-                    <Heart className="w-4 h-4" /> Saved
+                    <Heart className="w-4 h-4" /> {t("detail.saved")}
                   </button>
                 ) : (
                   <button
                     onClick={() => handleSaveProperty()}
                     className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-sm font-medium transition-colors"
                   >
-                    <Heart className="w-4 h-4" /> Save this home
+                    <Heart className="w-4 h-4" /> {t("detail.saveHome")}
                   </button>
                 )}
                 <div className="w-px h-4 bg-gray-300"></div>
                 <button className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 text-sm font-medium transition-colors">
-                  <Share2 className="w-4 h-4" /> Share this listing
+                  <Share2 className="w-4 h-4" /> {t("detail.shareListings")}
                 </button>
               </div>
             </div>
@@ -525,10 +549,10 @@ const PropertyDetail = () => {
         <section className="mt-20 pt-10 border-t border-gray-200">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              Similar Homes You Might Like
+              {t("detail.similarHomes")}
             </h2>
             <button className="text-emerald-600 font-bold hover:underline">
-              View All
+              {t("detail.viewAll")}
             </button>
           </div>
           {/* Placeholder for Similar Properties Grid */}

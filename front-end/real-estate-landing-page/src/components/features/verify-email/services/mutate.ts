@@ -13,9 +13,8 @@ export const useCreatePassword = (): UseMutationResult<
       return VerifyEmailService.createPassword(data);
     },
     meta: {
-      ERROR_SOURCE:
-        "[Create password failed]: The password has been successfully created",
-      SUCCESS_MESSAGE: "The password has been successfully created",
+      ERROR_SOURCE: "notifications.createPasswordFailed",
+      SUCCESS_MESSAGE: "notifications.createPasswordSuccess",
     },
   });
 };

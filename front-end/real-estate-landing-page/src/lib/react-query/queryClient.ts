@@ -8,6 +8,7 @@ import {
   type QueryKey,
 } from "@tanstack/react-query";
 import axios from "axios";
+import { getClientTranslation } from "@/lib/i18n/getClientTranslation";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,7 +24,8 @@ export const queryClient = new QueryClient({
       query: Query<unknown, unknown, unknown, QueryKey>,
     ): void => {
       if (query.meta?.SUCCESS_MESSAGE) {
-        toast.success(`${query.meta.SUCCESS_MESSAGE}`, {
+        const msg = getClientTranslation(query.meta.SUCCESS_MESSAGE as string);
+        toast.success(msg, {
           position: "top-center",
         });
       }
@@ -32,8 +34,10 @@ export const queryClient = new QueryClient({
       error: any,
       query: Query<unknown, unknown, unknown, QueryKey>,
     ): void => {
-      const errorSource = (query.meta?.ERROR_SOURCE as string) || "Error";
-      let errorMessage = "An unknown error occurred";
+      const errorSource = getClientTranslation(
+        (query.meta?.ERROR_SOURCE as string) || "notifications.error",
+      );
+      let errorMessage = getClientTranslation("notifications.unknownError");
 
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
@@ -53,8 +57,10 @@ export const queryClient = new QueryClient({
       _context: unknown,
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
-      const errorSource = (mutation.meta?.ERROR_SOURCE as string) || "Error";
-      let errorMessage = "An unknown error occurred";
+      const errorSource = getClientTranslation(
+        (mutation.meta?.ERROR_SOURCE as string) || "notifications.error",
+      );
+      let errorMessage = getClientTranslation("notifications.unknownError");
 
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
@@ -79,7 +85,10 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (mutation.meta?.SUCCESS_MESSAGE) {
-        toast.success(`${mutation.meta.SUCCESS_MESSAGE}`, {
+        const msg = getClientTranslation(
+          mutation.meta.SUCCESS_MESSAGE as string,
+        );
+        toast.success(msg, {
           position: "top-center",
         });
       }

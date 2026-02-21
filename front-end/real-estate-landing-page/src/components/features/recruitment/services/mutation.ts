@@ -13,8 +13,8 @@ export const useExtractID = (): UseMutationResult<
       return ExtractService.ExtractID(file);
     },
     meta: {
-      ERROR_SOURCE: "[Extract ID failed]",
-      SUCCESS_MESSAGE: "The ID has been successfully extracted",
+      ERROR_SOURCE: "notifications.extractIdFailed",
+      SUCCESS_MESSAGE: "notifications.extractIdSuccess",
     },
   });
 };
@@ -30,8 +30,8 @@ export const useRegistration = (): UseMutationResult<
       return ExtractService.registration(data);
     },
     meta: {
-      ERROR_SOURCE: "[Registration failed]",
-      SUCCESS_MESSAGE: "The agent has been successfully registered",
+      ERROR_SOURCE: "notifications.registrationFailed",
+      SUCCESS_MESSAGE: "notifications.registrationSuccess",
     },
   });
 };
@@ -52,8 +52,8 @@ export const useUploadImage = (): UseMutationResult<
       return ExtractService.UploadImage(file) as any;
     },
     meta: {
-      ERROR_SOURCE: "[Extract ID failed]",
-      SUCCESS_MESSAGE: "The ID has been successfully extracted",
+      ERROR_SOURCE: "notifications.uploadImageFailed",
+      SUCCESS_MESSAGE: "notifications.uploadImageSuccess",
     },
   });
 };
