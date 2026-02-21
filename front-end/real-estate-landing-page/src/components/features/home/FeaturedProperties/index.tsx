@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 const FeaturedProperties = () => {
-  const t = useTranslations("HomePage");
+  const t = useTranslations("FeaturedProperties");
   const router = useRouter();
 
   const handleViewAllProperties = () => {
@@ -18,17 +18,18 @@ const FeaturedProperties = () => {
       <div className="flex flex-col md:flex-row justify-between items-center">
         <div className="flex flex-col mb-4 md:mb-0">
           <span className="cs-typography text-2xl md:text-[40px]! font-semibold! mb-3">
-            Featured <span className="italic font-normal">Properties</span>
+            {t("title")}{" "}
+            <span className="italic font-normal">{t("titleItalic")}</span>
           </span>
           <span className="cs-paragraph-gray max-w-[800px] text-center md:text-left text-[16px]!">
-            Discover our hand-picked selection of premium rentals.
+            {t("description")}
           </span>
         </div>
         <CsButton
           className="text-white cs-bg-black rounded-full"
           onClick={handleViewAllProperties}
         >
-          View All Properties
+          {t("viewAll")}
         </CsButton>
       </div>
       <div className="h-px w-full bg-[#E5E5E5] my-6" />

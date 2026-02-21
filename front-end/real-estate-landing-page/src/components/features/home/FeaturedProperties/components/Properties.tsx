@@ -5,6 +5,7 @@ import { Icon, Tag } from "@/components/ui";
 import { Bath, Bed, Maximize } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 const categories = [
   {
@@ -37,6 +38,7 @@ const Card = ({
   price: string;
 }) => {
   const router = useRouter();
+  const t = useTranslations("PropertiesPage");
 
   const handleViewDetails = () => {
     router.push("/properties/1");
@@ -58,7 +60,7 @@ const Card = ({
             className="cs-outline-black text-sm font-semibold border-none rounded-full"
             onClick={handleViewDetails}
           >
-            View Details
+            {t("viewDetails")}
           </CsButton>
         </div>
         <div>
@@ -68,10 +70,10 @@ const Card = ({
         <div className="bg-black/10 w-full h-px" />
         <div className="flex justify-start gap-4">
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Bed className="main-color-red w-5 h-5" />3 Beds
+            <Bed className="main-color-red w-5 h-5" />3 {t("beds")}
           </span>
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Bath className="main-color-red w-5 h-5" />3 Bathrooms
+            <Bath className="main-color-red w-5 h-5" />3 {t("bathrooms")}
           </span>
           <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1 ">
             <Maximize className="main-color-red w-5 h-5" />3 m<sup>2</sup>

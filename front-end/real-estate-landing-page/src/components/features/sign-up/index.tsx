@@ -11,11 +11,13 @@ import { Separator } from "@/components/ui/separator";
 import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { useSignUp } from "./services/mutate";
 import { useRouter } from "next/navigation";
 
 const SignUp = () => {
   const router = useRouter();
+  const t = useTranslations("SignUp");
   const { mutateAsync: signUpMutate, isPending } = useSignUp();
   const {
     handleSubmit,
@@ -49,9 +51,9 @@ const SignUp = () => {
   return (
     <>
       <div>
-        <h2 className="text-2xl font-bold text-black">Create an Account</h2>
+        <h2 className="text-2xl font-bold text-black">{t("createAccount")}</h2>
         <span className="cs-typography-gray text-sm!">
-          Join Havenly to save home and contact a real estate agent.
+          {t("joinDescription")}
         </span>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
@@ -60,15 +62,15 @@ const SignUp = () => {
             name="firstName"
             control={control}
             rules={{
-              required: "First name is required",
+              required: t("firstNameRequired"),
               minLength: {
                 value: 3,
-                message: "First name must be at least 3 characters",
+                message: t("firstNameMin"),
               },
             }}
             render={({ field }) => (
               <Input
-                label="First Name"
+                label={t("firstName")}
                 placeholder="John"
                 error={errors.firstName?.message}
                 {...field}
@@ -79,15 +81,15 @@ const SignUp = () => {
             name="lastName"
             control={control}
             rules={{
-              required: "Last name is required",
+              required: t("lastNameRequired"),
               minLength: {
                 value: 3,
-                message: "Last name must be at least 3 characters",
+                message: t("lastNameMin"),
               },
             }}
             render={({ field }) => (
               <Input
-                label="Last Name"
+                label={t("lastName")}
                 placeholder="Doe"
                 error={errors.lastName?.message}
                 {...field}
@@ -99,15 +101,15 @@ const SignUp = () => {
           name="email"
           control={control}
           rules={{
-            required: "Email is required",
+            required: t("emailRequired"),
             pattern: {
               value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-              message: "Please enter a valid email address",
+              message: t("emailInvalid"),
             },
           }}
           render={({ field }) => (
             <Input
-              label="Email Address"
+              label={t("emailLabel")}
               placeholder="john.doe@example.com"
               suffix={<Mail className="main-color-gray w-5 h-5" />}
               error={errors.email?.message}
@@ -119,15 +121,15 @@ const SignUp = () => {
           name="phone"
           control={control}
           rules={{
-            required: "Phone is required",
+            required: t("phoneRequired"),
             pattern: {
               value: /^[0-9]{10,11}$/,
-              message: "Please enter a valid phone number",
+              message: t("phoneInvalid"),
             },
           }}
           render={({ field }) => (
             <Input
-              label="Phone Number"
+              label={t("phoneLabel")}
               placeholder="09012345678"
               suffix={<Phone className="main-color-gray w-5 h-5" />}
               error={errors.phone?.message}
@@ -139,16 +141,16 @@ const SignUp = () => {
           name="password"
           control={control}
           rules={{
-            required: "Password is required",
+            required: t("passwordRequired"),
             minLength: {
               value: 8,
-              message: "Password must be at least 8 characters",
+              message: t("passwordMin"),
             },
           }}
           render={({ field }) => (
             <Password
-              label="Password"
-              placeholder="Password"
+              label={t("passwordLabel")}
+              placeholder={t("passwordLabel")}
               error={errors.password?.message}
               {...field}
             />
@@ -158,17 +160,17 @@ const SignUp = () => {
           name="confirmPassword"
           control={control}
           rules={{
-            required: "Confirm password is required",
+            required: t("confirmPasswordRequired"),
             minLength: {
               value: 8,
-              message: "Confirm password must be at least 8 characters",
+              message: t("confirmPasswordMin"),
             },
-            validate: (value) => value === password || "Passwords do not match",
+            validate: (value) => value === password || t("passwordMismatch"),
           }}
           render={({ field }) => (
             <Password
-              label="Confirm Password"
-              placeholder="Confirm Password"
+              label={t("confirmPasswordLabel")}
+              placeholder={t("confirmPasswordLabel")}
               error={errors.confirmPassword?.message}
               {...field}
             />
@@ -184,13 +186,13 @@ const SignUp = () => {
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                I agree to the{" "}
+                {t("agreePolicy")}{" "}
                 <Link href="/policy" className="text-red-500">
-                  Terms of Service
-                </Link>
-                and
+                  {t("termsOfService")}
+                </Link>{" "}
+                {t("and")}{" "}
                 <Link href="/policy" className="text-red-500">
-                  Privacy Policy
+                  {t("privacyPolicy")}
                 </Link>
               </Label>
             )}
@@ -201,7 +203,7 @@ const SignUp = () => {
           className="w-full cs-bg-red text-white"
           loading={isPending}
         >
-          Sign Up
+          {t("signUpBtn")}
         </CsButton>
       </form>
       <div className="mt-4 text-center">
@@ -212,17 +214,17 @@ const SignUp = () => {
             <CsButton icon={<Facebook className="w-5 h-5" />}></CsButton>
           </div>
           <span className="cs-typography-gray text-sm!">
-            Already have an account?{" "}
+            {t("alreadyHaveAccount")}{" "}
             <Link href="/sign-in" className="text-red-500">
-              Sign In
+              {t("signIn")}
             </Link>
           </span>
         </div>
         <Separator className="my-4" />
         <span className="cs-typography-gray text-sm!">
-          Are you an Agent?{" "}
+          {t("areYouAgent")}{" "}
           <Link href="/work/become-agent/recruitment" className="text-red-500">
-            Register here
+            {t("registerHere")}
           </Link>
         </span>
       </div>

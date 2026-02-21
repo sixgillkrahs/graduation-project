@@ -2,6 +2,66 @@
   "HomePage": {
     "title": "Chào mừng bạn đến với Real Estate Landing Page!"
   },
+  "Header": {
+    "searchProperties": "Tìm kiếm bất động sản",
+    "listForSale": "Đăng bán",
+    "listForRent": "Cho thuê",
+    "agentSpace": "Không gian đại lý",
+    "myFavorites": "Yêu thích",
+    "profile": "Hồ sơ",
+    "settings": "Cài đặt",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập"
+  },
+  "Banner": {
+    "title": "Bắt đầu tìm kiếm ngay hôm nay",
+    "rent": "Thuê",
+    "sell": "Bán",
+    "enterLocation": "Nhập địa điểm",
+    "propertyType": "Loại bất động sản",
+    "bedrooms": "Phòng ngủ",
+    "apartment": "Căn hộ",
+    "house": "Nhà ở",
+    "bedroom1": "1 Phòng ngủ",
+    "bedroom2": "2 Phòng ngủ",
+    "bedroom3": "3 Phòng ngủ",
+    "bedroom4": "4 Phòng ngủ",
+    "search": "Tìm kiếm",
+    "popularSearches": "Tìm kiếm phổ biến",
+    "petFriendly": "Cho phép thú cưng",
+    "pool": "Hồ bơi"
+  },
+  "WhyUs": {
+    "title": "Tại sao chọn",
+    "brandName": "Havenly?",
+    "description": "Vì chúng tôi giúp việc thuê nhà trở nên dễ dàng như nó vốn phải thế. Không thủ tục rườm rà, không lo lắng, và luôn có đội ngũ hỗ trợ bạn mọi lúc",
+    "card1Title": "Tất cả trong một nơi",
+    "card1Tag": "Tiện lợi",
+    "card2Title": "Đồng hành cùng bạn mọi bước",
+    "card2Tag": "Tin cậy",
+    "card3Title": "Thuê nhà đơn giản, không lo lắng",
+    "card3Tag": "Đơn giản"
+  },
+  "FeaturedProperties": {
+    "title": "Bất động sản",
+    "titleItalic": "Nổi bật",
+    "description": "Khám phá tuyển chọn bất động sản cho thuê cao cấp của chúng tôi.",
+    "viewAll": "Xem tất cả bất động sản"
+  },
+  "Benefit": {
+    "titleNormal": "Đăng tin",
+    "titleItalic": "Đơn giản và Không căng thẳng",
+    "item1": "Tìm được người thuê lý tưởng trong vòng 15 ngày.",
+    "item2": "Chụp ảnh chuyên nghiệp cho bất động sản của bạn.",
+    "item3": "Hiển thị cao trên các cổng thông tin hàng đầu.",
+    "item4": "Quản lý hoàn chỉnh trong ứng dụng của bạn.",
+    "item5": "Nhận tiền thuê đúng hạn mỗi tháng.",
+    "listMyProperty": "Đăng bất động sản"
+  },
+  "HearCustom": {
+    "titleNormal": "Lắng nghe từ",
+    "titleItalic": "Khách hàng hài lòng"
+  },
   "Footer": {
     "description": "Mỗi ngôi nhà có một câu chuyện.",
     "help": "Chúng tôi giúp bạn viết câu chuyện của mình.",
@@ -20,6 +80,125 @@
     "menuAbout": {
       "FrequentlyAskedQuestions": "Câu hỏi thường gặp",
       "PrivacyPolicy": "Chính sách bảo mật"
-    }
+    },
+    "followUs": "Theo dõi chúng tôi",
+    "email": "Email",
+    "phone": "Điện thoại"
+  },
+  "SignIn": {
+    "welcomeBack": "Chào mừng trở lại",
+    "enterDetails": "Vui lòng nhập thông tin của bạn.",
+    "emailLabel": "Địa chỉ Email",
+    "emailRequired": "Email là bắt buộc",
+    "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+    "passwordLabel": "Mật khẩu",
+    "passwordRequired": "Mật khẩu là bắt buộc",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "forgotPassword": "Quên mật khẩu?",
+    "signInBtn": "Đăng nhập",
+    "signInPasskey": "Đăng nhập bằng Passkey",
+    "noAccount": "Chưa có tài khoản?",
+    "signUp": "Đăng ký"
+  },
+  "SignUp": {
+    "createAccount": "Tạo tài khoản",
+    "joinDescription": "Tham gia Havenly để lưu nhà và liên hệ với đại lý bất động sản.",
+    "firstName": "Tên",
+    "firstNameRequired": "Tên là bắt buộc",
+    "firstNameMin": "Tên phải có ít nhất 3 ký tự",
+    "lastName": "Họ",
+    "lastNameRequired": "Họ là bắt buộc",
+    "lastNameMin": "Họ phải có ít nhất 3 ký tự",
+    "emailLabel": "Địa chỉ Email",
+    "emailRequired": "Email là bắt buộc",
+    "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+    "phoneLabel": "Số điện thoại",
+    "phoneRequired": "Số điện thoại là bắt buộc",
+    "phoneInvalid": "Vui lòng nhập số điện thoại hợp lệ",
+    "passwordLabel": "Mật khẩu",
+    "passwordRequired": "Mật khẩu là bắt buộc",
+    "passwordMin": "Mật khẩu phải có ít nhất 8 ký tự",
+    "confirmPasswordLabel": "Xác nhận mật khẩu",
+    "confirmPasswordRequired": "Xác nhận mật khẩu là bắt buộc",
+    "confirmPasswordMin": "Xác nhận mật khẩu phải có ít nhất 8 ký tự",
+    "passwordMismatch": "Mật khẩu không khớp",
+    "agreePolicy": "Tôi đồng ý với",
+    "termsOfService": "Điều khoản dịch vụ",
+    "and": "và",
+    "privacyPolicy": "Chính sách bảo mật",
+    "signUpBtn": "Đăng ký",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "signIn": "Đăng nhập",
+    "areYouAgent": "Bạn là đại lý?",
+    "registerHere": "Đăng ký tại đây"
+  },
+  "PropertiesPage": {
+    "tabs": {
+      "allProperties": "Tất cả bất động sản",
+      "myFavorites": "Yêu thích của tôi"
+    },
+    "heading": {
+      "allTitle": "Bất động sản đang bán",
+      "favTitle": "Bất động sản yêu thích",
+      "showing": "Hiển thị {count} trên {total} kết quả"
+    },
+    "sort": {
+      "label": "Sắp xếp:",
+      "placeholder": "Sắp xếp",
+      "newest": "Mới nhất",
+      "priceLowHigh": "Giá: Thấp đến Cao",
+      "priceHighLow": "Giá: Cao đến Thấp"
+    },
+    "empty": {
+      "noFavorites": "Chưa có yêu thích",
+      "noFavoritesDesc": "Khám phá các bất động sản và nhấn biểu tượng trái tim để lưu yêu thích tại đây."
+    },
+    "search": {
+      "placeholder": "Tìm kiếm Thành phố, Quận/Huyện, hoặc Dự án...",
+      "demandType": "Loại nhu cầu",
+      "propertyType": "Loại bất động sản",
+      "maxPrice": "Giá tối đa",
+      "priceLabel": "Tối đa {price} Tỷ VND",
+      "searchBtn": "Tìm kiếm",
+      "demandAll": "Tất cả",
+      "demandSale": "Cần bán",
+      "demandRent": "Cho thuê",
+      "typeAll": "Tất cả loại",
+      "typeApartment": "Căn hộ",
+      "typeHouse": "Nhà riêng",
+      "typeStreetHouse": "Nhà mặt phố",
+      "typeVilla": "Biệt thự",
+      "typeLand": "Đất nền",
+      "typeOther": "Khác"
+    },
+    "filter": {
+      "title": "Bộ lọc",
+      "resetAll": "Đặt lại",
+      "bedrooms": "Phòng ngủ",
+      "bathrooms": "Phòng tắm",
+      "direction": "Hướng nhà",
+      "selectDirection": "Chọn hướng",
+      "amenities": "Tiện ích",
+      "any": "Tất cả",
+      "north": "Bắc",
+      "south": "Nam",
+      "east": "Đông",
+      "west": "Tây",
+      "northEast": "Đông Bắc",
+      "northWest": "Tây Bắc",
+      "southEast": "Đông Nam",
+      "southWest": "Tây Nam",
+      "pool": "Hồ bơi",
+      "gym": "Phòng gym",
+      "parking": "Bãi đậu xe",
+      "security": "An ninh 24/7"
+    },
+    "location": {
+      "province": "Tỉnh/Thành phố",
+      "ward": "Phường/Xã"
+    },
+    "beds": "Phòng ngủ",
+    "bathrooms": "Phòng tắm",
+    "viewDetails": "Xem chi tiết"
   }
 }

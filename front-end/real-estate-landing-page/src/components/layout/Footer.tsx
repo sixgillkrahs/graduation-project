@@ -108,10 +108,10 @@ const Footer = () => {
               </div>
             </div>
             <div className="grid grid-cols-1 gap-2 min-w-[300px]">
-              <Label label="Email" value="contact@realestate.com" />
-              <Label label="Phone" value="0966999999" />
+              <Label label={t("email")} value="contact@realestate.com" />
+              <Label label={t("phone")} value="0966999999" />
               <div className="mt-8">
-                <div className={classText}>Follow Us</div>
+                <div className={classText}>{t("followUs")}</div>
                 <div className="flex gap-4 mt-4">
                   <Icon.Facebook className={classIcon} />
                   <Icon.TwitterX className={classIcon} />

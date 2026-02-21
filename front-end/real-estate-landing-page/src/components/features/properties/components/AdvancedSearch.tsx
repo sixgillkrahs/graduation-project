@@ -8,23 +8,8 @@ import {
 import { Slider } from "@/components/ui";
 import { ChevronDown, Search } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import LocationAutocomplete from "./LocationAutocomplete";
-
-const DEMAND_TYPES = [
-  { value: "all", label: "All" },
-  { value: "SALE", label: "For Sale" },
-  { value: "RENT", label: "For Rent" },
-];
-
-const PROPERTY_TYPES = [
-  { value: "all", label: "All Types" },
-  { value: "APARTMENT", label: "Apartment" },
-  { value: "HOUSE", label: "House" },
-  { value: "STREET_HOUSE", label: "Street House" },
-  { value: "VILLA", label: "Villa" },
-  { value: "LAND", label: "Land/Plot" },
-  { value: "OTHER", label: "Other" },
-];
 
 interface SearchFormValues {
   query: string;
@@ -56,6 +41,24 @@ const buildSearchFilters = (data: SearchFormValues): SearchFilters => {
 };
 
 const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
+  const t = useTranslations("PropertiesPage.search");
+
+  const DEMAND_TYPES = [
+    { value: "all", label: t("demandAll") },
+    { value: "SALE", label: t("demandSale") },
+    { value: "RENT", label: t("demandRent") },
+  ];
+
+  const PROPERTY_TYPES = [
+    { value: "all", label: t("typeAll") },
+    { value: "APARTMENT", label: t("typeApartment") },
+    { value: "HOUSE", label: t("typeHouse") },
+    { value: "STREET_HOUSE", label: t("typeStreetHouse") },
+    { value: "VILLA", label: t("typeVilla") },
+    { value: "LAND", label: t("typeLand") },
+    { value: "OTHER", label: t("typeOther") },
+  ];
+
   const { control, handleSubmit, watch } = useForm<SearchFormValues>({
     defaultValues: {
       query: "",
@@ -87,6 +90,7 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
                 <LocationAutocomplete
                   value={field.value}
                   onChange={field.onChange}
+                  placeholder={t("placeholder")}
                 />
               )}
             />
@@ -102,7 +106,7 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
               control={control}
               render={({ field }) => (
                 <CsSelect
-                  placeholder="Demand Type"
+                  placeholder={t("demandType")}
                   value={field.value}
                   onChange={field.onChange}
                   options={DEMAND_TYPES}
@@ -122,7 +126,7 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
               control={control}
               render={({ field }) => (
                 <CsSelect
-                  placeholder="Property Type"
+                  placeholder={t("propertyType")}
                   value={field.value}
                   onChange={field.onChange}
                   options={PROPERTY_TYPES}
@@ -144,14 +148,16 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
                   className="w-full h-12 flex items-center justify-between px-3 text-left text-gray-700 hover:text-red-500 transition-colors"
                 >
                   <span className="truncate font-medium">
-                    Up to {maxPrice} Billion VND
+                    {t("priceLabel", { price: maxPrice })}
                   </span>
                   <ChevronDown className="w-4 h-4 text-gray-400" />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4" align="center">
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-gray-900">Max Price</h4>
+                  <h4 className="font-semibold text-gray-900">
+                    {t("maxPrice")}
+                  </h4>
                   <div className="pt-2 px-2">
                     <Controller
                       name="maxPrice"
@@ -178,7 +184,7 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
               className="w-full md:w-auto rounded-full text-white font-bold text-base h-12 px-8 shadow-lg"
               icon={<Search className="w-5 h-5 mr-1" />}
             >
-              Search
+              {t("searchBtn")}
             </CsButton>
           </div>
         </form>

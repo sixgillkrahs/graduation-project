@@ -1,19 +1,13 @@
+"use client";
+
 import { CsCheckbox } from "@/components/custom";
 import CsToggleGroup from "@/components/custom/toggle-group";
 import { CsSelect } from "@/components/ui/select";
 import { FilterX } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-const AMENITIES = [
-  { id: "pool", label: "Swimming Pool" },
-  { id: "gym", label: "Gym & Fitness" },
-  { id: "parking", label: "Car Parking" },
-  { id: "elevator", label: "Elevator" },
-  { id: "balcony", label: "Balcony/Terrace" },
-  { id: "garden", label: "Garden" },
-  { id: "security", label: "24/7 Security" },
-  { id: "furnished", label: "Fully Furnished" },
-];
+const AMENITY_KEYS = ["pool", "gym", "parking", "security"] as const;
 
 export interface FilterValues {
   "features.bedrooms"?: number;
@@ -126,18 +120,20 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
     onReset?.();
   };
 
+  const t = useTranslations("PropertiesPage.filter");
+
   return (
     <aside className="w-full lg:w-1/4 min-w-[280px] bg-white rounded-xl border border-gray-100 p-6 sticky top-24 h-fit shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
           <FilterX className="w-5 h-5 main-color-red" />
-          Filters
+          {t("title")}
         </h2>
         <button
           onClick={handleResetAll}
           className="text-sm font-medium text-red-500 hover:text-red-600 hover:underline transition-colors"
         >
-          Reset All
+          {t("resetAll")}
         </button>
       </div>
 
@@ -145,7 +141,7 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
         {/* Bedrooms Section */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-            Bedrooms
+            {t("bedrooms")}
           </h3>
           <CsToggleGroup
             type="single"
@@ -154,7 +150,7 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
             value={bedrooms}
             onValueChange={handleBedroomChange}
             items={[
-              { value: "any", label: "Any" },
+              { value: "any", label: t("any") },
               { value: "1", label: "1" },
               { value: "2", label: "2" },
               { value: "3", label: "3" },
@@ -168,7 +164,7 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
         {/* Bathrooms Section */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-            Bathrooms
+            {t("bathrooms")}
           </h3>
           <CsToggleGroup
             type="single"
@@ -177,7 +173,7 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
             value={bathrooms}
             onValueChange={handleBathroomChange}
             items={[
-              { value: "any", label: "Any" },
+              { value: "any", label: t("any") },
               { value: "1", label: "1" },
               { value: "2", label: "2" },
               { value: "3+", label: "3+" },
@@ -190,22 +186,22 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
         {/* Direction Section */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-            Property Direction
+            {t("direction")}
           </h3>
           <CsSelect
             key={resetKey}
-            placeholder="Select Direction"
+            placeholder={t("selectDirection")}
             value={direction || undefined}
             onChange={handleDirectionChange}
             options={[
-              { value: "north", label: "North" },
-              { value: "south", label: "South" },
-              { value: "east", label: "East" },
-              { value: "west", label: "West" },
-              { value: "northeast", label: "North East" },
-              { value: "northwest", label: "North West" },
-              { value: "southeast", label: "South East" },
-              { value: "southwest", label: "South West" },
+              { value: "north", label: t("north") },
+              { value: "south", label: t("south") },
+              { value: "east", label: t("east") },
+              { value: "west", label: t("west") },
+              { value: "northeast", label: t("northEast") },
+              { value: "northwest", label: t("northWest") },
+              { value: "southeast", label: t("southEast") },
+              { value: "southwest", label: t("southWest") },
             ]}
             className="w-full"
           />
@@ -214,15 +210,15 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
         {/* Amenities Section */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-            Amenities
+            {t("amenities")}
           </h3>
           <div className="grid grid-cols-1 gap-3">
-            {AMENITIES.map((amenity) => (
-              <div key={amenity.id} className="flex items-center">
+            {AMENITY_KEYS.map((key) => (
+              <div key={key} className="flex items-center">
                 <CsCheckbox
-                  label={amenity.label}
-                  checked={selectedAmenities.includes(amenity.id)}
-                  onCheckedChange={() => toggleAmenity(amenity.id)}
+                  label={t(key)}
+                  checked={selectedAmenities.includes(key)}
+                  onCheckedChange={() => toggleAmenity(key)}
                 />
               </div>
             ))}

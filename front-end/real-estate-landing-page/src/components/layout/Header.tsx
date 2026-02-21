@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslations } from "next-intl";
 import { CsButton } from "../custom";
 import { Dropdown, DropdownItem, Icon } from "../ui";
 
@@ -19,6 +20,7 @@ const Header = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { mutateAsync: logout } = useLogout();
+  const t = useTranslations("Header");
 
   useEffect(() => {
     if (isSuccess && me?.data) {
@@ -51,13 +53,13 @@ const Header = () => {
         <nav className="hidden md:block">
           <ul className="flex gap-6 p-6">
             <li className="cs-typography text-[16px]! cursor-pointer flex items-center gap-1 cs-outline-gray p-2 rounded-full px-4">
-              Search for properties <Icon.ArrowDown />
+              {t("searchProperties")} <Icon.ArrowDown />
             </li>
             <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full px-4  cs-outline-gray">
-              List for sale
+              {t("listForSale")}
             </li>
             <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full px-4  cs-outline-gray">
-              List for rent
+              {t("listForRent")}
             </li>
             <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full  cs-outline-gray size-[40px] ">
               <Icon.ExpandUpDown />
@@ -107,14 +109,14 @@ const Header = () => {
                   className="cs-bg-black text-white rounded-full"
                   icon={<Icon.Briefcase />}
                 >
-                  Agent space
+                  {t("agentSpace")}
                 </CsButton>
               </Link>
             )}
             <Link
               href="/properties?tab=favorites"
               className="relative group/fav p-2.5 rounded-full cs-outline-gray hover:bg-red-50 transition-all duration-200 cursor-pointer"
-              title="My Favorites"
+              title={t("myFavorites")}
             >
               <Heart className="w-5 h-5 text-gray-500 group-hover/fav:text-red-500 transition-colors duration-200" />
             </Link>
@@ -132,19 +134,19 @@ const Header = () => {
                 onClick={() => router.push(`/profile`)}
                 icon={<Icon.User className="w-4 h-4" />}
               >
-                Profile
+                {t("profile")}
               </DropdownItem>
               <DropdownItem
                 onClick={() => router.push(`/properties?tab=favorites`)}
                 icon={<Heart className="w-4 h-4" />}
               >
-                My Favorites
+                {t("myFavorites")}
               </DropdownItem>
               <DropdownItem
                 onClick={() => router.push("/settings")}
                 icon={<Icon.Settings className="w-4 h-4" />}
               >
-                Settings
+                {t("settings")}
               </DropdownItem>
               <div className="my-1 border-t border-gray-200" />
               <DropdownItem
@@ -152,7 +154,7 @@ const Header = () => {
                 onClick={handleLogout}
                 icon={<Icon.LogoutCircle className="w-4 h-4" />}
               >
-                Logout
+                {t("logout")}
               </DropdownItem>
             </Dropdown>
           </div>
@@ -164,7 +166,7 @@ const Header = () => {
               className="bg-white! outline-none! border-none! shadow-none! text-black"
               onClick={handleLogin}
             >
-              Login
+              {t("login")}
             </CsButton>
           </div>
         )}
@@ -174,13 +176,13 @@ const Header = () => {
           <nav className="px-4 py-4">
             <ul className="flex flex-col gap-4">
               <li className="cs-typography text-[16px]! cursor-pointer flex items-center gap-1 cs-outline-gray p-2 rounded-full px-4">
-                Search for properties <Icon.ArrowDown />
+                {t("searchProperties")} <Icon.ArrowDown />
               </li>
               <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full px-4  cs-outline-gray">
-                List for sale
+                {t("listForSale")}
               </li>
               <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full px-4  cs-outline-gray">
-                List for rent
+                {t("listForRent")}
               </li>
               <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full  cs-outline-gray size-[40px] ">
                 <Icon.ExpandUpDown />
@@ -192,7 +194,7 @@ const Header = () => {
                   className="text-black pl-2!"
                   onClick={() => handleLogin()}
                 >
-                  Login
+                  {t("login")}
                 </CsButton>
               </li>
             </ul>

@@ -9,10 +9,12 @@ import { Password } from "@/components/ui/password";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { useSignIn, useSignInPasskey } from "./services/mutate";
 
 const SignIn = () => {
   const router = useRouter();
+  const t = useTranslations("SignIn");
   const { mutateAsync: signIn, isPending } = useSignIn();
   const { mutateAsync: signInPasskey, isPending: isPendingPasskey } =
     useSignInPasskey();
@@ -55,25 +57,23 @@ const SignIn = () => {
   return (
     <>
       <div>
-        <h2 className="text-2xl font-bold text-black">Welcome Back</h2>
-        <span className="cs-typography-gray text-sm!">
-          Please enter your details.
-        </span>
+        <h2 className="text-2xl font-bold text-black">{t("welcomeBack")}</h2>
+        <span className="cs-typography-gray text-sm!">{t("enterDetails")}</span>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <Controller
           name="email"
           control={control}
           rules={{
-            required: "Email is required",
+            required: t("emailRequired"),
             pattern: {
               value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-              message: "Please enter a valid email address",
+              message: t("emailInvalid"),
             },
           }}
           render={({ field }) => (
             <Input
-              label="Email Address"
+              label={t("emailLabel")}
               placeholder="john.doe@example.com"
               suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
               error={errors.email?.message}
@@ -85,12 +85,12 @@ const SignIn = () => {
           name="password"
           control={control}
           rules={{
-            required: "Password is required",
+            required: t("passwordRequired"),
           }}
           render={({ field }) => (
             <Password
-              label="Password"
-              placeholder="Password"
+              label={t("passwordLabel")}
+              placeholder={t("passwordLabel")}
               error={errors.password?.message}
               {...field}
             />
@@ -106,7 +106,7 @@ const SignIn = () => {
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                Remember me
+                {t("rememberMe")}
               </Label>
             )}
           />
@@ -114,7 +114,7 @@ const SignIn = () => {
             className="cs-typography-gray text-sm! cursor-pointer hover:underline"
             href="/forgot-password"
           >
-            Forgot password?
+            {t("forgotPassword")}
           </Link>
         </div>
         <CsButton
@@ -122,7 +122,7 @@ const SignIn = () => {
           className="w-full cs-bg-red text-white"
           loading={isPending}
         >
-          Sign In
+          {t("signInBtn")}
         </CsButton>
         <CsButton
           type="button"
@@ -130,14 +130,14 @@ const SignIn = () => {
           icon={<Icon.Fingerprint className="w-5 h-5" />}
           onClick={onSubmitPasskey}
         >
-          Sign In with Passkey
+          {t("signInPasskey")}
         </CsButton>
       </form>
       <div className="mt-4 text-center">
         <span className="cs-typography-gray text-sm!">
-          Don't have an account?{" "}
+          {t("noAccount")}{" "}
           <Link href="/sign-up" className="text-red-500">
-            Sign Up
+            {t("signUp")}
           </Link>
         </span>
       </div>

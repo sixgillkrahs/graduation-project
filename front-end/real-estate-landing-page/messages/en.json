@@ -2,6 +2,66 @@
   "HomePage": {
     "title": "Hello world!"
   },
+  "Header": {
+    "searchProperties": "Search for properties",
+    "listForSale": "List for sale",
+    "listForRent": "List for rent",
+    "agentSpace": "Agent space",
+    "myFavorites": "My Favorites",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  "Banner": {
+    "title": "Start Your Search Today",
+    "rent": "Rent",
+    "sell": "Sell",
+    "enterLocation": "Enter location",
+    "propertyType": "Property Type",
+    "bedrooms": "Bedrooms",
+    "apartment": "Apartment",
+    "house": "House",
+    "bedroom1": "1 Bedroom",
+    "bedroom2": "2 Bedrooms",
+    "bedroom3": "3 Bedrooms",
+    "bedroom4": "4 Bedrooms",
+    "search": "Search",
+    "popularSearches": "Popular Searches",
+    "petFriendly": "Pet Friendly",
+    "pool": "Pool"
+  },
+  "WhyUs": {
+    "title": "Why Choose",
+    "brandName": "Havenly?",
+    "description": "Because we made renting as easy as it should be. No endless paperwork, no uncertainty, and the support of a team that's with you every step of the way",
+    "card1Title": "Everything In One Place",
+    "card1Tag": "Comfort",
+    "card2Title": "We're With You Every Step Of The Way",
+    "card2Tag": "Trust",
+    "card3Title": "Stress-Free Renting Made Simple",
+    "card3Tag": "Simplicity"
+  },
+  "FeaturedProperties": {
+    "title": "Featured",
+    "titleItalic": "Properties",
+    "description": "Discover our hand-picked selection of premium rentals.",
+    "viewAll": "View All Properties"
+  },
+  "Benefit": {
+    "titleNormal": "Listing Made",
+    "titleItalic": "Simple and Stress Free",
+    "item1": "Find the ideal tenant in less than 15 days.",
+    "item2": "Professional photos for your property.",
+    "item3": "High visibility on the country's main portals.",
+    "item4": "Complete management within your application.",
+    "item5": "Receive your rent on time every month.",
+    "listMyProperty": "List My Property"
+  },
+  "HearCustom": {
+    "titleNormal": "Hear From Our",
+    "titleItalic": "Happy Customers"
+  },
   "Footer": {
     "description": "Every Home Has A Story.",
     "help": "We Help You Write Yours.",
@@ -20,6 +80,125 @@
     "menuAbout": {
       "FrequentlyAskedQuestions": "Frequently Asked Questions",
       "PrivacyPolicy": "Privacy Policy"
-    }
+    },
+    "followUs": "Follow Us",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "SignIn": {
+    "welcomeBack": "Welcome Back",
+    "enterDetails": "Please enter your details.",
+    "emailLabel": "Email Address",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordLabel": "Password",
+    "passwordRequired": "Password is required",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signInBtn": "Sign In",
+    "signInPasskey": "Sign In with Passkey",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up"
+  },
+  "SignUp": {
+    "createAccount": "Create an Account",
+    "joinDescription": "Join Havenly to save home and contact a real estate agent.",
+    "firstName": "First Name",
+    "firstNameRequired": "First name is required",
+    "firstNameMin": "First name must be at least 3 characters",
+    "lastName": "Last Name",
+    "lastNameRequired": "Last name is required",
+    "lastNameMin": "Last name must be at least 3 characters",
+    "emailLabel": "Email Address",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "phoneLabel": "Phone Number",
+    "phoneRequired": "Phone is required",
+    "phoneInvalid": "Please enter a valid phone number",
+    "passwordLabel": "Password",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least 8 characters",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordRequired": "Confirm password is required",
+    "confirmPasswordMin": "Confirm password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match",
+    "agreePolicy": "I agree to the",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "signUpBtn": "Sign Up",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign In",
+    "areYouAgent": "Are you an Agent?",
+    "registerHere": "Register here"
+  },
+  "PropertiesPage": {
+    "tabs": {
+      "allProperties": "All Properties",
+      "myFavorites": "My Favorites"
+    },
+    "heading": {
+      "allTitle": "Properties for Sale",
+      "favTitle": "My Favorite Properties",
+      "showing": "Showing {count} of {total} results"
+    },
+    "sort": {
+      "label": "Sort by:",
+      "placeholder": "Sort",
+      "newest": "Newest",
+      "priceLowHigh": "Price: Low to High",
+      "priceHighLow": "Price: High to Low"
+    },
+    "empty": {
+      "noFavorites": "No favorites yet",
+      "noFavoritesDesc": "Start exploring properties and tap the heart icon to save your favorites here."
+    },
+    "search": {
+      "placeholder": "Search City, District, or Project...",
+      "demandType": "Demand Type",
+      "propertyType": "Property Type",
+      "maxPrice": "Max Price",
+      "priceLabel": "Up to {price} Billion VND",
+      "searchBtn": "Search",
+      "demandAll": "All",
+      "demandSale": "For Sale",
+      "demandRent": "For Rent",
+      "typeAll": "All Types",
+      "typeApartment": "Apartment",
+      "typeHouse": "House",
+      "typeStreetHouse": "Street House",
+      "typeVilla": "Villa",
+      "typeLand": "Land/Plot",
+      "typeOther": "Other"
+    },
+    "filter": {
+      "title": "Filters",
+      "resetAll": "Reset All",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "direction": "Property Direction",
+      "selectDirection": "Select Direction",
+      "amenities": "Amenities",
+      "any": "Any",
+      "north": "North",
+      "south": "South",
+      "east": "East",
+      "west": "West",
+      "northEast": "North East",
+      "northWest": "North West",
+      "southEast": "South East",
+      "southWest": "South West",
+      "pool": "Swimming Pool",
+      "gym": "Gym/Fitness",
+      "parking": "Parking",
+      "security": "24/7 Security"
+    },
+    "location": {
+      "province": "City/Province",
+      "ward": "Ward"
+    },
+    "beds": "Beds",
+    "bathrooms": "Bathrooms",
+    "viewDetails": "View"
   }
 }

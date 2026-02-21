@@ -12,6 +12,7 @@ import {
 import { Heart, Loader2, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import AdvancedSearch, { SearchFilters } from "./components/AdvancedSearch";
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
@@ -21,6 +22,7 @@ import { useFavoriteProperties, useOnSale } from "./services/query";
 type TabType = "all" | "favorites";
 
 const Properties = () => {
+  const t = useTranslations("PropertiesPage");
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -125,7 +127,7 @@ const Properties = () => {
                 }`}
               >
                 <Search className="w-4 h-4" />
-                All Properties
+                {t("tabs.allProperties")}
               </button>
               {isLoggedIn && (
                 <button
@@ -139,7 +141,7 @@ const Properties = () => {
                   <Heart
                     className={`w-4 h-4 ${!isAllTab ? "fill-current" : ""}`}
                   />
-                  My Favorites
+                  {t("tabs.myFavorites")}
                   {favorites?.data?.totalResults !== undefined &&
                     favorites.data.totalResults > 0 && (
                       <span className="bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
@@ -153,17 +155,17 @@ const Properties = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {isAllTab
-                    ? "Properties for Sale in Hanoi"
-                    : "My Favorite Properties"}
+                  {isAllTab ? t("heading.allTitle") : t("heading.favTitle")}
                 </h1>
                 <p className="text-gray-500 text-sm mt-1">
                   {currentLoading ? (
                     <span className="inline-block h-4 w-40 bg-gray-200 rounded animate-pulse" />
                   ) : (
                     <>
-                      Showing {currentData?.data?.results?.length || 0} of{" "}
-                      {currentData?.data?.totalResults || 0} results
+                      {t("heading.showing", {
+                        count: currentData?.data?.results?.length || 0,
+                        total: currentData?.data?.totalResults || 0,
+                      })}
                     </>
                   )}
                 </p>
@@ -171,11 +173,11 @@ const Properties = () => {
 
               <div className="flex items-center gap-3">
                 <span className="text-gray-500 text-sm font-medium">
-                  Sort by:
+                  {t("sort.label")}
                 </span>
                 <div className="w-48">
                   <CsSelect
-                    placeholder="Sort"
+                    placeholder={t("sort.placeholder")}
                     value={
                       params.sortField === "features.price"
                         ? params.sortOrder === "asc"
@@ -210,9 +212,9 @@ const Properties = () => {
                       }
                     }}
                     options={[
-                      { value: "newest", label: "Newest" },
-                      { value: "price_asc", label: "Price: Low to High" },
-                      { value: "price_desc", label: "Price: High to Low" },
+                      { value: "newest", label: t("sort.newest") },
+                      { value: "price_asc", label: t("sort.priceLowHigh") },
+                      { value: "price_desc", label: t("sort.priceHighLow") },
                     ]}
                     className="border-gray-200 h-10 bg-white"
                   />
@@ -282,17 +284,16 @@ const Properties = () => {
                       <Heart className="w-10 h-10 text-red-300" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      No favorites yet
+                      {t("empty.noFavorites")}
                     </h3>
                     <p className="text-gray-500 text-sm max-w-sm">
-                      Start exploring properties and tap the heart icon to save
-                      your favorites here.
+                      {t("empty.noFavoritesDesc")}
                     </p>
                     <button
                       onClick={() => handleTabChange("all")}
                       className="mt-6 px-6 py-2.5 bg-gray-900 text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
                     >
-                      Explore Properties
+                      {t("tabs.allProperties")}
                     </button>
                   </div>
                 )}

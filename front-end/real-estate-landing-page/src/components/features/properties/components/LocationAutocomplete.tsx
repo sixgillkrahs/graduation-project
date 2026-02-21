@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { MapPin } from "lucide-react";
 import { LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface LocationOption {
@@ -41,8 +42,14 @@ const LocationAutocomplete = ({
 }: LocationAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationOption[]>([]);
+  const [displayText, setDisplayText] = useState(value);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync displayText when value is cleared externally (e.g. reset)
+  useEffect(() => {
+    if (!value) setDisplayText("");
+  }, [value]);
 
   // Filter suggestions based on input
   const filterSuggestions = useCallback((query: string) => {
@@ -56,22 +63,24 @@ const LocationAutocomplete = ({
       (loc) =>
         loc.label.toLowerCase().includes(q) ||
         loc.value.toLowerCase().includes(q),
-    ).slice(0, 8); // Limit to 8 suggestions
+    ).slice(0, 8);
 
     setSuggestions(filtered);
   }, []);
 
-  // Handle input change
+  // Handle input change — user is typing freely
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    onChange(val);
+    setDisplayText(val);
+    onChange(val); // pass raw text as query
     filterSuggestions(val);
     setIsOpen(true);
   };
 
-  // Handle suggestion click
+  // Handle suggestion click — show label, pass value
   const handleSuggestionClick = (suggestion: LocationOption) => {
-    onChange(suggestion.label);
+    setDisplayText(suggestion.label); // display label in input
+    onChange(suggestion.value); // pass value to form query
     setSuggestions([]);
     setIsOpen(false);
   };
@@ -90,12 +99,14 @@ const LocationAutocomplete = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const tLoc = useTranslations("PropertiesPage.location");
+
   const typeLabel = (type: string) => {
     switch (type) {
       case "province":
-        return "City/Province";
+        return tLoc("province");
       case "ward":
-        return "Ward";
+        return tLoc("ward");
       default:
         return "";
     }
@@ -111,7 +122,7 @@ const LocationAutocomplete = ({
           "border-none shadow-none bg-transparent h-12 text-base placeholder:text-gray-400 focus-visible:ring-0 px-0 md:px-4 pl-10!",
           className,
         )}
-        value={value}
+        value={displayText}
         onChange={handleInputChange}
         onFocus={() => {
           if (value && suggestions.length > 0) setIsOpen(true);
