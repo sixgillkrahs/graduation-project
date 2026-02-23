@@ -1,6 +1,7 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
+import { ROUTES } from "@/const/routes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -8,7 +9,7 @@ const Header = () => {
   const router = useRouter();
 
   const handleToHome = () => {
-    router.push("/");
+    router.push(ROUTES.HOME);
   };
   return (
     <div

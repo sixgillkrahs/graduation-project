@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
+import { ROUTES } from "@/const/routes";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -49,7 +50,7 @@ const VerifyEmail = () => {
   const onSubmit = async (data: IVerifyEmailService.IBodyCreatePassword) => {
     await createPassword(data);
     toast.success("The password has been successfully created");
-    router.push("/sign-in");
+    router.push(ROUTES.SIGN_IN);
   };
 
   if (isError) {
@@ -140,7 +141,7 @@ const VerifyEmail = () => {
       <div className="mt-4 text-center">
         <span className="cs-typography-gray text-sm!">
           Already verified?{" "}
-          <Link href="/sign-in" className="text-red-500">
+          <Link href={ROUTES.SIGN_IN} className="text-red-500">
             Sign In
           </Link>
         </span>

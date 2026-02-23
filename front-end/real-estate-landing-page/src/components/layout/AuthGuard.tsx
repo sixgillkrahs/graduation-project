@@ -1,5 +1,6 @@
 "use client";
 
+import { ROUTES } from "@/const/routes";
 import { useGetMe } from "@/shared/auth/query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -25,7 +26,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!isLoading && (isError || !me?.data?.userId)) {
-      router.push("/");
+      router.push(ROUTES.HOME);
     }
   }, [me, isLoading, isError, router]);
 

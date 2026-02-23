@@ -1,17 +1,15 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
-import { queryClient } from "@/lib/react-query/queryClient";
-import AuthService from "@/shared/auth/AuthService";
-import { useGetMe } from "@/shared/auth/query";
+import { ROUTES } from "@/const/routes";
 import { useLogout } from "@/shared/auth/mutate";
+import { useGetMe } from "@/shared/auth/query";
 import { Heart } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useTranslations } from "next-intl";
 import { CsButton } from "../custom";
 import { Dropdown, DropdownItem, Icon } from "../ui";
 
@@ -21,6 +19,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { mutateAsync: logout } = useLogout();
   const t = useTranslations("Header");
+  const locale = useLocale();
 
   useEffect(() => {
     if (isSuccess && me?.data) {
@@ -31,7 +30,7 @@ const Header = () => {
   }, [isSuccess, isError, me]);
 
   const handleLogin = () => {
-    router.push("/sign-in");
+    router.push(ROUTES.SIGN_IN);
   };
 
   const handleLogout = async () => {
@@ -45,7 +44,7 @@ const Header = () => {
       <div className="flex items-center justify-between w-full md:w-auto">
         <div
           className="flex items-start gap-2 text-xl md:text-2xl font-semibold cursor-pointer"
-          onClick={() => router.push("/")}
+          onClick={() => router.push(ROUTES.HOME)}
         >
           <Image src={Logo} alt="logo" width={24} height={24} />
           <span className="text-black">Havenly</span>
@@ -104,7 +103,7 @@ const Header = () => {
         ) : me?.data?.userId ? (
           <div className="hidden md:flex items-center gap-2">
             {me.data.roleId.code === "AGENT" && (
-              <Link href="/agent/dashboard">
+              <Link href={ROUTES.AGENT_DASHBOARD}>
                 <CsButton
                   className="cs-bg-black text-white rounded-full"
                   icon={<Icon.Briefcase />}
@@ -114,7 +113,7 @@ const Header = () => {
               </Link>
             )}
             <Link
-              href="/properties?tab=favorites"
+              href={`${ROUTES.PROPERTIES}?tab=favorites`}
               className="relative group/fav p-2.5 rounded-full cs-outline-gray hover:bg-red-50 transition-all duration-200 cursor-pointer"
               title={t("myFavorites")}
             >
@@ -131,19 +130,21 @@ const Header = () => {
               }
             >
               <DropdownItem
-                onClick={() => router.push(`/profile`)}
+                onClick={() => router.push(ROUTES.PROFILE)}
                 icon={<Icon.User className="w-4 h-4" />}
               >
                 {t("profile")}
               </DropdownItem>
               <DropdownItem
-                onClick={() => router.push(`/properties?tab=favorites`)}
+                onClick={() =>
+                  router.push(`${ROUTES.PROPERTIES}?tab=favorites`)
+                }
                 icon={<Heart className="w-4 h-4" />}
               >
                 {t("myFavorites")}
               </DropdownItem>
               <DropdownItem
-                onClick={() => router.push("/settings")}
+                onClick={() => router.push(ROUTES.SETTINGS)}
                 icon={<Icon.Settings className="w-4 h-4" />}
               >
                 {t("settings")}
@@ -159,11 +160,11 @@ const Header = () => {
             </Dropdown>
           </div>
         ) : (
-          <div className="hidden md:flex items-center rounded-full cs-outline-gray px-3 py-1 gap-2 w-35!">
+          <div className="hidden md:flex items-center rounded-full cs-outline-gray px-2 py-0.5 gap-1 whitespace-nowrap">
             <Icon.User className="bg-black w-8 h-8 p-1.5 rounded-full text-white" />
             <CsButton
               type="button"
-              className="bg-white! outline-none! border-none! shadow-none! text-black"
+              className={`bg-white! outline-none! border-none! shadow-none! text-black ${locale === "vi" ? "p-1!" : ""}`}
               onClick={handleLogin}
             >
               {t("login")}

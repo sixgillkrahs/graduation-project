@@ -3,6 +3,7 @@
 import { Icon, Image, Tag, useModal } from "@/components/ui";
 import { startRegistration } from "@simplewebauthn/browser";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 import { useCallback } from "react";
 import CardField from "./components/CardField";
 import CardIdentity from "./components/CardIdentity";
@@ -43,7 +44,7 @@ const Profile = () => {
   };
 
   const handleToEdit = () => {
-    router.push("/profile/edit");
+    router.push(ROUTES.PROFILE_EDIT);
   };
 
   const isBankInfoMissing =

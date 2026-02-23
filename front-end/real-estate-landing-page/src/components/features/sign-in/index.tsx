@@ -3,6 +3,7 @@
 import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
 import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
+import { ROUTES } from "@/const/routes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Password } from "@/components/ui/password";
@@ -46,12 +47,12 @@ const SignIn = () => {
       password: data.password,
       rememberMe: data.rememberMe,
     });
-    router.push("/");
+    router.push(ROUTES.HOME);
   };
 
   const onSubmitPasskey = async () => {
     await signInPasskey({ email: "dvq2804@gmail.com" });
-    router.push("/");
+    router.push(ROUTES.HOME);
   };
 
   return (
@@ -112,7 +113,7 @@ const SignIn = () => {
           />
           <Link
             className="cs-typography-gray text-sm! cursor-pointer hover:underline"
-            href="/forgot-password"
+            href={ROUTES.FORGOT_PASSWORD}
           >
             {t("forgotPassword")}
           </Link>
@@ -136,7 +137,7 @@ const SignIn = () => {
       <div className="mt-4 text-center">
         <span className="cs-typography-gray text-sm!">
           {t("noAccount")}{" "}
-          <Link href="/sign-up" className="text-red-500">
+          <Link href={ROUTES.SIGN_UP} className="text-red-500">
             {t("signUp")}
           </Link>
         </span>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
+import { ROUTES } from "@/const/routes";
+import { CsButton } from "@/components/custom";
 
 export default function NotFound() {
   return (
@@ -13,8 +14,8 @@ export default function NotFound() {
           Oops! The page you are looking for does not exist or you do not have
           permission to access it.
         </p>
-        <Link href="/">
-          <Button variant="primary">Back to Home</Button>
+        <Link href={ROUTES.HOME}>
+          <CsButton>Back to Home</CsButton>
         </Link>
       </div>
     </div>

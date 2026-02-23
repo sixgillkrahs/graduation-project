@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { LockKeyhole, LogIn } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 import { useState } from "react";
 
 interface AuthActionDialogProps {
@@ -39,7 +40,7 @@ export function AuthActionDialog({
     setIsLoading(true);
     setTimeout(() => {
       const returnUrl = redirectUrl || pathname;
-      const loginUrl = `/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`;
+      const loginUrl = `${ROUTES.SIGN_IN}?callbackUrl=${encodeURIComponent(returnUrl)}`;
 
       onOpenChange(false);
       router.push(loginUrl);

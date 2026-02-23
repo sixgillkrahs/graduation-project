@@ -1,3 +1,4 @@
+import { ROUTES } from "@/const/routes";
 import { useRouter } from "next/navigation";
 import { useProfile } from "./services/query";
 import { Icon, Image, useModal } from "@/components/ui";
@@ -39,7 +40,7 @@ const Profile = () => {
   console.log(profile);
 
   const handleToEdit = () => {
-    router.push("/profile/edit");
+    router.push(ROUTES.PROFILE_EDIT);
   };
 
   return (

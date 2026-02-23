@@ -4,6 +4,7 @@ import { Icon, Image } from "@/components/ui";
 import { useState } from "react";
 import { useGetMyProperties } from "./services/query";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 import { Building2, Eye, Plus } from "lucide-react";
 import { CsButton } from "@/components/custom";
 import { IPropertyDto } from "./dto/property.dto";
@@ -143,7 +144,7 @@ const MyListings = () => {
           <CsButton
             icon={<Plus />}
             className="cs-bg-black text-white px-4"
-            onClick={() => router.push("/agent/listings/add")}
+            onClick={() => router.push(ROUTES.AGENT_LISTINGS_ADD)}
           >
             Create New Listing
           </CsButton>

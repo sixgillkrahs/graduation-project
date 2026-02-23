@@ -123,7 +123,7 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
   const t = useTranslations("PropertiesPage.filter");
 
   return (
-    <aside className="w-full lg:w-1/4 min-w-[280px] bg-white rounded-xl border border-gray-100 p-6 sticky top-24 h-fit shadow-sm">
+    <aside className="w-full lg:w-1/4 min-w-[280px] bg-white rounded-xl border border-gray-100 p-6 sticky top-32 h-fit shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
           <FilterX className="w-5 h-5 main-color-red" />

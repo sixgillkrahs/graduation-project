@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import NextImage from "next/image";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 import React, { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -60,7 +61,7 @@ const Review = () => {
       onSuccess: () => {
         toast.success("Listings created successfully! Wait for approval.");
         dispatch(resetListing());
-        router.push("/agent/listings");
+        router.push(ROUTES.AGENT_LISTINGS);
       },
       onError: (error) => {
         toast.error("Failed to create property. Please try again.");

@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Icon, Tag } from "@/components/ui";
+import { ROUTES } from "@/const/routes";
 import { Bath, Bed, Maximize } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -41,7 +42,7 @@ const Card = ({
   const t = useTranslations("PropertiesPage");
 
   const handleViewDetails = () => {
-    router.push("/properties/1");
+    router.push(ROUTES.PROPERTY_DETAIL("1"));
   };
 
   return (

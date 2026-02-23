@@ -252,8 +252,8 @@
       "province": "Tỉnh/Thành phố",
       "ward": "Phường/Xã"
     },
-    "beds": "Phòng ngủ",
-    "baths": "Phòng tắm",
+    "beds": "P.ngủ",
+    "baths": "P.tắm",
     "bathrooms": "Phòng tắm",
     "viewDetails": "Xem chi tiết",
     "card": {

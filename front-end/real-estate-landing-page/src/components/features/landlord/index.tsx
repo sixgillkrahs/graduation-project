@@ -12,6 +12,7 @@ import { useLandlords } from "./services/query";
 import { useDeleteLandlord } from "./services/mutate";
 import { CsAlert } from "@/components/custom/alert";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 
 export const Landlord = () => {
   const router = useRouter();
@@ -104,7 +105,7 @@ export const Landlord = () => {
   };
 
   const handleView = (id: string) => {
-    router.push(`/agent/landlord/${id}`);
+    router.push(ROUTES.AGENT_LANDLORD_DETAIL(id));
   };
 
   const handleEdit = (id: string) => {

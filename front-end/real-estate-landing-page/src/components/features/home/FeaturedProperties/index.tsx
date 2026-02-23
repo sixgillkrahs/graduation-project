@@ -1,6 +1,7 @@
 "use client";
 
 import { CsButton } from "@/components/custom";
+import { ROUTES } from "@/const/routes";
 import Properties from "./components/Properties";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -10,7 +11,7 @@ const FeaturedProperties = () => {
   const router = useRouter();
 
   const handleViewAllProperties = () => {
-    router.push("/properties");
+    router.push(ROUTES.PROPERTIES);
   };
 
   return (

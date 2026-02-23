@@ -4,6 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useConversations } from "../services/query";
 import MessageItem from "./MessageItem";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 
 interface ListChatProps {
   onSelectConversation?: (conversation: any) => void;
@@ -25,7 +26,7 @@ const ListChat = ({ onSelectConversation }: ListChatProps) => {
     if (onSelectConversation) {
       onSelectConversation(item);
     } else {
-      router.push(`/agent/messages/${item.id}`);
+      router.push(ROUTES.AGENT_MESSAGE_DETAIL(item.id));
     }
   };
 

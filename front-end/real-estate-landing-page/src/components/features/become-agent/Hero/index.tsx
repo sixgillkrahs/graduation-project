@@ -5,13 +5,14 @@ import { Avatar } from "@/components/ui/Icon/Avatar";
 import bg from "@/assets/images/become-agent/bg.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { ROUTES } from "@/const/routes";
 import { CsButton } from "@/components/custom";
 
 const Hero = () => {
   const router = useRouter();
 
   const handleApplyNow = () => {
-    router.push("/work/become-agent/recruitment");
+    router.push(ROUTES.RECRUITMENT);
   };
 
   return (

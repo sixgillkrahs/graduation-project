@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { useResetPassword } from "../services/mutate";
 import { useState } from "react";
 import Link from "next/link";
+import { ROUTES } from "@/const/routes";
 import { CsButton } from "@/components/custom";
 import { Password } from "@/components/ui/password";
 
@@ -67,7 +68,7 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <Link
-              href="/sign-in"
+              href={ROUTES.SIGN_IN}
               className="
             px-8 py-3 rounded-full
             bg-black text-white font-medium text-sm
@@ -80,7 +81,7 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
             </Link>
 
             <Link
-              href="/"
+              href={ROUTES.HOME}
               className="
             px-8 py-3 rounded-full
             border border-gray-200 text-gray-600 font-medium text-sm

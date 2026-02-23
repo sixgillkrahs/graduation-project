@@ -26,6 +26,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/const/routes";
 
 export interface MenuItem {
   title: string;
@@ -144,7 +145,7 @@ function CsSidebar({
           <SidebarMenuButton
             tooltip={"Client Mode"}
             onClick={() => {
-              router.push("/");
+              router.push(ROUTES.HOME);
             }}
             className="m-2 cursor-pointer"
           >

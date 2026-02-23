@@ -3,6 +3,7 @@
 import { useAppDispatch } from "@/lib/hooks";
 import { queryClient } from "@/lib/react-query/queryClient";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/const/routes";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
 import Image from "next/image";
@@ -82,7 +83,7 @@ const PropertyCard = ({
         "group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full relative",
         className,
       )}
-      onClick={() => router.push(`/properties/${id}`)}
+      onClick={() => router.push(ROUTES.PROPERTY_DETAIL(id))}
     >
       {/* Image Container */}
       <div className="relative h-64 w-full overflow-hidden bg-gray-100">
@@ -155,23 +156,23 @@ const PropertyCard = ({
         </div>
 
         {/* Specs Row */}
-        <div className="flex items-center gap-4 py-3 border-t border-b border-gray-50">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Bed className="w-4 h-4 main-color-red" />
+        <div className="flex items-center justify-between flex-nowrap py-3 border-t border-b border-gray-50">
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
+            <Bed className="w-4 h-4 shrink-0 main-color-red" />
             <span className="font-medium">
               {specs.beds} {t("beds")}
             </span>
           </div>
-          <div className="w-px h-4 bg-gray-200"></div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Bath className="w-4 h-4 main-color-red" />
+          <div className="w-px h-4 shrink-0 bg-gray-200"></div>
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
+            <Bath className="w-4 h-4 shrink-0 main-color-red" />
             <span className="font-medium">
               {specs.baths} {t("baths")}
             </span>
           </div>
-          <div className="w-px h-4 bg-gray-200"></div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Maximize className="w-4 h-4 main-color-red" />
+          <div className="w-px h-4 shrink-0 bg-gray-200"></div>
+          <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
+            <Maximize className="w-4 h-4 shrink-0 main-color-red" />
             <span className="font-medium">{specs.area} m²</span>
           </div>
         </div>

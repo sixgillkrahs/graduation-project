@@ -3,6 +3,7 @@
 import { Icon } from "@/components/ui";
 import { RootState } from "@/store";
 import Link from "next/link";
+import { ROUTES } from "@/const/routes";
 import { useSelector } from "react-redux";
 import BasicInfo from "./components/BasicInfo";
 import BusinessInfo from "./components/BusinessInfo";
@@ -98,7 +99,7 @@ const Recruitment = () => {
                 </button>
 
                 <Link
-                  href="/"
+                  href={ROUTES.HOME}
                   className="
             px-8 py-3 rounded-full 
             border border-gray-200 text-gray-600 font-medium text-sm

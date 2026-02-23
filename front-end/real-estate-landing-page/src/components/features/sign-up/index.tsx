@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Password } from "@/components/ui/password";
 import { Separator } from "@/components/ui/separator";
+import { ROUTES } from "@/const/routes";
 import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
@@ -45,7 +46,7 @@ const SignUp = () => {
       ...data,
       username: data.email,
     });
-    router.push("/sign-in");
+    router.push(ROUTES.SIGN_IN);
   };
 
   return (
@@ -187,11 +188,11 @@ const SignUp = () => {
                   onCheckedChange={field.onChange}
                 />
                 {t("agreePolicy")}{" "}
-                <Link href="/policy" className="text-red-500">
+                <Link href={ROUTES.POLICY} className="text-red-500">
                   {t("termsOfService")}
                 </Link>{" "}
                 {t("and")}{" "}
-                <Link href="/policy" className="text-red-500">
+                <Link href={ROUTES.POLICY} className="text-red-500">
                   {t("privacyPolicy")}
                 </Link>
               </Label>
@@ -215,7 +216,7 @@ const SignUp = () => {
           </div>
           <span className="cs-typography-gray text-sm!">
             {t("alreadyHaveAccount")}{" "}
-            <Link href="/sign-in" className="text-red-500">
+            <Link href={ROUTES.SIGN_IN} className="text-red-500">
               {t("signIn")}
             </Link>
           </span>
@@ -223,7 +224,7 @@ const SignUp = () => {
         <Separator className="my-4" />
         <span className="cs-typography-gray text-sm!">
           {t("areYouAgent")}{" "}
-          <Link href="/work/become-agent/recruitment" className="text-red-500">
+          <Link href={ROUTES.RECRUITMENT} className="text-red-500">
             {t("registerHere")}
           </Link>
         </span>
