@@ -65,7 +65,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const {
         nameRegister,
         email,
@@ -147,7 +147,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { limit, page, sortField, sortOrder, status, nameRegister, email } =
         req.query;
       let filter: Record<string, any> = {
@@ -186,7 +186,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { id } = req.params;
       const agentRegistration =
         await this.agentService.getAgentRegistrationById(id);
@@ -209,7 +209,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { id } = req.params;
       const { reason } = req.body;
       const agentRegistration =
@@ -249,7 +249,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { id } = req.params;
       const { note } = req.body;
       const agentRegistration =
@@ -325,7 +325,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { token } = req.params;
       if (!token) {
         throw new AppError(
@@ -393,7 +393,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { limit, page, sortField, sortOrder } = req.query;
       let filter: Record<string, any> = {
         status: {
@@ -427,7 +427,7 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { token } = req.params;
       const { password, email } = req.body;
 

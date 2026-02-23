@@ -116,7 +116,7 @@ export class RoleController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { id } = req.params;
       const { name, permissionIds, description, isActive, isDefault } =
         req.body;

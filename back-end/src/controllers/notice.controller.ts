@@ -57,7 +57,7 @@ export class NoticeController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
       const user = (req as any).user;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       const notice = await this.noticeService.getNoticeById(id);
 
@@ -88,7 +88,7 @@ export class NoticeController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
       const user = req.user;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       const notice = await this.noticeService.getNoticeById(id);
       if (!notice) {
@@ -120,7 +120,7 @@ export class NoticeController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
       const user = req.user;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       const notice = await this.noticeService.getNoticeById(id);
       if (!notice) {

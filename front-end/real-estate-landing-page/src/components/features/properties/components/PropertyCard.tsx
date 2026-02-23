@@ -102,7 +102,7 @@ const PropertyCard = ({
             </span>
           )}
           <span className="bg-white/90 backdrop-blur-md text-gray-800 text-[10px] font-bold px-2 py-1 rounded-lg">
-            For {type === "rent" ? t("card.forRent") : t("card.forSale")}
+            {type === "rent" ? t("card.forRent") : t("card.forSale")}
           </span>
         </div>
 

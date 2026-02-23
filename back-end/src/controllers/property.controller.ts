@@ -72,7 +72,7 @@ export class PropertyController extends BaseController {
       // Assuming req.user is populated by auth middleware
       const user = req.user;
       if (!user || !user.userId) {
-        const lang = ApiRequest.getCurrentLang(req);
+        const lang = req.lang;
         throw new AppError(
           lang === "vi"
             ? "Bạn cần đăng nhập để thực hiện chức năng này"
@@ -273,7 +273,7 @@ export class PropertyController extends BaseController {
   getPropertyById = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const property = await this.propertyService.getPropertyById(id, "userId");
 
       if (!property) {
@@ -309,7 +309,7 @@ export class PropertyController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
       const user = (req as any).user;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       // Check ownership
       const existingProperty = await this.propertyService.getPropertyById(id);
@@ -343,7 +343,7 @@ export class PropertyController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
       const user = (req as any).user;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       // Check ownership
       const existingProperty = await this.propertyService.getPropertyById(id);
@@ -373,7 +373,7 @@ export class PropertyController extends BaseController {
   approveProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       const existingProperty = await this.propertyService.getPropertyById(id);
       if (!existingProperty) {
@@ -435,7 +435,7 @@ export class PropertyController extends BaseController {
   rejectProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
 
       const existingProperty = await this.propertyService.getPropertyById(id);
       if (!existingProperty) {
@@ -497,7 +497,7 @@ export class PropertyController extends BaseController {
   getOnSaleProperties = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { limit, page, sortField, sortOrder, ...filters } = req.query;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const user = (req as any).user;
 
       const options = {
@@ -606,7 +606,7 @@ export class PropertyController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const user = (req as any).user;
       const property = await this.propertyService.getPropertyById(id, "userId");
       if (!property) {

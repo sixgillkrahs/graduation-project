@@ -15,6 +15,7 @@ import { compressionMiddleware } from "./middleware/performanceMiddleware";
 import { authLimiter } from "./middleware/rateLimiter";
 import { requestId } from "./middleware/requestId";
 import { setupSecurityHeaders } from "./middleware/securityHeaders";
+import { langMiddleware } from "./middleware/langMiddleware";
 import authRoutes from "./routes/auth.routes";
 import permissionRoutes from "./routes/permission.routes";
 import resourcesRoutes from "./routes/resource.routes";
@@ -34,6 +35,7 @@ const app = express();
 const setupMiddleware = (app: express.Application) => {
   // Security
   app.use(requestId);
+  app.use(langMiddleware);
   app.use((req, res, next) => {
     const io = WebSocketService.getInstance().getWss();
     if (io) {

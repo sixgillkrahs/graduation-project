@@ -45,7 +45,7 @@ export class AuthController extends BaseController {
 
   login = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { username, password, rememberMe } = req.body;
       const auth = await this.authService.getAuthByUsername<
         IAuth & {
@@ -141,7 +141,7 @@ export class AuthController extends BaseController {
 
   signup = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const {
         username,
         password,
@@ -227,7 +227,7 @@ export class AuthController extends BaseController {
 
   refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const cookieHeader = req.headers.cookie;
       if (!cookieHeader) {
         throw new AppError(
@@ -326,7 +326,7 @@ export class AuthController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const { oldPassword, newPassword } = req.body;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const currentUser = req.user;
       if (!currentUser.userId.isActive) {
         throw new AppError(
@@ -396,7 +396,7 @@ export class AuthController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { email, otp } = req.body;
       const storedOTP = await redisConnection.get(`otp:${email}`);
       if (!storedOTP) {
@@ -435,7 +435,7 @@ export class AuthController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const { token, password } = req.body;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const decoded = (await this.authService.validateToken(token)) as {
         user: {
           email: string;
@@ -512,7 +512,7 @@ export class AuthController extends BaseController {
   verifyPasskey = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const currentUser = req.user;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const expectedChallenge = req.headers.cookie
         ?.split("; ")
         .find((item) => item.startsWith("webauthn_register_challenge"))
@@ -568,7 +568,7 @@ export class AuthController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { email } = req.body;
       const auth = await this.authService.getAuthByUsername<
         IAuth & {

@@ -29,6 +29,7 @@ declare global {
         updatedAt: string;
       };
       requestId: string;
+      lang: keyof typeof import("../../i18n/validationMessages").validationMessages;
       io: Server;
     }
   }

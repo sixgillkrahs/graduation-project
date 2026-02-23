@@ -38,6 +38,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
 import { usePropertyDetail } from "../services/query";
+import { PhotoSlider } from "react-photo-view";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 
@@ -48,6 +49,8 @@ const PropertyDetail = () => {
   const dispatch = useAppDispatch();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [show3D, setShow3D] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
   const { mutate: increaseView } = useIncreaseView();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const t = useTranslations("PropertiesPage");
@@ -110,16 +113,25 @@ const PropertyDetail = () => {
     <div className="bg-white min-h-screen pb-20">
       <div className="container mx-auto px-4 md:px-20 pt-6 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 h-[400px] md:h-[500px] rounded-2xl overflow-hidden relative">
-          <div className="md:col-span-2 md:row-span-2 relative h-full group cursor-pointer">
+          <div
+            className="md:col-span-2 md:row-span-2 relative h-full group cursor-pointer"
+            onClick={() => {
+              setViewerIndex(0);
+              setViewerVisible(true);
+            }}
+          >
             <Image
-              src={prop.media.thumbnail || "/placeholder.jpg"}
+              src={
+                prop.media.thumbnail ||
+                prop.media.images?.[0] ||
+                "/placeholder.jpg"
+              }
               alt={prop.title}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-700"
             />
             <div className="absolute top-4 left-4 flex gap-2">
               <Badge className="cs-bg-red hover:bg-emerald-700 text-white font-semibold">
-                For{" "}
                 {prop.demandType === "sale"
                   ? t("card.forSale")
                   : t("card.forRent")}
@@ -144,7 +156,11 @@ const PropertyDetail = () => {
             {prop.media.images.slice(0, 4).map((img, idx) => (
               <div
                 key={idx}
-                className="relative h-full relative group cursor-pointer overflow-hidden"
+                className="h-full relative group cursor-pointer overflow-hidden"
+                onClick={() => {
+                  setViewerIndex(idx);
+                  setViewerVisible(true);
+                }}
               >
                 <Image
                   src={img}
@@ -551,7 +567,13 @@ const PropertyDetail = () => {
             <h2 className="text-2xl font-bold text-gray-900">
               {t("detail.similarHomes")}
             </h2>
-            <button className="text-emerald-600 font-bold hover:underline">
+            <button
+              className="text-emerald-600 font-bold hover:underline"
+              onClick={() => {
+                setViewerIndex(0);
+                setViewerVisible(true);
+              }}
+            >
               {t("detail.viewAll")}
             </button>
           </div>
@@ -570,6 +592,20 @@ const PropertyDetail = () => {
           </div>
         </section>
       </main>
+
+      <PhotoSlider
+        images={
+          prop.media.images?.length > 0
+            ? prop.media.images.map((url) => ({ src: url, key: url }))
+            : prop.media.thumbnail
+              ? [{ src: prop.media.thumbnail, key: "thumbnail" }]
+              : [{ src: "/placeholder.jpg", key: "placeholder" }]
+        }
+        visible={viewerVisible}
+        onClose={() => setViewerVisible(false)}
+        index={viewerIndex}
+        onIndexChange={setViewerIndex}
+      />
     </div>
   );
 };

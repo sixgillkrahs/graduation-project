@@ -40,10 +40,10 @@ export class UserController extends BaseController {
           page: Number(page),
           limit: Number(limit),
           sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
-          populate: "userId:email fullName phone isActive,roleId:name code"
+          populate: "userId:email fullName phone isActive,roleId:name code",
         },
         filter,
-        "username userId roleId createdAt"
+        "username userId roleId createdAt",
       );
     });
   };
@@ -51,7 +51,7 @@ export class UserController extends BaseController {
   getUser = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const user = await this.authService.getAuthById(
         id,
         [
@@ -64,8 +64,7 @@ export class UserController extends BaseController {
             select: "_id email fullName isActive phone",
           },
         ],
-        "username userId roleId createdAt updatedAt"
-
+        "username userId roleId createdAt updatedAt",
       );
       if (!user) {
         throw new AppError(
@@ -80,7 +79,7 @@ export class UserController extends BaseController {
 
   profile = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const { userId, roleId } = req.user;
       if (roleId.code === "AGENT") {
         const profile = await this.agentService.getAgentByUserId(userId._id);
@@ -128,7 +127,7 @@ export class UserController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = ApiRequest.getCurrentLang(req);
+      const lang = req.lang;
       const currentUser = req.user;
       const {
         nameRegister,
@@ -186,5 +185,4 @@ export class UserController extends BaseController {
       return true;
     });
   };
-
 }
