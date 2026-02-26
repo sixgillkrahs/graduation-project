@@ -218,11 +218,9 @@ const BasicInfo = () => {
         </div>
         <div className="flex justify-between pt-6">
           <CsButton
-            className="text-black px-6 py-2 rounded-full"
-            // onClick={handlePrev}
+            className="px-6 py-2 rounded-full"
             type="button"
             icon={<Icon.ArrowLeft className="w-5 h-5" />}
-            // disabled={isSubmitting}
           >
             Back
           </CsButton>

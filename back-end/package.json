@@ -18,6 +18,8 @@
   "license": "ISC",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@qdrant/js-client-rest": "^1.17.0",
     "@simplewebauthn/server": "^13.2.2",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.66.4",

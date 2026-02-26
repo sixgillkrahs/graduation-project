@@ -694,4 +694,23 @@ export class PropertyController extends BaseController {
       return { ...properties, results: resultsWithFavorite };
     });
   };
+
+  getRecommendedProperties = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const limit = Number(req.query.limit) || 4;
+      const lang = req.lang;
+
+      const properties = await this.propertyService.getRecommendedProperties(
+        id,
+        limit,
+      );
+
+      return properties;
+    });
+  };
 }

@@ -384,6 +384,40 @@ router.get("/:id", requireAuth, propertyController.getPropertyById);
 
 /**
  * @swagger
+ * /properties/{id}/recommended:
+ *   get:
+ *     summary: Get recommended properties based on a given property ID
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 4
+ *     responses:
+ *       200:
+ *         description: List of recommended properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Property'
+ */
+router.get(
+  "/:id/recommended",
+  optionalAuth,
+  propertyController.getRecommendedProperties,
+);
+
+/**
+ * @swagger
  * /properties/{id}/view:
  *   get:
  *     summary: Get property details by ID for landing page

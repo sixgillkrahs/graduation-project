@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreatePassword } from "./services/mutate";
 import { useVerifyEmail } from "./services/query";
+import { Password } from "@/components/ui/password";
 
 const VerifyEmail = () => {
   const router = useRouter();
@@ -96,11 +97,9 @@ const VerifyEmail = () => {
                 },
               }}
               render={({ field }) => (
-                <Input
+                <Password
                   label="Password"
                   placeholder="Enter password"
-                  type="password"
-                  suffix={<Icon.Lock className="main-color-gray w-5 h-5" />}
                   error={errors.password?.message}
                   {...field}
                 />
@@ -116,11 +115,9 @@ const VerifyEmail = () => {
                   value === password || "Passwords do not match",
               }}
               render={({ field }) => (
-                <Input
+                <Password
                   label="Confirm Password"
                   placeholder="Re-enter password"
-                  type="password"
-                  suffix={<Icon.Lock className="main-color-gray w-5 h-5" />}
                   error={errors.confirmPassword?.message}
                   {...field}
                 />
@@ -138,7 +135,7 @@ const VerifyEmail = () => {
         )}
       </div>
 
-      <div className="mt-4 text-center">
+      <div className="mt-12 text-center">
         <span className="cs-typography-gray text-sm!">
           Already verified?{" "}
           <Link href={ROUTES.SIGN_IN} className="text-red-500">

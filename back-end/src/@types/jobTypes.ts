@@ -26,3 +26,9 @@ export type SendOTPEmailJob = {
   to: string;
   otp: string;
 };
+
+export type UpsertPropertyEmbeddingJob = {
+  propertyId: string;
+  textData: string;
+  payload?: any;
+};

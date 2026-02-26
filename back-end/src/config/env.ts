@@ -43,7 +43,10 @@ const envSchema = z.object({
       : z.string(),
   SERVER_URL: z.url(),
   // PROMETHEUS_URL: z.string().url().optional().default('http://localhost:9090'),
-  MESSAGE_ENCRYPTION_KEY: z.string().min(32).default("01234567890123456789012345678901"),
+  MESSAGE_ENCRYPTION_KEY: z
+    .string()
+    .min(32)
+    .default("01234567890123456789012345678901"),
   // Google API
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
@@ -51,6 +54,12 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
+  // Qdrant
+  QDRANT_URL: z.string(),
+  QDRANT_API_KEY: z.string(),
+  QDRANT_COLLECTION: z.string(),
+  // Gemini API
+  GEMINI_API_KEY: z.string(),
 });
 export const ENV = envSchema.parse(process.env);
 if (process.env.NODE_ENV === "production") {

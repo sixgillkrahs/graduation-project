@@ -20,6 +20,12 @@ import { EmailWorker } from "@/workers/email.worker";
 const emailService = new EmailService();
 new EmailWorker(emailService);
 
+// Initialize Qdrant Worker
+import { QdrantService } from "@/services/qdrant.service";
+import { QdrantWorker } from "@/workers/qdrant.worker";
+const qdrantService = new QdrantService();
+new QdrantWorker(qdrantService);
+
 // Lắng nghe message từ client
 // wsService.onMessage((ws, msg) => {
 //   if (msg.type === 'ping') {

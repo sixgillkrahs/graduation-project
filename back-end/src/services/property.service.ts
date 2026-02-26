@@ -7,12 +7,47 @@ import {
   PropertyInteractionModel,
 } from "@/models/property-interaction.model";
 
+import { QdrantService } from "./qdrant.service";
+import { QdrantQueue } from "@/queues/qdrant.queue";
+
 @singleton
 export class PropertyService {
-  constructor() {}
+  private qdrantService: QdrantService;
+  private qdrantQueue: QdrantQueue;
+
+  constructor() {
+    this.qdrantService = new QdrantService();
+    this.qdrantQueue = new QdrantQueue();
+  }
 
   createProperty = async (propertyData: IProperty) => {
-    return await PropertyModel.create(propertyData);
+    const property = await PropertyModel.create(propertyData);
+
+    // Async embed and upsert into Qdrant for recommendations
+    try {
+      if (property && property._id) {
+        // Compile a descriptive text string from the property features
+        const textData = `${property.title}. ${property.description}. Located in ${property.location?.ward}, ${property.location?.district}, ${property.location?.province}. Features: ${property.features?.bedrooms} bedrooms, ${property.features?.bathrooms} bathrooms. Type: ${property.propertyType}. Setup: ${property.features?.furniture}. Direction: ${property.features?.direction}.`;
+
+        // Push job to queue (avoids blocking Event Loop heavily)
+        this.qdrantQueue
+          .enqueueUpsertPropertyEmbedding({
+            propertyId: property._id.toString(),
+            textData,
+            payload: {
+              price: property.features?.price,
+              type: property.propertyType,
+              district: property.location?.district,
+              province: property.location?.province,
+            },
+          })
+          .catch((err) => console.error(err));
+      }
+    } catch (error) {
+      console.error("Failed to generate embedding for new property:", error);
+    }
+
+    return property;
   };
 
   getPropertyById = async (
@@ -211,5 +246,40 @@ export class PropertyService {
     return Array.from(mergedData.values()).sort((a, b) =>
       a.label.localeCompare(b.label),
     );
+  };
+
+  getRecommendedProperties = async (propertyId: string, limit: number = 4) => {
+    try {
+      // Find similar IDs from Qdrant
+      const similarResults = await this.qdrantService.searchSimilarProperties(
+        propertyId,
+        limit,
+      );
+
+      const ids = similarResults.map((res) => res.id);
+
+      if (ids.length === 0) {
+        return [];
+      }
+
+      // Fetch actual property data from MongoDB
+      const properties = await PropertyModel.find({ _id: { $in: ids } })
+        .lean()
+        .exec();
+
+      // Keep the sorted order returned by Qdrant
+      properties.sort(
+        (a: any, b: any) =>
+          ids.indexOf(a._id.toString()) - ids.indexOf(b._id.toString()),
+      );
+
+      return properties;
+    } catch (error) {
+      console.error(
+        `Error fetching recommended properties for ${propertyId}:`,
+        error,
+      );
+      return [];
+    }
   };
 }
