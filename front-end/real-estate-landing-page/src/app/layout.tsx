@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import { Be_Vietnam_Pro } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
 import "react-photo-view/dist/react-photo-view.css";
 import "../styles/globals.css";
 import Wrapper from "./wrapper";

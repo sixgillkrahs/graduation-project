@@ -2,95 +2,47 @@
 
 import { CsButton } from "@/components/custom";
 import { Icon, Tag } from "@/components/ui";
-import { ROUTES } from "@/const/routes";
-import { Bath, Bed, Maximize } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import PropertyCard from "@/components/features/properties/components/PropertyCard";
+import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
+import { useOnSale } from "@/components/features/properties/services/query";
+import {
+  LIST_PROVINCE,
+  LIST_WARD,
+  findOptionLabel,
+  formatChatTime,
+} from "gra-helper";
 
 const categories = [
-  {
-    name: "All",
-  },
-  {
-    name: "Apartments",
-  },
-  {
-    name: "Villa",
-  },
-  {
-    name: "Duplex",
-  },
-  {
-    name: "Warehouse",
-  },
-  {
-    name: "Resort",
-  },
+  { name: "All", value: "" },
+  { name: "Apartments", value: "APARTMENT" },
+  { name: "Villa", value: "VILLA" },
+  { name: "House", value: "HOUSE" },
+  { name: "Land", value: "LAND" },
+  { name: "Other", value: "OTHER" },
 ];
 
-const Card = ({
-  name,
-  location,
-  price,
-}: {
-  name: string;
-  location: string;
-  price: string;
-}) => {
-  const router = useRouter();
-  const t = useTranslations("PropertiesPage");
+const Properties = () => {
+  const [activeCategory, setActiveCategory] = useState(categories[0]);
+  const [page, setPage] = useState(1);
+  const limit = 3; // Show 3 properties per page for top featured
 
-  const handleViewDetails = () => {
-    router.push(ROUTES.PROPERTY_DETAIL("1"));
+  const { data, isLoading } = useOnSale({
+    page,
+    limit,
+    ...(activeCategory.value ? { propertyType: activeCategory.value } : {}),
+  });
+
+  const totalPages = Math.ceil((data?.data?.totalResults || 0) / limit);
+
+  const handlePrev = () => {
+    if (page > 1) setPage(page - 1);
   };
 
-  return (
-    <div className="bg-white p-4 rounded-2xl cs-outline-gray shadow-md flex flex-col justify-between gap-8">
-      <img
-        src="https://placehold.co/600x400"
-        alt="property"
-        className="w-full h-70 object-cover rounded-xl"
-      />
-      <div className="px-2 flex flex-col justify-between gap-4">
-        <div className="flex justify-between items-center">
-          <span className="cs-paragraph text-xl! font-semibold!">
-            ${price}
-            <span className="text-sm text-gray-500">
-              {t("currency.perMonth")}
-            </span>
-          </span>
-          <CsButton
-            className="cs-outline-black text-sm font-semibold border-none rounded-full"
-            onClick={handleViewDetails}
-          >
-            {t("viewDetails")}
-          </CsButton>
-        </div>
-        <div>
-          <h3 className="cs-typography font-black! mb-3">{name}</h3>
-          <h3 className="cs-typography-gray  text-[16px]!">{location}</h3>
-        </div>
-        <div className="bg-black/10 w-full h-px" />
-        <div className="flex justify-start gap-4">
-          <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Bed className="main-color-red w-5 h-5" />3 {t("beds")}
-          </span>
-          <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1">
-            <Bath className="main-color-red w-5 h-5" />3 {t("bathrooms")}
-          </span>
-          <span className="cs-typography-gray  text-[16px]! font-medium! inline-flex items-center gap-1 ">
-            <Maximize className="main-color-red w-5 h-5" />3 m<sup>2</sup>
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
+  const handleNext = () => {
+    if (page < totalPages) setPage(page + 1);
+  };
 
-const Properties = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [isActive, setIsActive] = useState(1);
   return (
     <>
       <div className="flex flex-col md:flex-row justify-between items-center">
@@ -100,50 +52,99 @@ const Properties = () => {
               key={category.name}
               title={category.name}
               className={`bg-black/10 main-color-black font-medium border-none ${
-                activeCategory == category.name
+                activeCategory.name === category.name
                   ? "outline outline-1 outline-black"
                   : ""
               }`}
-              onClick={() => setActiveCategory(category.name)}
+              onClick={() => {
+                setActiveCategory(category);
+                setPage(1); // Reset to first page when changing categories
+              }}
             />
           ))}
         </div>
         <div className="flex gap-2">
           <CsButton
-            className="font-medium border-none rounded-full"
+            className={`font-medium border-none rounded-full transition-opacity ${page === 1 ? "opacity-30 cursor-not-allowed" : ""}`}
             icon={<Icon.ArrowLeft />}
-            onClick={() => setIsActive(isActive - 1)}
+            onClick={handlePrev}
+            disabled={page === 1 || isLoading}
           />
           <CsButton
-            className="font-medium border-none rounded-full"
+            className={`font-medium border-none rounded-full transition-opacity ${page === totalPages || totalPages === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
             icon={<Icon.ArrowRight />}
-            onClick={() => setIsActive(isActive + 1)}
-          ></CsButton>
+            onClick={handleNext}
+            disabled={page === totalPages || totalPages === 0 || isLoading}
+          />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-        <Card name="Apartments" location="Hanoi" price="1,000" />
-        <Card name="Villa" location="Hanoi" price="2,000" />
-        <Card name="Resort" location="Hanoi" price="1,000" />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 min-h-[400px]">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <PropertyCardSkeleton key={i} />
+          ))
+        ) : data?.data?.results?.length ? (
+          data.data.results.map((prop) => (
+            <PropertyCard
+              key={prop._id}
+              id={prop._id}
+              image={prop.media.thumbnail}
+              title={prop.title}
+              badges={{
+                aiRecommended: false,
+                tour3D: prop.media.virtualTourUrls?.length > 0,
+              }}
+              address={`${prop.location.address}, ${findOptionLabel(prop.location.ward, LIST_WARD)}, ${findOptionLabel(prop.location.province, LIST_PROVINCE)}`}
+              price={prop.features.price.toString()}
+              specs={{
+                beds: prop.features.bedrooms,
+                baths: prop.features.bathrooms,
+                area: prop.features.area,
+              }}
+              unit={prop.features.priceUnit}
+              agent={{
+                name: prop.userId.fullName,
+                avatar: prop.userId.avatarUrl,
+              }}
+              postedAt={formatChatTime(prop.createdAt)}
+              type={prop.demandType === "sale" ? "sale" : "rent"}
+              isFavorite={prop.isFavorite}
+            />
+          ))
+        ) : (
+          <div className="col-span-1 md:col-span-3 py-10 flex flex-col items-center justify-center text-gray-500">
+            <span className="text-lg font-semibold">No properties found</span>
+            <span className="text-sm">
+              Try changing the category to see more results
+            </span>
+          </div>
+        )}
       </div>
-      <div className="flex justify-center items-center gap-2 my-8 h-12">
-        {[1, 2, 3, 4].map((item) => {
-          const active = isActive === item;
-          return (
-            <div
-              key={item}
-              onClick={() => setIsActive(item)}
-              className={`relative cursor-pointer rounded-full transition-all ${
-                active ? "size-3 bg-black" : "size-2 bg-black/20"
-              }`}
-            >
-              {active && (
-                <span className="absolute inset-px rounded-full border border-white" />
-              )}
-            </div>
-          );
-        })}
-      </div>
+
+      {totalPages > 0 && (
+        <div className="flex justify-center items-center gap-2 my-8 h-12">
+          {Array.from({ length: totalPages }).map((_, idx) => {
+            const item = idx + 1;
+            const active = page === item;
+            return (
+              <div
+                key={item}
+                onClick={() => setPage(item)}
+                className={`relative cursor-pointer rounded-full transition-all ${
+                  active
+                    ? "size-3 bg-black"
+                    : "size-2 bg-black/20 hover:bg-black/40"
+                }`}
+              >
+                {active && (
+                  <span className="absolute inset-px rounded-full border border-white" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </>
   );
 };

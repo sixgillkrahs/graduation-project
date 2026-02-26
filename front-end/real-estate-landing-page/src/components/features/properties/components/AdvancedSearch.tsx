@@ -1,14 +1,14 @@
 import { CsButton } from "@/components/custom";
-import { CsSelect } from "@/components/ui/select";
+import { Slider } from "@/components/ui";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Slider } from "@/components/ui";
+import { CsSelect } from "@/components/ui/select";
 import { ChevronDown, Search } from "lucide-react";
-import { useForm, Controller } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { Controller, useForm } from "react-hook-form";
 import LocationAutocomplete from "./LocationAutocomplete";
 
 interface SearchFormValues {

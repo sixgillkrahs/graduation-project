@@ -16,6 +16,8 @@ export const useFavoriteProperties = (params: IParamsPagination) => {
     queryKey: [PropertyQueryKey.favorites, params],
     queryFn: () => PropertyService.favorites(params),
     placeholderData: keepPreviousData,
+    meta: { SUPPRESS_ERROR: true },
+    retry: 0,
   });
 };
 

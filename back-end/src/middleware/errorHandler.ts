@@ -3,6 +3,7 @@ import { AppError } from "@/utils/appError";
 import { ApiResponse } from "@/utils/apiResponse";
 import { logger } from "@/config/logger";
 import { MetricsService } from "@/services/metrics.service";
+import { validationMessages } from "@/i18n/validationMessages";
 
 const metricsService = new MetricsService();
 
@@ -29,9 +30,13 @@ export const errorHandler = (
     return;
   }
 
+  const lang = req.lang || "vi";
+  const internalErrorMsg =
+    validationMessages[lang]?.error || "Internal server error";
+
   ApiResponse.error(
     res,
-    `Internal server error: ${error.message}`,
+    `${internalErrorMsg}: ${error.message}`,
     500,
     undefined,
     error.stack,

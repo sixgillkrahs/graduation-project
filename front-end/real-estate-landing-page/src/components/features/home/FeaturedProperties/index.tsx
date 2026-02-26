@@ -5,6 +5,7 @@ import { ROUTES } from "@/const/routes";
 import Properties from "./components/Properties";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 const FeaturedProperties = () => {
   const t = useTranslations("FeaturedProperties");
@@ -16,7 +17,13 @@ const FeaturedProperties = () => {
 
   return (
     <section className="px-4 md:px-20 container mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col md:flex-row justify-between items-center"
+      >
         <div className="flex flex-col mb-4 md:mb-0">
           <span className="cs-typography text-2xl md:text-[40px]! font-semibold! mb-3">
             {t("title")}{" "}
@@ -32,7 +39,7 @@ const FeaturedProperties = () => {
         >
           {t("viewAll")}
         </CsButton>
-      </div>
+      </motion.div>
       <div className="h-px w-full bg-[#E5E5E5] my-6" />
       <Properties />
     </section>

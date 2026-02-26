@@ -1,15 +1,14 @@
 "use client";
 
-import { queryClient } from "@/lib/react-query/queryClient";
-import { store } from "@/store";
 import { QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import type React from "react";
 import { PhotoProvider } from "react-photo-view";
 import { Provider } from "react-redux";
 import { Toaster } from "sonner";
-
-import { SocketProvider } from "@/components/features/message/services/socket-context";
 import { GlobalAuthDialog } from "@/components/custom/auth/GlobalAuthDialog";
+import { SocketProvider } from "@/components/features/message/services/socket-context";
+import { queryClient } from "@/lib/react-query/queryClient";
+import { store } from "@/store";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   return (

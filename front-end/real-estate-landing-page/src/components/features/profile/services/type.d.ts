@@ -24,6 +24,10 @@ namespace IProfileService {
     updatedAt: string;
     avatarUrl?: string;
     roleId: string;
+    bankInfo?: BankInfo;
+    imageInfo?: ImageInfo;
+    basicInfo: BasicInfo;
+    businessInfo: BusinessInfo;
     __v: number;
   }
 

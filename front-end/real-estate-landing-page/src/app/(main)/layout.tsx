@@ -1,7 +1,7 @@
+import type { Metadata } from "next";
 import ChatWidget from "@/components/features/message/ChatWidget";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Havenly",

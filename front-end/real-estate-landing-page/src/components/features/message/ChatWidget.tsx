@@ -9,11 +9,17 @@ import { useConversationDetail } from "./services/query";
 import { Spinner } from "@/components/ui/spinner";
 import ChatDetail from "./components/ChatDetail";
 import { SocketProvider } from "./services/socket-context";
+import { useGetMe } from "@/shared/auth/query";
 
 const ChatWidget = () => {
+  const { data: me } = useGetMe();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const { data, isLoading } = useConversationDetail(selectedConversation?.id);
+
+  if (!me?.data?.userId) {
+    return null;
+  }
 
   return (
     <SocketProvider>

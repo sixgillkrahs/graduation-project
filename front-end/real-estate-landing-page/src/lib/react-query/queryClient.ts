@@ -34,6 +34,8 @@ export const queryClient = new QueryClient({
       error: any,
       query: Query<unknown, unknown, unknown, QueryKey>,
     ): void => {
+      if (query.meta?.SUPPRESS_ERROR) return;
+
       const errorSource = getClientTranslation(
         (query.meta?.ERROR_SOURCE as string) || "notifications.error",
       );

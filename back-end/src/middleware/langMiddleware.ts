@@ -1,31 +1,23 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiRequest } from "@/utils/apiRequest";
-import { parse } from "cookie";
-import { validationMessages } from "@/i18n/validationMessages";
 
 export const langMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
-  const cookieHeader = req.headers.cookie;
-  if (cookieHeader) {
-    const cookies = parse(cookieHeader);
-    if (cookies.locale) {
-      req.lang = cookies.locale as keyof typeof validationMessages;
-      next();
-    }
-  }
-  const acceptLanguage = req.headers["accept-language"] || "";
-  const languages = acceptLanguage
-    .split(",")
-    .map((l) => l.split(";")[0].trim().substring(0, 2).toLowerCase());
+): void => {
+  let lang = "vi";
 
-  for (const lang of languages) {
-    if (lang === "en" || lang === "vi") {
-      req.lang = lang as keyof typeof validationMessages;
-      next();
+  if (req.cookies && req.cookies.lang) {
+    lang = req.cookies.lang;
+  } else if (req.headers["accept-language"]) {
+    const acceptLang = req.headers["accept-language"];
+    if (acceptLang.includes("vi")) {
+      lang = "vi";
+    } else if (acceptLang.includes("en")) {
+      lang = "en";
     }
   }
+
+  req.lang = lang as "vi" | "en";
   next();
 };

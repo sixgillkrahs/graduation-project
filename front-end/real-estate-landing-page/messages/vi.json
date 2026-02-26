@@ -311,6 +311,135 @@
       "security": "An ninh 24/7",
       "wifi": "Wifi & Internet"
     }
+  },
+  "TopCities": {
+    "title": "Khám phá",
+    "titleItalic": "Thành phố nổi bật",
+    "description": "Tìm kiếm bất động sản tại các địa điểm được ưa chuộng nhất.",
+    "hanoi": "Hà Nội",
+    "hcmc": "TP. Hồ Chí Minh",
+    "danang": "Đà Nẵng",
+    "haiphong": "Hải Phòng"
+  },
+  "HowItWorks": {
+    "title": "Cách thức",
+    "titleItalic": "Hoạt động",
+    "step1Title": "Tìm kiếm BĐS",
+    "step1Desc": "Duyệt qua danh sách đa dạng với bộ lọc nâng cao để tìm ngôi nhà hoàn hảo.",
+    "step2Title": "Đặt lịch xem nhà",
+    "step2Desc": "Lên lịch tham quan thực tế hoặc ảo trước khi đưa ra quyết định.",
+    "step3Title": "Chuyển vào ở",
+    "step3Desc": "Hoàn tất thủ tục trực tuyến an toàn và chuẩn bị dọn đến ngôi nhà mới."
+  },
+  "FinalCTA": {
+    "title": "Bạn đã sẵn sàng tìm",
+    "titleItalic": "Ngôi nhà mơ ước?",
+    "description": "Hàng ngàn người dùng đã thuê hoặc mua nhà thành công qua Havenly.",
+    "button": "Xem toàn bộ Bất động sản"
+  },
+  "FAQ": {
+    "header": {
+      "title": "Câu hỏi thường gặp",
+      "description": "Tìm kiếm câu trả lời về việc tìm nhà, đăng bất động sản và quản lý tài khoản trên Havenly.",
+      "searchPlaceholder": "Tìm kiếm câu hỏi...",
+      "contents": "Mục lục"
+    },
+    "categories": {
+      "forHomeBuyers": "Dành cho Người Mua",
+      "forAgentsSellers": "Dành cho Môi giới & Người Bán",
+      "accountSecurity": "Tài Khoản & Bảo mật"
+    },
+    "questions": {
+      "q1": {
+        "question": "Làm thế nào để Tôi đặt lịch xem nhà?",
+        "answer": "Bạn có thể đặt lịch xem trực tiếp từ trang danh sách bằng cách nhấp vào nút 'Đặt lịch xem nhà' và chọn khoảng thời gian khả dụng. Môi giới sẽ xác nhận lịch của bạn trong vòng 24 giờ."
+      },
+      "q2": {
+        "question": "Havenly có những lựa chọn hỗ trợ tài chính nào?",
+        "answer": "Havenly hợp tác với một số ngân hàng và tổ chức tín dụng hàng đầu quốc gia để cung cấp lãi suất vay thế chấp cạnh tranh. Bạn có thể được xét duyệt trước trực tiếp qua cổng thông tin tài chính của chúng tôi trước khi đưa ra bất kỳ thỏa thuận nào."
+      },
+      "q3": {
+        "question": "Có chi phí ẩn nào khi mua nhà không?",
+        "answer": "Minh bạch là giá trị cốt lõi của chúng tôi. Havenly hoàn toàn không thu phí người mua. Mọi chi phí đóng cửa (closing costs) hoặc hoa hồng cho môi giới đều được làm rõ trong bảng phân tích giá ban đầu của bạn."
+      },
+      "q4": {
+        "question": "Đăng bất động sản tốn bao nhiêu tiền?",
+        "answer": "Đăng tin tiêu chuẩn hoàn toàn miễn phí. Chúng tôi cũng cung cấp các gói định vị cao cấp (premium packages) bắt đầu từ 199$/tháng để tăng cường khả năng hiển thị và phân tích nâng cao."
+      },
+      "q5": {
+        "question": "Làm sao để tôi xác minh chứng chỉ Môi giới của mình?",
+        "answer": "Hãy đi tới 'Trang tổng quan Đại lý' của bạn, điều hướng đến tab 'Xác minh' và tải lên số giấy phép kinh doanh bất động sản cùng số CCCD/CMND hợp lệ. Quá trình xét duyệt thường diễn ra từ 1-2 ngày làm việc."
+      },
+      "q6": {
+        "question": "Dữ liệu cá nhân của tôi được bảo vệ như thế nào?",
+        "answer": "Chúng tôi sử dụng mã hóa tiêu chuẩn ngân hàng (AES-256) cho tất cả dữ liệu lưu trữ (data at rest) và TLS 1.3 cho dữ liệu truyền tải. Thông tin cá nhân của bạn không bao giờ được bán cho các bên thứ ba mà không có sự đồng ý rõ ràng của bạn."
+      },
+      "q7": {
+        "question": "Tôi có thể vô hiệu hóa hoặc xóa hoàn toàn tài khoản không?",
+        "answer": "Có, bạn có thể tạm dừng tài khoản hoặc yêu cầu xóa toàn bộ dữ liệu trực tiếp tại mục Cài đặt Bảo mật. Các yêu cầu xóa được xử lý triệt để trong vòng 14 ngày."
+      }
+    },
+    "search": {
+      "searchingFor": "Đang tìm kiếm \"{query}\" — có {count} kết quả",
+      "searchingForPlural": "Đang tìm kiếm \"{query}\" — có {count} kết quả",
+      "noResultsFound": "Không tìm thấy kết quả",
+      "noResultsMessage": "Chúng tôi không thể tìm thấy bất kì câu nào chứa \"{query}\".",
+      "clearSearch": "Xóa tìm kiếm"
+    },
+    "footer": {
+      "stillHaveQuestions": "Vẫn còn câu hỏi?",
+      "supportMessage": "Vẫn không tìm thấy điều bạn mong muốn? Đội ngũ hỗ trợ của chúng tôi sẽ tận tình giúp bạn trong hành trình tìm kiếm mái ấm.",
+      "contactSupport": "Liên hệ Hỗ trợ"
+    }
+  },
+  "PrivacyPolicy": {
+    "header": {
+      "title": "Chính sách bảo mật",
+      "effectiveDate": "Ngày hiệu lực: 26 tháng 02 năm 2026",
+      "description": "Tìm hiểu cách Havenly thu thập, sử dụng và bảo vệ dữ liệu của bạn.",
+      "contents": "Nội dung"
+    },
+    "sections": {
+      "s1": {
+        "menu": "Dữ liệu thu thập",
+        "title": "1. Dữ liệu mà chúng tôi thu thập",
+        "p1": "Tại Havenly, chúng tôi thu thập dữ liệu để xác minh danh tính của bạn, tạo điều kiện thuận lợi cho các giao dịch bất động sản và cải thiện dịch vụ trực tuyến. Các loại dữ liệu thu thập bao gồm:",
+        "li1": "Thông tin tài khoản tĩnh: Họ tên, địa chỉ email, số điện thoại, và mật khẩu.",
+        "li2": "Thông tin hồ sơ năng động: Tùy chỉnh cá nhân hóa của người dùng, bất động sản đã lưu và lịch sử tương tác ứng dụng.",
+        "li3": "Dữ liệu eKYC (Chỉ cho Môi giới): Nhằm duy trì thị trường an toàn, quy định cần xác minh cho hoạt động Môi giới bất động sản. Mục này yêu cầu thu thập Giấy chứng nhận/CCCD trong khâu đăng kí Môi giới."
+      },
+      "s2": {
+        "menu": "Cách Chúng Tôi Sử Dụng",
+        "title": "2. Cách chúng tôi sử dụng dữ liệu",
+        "p1": "Dữ liệu hoạt động sẽ được chia sẻ cho mục đích hỗ trợ hệ thống cải thiện độ tin cậy bao gồm:",
+        "li1": "Kết nối việc xem trước nhà cửa và thiết lập câu hỏi tương quan.",
+        "li2": "Chạy trải nghiệm và nâng cao sự tương tác trên tính năng Virtual Tours 3D.",
+        "li3": "Nâng cao sự hiệu quả khi trả lời thông điệp hỗ trợ người dùng.",
+        "li4": "Truyền tải các thông báo liên quan tới tiến độ đặt lịch xem cũng như sự thay đổi mới (nếu có)."
+      },
+      "s3": {
+        "menu": "Chia sẻ thông tin (Với Đại lý)",
+        "title": "3. Chia sẻ thông tin với Bên Thứ Ba và Đại lý",
+        "p1": "Chúng tôi chú trọng vào tính riêng tư và sẽ CHỈ chia sẻ dữ liệu khi yêu cầu các bên khác tham gia hệ sinh thái kết nối nhu cầu tìm nhà. Mọi dữ liệu bán lẻ qua công ty tiếp thị là ĐƯỢC CHỐNG LẠI. Dữ liệu chỉ chia sẻ nội bộ qua một hệ thống Mã Hóa.",
+        "clauseTitle": "Điều Khoản Chia Sẻ Dữ Liệu Quan Trọng Bắt Buộc",
+        "clauseContent": "Khi một Nhóm/Cá nhân tiến hành Booking xem bất động sản tại nền tảng, Họ tên Cùng Số Điện Thoại sẽ trực tiếp được share cho Agent (chủ đại lý sở hữu khu vực đó). Quá trình này hoàn toàn bắt buộc và chính đáng để đại lý liên hệ bạn điều phối cũng như đảm bảo sự an toàn vật lý của tài sản."
+      },
+      "s4": {
+        "menu": "Hệ thống AI & Tự động",
+        "title": "4. Xử lí tự động & Trí tuệ AI",
+        "p1": "Havenly tuân theo pháp lý chuẩn bằng cách triển khai nhanh chóng quy trình nhận dạng điện tử hiện đại.",
+        "p2": "Ví dụ, trên quy trình xác nhận Giấy tờ tại luồng trở thành Người đăng bán đại lý, AI (OCR nhận dạng kí tự mờ) được áp dụng nhằm bóc tách một cách TỰ ĐỘNG các chữ ký mà không ghi đè hoặc can thiệp thông qua con người, giảm thiểu khả năng có các danh sách thông tin lừa đảo giả mạo Môi giới thật."
+      },
+      "s5": {
+        "menu": "Quyền Sở Hữu & Lựa Chọn",
+        "title": "5. Quyền Sở Hữu Dữ Liệu",
+        "p1": "Bạn HOÀN TOÀN có ĐẦY ĐỦ các đặc quyền: Truy cập - Xóa - Sửa đối với mọi phần dữ liệu bản thân. Nếu cần trích xuất trực tiếp hay kích hoạt quyền bị Lãng quên thì đơn giản gọi cho đội bảo mật Havenly trên trang Liên hệ."
+      }
+    },
+    "footer": {
+      "questionsAbout": "Bạn có câu hỏi liên quan?",
+      "reachOut": "Bất cứ thắc mắc nảy sinh về Chính sách Bảo Mật, làm ơn gửi thư điện tử cho Viên Chức Xử Lý Bảo Mật của trang web bằng liên kết"
+    }
   }
 }
 

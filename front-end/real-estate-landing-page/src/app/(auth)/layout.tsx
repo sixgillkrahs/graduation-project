@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Sider from "@/components/layout/Sider";
 import Header from "@/components/layout/auth/Header";
+import Sider from "@/components/layout/Sider";
 
 export const metadata: Metadata = {
   title: "Havenly",

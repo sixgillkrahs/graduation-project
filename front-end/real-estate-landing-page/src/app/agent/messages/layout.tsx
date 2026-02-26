@@ -1,5 +1,5 @@
-import Sidebar from "@/components/layout/message/Sidebar";
 import type { Metadata } from "next";
+import Sidebar from "@/components/layout/message/Sidebar";
 
 export const metadata: Metadata = {
   title: "Messages",

@@ -1,6 +1,6 @@
+import type { Metadata } from "next";
 import AuthGuard from "@/components/layout/AuthGuard";
 import Sidebar from "@/components/layout/agent/Sidebar";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Agent Dashboard",

@@ -34,4 +34,6 @@ export const ROUTES = {
 
   // Misc
   POLICY: "/policy",
+  FAQ: "/faq",
+  PRIVACY_POLICY: "/privacy-policy",
 } as const;

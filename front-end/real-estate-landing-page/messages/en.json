@@ -311,6 +311,135 @@
       "security": "24/7 Security",
       "wifi": "Wifi & Internet"
     }
+  },
+  "TopCities": {
+    "title": "Explore by",
+    "titleItalic": "Top Cities",
+    "description": "Discover properties in the most preferred locations.",
+    "hanoi": "Hanoi",
+    "hcmc": "Ho Chi Minh City",
+    "danang": "Da Nang",
+    "haiphong": "Hai Phong"
+  },
+  "HowItWorks": {
+    "title": "How It",
+    "titleItalic": "Works",
+    "step1Title": "Search Property",
+    "step1Desc": "Browse our extensive list of properties using advanced filters to find your perfect match.",
+    "step2Title": "Book a Tour",
+    "step2Desc": "Schedule a virtual or in-person tour to experience the property before making a decision.",
+    "step3Title": "Move In",
+    "step3Desc": "Complete the process securely online and get ready to move into your new home."
+  },
+  "FinalCTA": {
+    "title": "Ready to find your",
+    "titleItalic": "dream home?",
+    "description": "Join thousands of users who have successfully rented or bought properties through Havenly.",
+    "button": "Browse All Properties"
+  },
+  "FAQ": {
+    "header": {
+      "title": "Frequently Asked Questions",
+      "description": "Find answers about finding homes, listing properties, and account management on Havenly.",
+      "searchPlaceholder": "Search for questions...",
+      "contents": "Contents"
+    },
+    "categories": {
+      "forHomeBuyers": "For Home Buyers",
+      "forAgentsSellers": "For Agents & Sellers",
+      "accountSecurity": "Account & Security"
+    },
+    "questions": {
+      "q1": {
+        "question": "How do I schedule a property viewing?",
+        "answer": "You can schedule a viewing directly from any property listing page by clicking the 'Schedule Viewing' button and selecting an available time slot. The listing agent will confirm your appointment within 24 hours."
+      },
+      "q2": {
+        "question": "What financing options are available through Havenly?",
+        "answer": "Havenly partners with several top-tier national banks and credit unions to offer competitive mortgage rates. You can get pre-approved directly through our financing portal before making any offers."
+      },
+      "q3": {
+        "question": "Are there any hidden fees when buying?",
+        "answer": "Transparency is our core value. Havenly charges absolutely zero buyer fees. Any closing costs or agent commissions are clearly outlined in your initial pricing breakdown."
+      },
+      "q4": {
+        "question": "How much does it cost to list a property?",
+        "answer": "Standard listings are completely free. We also offer premium positioning packages starting at $199/month for increased visibility and advanced analytics."
+      },
+      "q5": {
+        "question": "How do I verify my agent credentials?",
+        "answer": "Go to your 'Agent Dashboard', navigate to the 'Verification' tab, and upload your real estate license number along with a valid ID. Verification generally takes 1-2 business days."
+      },
+      "q6": {
+        "question": "How is my personal data protected?",
+        "answer": "We use bank-level encryption (AES-256) for all data at rest and TLS 1.3 for data in transit. Your personal information is never sold to third parties without your explicit consent."
+      },
+      "q7": {
+        "question": "Can I delete or pause my account?",
+        "answer": "Yes, you can temporarily pause your account or request complete data deletion directly from your Security Settings. Deletion requests are processed within 14 days."
+      }
+    },
+    "search": {
+      "searchingFor": "Searching for \"{query}\" — found {count} result",
+      "searchingForPlural": "Searching for \"{query}\" — found {count} results",
+      "noResultsFound": "No results found",
+      "noResultsMessage": "We couldn't find any questions matching \"{query}\".",
+      "clearSearch": "Clear search"
+    },
+    "footer": {
+      "stillHaveQuestions": "Still have questions?",
+      "supportMessage": "Can't find what you're looking for? Our support team is here to help you navigate your real estate journey.",
+      "contactSupport": "Contact Support"
+    }
+  },
+  "PrivacyPolicy": {
+    "header": {
+      "title": "Privacy Policy",
+      "effectiveDate": "Effective Date: February 26, 2026",
+      "description": "Learn how Havenly collects, uses, and protects your data.",
+      "contents": "Contents"
+    },
+    "sections": {
+      "s1": {
+        "menu": "Information We Collect",
+        "title": "1. Information We Collect",
+        "p1": "At Havenly, we collect information to authenticate your identity, facilitate real estate transactions, and improve our services. The types of data we collect include:",
+        "li1": "Basic Account Information: Name, email address, phone number, and password.",
+        "li2": "Profile Information: User preferences, saved properties, and interaction history on our platform.",
+        "li3": "eKYC Data (for Agents): To maintain a secure marketplace, we require verification for Real Estate Agents. This includes collecting identification documents (such as ID cards or Certificates) during the Agent registration process."
+      },
+      "s2": {
+        "menu": "How We Use Your Data",
+        "title": "2. How We Use Your Data",
+        "p1": "The data we collect from you is used for the following operational and service-enhancing purposes:",
+        "li1": "To facilitate property bookings, viewings, and related inquiries.",
+        "li2": "To provide, personalize, and improve interactions with our 3D virtual tours.",
+        "li3": "To deliver prompt customer support and respond effectively to your requests.",
+        "li4": "To communicate with you via notifications regarding schedule updates, property availability, and essential platform announcements."
+      },
+      "s3": {
+        "menu": "Information Sharing (Agents & Users)",
+        "title": "3. Information Sharing (Agents & Users)",
+        "p1": "We respect your privacy and only share your data when necessary to fulfill a real estate service you have requested. We do not sell your personal data to third-party marketing companies. Data is only shared with verified Agents or with trusted service providers.",
+        "clauseTitle": "Crucial Data Sharing Clause",
+        "clauseContent": "When a User books a property viewing through Havenly, their Phone Number and Name are shared directly with the specific Agent managing that property. This sharing is essential to allow the Agent to coordinate the viewing and provide you with physical access to the property."
+      },
+      "s4": {
+        "menu": "AI & Automated Processing",
+        "title": "4. AI & Automated Processing",
+        "p1": "Havenly utilizes modern technology to streamline our verification processes and ensure the safety of our community.",
+        "p2": "During the Agent onboarding process, we employ Optical Character Recognition (OCR) technology to securely and automatically extract information from Agent identification documents and certificates. This automated processing is strictly used for verifying the authenticity of the Agent's credentials and preventing fraudulent listings."
+      },
+      "s5": {
+        "menu": "Your Rights & Choices",
+        "title": "5. Your Rights & Choices",
+        "p1": "You have the right to access, update, or delete your personal information at any time through your account settings. You may also request a copy of the data we hold about you. If you wish to exercise your rights under applicable data protection laws, or if you wish to revoke your consent, please contact our support team."
+      }
+    },
+    "footer": {
+      "questionsAbout": "Questions About Privacy?",
+      "reachOut": "If you have questions about this Privacy Policy, please contact our Data Protection Officer at"
+    }
   }
 }
 

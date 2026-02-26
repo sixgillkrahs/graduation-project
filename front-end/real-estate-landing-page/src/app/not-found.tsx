@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ROUTES } from "@/const/routes";
 import { CsButton } from "@/components/custom";
+import { ROUTES } from "@/const/routes";
 
 export default function NotFound() {
   return (

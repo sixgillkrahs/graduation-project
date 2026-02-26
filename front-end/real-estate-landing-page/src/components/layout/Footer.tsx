@@ -1,9 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Icon } from "../ui/Icon";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { ROUTES } from "@/const/routes";
+import { Icon } from "../ui/Icon";
 
 const LocaleSwitcher = () => {
   const router = useRouter();
@@ -38,17 +39,28 @@ const LocaleSwitcher = () => {
 const Label = ({
   label,
   value,
+  href,
   className,
 }: {
   label: string;
   value: string;
+  href?: string;
   className?: string;
 }) => {
   return (
     <div className={`flex flex-col  w-full items-center gap-2 ${className}`}>
       <div className="flex justify-between items-center gap-2 w-full">
         <span className="cs-paragraph-white text-[16px]!">{label}</span>
-        <span className="text-sm! cs-paragraph-gray">{value}</span>
+        {href ? (
+          <a
+            href={href}
+            className="text-sm! cs-paragraph-gray hover:text-white transition-colors"
+          >
+            {value}
+          </a>
+        ) : (
+          <span className="text-sm! cs-paragraph-gray">{value}</span>
+        )}
       </div>
       <div className="w-full h-[0.5px] cs-bg-gray"></div>
     </div>
@@ -65,15 +77,16 @@ const Footer = () => {
 
   return (
     <footer className="cs-bg-black">
-      <footer className="p-20 grid grid-cols-1 container mx-auto">
-        <div className="flex gap-12 justify-between">
-          <div className="cs-paragraph-white">
+      <div className="px-5 py-10 lg:p-20 flex flex-col container mx-auto gap-8">
+        <div className="flex flex-col xl:flex-row gap-12 justify-between">
+          <div className="cs-paragraph-white xl:max-w-sm">
             {t("description")}
             <br />
+            <br className="hidden xl:block" />
             {t("help")}
           </div>
-          <div className="flex gap-15">
-            <div className="grid grid-cols-3 gap-10">
+          <div className="flex flex-col lg:flex-row gap-10 lg:gap-15 w-full xl:w-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 w-full lg:w-auto">
               <div>
                 <span className={classText}>
                   {t("titlebrowser", { name: "Havenly" })}
@@ -90,7 +103,7 @@ const Footer = () => {
                 </span>
                 <ul className={classLi}>
                   <li>
-                    <Link href={"/work/become-agent"}>
+                    <Link href={`${ROUTES.BECOME_AGENT}`}>
                       {t("menuWorkAt.BecomeAgent", { name: "Havenly" })}
                     </Link>
                   </li>
@@ -102,14 +115,26 @@ const Footer = () => {
                   {t("About", { name: "Havenly" })}
                 </span>
                 <ul className={classLi}>
-                  <li>{t("menuAbout.FrequentlyAskedQuestions")}</li>
-                  <li>{t("menuAbout.PrivacyPolicy")}</li>
+                  <Link href={`${ROUTES.FAQ}`}>
+                    {t("menuAbout.FrequentlyAskedQuestions")}
+                  </Link>
+                  <Link href={`${ROUTES.PRIVACY_POLICY}`}>
+                    {t("menuAbout.PrivacyPolicy")}
+                  </Link>
                 </ul>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-2 min-w-[300px]">
-              <Label label={t("email")} value="contact@realestate.com" />
-              <Label label={t("phone")} value="0966999999" />
+            <div className="flex flex-col gap-2 w-full lg:min-w-[300px] lg:w-auto">
+              <Label
+                label={t("email")}
+                value="contact@realestate.com"
+                href="mailto:contact@realestate.com"
+              />
+              <Label
+                label={t("phone")}
+                value="0966999999"
+                href="tel:0966999999"
+              />
               <div className="mt-8">
                 <div className={classText}>{t("followUs")}</div>
                 <div className="flex gap-4 mt-4">
@@ -122,13 +147,15 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-end">
-          <div className="sm:text-[120px]! lg:text-[220px]! cs-typography-gray font-semibold!">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-end mt-8 lg:mt-0 gap-6">
+          <div className="text-[60px]! sm:text-[100px]! lg:text-[220px]! cs-typography-gray font-semibold! leading-none">
             Havenly
           </div>
-          <LocaleSwitcher />
+          <div className="pb-2 lg:pb-12">
+            <LocaleSwitcher />
+          </div>
         </div>
-      </footer>
+      </div>
     </footer>
   );
 };

@@ -1,16 +1,15 @@
 "use client";
 
-import { Icon, Image } from "@/components/ui";
-import { useState } from "react";
-import { useGetMyProperties } from "./services/query";
-import { useRouter } from "next/navigation";
-import { ROUTES } from "@/const/routes";
-import { Building2, Eye, Plus } from "lucide-react";
 import { CsButton } from "@/components/custom";
-import { IPropertyDto } from "./dto/property.dto";
+import { Icon, Image } from "@/components/ui";
 import { CsTable, TableColumn } from "@/components/ui/table";
-import { findOptionLabel } from "@/shared/helper/findOptionValue";
-import PropertyService from "./services/service";
+import { ROUTES } from "@/const/routes";
+import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
+import { Building2, Eye, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { IPropertyDto } from "./dto/property.dto";
+import { useGetMyProperties } from "./services/query";
 
 const MyListings = () => {
   const router = useRouter();
@@ -52,11 +51,8 @@ const MyListings = () => {
             </h4>
             <p className="text-sm text-gray-500 line-clamp-2 mt-1">
               {record.location.address},{" "}
-              {findOptionLabel(record.location.ward, PropertyService.Wards)},{" "}
-              {findOptionLabel(
-                record.location.province,
-                PropertyService.Provinces,
-              )}
+              {findOptionLabel(record.location.ward, LIST_WARD)},{" "}
+              {findOptionLabel(record.location.province, LIST_PROVINCE)}
             </p>
           </div>
         </div>
