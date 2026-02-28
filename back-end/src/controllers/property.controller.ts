@@ -240,6 +240,60 @@ export class PropertyController extends BaseController {
     });
   };
 
+  getRejectedProperties = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { limit, page, sortField, sortOrder, ...filters } = req.query;
+
+      const options = {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 10,
+        sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        populate: "userId", // Populate owner info if needed
+      };
+
+      // Handle user search
+      const userFilter: any = {};
+      if (filters["userId.fullName"]) {
+        userFilter.fullName = {
+          $regex: filters["userId.fullName"],
+          $options: "i",
+        };
+        delete filters["userId.fullName"];
+      }
+      if (filters["userId.phone"]) {
+        userFilter.phone = { $regex: filters["userId.phone"], $options: "i" };
+        delete filters["userId.phone"];
+      }
+
+      // If filters come as object (extended query parser behavior for userId[fullName]) or simple dot notation
+      if (filters.userId && typeof filters.userId === "object") {
+        const uFilters = filters.userId as any;
+        if (uFilters.fullName)
+          userFilter.fullName = { $regex: uFilters.fullName, $options: "i" };
+        if (uFilters.phone)
+          userFilter.phone = { $regex: uFilters.phone, $options: "i" };
+        delete filters.userId;
+      }
+
+      if (Object.keys(userFilter).length > 0) {
+        const users = await UserModel.find(userFilter).select("_id");
+        const userIds = users.map((u: any) => u._id);
+        (filters as any).userId = { $in: userIds };
+      }
+
+      const queryFilters = {
+        ...filters,
+        status: PropertyStatusEnum.REJECTED,
+      };
+
+      const properties = await this.propertyService.getProperties(
+        options,
+        queryFilters,
+      );
+      return properties;
+    });
+  };
+
   getMyProperties = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const user = (req as any).user;
@@ -331,9 +385,93 @@ export class PropertyController extends BaseController {
         );
       }
 
+      const body = req.body;
+      const getDirection = (val: string) => {
+        const map: Record<string, any> = {
+          NORTH: PropertyDirectionEnum.NORTH,
+          SOUTH: PropertyDirectionEnum.SOUTH,
+          EAST: PropertyDirectionEnum.EAST,
+          WEST: PropertyDirectionEnum.WEST,
+          NORTH_EAST: PropertyDirectionEnum.NORTH_EAST,
+          NORTH_WEST: PropertyDirectionEnum.NORTH_WEST,
+          SOUTH_EAST: PropertyDirectionEnum.SOUTH_EAST,
+          SOUTH_WEST: PropertyDirectionEnum.SOUTH_WEST,
+        };
+        return map[val] || existingProperty.features?.direction;
+      };
+
+      const getLegalStatus = (val: string) => {
+        const map: Record<string, any> = {
+          PINK_BOOK: PropertyLegalStatusEnum.PINK_BOOK,
+          RED_BOOK: PropertyLegalStatusEnum.RED_BOOK,
+          SALE_CONTRACT: PropertyLegalStatusEnum.SALE_CONTRACT,
+          WAITING: PropertyLegalStatusEnum.WAITING,
+          OTHER: PropertyLegalStatusEnum.OTHER,
+        };
+        return map[val] || existingProperty.features?.legalStatus;
+      };
+
+      const getFurniture = (val: string) => {
+        const map: Record<string, any> = {
+          FULL: PropertyFurnitureEnum.FULL,
+          BASIC: PropertyFurnitureEnum.BASIC,
+          EMPTY: PropertyFurnitureEnum.EMPTY,
+        };
+        return map[val] || existingProperty.features?.furniture;
+      };
+
+      const propertyData = {
+        demandType: body.demandType || existingProperty.demandType,
+        title: body.title || existingProperty.title,
+        propertyType: body.propertyType || existingProperty.propertyType,
+        projectName: body.projectName ?? existingProperty.projectName,
+        location: {
+          province: body.province || existingProperty.location?.province,
+          ward: body.ward || existingProperty.location?.ward,
+          district: "", // Optional in model now
+          address: body.address || existingProperty.location?.address,
+          hideAddress: false,
+          coordinates: {
+            lat:
+              Number(body.latitude) ||
+              existingProperty.location?.coordinates?.lat ||
+              0,
+            long:
+              Number(body.longitude) ||
+              existingProperty.location?.coordinates?.long ||
+              0,
+          },
+        },
+        features: {
+          area: Number(body.area) || existingProperty.features?.area,
+          price: Number(body.price) || existingProperty.features?.price,
+          priceUnit: "MILLION" as any, // Default or derived
+          bedrooms:
+            Number(body.bedrooms) || existingProperty.features?.bedrooms || 0,
+          bathrooms:
+            Number(body.bathrooms) || existingProperty.features?.bathrooms || 0,
+          direction: getDirection(body.direction),
+          legalStatus: getLegalStatus(body.legalStatus),
+          furniture: getFurniture(body.furniture),
+        },
+        media: {
+          images: body.images || existingProperty.media?.images || [],
+          thumbnail: body?.thumbnail || existingProperty.media?.thumbnail || "",
+          videoLink: body?.videoLink || existingProperty.media?.videoLink || "",
+          virtualTourUrls:
+            body?.virtualTourUrls ||
+            existingProperty.media?.virtualTourUrls ||
+            [],
+        },
+        amenities: body.amenities || existingProperty.amenities || [],
+        description: body.description ?? existingProperty.description,
+        status: PropertyStatusEnum.PENDING, // Always return to pending queue after someone edits
+        rejectReason: "", // clear out any old rejection notice
+      };
+
       const updatedProperty = await this.propertyService.updateProperty(
         id,
-        req.body,
+        propertyData,
       );
       return updatedProperty;
     });
@@ -435,6 +573,7 @@ export class PropertyController extends BaseController {
   rejectProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
+      const { reason } = req.body;
       const lang = req.lang;
 
       const existingProperty = await this.propertyService.getPropertyById(id);
@@ -463,6 +602,7 @@ export class PropertyController extends BaseController {
 
       await this.propertyService.updateProperty(id, {
         status: targetStatus,
+        rejectReason: reason,
       });
 
       const io = req.io;
@@ -471,7 +611,7 @@ export class PropertyController extends BaseController {
         const roomName = ownerId.toString();
 
         io.to(roomName).emit("property_status_update", {
-          message: `Your property "${existingProperty.projectName || "Listing"}" has been rejected.`,
+          message: `Your property "${existingProperty.projectName || "Listing"}" has been rejected. Reason: ${reason}`,
           propertyId: id,
           status: targetStatus,
           timestamp: new Date().toISOString(),
@@ -483,6 +623,12 @@ export class PropertyController extends BaseController {
           content: `Your property "${existingProperty.projectName || "Listing"}" has been rejected.`,
           isRead: false,
           title: "Property rejected",
+          metadata: {
+            propertyId: id,
+            status: targetStatus,
+            timestamp: new Date().toISOString(),
+            rejectReason: reason,
+          },
         });
       } else {
         console.error(

@@ -76,14 +76,14 @@ const Table = <T extends object>({
       </div>
       <div
         className={clsx(
-          "w-full overflow-hidden bg-white rounded-3xl shadow-sm border border-gray-200",
+          "w-full bg-white rounded-3xl shadow-sm border border-gray-200",
           className,
         )}
       >
-        <div className="overflow-x-auto">
+        <div className="overflow-visible">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
+              <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold relative z-10">
                 {rowSelection && (
                   <th className="px-6 py-4 w-10">
                     <input
@@ -112,7 +112,7 @@ const Table = <T extends object>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 relative z-0">
               {loading ? (
                 <tr>
                   <td
@@ -140,7 +140,8 @@ const Table = <T extends object>({
                     <tr
                       key={key}
                       className={clsx(
-                        "hover:bg-gray-50 transition-colors duration-150",
+                        "transition-colors duration-150 relative",
+                        "hover:bg-gray-50 hover:z-20 focus-within:z-20",
                         isSelected && "bg-blue-50",
                       )}
                     >

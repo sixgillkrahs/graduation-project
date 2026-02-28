@@ -38,6 +38,7 @@ export interface IProperty {
     images: string[];
     thumbnail?: string;
     videoLink?: string;
+    virtualTourUrls?: string[];
   };
   description: string;
   status: "DRAFT" | "PENDING" | "PUBLISHED" | "REJECTED" | "EXPIRED" | "SOLD";

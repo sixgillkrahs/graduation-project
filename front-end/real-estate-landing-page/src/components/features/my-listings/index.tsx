@@ -1,11 +1,11 @@
 "use client";
 
 import { CsButton } from "@/components/custom";
-import { Icon, Image } from "@/components/ui";
+import { Dropdown, DropdownItem, Icon, Image } from "@/components/ui";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import { ROUTES } from "@/const/routes";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
-import { Building2, Eye, Plus } from "lucide-react";
+import { Building2, Eye, Plus, Send, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IPropertyDto } from "./dto/property.dto";
@@ -85,6 +85,7 @@ const MyListings = () => {
     {
       title: "Performance",
       dataIndex: "viewCount",
+      width: "10%",
       render: (viewCount) => (
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-gray-400" />
@@ -98,7 +99,7 @@ const MyListings = () => {
     {
       title: "Price & Date",
       dataIndex: "features",
-      width: "20%",
+      width: "15%",
       render: (features: any, record) => (
         <div className="flex flex-col gap-1">
           <div className="font-semibold text-gray-900">
@@ -111,16 +112,79 @@ const MyListings = () => {
       ),
     },
     {
-      title: "Action",
-      dataIndex: "_id",
-      align: "center",
-      width: "10%",
-      render: () => {
+      title: "Reason",
+      dataIndex: "rejectReason",
+      width: "15%",
+      render: (reason: any, record) => {
+        if (record.status !== "REJECTED" || !reason) {
+          return <span className="text-gray-400 text-sm">-</span>;
+        }
         return (
-          <div className="flex gap-2 justify-end">
-            <CsButton icon={<Eye className="w-4 h-4" />} />
-            <CsButton icon={<Icon.Edit className="w-4 h-4" />} />
-            <CsButton icon={<Icon.MoreVertical className="w-4 h-4" />} />
+          <div
+            className="text-sm text-red-600 line-clamp-2 font-medium"
+            title={reason}
+          >
+            {reason}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Action",
+      dataIndex: "id",
+      align: "center",
+      width: "15%",
+      render: (_, record, rowIndex) => {
+        console.log(record);
+        const isPending = record.status === "PENDING";
+        const canSubmitApproval =
+          record.status === "REJECTED" || record.status === "DRAFT";
+
+        // Detect if it's the last or second to last item to flip the dropdown upward
+        const isBottomRow =
+          rowIndex !== undefined && data?.data?.results?.length
+            ? data.data.results.length > 3 &&
+              rowIndex >= data.data.results.length - 2
+            : false;
+
+        return (
+          <div className="flex gap-2 justify-center items-center">
+            <Dropdown
+              width={160}
+              placement={isBottomRow ? "top" : "bottom"}
+              trigger={
+                <CsButton
+                  icon={<Icon.MoreVertical className="w-4 h-4" />}
+                  disabled={isPending}
+                  title={
+                    isPending
+                      ? "Đang chờ duyệt, không thể thao tác"
+                      : "Hành động khác"
+                  }
+                />
+              }
+            >
+              <div className="py-2">
+                <DropdownItem
+                  icon={<Icon.Edit className="w-4 h-4" />}
+                  onClick={() =>
+                    router.push(`/agent/listings/edit/${record.id}`)
+                  }
+                >
+                  Chỉnh sửa
+                </DropdownItem>
+
+                {canSubmitApproval && (
+                  <DropdownItem icon={<Send className="w-4 h-4" />}>
+                    Gửi duyệt
+                  </DropdownItem>
+                )}
+
+                <DropdownItem icon={<Trash2 className="w-4 h-4" />} danger>
+                  Xóa
+                </DropdownItem>
+              </div>
+            </Dropdown>
           </div>
         );
       },
@@ -149,7 +213,7 @@ const MyListings = () => {
       <CsTable
         columns={columns}
         dataSource={data?.data.results || []}
-        rowKey={"_id"}
+        rowKey={"id"}
         loading={isLoading}
         pagination={{
           current: pagination.current,

@@ -9,3 +9,11 @@ export const useGetMyProperties = (params?: IParamsPagination) => {
     queryFn: () => PropertyService.getProperties(params),
   });
 };
+
+export const useGetPropertyDetail = (id: string) => {
+  return useQuery({
+    queryKey: [PropertyKey.getPropertyDetail, id],
+    queryFn: () => PropertyService.getPropertyDetail(id),
+    enabled: !!id,
+  });
+};

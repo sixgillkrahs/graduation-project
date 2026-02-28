@@ -1,5 +1,6 @@
 import { useApproveProperty, useRejectProperty } from "../../services/mutate";
 import { useGetPropertyDetail } from "../../services/query";
+import RejectPropertyModal from "./components/RejectPropertyModal";
 import {
   Button,
   Card,
@@ -27,7 +28,9 @@ import {
   User,
   XCircle,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { useNavigate, useParams } from "react-router-dom";
 
 const { Title, Text, Paragraph } = Typography;
@@ -39,6 +42,8 @@ const PropertyDetail = () => {
   const { mutate: rejectProperty, isPending: isRejecting } = useRejectProperty();
   const { t } = useTranslation();
   const { data: propertyResp, isLoading } = useGetPropertyDetail(id || "");
+
+  const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
 
   const property = propertyResp?.data;
 
@@ -55,16 +60,26 @@ const PropertyDetail = () => {
         },
       });
     } else {
-      rejectProperty(id, {
+      setIsRejectModalVisible(true);
+    }
+  };
+
+  const handleConfirmReject = (reason: string) => {
+    if (!id) return;
+
+    rejectProperty(
+      { id, reason },
+      {
         onSuccess: () => {
           message.success(t("message.updateSuccess"));
+          setIsRejectModalVisible(false);
           navigate("/properties/pending");
         },
         onError: () => {
           message.error(t("message.updateError"));
         },
-      });
-    }
+      },
+    );
   };
 
   if (isLoading) {
@@ -163,6 +178,31 @@ const PropertyDetail = () => {
                   />
                 </div>
               ))}
+            </div>
+          </Card>
+
+          <Card title="Chùm ảnh 360 độ (Virtual Tour)" className="mb-6 shadow-sm">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {property?.media?.virtualTourUrls && property.media.virtualTourUrls.length > 0 ? (
+                property.media.virtualTourUrls.map((url: string, index: number) => (
+                  <div
+                    key={index}
+                    className="flex h-[350px] w-full items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm"
+                  >
+                    <ReactPhotoSphereViewer
+                      src={url}
+                      height="100%"
+                      width="100%"
+                      littlePlanet={false}
+                      container={`viewer-${index}`}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-1 flex h-[200px] items-center justify-center rounded-lg bg-gray-100 text-center text-gray-500 md:col-span-2">
+                  <p>Không có dữ liệu 360 độ cho bất động sản này.</p>
+                </div>
+              )}
             </div>
           </Card>
 
@@ -269,6 +309,13 @@ const PropertyDetail = () => {
           </Card>
         </Col>
       </Row>
+
+      <RejectPropertyModal
+        isOpen={isRejectModalVisible}
+        onClose={() => setIsRejectModalVisible(false)}
+        onConfirm={handleConfirmReject}
+        isRejecting={isRejecting}
+      />
     </div>
   );
 };

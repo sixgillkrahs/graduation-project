@@ -20,3 +20,20 @@ export const useCreateProperty = (): UseMutationResult<
     },
   });
 };
+
+export const useUpdateProperty = (): UseMutationResult<
+  IResp<IPropertyDto>,
+  Error,
+  { id: string; data: ListingFormData },
+  void
+> => {
+  return useMutation({
+    mutationFn: ({ id, data }) => {
+      return PropertyService.updateProperty(id, data);
+    },
+    meta: {
+      ERROR_SOURCE: "notifications.updatePropertyFailed",
+      SUCCESS_MESSAGE: "notifications.updatePropertySuccess",
+    },
+  });
+};

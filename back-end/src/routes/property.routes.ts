@@ -557,6 +557,12 @@ router.patch("/:id/approve", requireAuth, propertyController.approveProperty);
  *         schema:
  *           type: string
  *         description: Property ID
+ *       - in: body
+ *         name: reason
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reason for rejection
  *     requestBody:
  *       required: false
  *       content:
@@ -678,6 +684,61 @@ router.get(
 
 /**
  * @swagger
+ * /properties/status/rejected:
+ *   get:
+ *     summary: Get all rejected properties with pagination and filtering
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *     responses:
+ *       200:
+ *         description: List of rejected properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ */
+router.get(
+  "/status/rejected",
+  requireAuth,
+  propertyController.getRejectedProperties,
+);
+
+/**
+ * @swagger
  * /properties/{id}/view:
  *   patch:
  *     summary: Increment view count of a property
@@ -735,6 +796,13 @@ router.post(
   "/:id/interact",
   optionalAuth,
   propertyController.recordInteraction,
+);
+
+router.put(
+  "/:id",
+  requireAuth,
+  validateRequest(createPropertySchema),
+  propertyController.updateProperty,
 );
 
 export default router;

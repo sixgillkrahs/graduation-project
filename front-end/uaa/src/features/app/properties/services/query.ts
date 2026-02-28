@@ -10,6 +10,13 @@ export const useGetPropertiesPending = (params: IParamsPagination) => {
   });
 };
 
+export const useGetPropertiesRejected = (params: IParamsPagination) => {
+  return useQuery({
+    queryKey: [PropertiesQueryKey.GetPropertiesRejected, params],
+    queryFn: () => PropertiesService.GetPropertiesRejected(params),
+  });
+};
+
 export const useGetPropertyDetail = (id: string) => {
   return useQuery({
     queryKey: [PropertiesQueryKey.GetPropertyDetail, id],

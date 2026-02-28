@@ -52,6 +52,17 @@ const router: RouterConfig = {
           name: "Properties Detail",
           hideInMenu: true,
         },
+        {
+          path: "/rejected",
+          component: lazy(() => import("./properties/properties/properties-rejected")),
+          name: "Properties Rejected",
+        },
+        {
+          path: "/rejected/:id",
+          component: lazy(() => import("./properties/properties/properties-detail")),
+          name: "Rejected Property Detail",
+          hideInMenu: true,
+        },
       ],
     },
     {

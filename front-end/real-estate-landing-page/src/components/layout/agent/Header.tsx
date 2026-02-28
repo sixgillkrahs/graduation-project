@@ -27,17 +27,10 @@ import {
 } from "./services/mutate";
 import { useGetMyNotices } from "./services/query";
 import { cn } from "@/lib/utils";
-
-// Map backend notice to UI notification format if needed, or update interface
-interface Notification {
-  message: string;
-  status: string;
-  timestamp: string;
-  propertyId?: string;
-  isRead: boolean;
-  type: string;
-  id: string; // Add ID for tracking
-}
+import {
+  NotificationDetail,
+  NotificationDetailModal,
+} from "./components/NotificationDetailModal";
 
 const Header = () => {
   const { info } = useSelector((state: RootState) => state.menu);
@@ -45,9 +38,14 @@ const Header = () => {
     (state: RootState) => state.auth,
   );
   const socket = useSocket();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<NotificationDetail[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Modal detail state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedNotice, setSelectedNotice] =
+    useState<NotificationDetail | null>(null);
 
   // Fetch initial notifications
   const {
@@ -109,7 +107,11 @@ const Header = () => {
     });
   };
 
-  const handleReadNotice = (notify: Notification) => {
+  const handleReadNotice = (notify: NotificationDetail) => {
+    // Open the detail modal
+    setSelectedNotice(notify);
+    setIsModalOpen(true);
+
     if (!notify.isRead) {
       readNotice(notify.id, {
         onSuccess: () => {
@@ -126,7 +128,7 @@ const Header = () => {
     if (noticesData?.pages) {
       const allNotices = noticesData.pages.flatMap((page) => page.data.results);
 
-      const formattedNotices: Notification[] = allNotices.map(
+      const formattedNotices: NotificationDetail[] = allNotices.map(
         (n: INoticeDto) => ({
           message: n.content,
           status: n.type,
@@ -134,6 +136,7 @@ const Header = () => {
           isRead: n.isRead,
           type: n.type,
           propertyId: n.metadata?.propertyId,
+          metadata: n.metadata,
           id: n.id,
         }),
       );
@@ -160,7 +163,7 @@ const Header = () => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("property_status_update", (data: Notification) => {
+    socket.on("property_status_update", (data: NotificationDetail) => {
       setNotifications((prev) => [data, ...prev]);
       setUnreadCount((prev) => prev + 1);
       refetch();
@@ -177,6 +180,21 @@ const Header = () => {
   }, [socket]);
 
   const hasUnread = unreadCount > 0;
+
+  useEffect(() => {
+    // Save original title if not already saved in a ref, but to keep it simple, strip previous unread count
+    const originalTitle = document.title.replace(
+      /^\(\d+\+\?\)\s*|^\(\d+\)\s*/,
+      "",
+    );
+
+    if (hasUnread) {
+      const displayCount = unreadCount > 99 ? "99+" : unreadCount;
+      document.title = `(${displayCount}) ${originalTitle}`;
+    } else {
+      document.title = originalTitle;
+    }
+  }, [unreadCount, hasUnread]);
 
   return (
     <header className="flex justify-between h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-2xs w-full pr-10 relative">
@@ -354,6 +372,12 @@ const Header = () => {
 
         <Avatar src={user?.avatarUrl} />
       </div>
+
+      <NotificationDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        notification={selectedNotice}
+      />
     </header>
   );
 };

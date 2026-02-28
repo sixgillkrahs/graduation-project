@@ -15,6 +15,16 @@ export default class PropertiesService {
     });
   };
 
+  public static readonly GetPropertiesRejected = (
+    params: IParamsPagination,
+  ): Promise<IPaginationResp<IProperty>> => {
+    return request({
+      url: PropertiesEndpoint.GetPropertiesRejected(),
+      method: AxiosMethod.GET,
+      params,
+    });
+  };
+
   public static readonly GetPropertyDetail = (id: string): Promise<IResp<IProperty>> => {
     return request({
       url: PropertiesEndpoint.GetPropertyDetail(id),
@@ -40,10 +50,11 @@ export default class PropertiesService {
     });
   };
 
-  public static readonly RejectProperty = (id: string): Promise<IProperty> => {
+  public static readonly RejectProperty = (id: string, reason?: string): Promise<IProperty> => {
     return request({
       url: PropertiesEndpoint.RejectProperty(id),
       method: AxiosMethod.PATCH,
+      data: reason ? { reason } : undefined,
     });
   };
 }

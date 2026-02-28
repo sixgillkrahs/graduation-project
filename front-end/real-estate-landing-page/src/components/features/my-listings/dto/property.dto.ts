@@ -1,5 +1,5 @@
 export interface IPropertyDto {
-  _id: string;
+  id: string;
   userId: string;
   demandType: "SALE" | "RENT";
   propertyType:
@@ -40,10 +40,12 @@ export interface IPropertyDto {
     images: string[];
     thumbnail?: string;
     videoLink?: string;
+    virtualTourUrls?: string[];
   };
   title: string;
   description: string;
   status: "DRAFT" | "PENDING" | "PUBLISHED" | "REJECTED" | "EXPIRED" | "SOLD";
+  rejectReason?: string;
   viewCount: number;
   createdAt: string;
   updatedAt: string;

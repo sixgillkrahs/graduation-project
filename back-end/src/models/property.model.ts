@@ -114,6 +114,8 @@ export interface IProperty {
 
   viewCount: number;
 
+  rejectReason?: string;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -234,6 +236,9 @@ const propertySchema = new mongoose.Schema<
     viewCount: {
       type: Number,
       default: 0,
+    },
+    rejectReason: {
+      type: String,
     },
   },
   {

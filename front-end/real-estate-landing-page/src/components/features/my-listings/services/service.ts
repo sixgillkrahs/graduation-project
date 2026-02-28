@@ -184,4 +184,24 @@ export default class PropertyService {
       data: body,
     });
   };
+
+  public static readonly updateProperty = (
+    id: string,
+    body: ListingFormData,
+  ): Promise<IResp<IPropertyDto>> => {
+    return request({
+      url: PropertyEndpoint.updateProperty(id),
+      method: AxiosMethod.PUT,
+      data: body,
+    });
+  };
+
+  public static readonly getPropertyDetail = (
+    id: string,
+  ): Promise<IResp<IPropertyDto>> => {
+    return request({
+      url: PropertyEndpoint.getPropertyDetail(id),
+      method: AxiosMethod.GET,
+    });
+  };
 }

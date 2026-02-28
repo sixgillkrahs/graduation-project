@@ -33,13 +33,14 @@ export const useApproveProperty = () => {
 
 export const useRejectProperty = () => {
   return useMutation({
-    mutationFn: (id: string) => PropertiesService.RejectProperty(id),
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+      PropertiesService.RejectProperty(id, reason),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [PropertiesQueryKey.GetPropertiesPending, variables],
+        queryKey: [PropertiesQueryKey.GetPropertiesPending],
       });
       queryClient.invalidateQueries({
-        queryKey: [PropertiesQueryKey.GetPropertyDetail, variables],
+        queryKey: [PropertiesQueryKey.GetPropertyDetail, variables.id],
       });
     },
   });
