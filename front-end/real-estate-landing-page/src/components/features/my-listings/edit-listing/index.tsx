@@ -2,34 +2,29 @@
 
 import { CsStep } from "@/components/ui/stepper";
 import { RootState } from "@/store";
-import {
-  setStep,
-  updateListingData,
-  resetListing,
-} from "@/store/listing.store";
+import { setStep, updateListingData } from "@/store/listing.store";
+import { Loader2 } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { ListingFormData } from "../dto/listingformdata.dto";
+import { useGetPropertyDetail } from "../services/query";
 import PropertyService from "../services/service";
 import BasicInfo from "./components/BasicInfo";
 import FeaturesPricing from "./components/FeaturesPricing";
 import Location from "./components/Location";
 import MediaContent from "./components/MediaContent";
 import Review from "./components/Review";
-import { useEffect, useState } from "react";
-import { useGetPropertyDetail } from "../services/query";
-import { Loader2 } from "lucide-react";
 
-interface EditListingProps {
-  propertyId: string;
-}
-
-const EditListing = ({ propertyId }: EditListingProps) => {
+const EditListing = () => {
   const dispatch = useDispatch();
   const currentStep = useSelector(
     (state: RootState) => state.listing.currentStep,
   );
   const [isReady, setIsReady] = useState(false);
+  const params = useParams();
+  const propertyId = params.id as string;
 
   // Fetch property details
   const { data: propertyResponse, isLoading } =

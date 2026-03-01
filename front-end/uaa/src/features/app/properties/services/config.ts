@@ -1,6 +1,7 @@
 export const PropertiesEndpoint = {
   GetPropertiesPending: () => "/properties/status/pending",
   GetPropertiesRejected: () => "/properties/status/rejected",
+  GetPropertiesPublished: () => "/properties/status/published",
   GetPropertyDetail: (id: string) => `/properties/${id}`,
   UpdateProperty: (id: string) => `/properties/${id}`,
   ApproveProperty: (id: string) => `/properties/${id}/approve`,
@@ -10,6 +11,7 @@ export const PropertiesEndpoint = {
 export const PropertiesQueryKey = {
   GetPropertiesPending: "GetPropertiesPending",
   GetPropertiesRejected: "GetPropertiesRejected",
+  GetPropertiesPublished: "GetPropertiesPublished",
   GetPropertyDetail: "GetPropertyDetail",
   ApproveProperty: "ApproveProperty",
   RejectProperty: "RejectProperty",

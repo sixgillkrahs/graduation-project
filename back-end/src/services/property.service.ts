@@ -23,13 +23,14 @@ export class PropertyService {
   createProperty = async (propertyData: IProperty) => {
     const property = await PropertyModel.create(propertyData);
 
-    // Async embed and upsert into Qdrant for recommendations
+    return property;
+  };
+
+  embedAndUpsertProperty = async (property: any) => {
     try {
       if (property && property._id) {
-        // Compile a descriptive text string from the property features
         const textData = `${property.title}. ${property.description}. Located in ${property.location?.ward}, ${property.location?.district}, ${property.location?.province}. Features: ${property.features?.bedrooms} bedrooms, ${property.features?.bathrooms} bathrooms. Type: ${property.propertyType}. Setup: ${property.features?.furniture}. Direction: ${property.features?.direction}.`;
 
-        // Push job to queue (avoids blocking Event Loop heavily)
         this.qdrantQueue
           .enqueueUpsertPropertyEmbedding({
             propertyId: property._id.toString(),
@@ -44,10 +45,8 @@ export class PropertyService {
           .catch((err) => console.error(err));
       }
     } catch (error) {
-      console.error("Failed to generate embedding for new property:", error);
+      console.error("Failed to generate embedding for property:", error);
     }
-
-    return property;
   };
 
   getPropertyById = async (

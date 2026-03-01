@@ -17,6 +17,13 @@ export const useGetPropertiesRejected = (params: IParamsPagination) => {
   });
 };
 
+export const useGetPropertiesPublished = (params: IParamsPagination) => {
+  return useQuery({
+    queryKey: [PropertiesQueryKey.GetPropertiesPublished, params],
+    queryFn: () => PropertiesService.GetPropertiesPublished(params),
+  });
+};
+
 export const useGetPropertyDetail = (id: string) => {
   return useQuery({
     queryKey: [PropertiesQueryKey.GetPropertyDetail, id],

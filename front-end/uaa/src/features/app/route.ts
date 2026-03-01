@@ -63,6 +63,17 @@ const router: RouterConfig = {
           name: "Rejected Property Detail",
           hideInMenu: true,
         },
+        {
+          path: "/published",
+          component: lazy(() => import("./properties/properties/properties-published")),
+          name: "Properties Published",
+        },
+        {
+          path: "/published/:id",
+          component: lazy(() => import("./properties/properties/properties-detail")),
+          name: "Published Property Detail",
+          hideInMenu: true,
+        },
       ],
     },
     {

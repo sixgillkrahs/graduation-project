@@ -1,13 +1,7 @@
 import EditListing from "@/components/features/my-listings/edit-listing";
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-const Page = ({ params }: PageProps) => {
-  return <EditListing propertyId={params.id} />;
+const Page = () => {
+  return <EditListing />;
 };
 
 export default Page;

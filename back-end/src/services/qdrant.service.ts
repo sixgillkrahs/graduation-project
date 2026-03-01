@@ -29,7 +29,7 @@ export class QdrantService {
       if (!exists) {
         await this.client.createCollection(this.collectionName, {
           vectors: {
-            size: 768, // text-embedding-004 from Gemini outputs 768 dimensions
+            size: 3072, // gemini-embedding-001 outputs 3072 dimensions
             distance: "Cosine",
           },
         });
@@ -45,7 +45,7 @@ export class QdrantService {
   public generateEmbedding = async (text: string): Promise<number[]> => {
     try {
       const model = this.genAI.getGenerativeModel({
-        model: "text-embedding-004",
+        model: "gemini-embedding-001",
       });
       const result = await model.embedContent(text);
       return result.embedding.values;
@@ -55,6 +55,22 @@ export class QdrantService {
     }
   };
 
+  // Helper functions for MongoDB ObjectId <-> Qdrant UUID
+  private mongoIdToUuid = (id: string) =>
+    id.slice(0, 8) +
+    "-" +
+    id.slice(8, 12) +
+    "-" +
+    id.slice(12, 16) +
+    "-" +
+    id.slice(16, 20) +
+    "-" +
+    id.slice(20, 24) +
+    "00000000";
+
+  private uuidToMongoId = (uuid: string) =>
+    String(uuid).replace(/-/g, "").slice(0, 24);
+
   public upsertPropertyEmbedding = async (
     propertyId: string,
     textData: string,
@@ -62,14 +78,16 @@ export class QdrantService {
   ) => {
     try {
       const vector = await this.generateEmbedding(textData);
+      const uuid = this.mongoIdToUuid(propertyId);
 
       await this.client.upsert(this.collectionName, {
         points: [
           {
-            id: propertyId,
+            id: uuid,
             vector,
             payload: {
               ...payload,
+              propertyId,
               text: textData,
             },
           },
@@ -89,8 +107,10 @@ export class QdrantService {
       // Recommend similar properties by looking up the existing property's vector
       // Alternatively, we can use search with the current property's embedding
 
+      const uuid = this.mongoIdToUuid(propertyId);
+
       const record = await this.client.retrieve(this.collectionName, {
-        ids: [propertyId],
+        ids: [uuid],
         with_vector: true,
       });
 
@@ -103,9 +123,10 @@ export class QdrantService {
         limit: limit + 1, // Add 1 because it will likely retrieve itself
       });
 
-      // Filter out the exact same property
+      // Filter out the exact same property and map UUID back to Mongo ID
       return searchResults
-        .filter((res) => res.id !== propertyId)
+        .filter((res) => res.id !== uuid)
+        .map((res) => ({ ...res, id: this.uuidToMongoId(String(res.id)) }))
         .slice(0, limit);
     } catch (error) {
       logger.error(

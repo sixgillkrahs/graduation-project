@@ -1,5 +1,6 @@
 import { useApproveProperty, useRejectProperty } from "../../services/mutate";
 import { useGetPropertyDetail } from "../../services/query";
+import ApprovePropertyModal from "./components/ApprovePropertyModal";
 import RejectPropertyModal from "./components/RejectPropertyModal";
 import {
   Button,
@@ -28,7 +29,7 @@ import {
   User,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { useNavigate, useParams } from "react-router-dom";
@@ -44,43 +45,63 @@ const PropertyDetail = () => {
   const { data: propertyResp, isLoading } = useGetPropertyDetail(id || "");
 
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
+  const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
 
   const property = propertyResp?.data;
 
   const handleUpdateStatus = (status: "PUBLISHED" | "REJECTED") => {
     if (!id) return;
     if (status === "PUBLISHED") {
-      approveProperty(id, {
-        onSuccess: () => {
-          message.success(t("message.updateSuccess"));
-          navigate("/properties/pending");
-        },
-        onError: () => {
-          message.error(t("message.updateError"));
-        },
-      });
+      setIsApproveModalVisible(true);
     } else {
       setIsRejectModalVisible(true);
     }
   };
 
-  const handleConfirmReject = (reason: string) => {
-    if (!id) return;
+  const closeApproveModal = useCallback(() => setIsApproveModalVisible(false), []);
+  const closeRejectModal = useCallback(() => setIsRejectModalVisible(false), []);
 
-    rejectProperty(
-      { id, reason },
-      {
-        onSuccess: () => {
-          message.success(t("message.updateSuccess"));
-          setIsRejectModalVisible(false);
-          navigate("/properties/pending");
+  const handleConfirmApprove = useCallback(
+    (note: string) => {
+      if (!id) return;
+
+      approveProperty(
+        { id, note },
+        {
+          onSuccess: () => {
+            message.success(t("message.updateSuccess"));
+            setIsApproveModalVisible(false);
+            navigate(-1);
+          },
+          onError: () => {
+            message.error(t("message.updateError"));
+          },
         },
-        onError: () => {
-          message.error(t("message.updateError"));
+      );
+    },
+    [id, approveProperty, t, navigate],
+  );
+
+  const handleConfirmReject = useCallback(
+    (reason: string) => {
+      if (!id) return;
+
+      rejectProperty(
+        { id, reason },
+        {
+          onSuccess: () => {
+            message.success(t("message.updateSuccess"));
+            setIsRejectModalVisible(false);
+            navigate(-1);
+          },
+          onError: () => {
+            message.error(t("message.updateError"));
+          },
         },
-      },
-    );
-  };
+      );
+    },
+    [id, rejectProperty, t, navigate],
+  );
 
   if (isLoading) {
     return (
@@ -310,9 +331,16 @@ const PropertyDetail = () => {
         </Col>
       </Row>
 
+      <ApprovePropertyModal
+        isOpen={isApproveModalVisible}
+        onClose={closeApproveModal}
+        onConfirm={handleConfirmApprove}
+        isApproving={isApproving}
+      />
+
       <RejectPropertyModal
         isOpen={isRejectModalVisible}
-        onClose={() => setIsRejectModalVisible(false)}
+        onClose={closeRejectModal}
         onConfirm={handleConfirmReject}
         isRejecting={isRejecting}
       />

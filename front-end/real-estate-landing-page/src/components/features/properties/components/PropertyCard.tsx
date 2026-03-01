@@ -58,6 +58,8 @@ const PropertyCard = ({
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const t = useTranslations("PropertiesPage");
 
+  console.log(agent.avatar);
+
   const handleToggleFavorite = async () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) {

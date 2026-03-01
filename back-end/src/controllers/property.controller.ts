@@ -240,6 +240,64 @@ export class PropertyController extends BaseController {
     });
   };
 
+  getPublishedProperties = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { limit, page, sortField, sortOrder, ...filters } = req.query;
+
+      const options = {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 10,
+        sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        populate: "userId", // Populate owner info if needed
+      };
+
+      // Handle user search
+      const userFilter: any = {};
+      if (filters["userId.fullName"]) {
+        userFilter.fullName = {
+          $regex: filters["userId.fullName"],
+          $options: "i",
+        };
+        delete filters["userId.fullName"];
+      }
+      if (filters["userId.phone"]) {
+        userFilter.phone = { $regex: filters["userId.phone"], $options: "i" };
+        delete filters["userId.phone"];
+      }
+
+      // If filters come as object (extended query parser behavior for userId[fullName]) or simple dot notation
+      if (filters.userId && typeof filters.userId === "object") {
+        const uFilters = filters.userId as any;
+        if (uFilters.fullName)
+          userFilter.fullName = { $regex: uFilters.fullName, $options: "i" };
+        if (uFilters.phone)
+          userFilter.phone = { $regex: uFilters.phone, $options: "i" };
+        delete filters.userId;
+      }
+
+      if (Object.keys(userFilter).length > 0) {
+        const users = await UserModel.find(userFilter).select("_id");
+        const userIds = users.map((u: any) => u._id);
+        (filters as any).userId = { $in: userIds };
+      }
+
+      const queryFilters = {
+        ...filters,
+        status: PropertyStatusEnum.PUBLISHED,
+      };
+
+      const properties = await this.propertyService.getProperties(
+        options,
+        queryFilters,
+      );
+      return properties;
+    });
+  };
+
   getRejectedProperties = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { limit, page, sortField, sortOrder, ...filters } = req.query;
@@ -362,7 +420,7 @@ export class PropertyController extends BaseController {
   updateProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const user = (req as any).user;
+      const user = req.user;
       const lang = req.lang;
 
       // Check ownership
@@ -375,7 +433,7 @@ export class PropertyController extends BaseController {
         );
       }
 
-      if (existingProperty.userId.toString() !== user.userId) {
+      if (existingProperty.userId.toString() !== user.userId._id.toString()) {
         throw new AppError(
           lang === "vi"
             ? "Bạn không có quyền sửa tin này"
@@ -511,6 +569,7 @@ export class PropertyController extends BaseController {
   approveProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
+      const { note } = req.body;
       const lang = req.lang;
 
       const existingProperty = await this.propertyService.getPropertyById(id);
@@ -539,7 +598,11 @@ export class PropertyController extends BaseController {
 
       await this.propertyService.updateProperty(id, {
         status: targetStatus,
+        adminNote: note,
       });
+
+      // Embed property into Qdrant after approval
+      this.propertyService.embedAndUpsertProperty(existingProperty);
 
       const io = req.io;
       if (io) {

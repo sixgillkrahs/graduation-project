@@ -684,6 +684,61 @@ router.get(
 
 /**
  * @swagger
+ * /properties/status/published:
+ *   get:
+ *     summary: Get all published properties with pagination and filtering
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *     responses:
+ *       200:
+ *         description: List of published properties
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ */
+router.get(
+  "/status/published",
+  requireAuth,
+  propertyController.getPublishedProperties,
+);
+
+/**
+ * @swagger
  * /properties/status/rejected:
  *   get:
  *     summary: Get all rejected properties with pagination and filtering

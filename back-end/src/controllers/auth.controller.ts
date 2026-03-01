@@ -173,7 +173,8 @@ export class AuthController extends BaseController {
         phone,
         prefixPhone: "+84",
         address: "",
-        avatarUrl: "default-avatar.jpg",
+        avatarUrl:
+          "https://res.cloudinary.com/dr1akv5p4/image/upload/v1769763068/default-avatar_rolye6.jpg",
         isActive: true,
         isDeleted: false,
       });

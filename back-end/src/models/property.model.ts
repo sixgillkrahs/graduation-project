@@ -115,6 +115,7 @@ export interface IProperty {
   viewCount: number;
 
   rejectReason?: string;
+  adminNote?: string;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -238,6 +239,9 @@ const propertySchema = new mongoose.Schema<
       default: 0,
     },
     rejectReason: {
+      type: String,
+    },
+    adminNote: {
       type: String,
     },
   },

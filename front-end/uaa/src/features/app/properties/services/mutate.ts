@@ -19,7 +19,8 @@ export const useUpdateProperty = () => {
 
 export const useApproveProperty = () => {
   return useMutation({
-    mutationFn: (id: string) => PropertiesService.ApproveProperty(id),
+    mutationFn: ({ id, note }: { id: string; note?: string }) =>
+      PropertiesService.ApproveProperty(id, note),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: [PropertiesQueryKey.GetPropertiesPending, variables],

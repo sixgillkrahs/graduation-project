@@ -1,5 +1,5 @@
 import { Input, Modal, message } from "antd";
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface RejectPropertyModalProps {
   isOpen: boolean;
@@ -8,48 +8,47 @@ interface RejectPropertyModalProps {
   isRejecting: boolean;
 }
 
-const RejectPropertyModal = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  isRejecting,
-}: RejectPropertyModalProps) => {
-  const [rejectReason, setRejectReason] = useState("");
+const RejectPropertyModal: React.FC<RejectPropertyModalProps> = React.memo(
+  ({ isOpen, onClose, onConfirm, isRejecting }) => {
+    const [rejectReason, setRejectReason] = useState("");
 
-  const handleOk = () => {
-    if (!rejectReason.trim()) {
-      message.warning("Vui lòng nhập lý do từ chối");
-      return;
-    }
-    onConfirm(rejectReason.trim());
-  };
+    const handleOk = () => {
+      if (!rejectReason.trim()) {
+        message.warning("Vui lòng nhập lý do từ chối");
+        return;
+      }
+      onConfirm(rejectReason.trim());
+    };
 
-  const handleCancel = () => {
-    setRejectReason("");
-    onClose();
-  };
+    const handleCancel = () => {
+      setRejectReason("");
+      onClose();
+    };
 
-  return (
-    <Modal
-      title="Lý do từ chối"
-      open={isOpen}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      confirmLoading={isRejecting}
-      okText="Gửi từ chối"
-      cancelText="Hủy"
-      okButtonProps={{ danger: true }}
-    >
-      <div className="pt-4">
-        <Input.TextArea
-          rows={4}
-          placeholder="Nhập lý do chi tiết tại sao từ chối tin đăng này..."
-          value={rejectReason}
-          onChange={(e) => setRejectReason(e.target.value)}
-        />
-      </div>
-    </Modal>
-  );
-};
+    return (
+      <Modal
+        title="Lý do từ chối"
+        open={isOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        confirmLoading={isRejecting}
+        okText="Gửi từ chối"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+      >
+        <div className="pt-4">
+          <Input.TextArea
+            rows={4}
+            placeholder="Nhập lý do chi tiết tại sao từ chối tin đăng này..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </div>
+      </Modal>
+    );
+  },
+);
+
+RejectPropertyModal.displayName = "RejectPropertyModal";
 
 export default RejectPropertyModal;

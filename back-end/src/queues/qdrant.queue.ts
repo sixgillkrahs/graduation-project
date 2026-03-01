@@ -12,7 +12,7 @@ export class QdrantQueue {
   }
 
   enqueueUpsertPropertyEmbedding(data: UpsertPropertyEmbeddingJob) {
-    const jobId = `upsert-embedding:${data.propertyId}`;
+    const jobId = `upsert-embedding-${data.propertyId}`;
 
     return this.queue.add("upsertPropertyEmbedding", data, {
       jobId,
