@@ -263,6 +263,7 @@ export class PropertyService {
 
       // Fetch actual property data from MongoDB
       const properties = await PropertyModel.find({ _id: { $in: ids } })
+        .populate("userId", "fullName avatarUrl")
         .lean()
         .exec();
 

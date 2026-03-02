@@ -28,3 +28,11 @@ export const usePropertyDetail = (id: string) => {
     enabled: !!id,
   });
 };
+
+export const useRecommendedProperties = (id: string) => {
+  return useQuery({
+    queryKey: [PropertyQueryKey.recommended, id],
+    queryFn: () => PropertyService.getRecommended(id),
+    enabled: !!id,
+  });
+};

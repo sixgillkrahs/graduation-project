@@ -228,7 +228,7 @@ const DetailLandlord = () => {
           <CsTable
             columns={columns}
             dataSource={properties}
-            rowKey={(record) => record._id}
+            rowKey={(record) => record.id}
             loading={isLoadingProperties}
             emptyText="No real estate properties found for this landlord."
             pagination={{

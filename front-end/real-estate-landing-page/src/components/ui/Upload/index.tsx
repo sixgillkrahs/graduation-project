@@ -12,7 +12,7 @@ import {
 import { Icon } from "../Icon";
 import { PhotoView } from "react-photo-view";
 import Image from "next/image";
-import { Button } from "../Button";
+import { CsButton } from "@/components/custom";
 
 interface FileWithStatus {
   id: string;
@@ -365,7 +365,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                       </div>
                     </div>
 
-                    <Button
+                    <CsButton
                       type="button"
                       onClick={() => handleRemoveFile(item.id)}
                       disabled={item.status === "uploading" || disabled}

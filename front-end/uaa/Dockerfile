@@ -1,47 +1,52 @@
-# ## Dockerfile
-# ################################
-# ## BUILD ENVIRONMENT ###########
-# ################################
+# Stage 1: Build the Vite (React) app
+FROM node:20-alpine AS builder
 
-# # Use the official Node.js Alpine image (adjust based on your project's requirements)
-# # You can find the appropriate image on Docker Hub: https://hub.docker.com/_/node
-# # In this example, we're using node:20-alpine3.20
-# # run in termilnal commande line "node --version to get the version of your app"
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-#Build React app
-FROM node:20 AS builder
+# Install libc6-compat if needed by Alpine
+RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# enable pnpm
-RUN corepack enable
-
-# copy dependencies
+# Copy lockfile and package.json
 COPY package.json pnpm-lock.yaml ./
 
-# install deps
-RUN pnpm install
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-# copy source
+# Copy the rest of the application code
 COPY . .
 
-# build app
-RUN pnpm build:prod
+# Build the application for production
+RUN pnpm run build:prod
 
-# 2️⃣ Nginx stage
+# Stage 2: Serve the app with Nginx (Alpine)
 FROM nginx:alpine
 
-# copy nginx config
-COPY --from=builder /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
 
-WORKDIR /usr/share/nginx/html
+# Copy built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# clear default content
-RUN rm -rf ./*
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# copy built app
-COPY --from=builder /app/dist .
+# Add non-root user (optional but good practice)
+RUN addgroup -S nginxuser && adduser -S nginxuser -G nginxuser && \
+    chown -R nginxuser:nginxuser /usr/share/nginx/html && \
+    chown -R nginxuser:nginxuser /var/cache/nginx && \
+    chown -R nginxuser:nginxuser /var/log/nginx && \
+    chown -R nginxuser:nginxuser /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginxuser:nginxuser /var/run/nginx.pid
+
+# Switch to non-root user
+USER nginxuser
 
 EXPOSE 80
 
+# Start nginx
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

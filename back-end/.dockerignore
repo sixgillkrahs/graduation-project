@@ -1,9 +1,16 @@
 node_modules
 npm-debug.log
 Dockerfile*
+docker-compose*.yml
 .dockerignore
 .git
 .gitignore
 README.md
 coverage
-logs 
+logs
+uploads
+.env*
+.nvmrc
+.prettierrc*
+.vscode
+data/

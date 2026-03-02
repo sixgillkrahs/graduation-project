@@ -288,7 +288,7 @@ const Profile = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo.identityFront}`}
+                      src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo?.identityFront}`}
                       alt="Identity Front"
                       width={40}
                       height={40}
@@ -296,7 +296,7 @@ const Profile = () => {
                       unoptimized={true}
                     />
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo.identityBack}`}
+                      src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo?.identityBack}`}
                       alt="Identity Back"
                       width={40}
                       height={40}
@@ -310,7 +310,7 @@ const Profile = () => {
                     Business License
                   </div>
                   <div className="grid gap-2">
-                    {profileData?.imageInfo.certificateImage.map((item) => {
+                    {profileData?.imageInfo?.certificateImage.map((item) => {
                       return (
                         <Image
                           src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${item}`}

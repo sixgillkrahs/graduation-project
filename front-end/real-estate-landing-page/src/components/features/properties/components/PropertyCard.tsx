@@ -57,9 +57,6 @@ const PropertyCard = ({
   const dispatch = useAppDispatch();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const t = useTranslations("PropertiesPage");
-
-  console.log(agent.avatar);
-
   const handleToggleFavorite = async () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) {
@@ -192,12 +189,12 @@ const PropertyCard = ({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-emerald-100 text-emerald-700 text-[10px] font-bold">
-                  {agent.name.charAt(0)}
+                  {agent?.name?.charAt(0)}
                 </div>
               )}
             </div>
             <span className="text-xs font-medium text-gray-600">
-              {agent.name}
+              {agent?.name}
             </span>
           </div>
           <span className="text-xs text-gray-400 font-medium">

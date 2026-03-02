@@ -127,9 +127,9 @@ const Resources = () => {
         loading={isLoading || isFetching}
         onDelete={onDelete}
         pagination={{
-          total: data?.data.totalResults || pagination.total,
-          current: data?.data.page || pagination.page,
-          pageSize: data?.data.limit || pagination.limit,
+          total: data?.data.totalResults || pagination.total || 0,
+          current: data?.data.page || pagination.page || 1,
+          pageSize: data?.data.limit || pagination.limit || 10,
           onChange: (page, pageSize) => {
             onChangePage({
               current: page,

@@ -2,6 +2,8 @@
 
 import { CsButton } from "@/components/custom";
 import CsTabs from "@/components/custom/tabs";
+import PropertyCard from "@/components/features/properties/components/PropertyCard";
+import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
 import { Zalo } from "@/components/ui/Icon/Zalo";
 import { Map } from "@/components/ui/Map";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +17,14 @@ import { useAppDispatch } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import { format } from "date-fns";
-import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import {
+  LIST_PROVINCE,
+  LIST_WARD,
+  findOptionLabel,
+  formatChatTime,
+} from "gra-helper";
+import {
+  ArrowLeft,
   Bath,
   Bed,
   Calendar as CalendarIcon,
@@ -31,21 +39,24 @@ import {
   Star,
   Video,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
-import { useIncreaseView, useRecordInteraction } from "../services/mutate";
-import { usePropertyDetail } from "../services/query";
 import { PhotoSlider } from "react-photo-view";
+import { useIncreaseView, useRecordInteraction } from "../services/mutate";
+import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 
 const PropertyDetail = () => {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
   const { data: property, isLoading } = usePropertyDetail(id);
+  const { data: recommendedData, isLoading: isLoadingRecommended } =
+    useRecommendedProperties(id);
   const dispatch = useAppDispatch();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [show3D, setShow3D] = useState(false);
@@ -112,6 +123,13 @@ const PropertyDetail = () => {
   return (
     <div className="bg-white min-h-screen pb-20">
       <div className="container mx-auto px-4 md:px-20 pt-6 pb-8">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 font-medium"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          {t("detail.goBack")}
+        </button>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 h-[400px] md:h-[500px] rounded-2xl overflow-hidden relative">
           <div
             className="md:col-span-2 md:row-span-2 relative h-full group cursor-pointer"
@@ -562,35 +580,50 @@ const PropertyDetail = () => {
         </div>
 
         {/* Similar Homes Section */}
-        <section className="mt-20 pt-10 border-t border-gray-200">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {t("detail.similarHomes")}
-            </h2>
-            <button
-              className="text-emerald-600 font-bold hover:underline"
-              onClick={() => {
-                setViewerIndex(0);
-                setViewerVisible(true);
-              }}
-            >
-              {t("detail.viewAll")}
-            </button>
-          </div>
-          {/* Placeholder for Similar Properties Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Using skeleton or mock cards if no data, logic to fetch similar items needed */}
-            <div className="bg-gray-50 h-80 rounded-2xl flex items-center justify-center border border-dashed border-gray-300">
-              <p className="text-gray-400 font-medium">Similar Property #1</p>
+        {!isLoadingRecommended &&
+        (!recommendedData?.data ||
+          recommendedData?.data?.length === 0) ? null : (
+          <section className="mt-20 pt-10 border-t border-gray-200">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {t("detail.similarHomes")}
+              </h2>
             </div>
-            <div className="bg-gray-50 h-80 rounded-2xl flex items-center justify-center border border-dashed border-gray-300">
-              <p className="text-gray-400 font-medium">Similar Property #2</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {isLoadingRecommended
+                ? Array.from({ length: 3 }).map((_, i) => (
+                    <PropertyCardSkeleton key={i} />
+                  ))
+                : recommendedData?.data?.map((prop) => (
+                    <PropertyCard
+                      key={prop._id}
+                      id={prop._id}
+                      image={prop.media?.thumbnail || prop.media?.images?.[0]}
+                      title={prop.title}
+                      badges={{
+                        aiRecommended: true,
+                        tour3D: prop.media?.virtualTourUrls?.length > 0,
+                      }}
+                      address={`${prop.location?.address}, ${findOptionLabel(prop.location?.ward, LIST_WARD)}, ${findOptionLabel(prop.location?.province, LIST_PROVINCE)}`}
+                      price={prop.features?.price?.toString()}
+                      specs={{
+                        beds: prop.features?.bedrooms,
+                        baths: prop.features?.bathrooms,
+                        area: prop.features?.area,
+                      }}
+                      unit={prop.features?.priceUnit}
+                      agent={{
+                        name: prop.userId?.fullName,
+                        avatar: prop.userId?.avatarUrl,
+                      }}
+                      postedAt={formatChatTime(prop.createdAt)}
+                      type={prop.demandType === "sale" ? "sale" : "rent"}
+                      isFavorite={prop.isFavorite}
+                    />
+                  ))}
             </div>
-            <div className="bg-gray-50 h-80 rounded-2xl flex items-center justify-center border border-dashed border-gray-300">
-              <p className="text-gray-400 font-medium">Similar Property #3</p>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
       <PhotoSlider

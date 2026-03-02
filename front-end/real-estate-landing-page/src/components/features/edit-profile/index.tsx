@@ -1,6 +1,5 @@
 "use client";
 
-import { Icon, Select } from "@/components/ui";
 import { bankList } from "@/const/bank";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { useEffect } from "react";
@@ -10,6 +9,8 @@ import { useEditProfile } from "./services/mutate";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { CsButton } from "@/components/custom";
+import { Edit } from "lucide-react";
+import { CsSelect } from "@/components/ui/select";
 
 const EditProfile = () => {
   const router = useRouter();
@@ -67,7 +68,7 @@ const EditProfile = () => {
         <div className="min-w-3xl mx-auto grid gap-6">
           <div className="flex gap-3 items-start ">
             <div className="w-12 h-12 rounded-full bg-[#F5F5F5] flex items-center justify-center">
-              <Icon.Edit />
+              <Edit />
             </div>
             <div className="flex flex-col gap-1">
               <h3 className="text-[20px] font-bold text-black">Edit Profile</h3>
@@ -210,7 +211,7 @@ const EditProfile = () => {
                           "Select at least one specialization",
                       }}
                       render={({ field }) => (
-                        <Select
+                        <CsSelect
                           label="Specialization"
                           error={errors.specialization?.message}
                           multiple
@@ -238,7 +239,7 @@ const EditProfile = () => {
                           val?.length > 0 || "Select at least one working area",
                       }}
                       render={({ field }) => (
-                        <Select
+                        <CsSelect
                           multiple
                           label="Working Area"
                           error={errors.workingArea?.message}
@@ -334,11 +335,11 @@ const EditProfile = () => {
                           required: "Bank name is required",
                         }}
                         render={({ field }) => (
-                          <Select
+                          <CsSelect
                             label="Bank Name"
                             options={bankList}
-                            searchable
-                            searchPlaceholder="Search bank name"
+                            // searchable
+                            // searchPlaceholder="Search bank name"
                             placeholder="e.g. 123 Main St"
                             error={errors.bankName?.message}
                             {...field}

@@ -52,4 +52,13 @@ export default class PropertyService {
       data: { type, metadata },
     });
   };
+
+  public static readonly getRecommended = (
+    id: string,
+  ): Promise<IResp<(PropertyDto & { isFavorite: boolean })[]>> => {
+    return request({
+      url: PropertyEndpoint.recommended(id),
+      method: AxiosMethod.GET,
+    });
+  };
 }
