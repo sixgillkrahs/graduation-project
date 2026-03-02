@@ -11,7 +11,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { useSignIn, useSignInPasskey } from "./services/mutate";
+import { startAuthentication } from "@simplewebauthn/browser";
+import {
+  useSignIn,
+  useSignInPasskey,
+  useVerifySignInPasskey,
+} from "./services/mutate";
 
 const SignIn = () => {
   const router = useRouter();
@@ -20,9 +25,13 @@ const SignIn = () => {
   const { mutateAsync: signInPasskey, isPending: isPendingPasskey } =
     useSignInPasskey();
 
+  const { mutateAsync: verifySignInPasskey, isPending: isPendingVerify } =
+    useVerifySignInPasskey();
+
   const {
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<{
     email: string;
@@ -51,8 +60,17 @@ const SignIn = () => {
   };
 
   const onSubmitPasskey = async () => {
-    await signInPasskey({ email: "dvq2804@gmail.com" });
-    router.push(ROUTES.HOME);
+    const currentEmail = watch("email");
+    if (!currentEmail) {
+      // You might want to show an error toast here requiring email input
+      return;
+    }
+    const res = await signInPasskey({ email: currentEmail });
+    if (res.success) {
+      const authRes = await startAuthentication(res.data as any);
+      await verifySignInPasskey({ email: currentEmail, response: authRes });
+      router.push(ROUTES.HOME);
+    }
   };
 
   return (

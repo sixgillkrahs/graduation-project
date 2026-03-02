@@ -305,4 +305,27 @@ router.post("/verify-passkey", requireAuth, authController.verifyPasskey);
  */
 router.post("/login-passkey", authController.loginPasskey);
 
+/**
+ * @swagger
+ * /auth/verify-login-passkey:
+ *   post:
+ *     summary: Verify login passkey
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Verify login passkey successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       400:
+ *         description: Invalid input
+ */
+router.post("/verify-login-passkey", authController.verifyLoginPasskey);
+
 export default router;

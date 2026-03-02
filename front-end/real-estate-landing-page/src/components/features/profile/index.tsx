@@ -50,11 +50,7 @@ const Profile = () => {
           <div className="">
             <div className="flex items-center gap-2">
               <Avatar
-                src={
-                  profileData?.avatarUrl
-                    ? `${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.avatarUrl}`
-                    : undefined
-                }
+                src={profileData?.avatarUrl}
                 alt={profileData?.fullName}
                 className="size-36 flex items-center justify-center object-cover overflow-hidden"
               />
@@ -69,13 +65,7 @@ const Profile = () => {
                   <Icon.Phone className="size-5" /> {profileData?.phone}
                 </span>
 
-                <Badge>
-                  {profileData?.roleId === "AGENT" ? (
-                    <>Real Estate Agent</>
-                  ) : (
-                    <>User</>
-                  )}
-                </Badge>
+                <Badge>Customer</Badge>
               </div>
             </div>
           </div>
@@ -103,7 +93,7 @@ const Profile = () => {
             </CsButton>
           </div>
         </div>
-        {/* <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-6">
           <div className="grid grid-cols-1 gap-6">
             <div className="bg-white rounded-[18px]">
               <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
@@ -115,55 +105,30 @@ const Profile = () => {
               <div className="grid gap-4 py-4 px-8">
                 <RenderField
                   label="Phone Number"
-                  value={profileData?.basicInfo.phoneNumber || ""}
+                  value={
+                    profileData?.phone ||
+                    profileData?.basicInfo?.phoneNumber ||
+                    ""
+                  }
                 />
                 <RenderField
                   label="Email"
-                  value={profileData?.basicInfo.email || ""}
+                  value={
+                    profileData?.email || profileData?.basicInfo?.email || ""
+                  }
                 />
                 <RenderField
                   label="Address"
-                  value={profileData?.basicInfo.identityInfo.placeOfBirth || ""}
-                />
-              </div>
-            </div>
-            <div
-              className={
-                isBankInfoMissing
-                  ? "bg-amber-50 border border-amber-200 rounded-[18px]"
-                  : "bg-white rounded-[18px]"
-              }
-            >
-              <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4 px-8 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
-                    <Icon.BankCard className="size-5" />
-                  </div>{" "}
-                  Bank Info
-                </div>
-                {isBankInfoMissing && (
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 shrink-0">
-                    <Icon.Alert className="size-4 text-amber-600" />
-                  </div>
-                )}
-              </div>
-              <div className="grid gap-4 py-4 px-8">
-                <RenderField
-                  label="Bank Account Name"
-                  value={profileData?.bankInfo?.bankAccountName || "-"}
-                />
-                <RenderField
-                  label="Bank Account Number"
-                  value={profileData?.bankInfo?.bankAccountNumber || "-"}
-                />
-                <RenderField
-                  label="Bank Name"
-                  value={profileData?.bankInfo?.bankName || "-"}
+                  value={
+                    profileData?.address ||
+                    profileData?.basicInfo?.identityInfo?.placeOfBirth ||
+                    ""
+                  }
                 />
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
       <ModalChangePassword onCancel={handleCloseModal} open={open} />
       <RegisterPasskey />

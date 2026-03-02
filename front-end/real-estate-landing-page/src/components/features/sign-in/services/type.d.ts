@@ -8,4 +8,9 @@ namespace ISignInService {
   interface IBodySignInPasskey {
     email: string;
   }
+
+  interface IBodyVerifySignInPasskey {
+    email: string;
+    response: any;
+  }
 }

@@ -35,3 +35,19 @@ export const useSignInPasskey = (): UseMutationResult<
     },
   });
 };
+export const useVerifySignInPasskey = (): UseMutationResult<
+  IResp<any>,
+  Error,
+  ISignInService.IBodyVerifySignInPasskey,
+  void
+> => {
+  return useMutation({
+    mutationFn: (data: ISignInService.IBodyVerifySignInPasskey) => {
+      return SignInService.verifySignInPasskey(data);
+    },
+    meta: {
+      ERROR_SOURCE: "notifications.verifySignInPasskeyFailed",
+      SUCCESS_MESSAGE: "notifications.signInSuccess",
+    },
+  });
+};

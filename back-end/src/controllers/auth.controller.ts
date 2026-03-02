@@ -21,6 +21,7 @@ import {
   generateAuthenticationOptions,
   generateRegistrationOptions,
   verifyRegistrationResponse,
+  verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import { ENV } from "@/config/env";
 
@@ -486,10 +487,11 @@ export class AuthController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const currentUser = req.user;
 
-      const options = generateRegistrationOptions({
-        rpName: "My App",
-        rpID: "localhost",
-        userID: currentUser._id as any,
+      const options = await generateRegistrationOptions({
+        rpName: "Havenly",
+        rpID:
+          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
+        userID: new Uint8Array(Buffer.from(currentUser._id.toString())),
         userName: currentUser.userId.email,
         timeout: 60000,
         attestationType: "none",
@@ -499,7 +501,7 @@ export class AuthController extends BaseController {
         },
       });
 
-      res.cookie("webauthn_register_challenge", (await options).challenge, {
+      res.cookie("webauthn_register_challenge", options.challenge, {
         httpOnly: true,
         secure: ENV.NODE_ENV === "production",
         sameSite: "strict",
@@ -548,13 +550,18 @@ export class AuthController extends BaseController {
         );
       }
       const { credential } = verification.registrationInfo;
+      const userAuth = await this.authService.getAuthById<IAuth>(
+        currentUser._id as string,
+      );
+      const currentPasskeys = userAuth?.passkeys || [];
       await this.authService.updateAuth(currentUser._id, {
         passkeys: [
+          ...currentPasskeys,
           {
             counter: credential.counter,
             credentialID: credential.id,
-            publicKey: credential.publicKey.toString(),
-            transports: credential.transports!,
+            publicKey: Buffer.from(credential.publicKey).toString("base64url"),
+            transports: (credential.transports as unknown as string[]) || [],
           },
         ],
       });
@@ -616,7 +623,7 @@ export class AuthController extends BaseController {
           process.env.NODE_ENV === "production" ? "example.com" : "localhost",
         userVerification: "preferred",
         allowCredentials: passkeys.map((pk) => ({
-          id: Buffer.from(pk.credentialID, "base64").toString("base64"),
+          id: pk.credentialID, // already Base64URLString
           type: "public-key",
           transports: pk.transports as AuthenticatorTransportFuture[],
         })),
@@ -630,6 +637,160 @@ export class AuthController extends BaseController {
       });
 
       return options;
+    });
+  };
+
+  verifyLoginPasskey = (
+    req: Request<{}, {}, { email: string; response: any }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { email, response } = req.body;
+      const expectedChallenge = req.headers.cookie
+        ?.split("; ")
+        .find((item) => item.startsWith("webauthn_login_challenge"))
+        ?.split("=")[1];
+
+      if (!expectedChallenge) {
+        throw new AppError(
+          lang === "vi"
+            ? "Mã đăng nhập không hợp lệ"
+            : "WebAuthn challenge not found",
+          410,
+          ErrorCode.WEBAUTHN_CHALLENGE_NOT_FOUND,
+        );
+      }
+
+      const auth = await this.authService.getAuthByUsername<
+        IAuth & {
+          _id: string;
+          roleId: IRole & { _id: string };
+          userId: IUser & { _id: string };
+        }
+      >(email, [
+        {
+          path: "roleId",
+          select: "_id name code permissionIds",
+        },
+        {
+          path: "userId",
+          select: "_id email fullName isActive phone",
+        },
+      ]);
+
+      if (!auth) {
+        throw new AppError(
+          lang === "vi" ? "Sai tài khoản" : "Incorrect username",
+          401,
+          ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+
+      const passkeys = auth.passkeys;
+      if (!passkeys || !passkeys.length) {
+        throw new AppError(
+          lang === "vi"
+            ? "Chưa đăng ký khóa thông minh"
+            : "No passkey registered",
+          401,
+          ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+
+      const passkey = passkeys.find((pk) => pk.credentialID === response.id);
+      if (!passkey) {
+        throw new AppError(
+          lang === "vi" ? "Khóa thông minh không hợp lệ" : "Passkey not found",
+          401,
+          ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+
+      const verification = await verifyAuthenticationResponse({
+        response,
+        expectedChallenge,
+        expectedOrigin:
+          process.env.NODE_ENV === "production"
+            ? "https://app.example.com"
+            : "http://localhost:3000",
+        expectedRPID:
+          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
+        credential: {
+          id: passkey.credentialID,
+          publicKey: new Uint8Array(
+            Buffer.from(passkey.publicKey, "base64url"),
+          ),
+          counter: passkey.counter,
+          transports: passkey.transports as AuthenticatorTransportFuture[],
+        },
+      });
+
+      if (!verification.verified) {
+        throw new AppError(
+          lang === "vi"
+            ? "Xác thực khóa thông minh thất bại"
+            : "WebAuthn verification failed",
+          410,
+          ErrorCode.WEBAUTHN_VERIFICATION_FAILED,
+        );
+      }
+
+      // Update counter
+      await this.authService.updateAuth(auth._id.toString(), {
+        passkeys: passkeys.map((pk) =>
+          pk.credentialID === response.id
+            ? { ...pk, counter: verification.authenticationInfo.newCounter }
+            : pk,
+        ),
+      });
+
+      res.clearCookie("webauthn_login_challenge");
+
+      // Generate tokens
+      const accessToken = this.authService.generateAccessToken(
+        {
+          user: auth.userId,
+          role: auth.roleId,
+        },
+        15 * 1000 * 60, // 15 phút
+      );
+
+      const refreshToken = this.authService.generateRefreshToken(
+        {
+          userId: auth.userId._id,
+        },
+        15 * 1000 * 60 * 24, // 15 ngày
+      );
+
+      const cookieOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none" as const,
+      };
+
+      res.cookie("accessToken", accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000,
+      });
+      res.cookie("refreshToken", refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return {
+        user: {
+          id: auth.userId._id,
+          email: auth.userId.email,
+          name: auth.userId.fullName,
+        },
+        role: {
+          id: auth.roleId._id,
+          name: auth.roleId.name,
+          code: auth.roleId.code,
+        },
+      };
     });
   };
 }

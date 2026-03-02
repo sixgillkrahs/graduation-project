@@ -23,4 +23,13 @@ export default class SignInService {
       data,
     });
   };
+  public static readonly verifySignInPasskey = (
+    data: ISignInService.IBodyVerifySignInPasskey,
+  ): Promise<IResp<any>> => {
+    return request({
+      url: SignInEndpoint.verifySignInPasskey(),
+      method: AxiosMethod.POST,
+      data,
+    });
+  };
 }
