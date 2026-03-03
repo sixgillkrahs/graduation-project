@@ -29,6 +29,7 @@ namespace IProfileService {
     basicInfo: BasicInfo;
     businessInfo: BusinessInfo;
     __v: number;
+    planInfo?: PlanInfo;
   }
 
   export interface BasicInfo {
@@ -51,6 +52,13 @@ namespace IProfileService {
     bankName?: string;
     bankAccountNumber?: string;
     bankAccountName?: string;
+  }
+
+  export interface PlanInfo {
+    plan: "BASIC" | "PRO";
+    startDate: string;
+    endDate: string;
+    transactionRef?: string;
   }
 
   export interface BusinessInfo {

@@ -48,6 +48,12 @@ export interface IAgent {
   registrationLink?: string;
   reasonReject?: string;
   note?: string;
+  planInfo?: {
+    plan: "BASIC" | "PRO";
+    startDate: Date;
+    endDate: Date;
+    transactionRef?: string;
+  };
   status: AgentStatusEnum;
 }
 
@@ -220,6 +226,23 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
       enum: AgentStatusEnum,
       default: AgentStatusEnum.PENDING,
       required: true,
+    },
+    planInfo: {
+      plan: {
+        type: String,
+        enum: ["BASIC", "PRO"],
+        default: "BASIC",
+      },
+      startDate: {
+        type: Date,
+      },
+      endDate: {
+        type: Date,
+      },
+      transactionRef: {
+        type: String,
+        trim: true,
+      },
     },
   },
   {

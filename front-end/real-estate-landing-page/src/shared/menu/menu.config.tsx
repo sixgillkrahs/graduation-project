@@ -34,4 +34,9 @@ export const sidebarMenu: MenuItem[] = [
     icon: <Icon.Message />,
     url: "/agent/messages",
   },
+  {
+    title: "Profile",
+    icon: <Icon.User />,
+    url: "/agent/profile",
+  },
 ];

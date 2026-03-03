@@ -60,6 +60,22 @@ const envSchema = z.object({
   QDRANT_COLLECTION: z.string(),
   // Gemini API
   GEMINI_API_KEY: z.string(),
+  // VNPay
+  VNP_TMN_CODE: z.string().optional().default("CGXZLS0Z"),
+  VNP_HASH_SECRET: z
+    .string()
+    .optional()
+    .default("XNBCJFAKAZQSGTARRLGCHVZWCIOIGSHN"),
+  VNP_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"),
+  VNP_RETURN_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("http://localhost:3000/agent/upgrade/success"),
 });
 export const ENV = envSchema.parse(process.env);
 if (process.env.NODE_ENV === "production") {

@@ -29,6 +29,7 @@ import propertyRoutes from "./routes/property.routes";
 import roleRoutes from "./routes/role.routes";
 import scheduleRoutes from "./routes/schedule.routes";
 import uploadRoutes from "./routes/upload.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 const app = express();
 
@@ -94,6 +95,7 @@ app.use("/api/notices", noticeRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/landlords", landlordRoutes);
 app.use("/api/schedules", scheduleRoutes);
+app.use("/api/payment", paymentRoutes);
 
 const swaggerOptions = {
   explorer: true,

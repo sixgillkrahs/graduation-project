@@ -8,7 +8,6 @@ import { useCallback } from "react";
 import CardField from "./components/CardField";
 import CardIdentity from "./components/CardIdentity";
 import { ModalChangePassword } from "./components/ModalChangePassword";
-import RegisterPasskey from "./components/RegisterPasskey";
 import RenderField from "./components/RenderField";
 import {
   useRegisterPasskey,
@@ -17,6 +16,7 @@ import {
 import { useProfile } from "../profile/services/query";
 import { CsButton } from "@/components/custom";
 import { BadgeCheck } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 
 const Profile = () => {
   const router = useRouter();
@@ -36,10 +36,16 @@ const Profile = () => {
   }, [hide]);
 
   const handleRegisterPasskey = async () => {
-    const resp = await registerPasskey();
-    if (resp.success) {
-      const credential = await startRegistration(resp.data as any);
-      await verifyPasskey(credential);
+    try {
+      const resp = await registerPasskey();
+      if (resp.success) {
+        const credential = await startRegistration(resp.data as any);
+        await verifyPasskey(credential);
+      }
+    } catch (err: any) {
+      if (err?.name !== "NotAllowedError") {
+        console.error("Passkey registration error:", err);
+      }
     }
   };
 
@@ -71,12 +77,10 @@ const Profile = () => {
         <div className="flex justify-between items-center gap-4 p-8 w-full rounded-[18px] bg-white ">
           <div className="">
             <div className="flex items-center gap-2">
-              <Image
-                src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo?.identityBack}`}
-                alt="avatar"
-                className="w-full h-full rounded-full bg-gray-200 p-4 size-36 flex items-center justify-center object-cover overflow-hidden"
-                width={150}
-                height={150}
+              <Avatar
+                src={profileData?.avatarUrl}
+                alt={profileData?.basicInfo.nameRegister}
+                className="w-full h-full rounded-full bg-gray-200 size-36 flex items-center justify-center object-cover overflow-hidden"
               />
               <div className="grid gap-2">
                 <span className="cs-typography text-[30px]! font-bold!">
@@ -331,7 +335,6 @@ const Profile = () => {
         </div>
       </div>
       <ModalChangePassword onCancel={handleCloseModal} open={open} />
-      <RegisterPasskey />
     </section>
   );
 };

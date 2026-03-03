@@ -100,6 +100,7 @@ export class UserController extends BaseController {
         } = profile;
         return {
           ...rest,
+          avatarUrl: userId.avatarUrl,
           roleId: roleId.code,
         };
       }
