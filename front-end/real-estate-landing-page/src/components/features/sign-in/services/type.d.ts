@@ -5,12 +5,9 @@ namespace ISignInService {
     rememberMe?: boolean;
   }
 
-  interface IBodySignInPasskey {
-    email: string;
-  }
+  interface IBodySignInPasskey {}
 
   interface IBodyVerifySignInPasskey {
-    email: string;
     response: any;
   }
 }

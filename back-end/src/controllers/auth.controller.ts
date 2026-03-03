@@ -571,62 +571,15 @@ export class AuthController extends BaseController {
   };
 
   loginPasskey = (
-    req: Request<{}, {}, { email: string }>,
+    req: Request<{}, {}, {}>,
     res: Response,
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = req.lang;
-      const { email } = req.body;
-      const auth = await this.authService.getAuthByUsername<
-        IAuth & {
-          roleId: IRole & { _id: string };
-          userId: IUser & { _id: string };
-        }
-      >(email, [
-        {
-          path: "roleId",
-          select: "_id name code permissionIds",
-        },
-        {
-          path: "userId",
-          select: "_id email fullName isActive phone",
-        },
-      ]);
-      if (!auth || !auth.password) {
-        throw new AppError(
-          lang === "vi" ? "Sai tài khoản" : "Incorrect username",
-          401,
-          ErrorCode.INCORRECT_CREDENTIALS,
-        );
-      }
-      if (!auth.userId.isActive) {
-        throw new AppError(
-          validationMessages[lang].userNotActive || "User not active",
-          401,
-          ErrorCode.USER_NOT_FOUND,
-        );
-      }
-      const passkeys = auth.passkeys;
-      if (!passkeys || !passkeys.length) {
-        throw new AppError(
-          lang === "vi"
-            ? "Chưa đăng ký khóa thông minh"
-            : "No passkey registered",
-          401,
-          ErrorCode.INCORRECT_CREDENTIALS,
-        );
-      }
-
       const options = generateAuthenticationOptions({
         rpID:
           process.env.NODE_ENV === "production" ? "example.com" : "localhost",
         userVerification: "preferred",
-        allowCredentials: passkeys.map((pk) => ({
-          id: pk.credentialID, // already Base64URLString
-          type: "public-key",
-          transports: pk.transports as AuthenticatorTransportFuture[],
-        })),
         timeout: 60000,
       });
       res.cookie("webauthn_login_challenge", (await options).challenge, {
@@ -641,13 +594,13 @@ export class AuthController extends BaseController {
   };
 
   verifyLoginPasskey = (
-    req: Request<{}, {}, { email: string; response: any }>,
+    req: Request<{}, {}, { response: any }>,
     res: Response,
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
       const lang = req.lang;
-      const { email, response } = req.body;
+      const { response } = req.body;
       const expectedChallenge = req.headers.cookie
         ?.split("; ")
         .find((item) => item.startsWith("webauthn_login_challenge"))
@@ -663,13 +616,13 @@ export class AuthController extends BaseController {
         );
       }
 
-      const auth = await this.authService.getAuthByUsername<
+      const auth = await this.authService.getAuthByPasskeyCredentialID<
         IAuth & {
           _id: string;
           roleId: IRole & { _id: string };
           userId: IUser & { _id: string };
         }
-      >(email, [
+      >(response.id, [
         {
           path: "roleId",
           select: "_id name code permissionIds",
@@ -682,9 +635,17 @@ export class AuthController extends BaseController {
 
       if (!auth) {
         throw new AppError(
-          lang === "vi" ? "Sai tài khoản" : "Incorrect username",
+          lang === "vi" ? "Khóa thông minh không hợp lệ" : "Passkey not found",
           401,
           ErrorCode.INCORRECT_CREDENTIALS,
+        );
+      }
+
+      if (!auth.userId.isActive) {
+        throw new AppError(
+          lang === "vi" ? "Tài khoản chưa được kích hoạt" : "User not active",
+          401,
+          ErrorCode.USER_NOT_FOUND,
         );
       }
 

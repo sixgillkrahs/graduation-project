@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { startAuthentication } from "@simplewebauthn/browser";
 import {
   useSignIn,
@@ -60,16 +61,21 @@ const SignIn = () => {
   };
 
   const onSubmitPasskey = async () => {
-    const currentEmail = watch("email");
-    if (!currentEmail) {
-      // You might want to show an error toast here requiring email input
-      return;
-    }
-    const res = await signInPasskey({ email: currentEmail });
-    if (res.success) {
-      const authRes = await startAuthentication(res.data as any);
-      await verifySignInPasskey({ email: currentEmail, response: authRes });
-      router.push(ROUTES.HOME);
+    try {
+      const res = await signInPasskey({});
+      if (res.success) {
+        const authRes = await startAuthentication(res.data as any);
+        const verifyRes = await verifySignInPasskey({
+          response: authRes,
+        });
+        if (verifyRes.success) {
+          router.push(ROUTES.HOME);
+        }
+      }
+    } catch (err: any) {
+      if (err?.name !== "NotAllowedError" && err?.name !== "AbortError") {
+        console.error("Passkey sign-in error:", err);
+      }
     }
   };
 

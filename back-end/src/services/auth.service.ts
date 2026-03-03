@@ -62,6 +62,20 @@ export class AuthService {
       .exec() as Promise<T | null>;
   }
 
+  async getAuthByPasskeyCredentialID<T>(
+    credentialID: string,
+    populate?: string | PopulateOptions | (string | PopulateOptions)[],
+  ): Promise<T | null> {
+    return AuthModel.findOne({
+      "passkeys.credentialID": credentialID,
+    })
+      .populate(
+        populate ? (Array.isArray(populate) ? populate : [populate]) : [],
+      )
+      .lean()
+      .exec() as Promise<T | null>;
+  }
+
   async refreshToken(refreshToken: string) {
     const decoded = jwt.verify(refreshToken, ENV.REFRESH_TOKEN_SECRET) as {
       userId: string;

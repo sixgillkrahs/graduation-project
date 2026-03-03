@@ -6,7 +6,6 @@ import { useRegisterPasskey, useVerifyPasskey } from "./services/mutate";
 import { useCallback } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
 import { ModalChangePassword } from "./components/ModalChangePassword";
-import RegisterPasskey from "./components/RegisterPasskey";
 import { CsButton } from "@/components/custom";
 import RenderField from "./components/RenderField";
 import { Badge } from "@/components/ui/badge";
@@ -30,10 +29,16 @@ const Profile = () => {
   }, [hide]);
 
   const handleRegisterPasskey = async () => {
-    const resp = await registerPasskey();
-    if (resp.success) {
-      const credential = await startRegistration(resp.data as any);
-      await verifyPasskey(credential);
+    try {
+      const resp = await registerPasskey();
+      if (resp.success) {
+        const credential = await startRegistration(resp.data as any);
+        await verifyPasskey(credential);
+      }
+    } catch (err: any) {
+      if (err?.name !== "NotAllowedError") {
+        console.error("Passkey registration error:", err);
+      }
     }
   };
 
@@ -131,7 +136,6 @@ const Profile = () => {
         </div>
       </div>
       <ModalChangePassword onCancel={handleCloseModal} open={open} />
-      <RegisterPasskey />
     </section>
   );
 };
