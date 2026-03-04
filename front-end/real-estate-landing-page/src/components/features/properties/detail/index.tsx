@@ -45,7 +45,11 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PhotoSlider } from "react-photo-view";
+import { useGetMe } from "@/shared/auth/query";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
+import { useCreateConversation } from "../../message/services/mutate";
+import { openConversation } from "@/store/chat.store";
+import { toast } from "sonner";
 import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
@@ -62,8 +66,12 @@ const PropertyDetail = () => {
   const [show3D, setShow3D] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const { data: me } = useGetMe();
+  const isClientLoggedIn = Boolean(me?.data?.userId);
   const { mutate: increaseView } = useIncreaseView();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
+  const { mutateAsync: createConversation, isPending: isCreatingChat } =
+    useCreateConversation();
   const t = useTranslations("PropertiesPage");
 
   useEffect(() => {
@@ -107,8 +115,7 @@ const PropertyDetail = () => {
   ];
 
   const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (!isLoggedIn) {
+    if (!isClientLoggedIn) {
       dispatch(
         showAuthDialog({
           title: t("card.loginToSave"),
@@ -118,6 +125,47 @@ const PropertyDetail = () => {
       return;
     }
     await recordInteraction({ id, type: "FAVORITE", metadata });
+  };
+
+  const handleContactAction = async (type: "call" | "message" | "zalo") => {
+    if (!isClientLoggedIn) {
+      dispatch(
+        showAuthDialog({
+          title: "Đăng nhập để xem Liên hệ",
+          description:
+            "Vui lòng cung cấp tài khoản để có thể xem thông tin số điện thoại của người bán/môi giới.",
+        }),
+      );
+      return;
+    }
+
+    const { phone } = prop.userId;
+    const fullPhone = phone ? phone.replace(/^\+84/, "0") : "";
+
+    if (!fullPhone) {
+      toast.info("Người bán chưa cập nhật thông tin số điện thoại.");
+      if (type !== "message") return;
+    }
+
+    switch (type) {
+      case "call":
+        window.location.href = `tel:${fullPhone}`;
+        break;
+      case "zalo":
+        window.open(`https://zalo.me/${fullPhone}`, "_blank");
+        break;
+      case "message":
+        // Tạo hoặc lấy hội thoại hiện tại
+        try {
+          const res = await createConversation([prop.userId.id]);
+          if (res.data) {
+            dispatch(openConversation(res.data));
+          }
+        } catch (error) {
+          console.error("Lỗi khi mở chat", error);
+        }
+        break;
+    }
   };
 
   return (
@@ -461,25 +509,34 @@ const PropertyDetail = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-3">
                     <CsButton
-                      className="w-full"
-                      icon={<Phone className="w-4 h-4 mr-2" />}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12"
+                      icon={<Phone className="w-5 h-5 mr-3" />}
+                      onClick={() => handleContactAction("call")}
                     >
-                      {t("detail.call")}
+                      {isClientLoggedIn && prop.userId.phone
+                        ? prop.userId.phone.replace(/^\+84/, "0")
+                        : "Bấm để xem SĐT"}
                     </CsButton>
-                    <CsButton
-                      className="w-full"
-                      icon={<MessageSquare className="w-4 h-4 mr-2" />}
-                    >
-                      {t("detail.message")}
-                    </CsButton>
-                    <CsButton
-                      className="w-full"
-                      icon={<Zalo className="w-4 h-4 mr-2" />}
-                    >
-                      Zalo
-                    </CsButton>
+                    <div className="grid grid-cols-2 gap-3">
+                      <CsButton
+                        className="w-full"
+                        variant="outline"
+                        icon={<MessageSquare className="w-4 h-4 mr-2" />}
+                        onClick={() => handleContactAction("message")}
+                      >
+                        {t("detail.message")}
+                      </CsButton>
+                      <CsButton
+                        className="w-full"
+                        variant="outline"
+                        icon={<Zalo className="w-4 h-4 mr-2" />}
+                        onClick={() => handleContactAction("zalo")}
+                      >
+                        Chát Zalo
+                      </CsButton>
+                    </div>
                   </div>
                 </div>
 

@@ -5,13 +5,16 @@ import { Icon, Modal, useModal } from "@/components/ui";
 import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import request from "@/lib/axios/request";
-import { AxiosMethod } from "@/lib/axios/method";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { fetchProfileItem } from "@/store/profile.store";
 import { toast } from "sonner";
 import { ROUTES } from "@/const/routes";
+import {
+  useCreateMoMoUrl,
+  useCreateVNPayUrl,
+  useDowngrade,
+} from "./services/mutate";
 
 const AgentUpgrade = () => {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -32,47 +35,41 @@ const AgentUpgrade = () => {
     setIsSuccess(true);
   };
 
-  const [isLoadingPayment, setIsLoadingPayment] = useState(false);
-  const [isDowngrading, setIsDowngrading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"vnpay" | "momo">("vnpay");
+
+  const { mutateAsync: createVNPayUrl, isPending: isVNPayPending } =
+    useCreateVNPayUrl();
+  const { mutateAsync: createMoMoUrl, isPending: isMoMoPending } =
+    useCreateMoMoUrl();
+  const { mutateAsync: downgradeReq, isPending: isDowngrading } =
+    useDowngrade();
+
+  const isLoadingPayment = isVNPayPending || isMoMoPending;
 
   const handleVNPayPayment = async () => {
     try {
-      setIsLoadingPayment(true);
-      const resp = await request({
-        url: "/payment/create_payment_url",
-        method: AxiosMethod.POST,
-        data: {
-          amount: isAnnual ? 4800000 : 500000,
-          language: "vn",
-        },
+      const resp = await createVNPayUrl({
+        amount: isAnnual ? 4800000 : 500000,
+        language: "vn",
       });
       if (resp.data) {
         window.location.href = resp.data;
       }
     } catch (err) {
       console.error(err);
-      setIsLoadingPayment(false);
     }
   };
 
   const handleMoMoPayment = async () => {
     try {
-      setIsLoadingPayment(true);
-      const resp = await request({
-        url: "/payment/create_momo_payment_url",
-        method: AxiosMethod.POST,
-        data: {
-          amount: isAnnual ? 4800000 : 500000,
-        },
+      const resp = await createMoMoUrl({
+        amount: isAnnual ? 4800000 : 500000,
       });
       if (resp.data) {
         window.location.href = resp.data;
       }
     } catch (err) {
       console.error(err);
-      setIsLoadingPayment(false);
-      toast.error("Failed to initialize MoMo payment");
     }
   };
 
@@ -90,18 +87,10 @@ const AgentUpgrade = () => {
       return;
 
     try {
-      setIsDowngrading(true);
-      await request({
-        url: "/payment/downgrade",
-        method: AxiosMethod.POST,
-      });
+      await downgradeReq();
       toast.success("Successfully downgraded to Basic plan");
       dispatch(fetchProfileItem());
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to downgrade plan");
-    } finally {
-      setIsDowngrading(false);
-    }
+    } catch (err: any) {}
   };
 
   return (

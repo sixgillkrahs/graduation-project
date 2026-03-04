@@ -4,6 +4,12 @@ import { CsButton } from "@/components/custom";
 import { ArrowLeft, MessageCircle, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  closeChatWidget,
+  openChatWidget,
+  openConversation,
+} from "@/store/chat.store";
 import ListChat from "./components/ListChat";
 import { useConversationDetail } from "./services/query";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,9 +19,11 @@ import { useGetMe } from "@/shared/auth/query";
 
 const ChatWidget = () => {
   const { data: me } = useGetMe();
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedConversation, setSelectedConversation] = useState<any>(null);
-  const { data, isLoading } = useConversationDetail(selectedConversation?.id);
+  const dispatch = useAppDispatch();
+  const { isOpen, selectedConversation } = useAppSelector(
+    (state) => state.chat,
+  );
+  const { data, isLoading } = useConversationDetail(selectedConversation?._id);
 
   if (!me?.data?.userId) {
     return null;
@@ -32,7 +40,7 @@ const ChatWidget = () => {
             className="fixed bottom-6 right-6 z-50"
           >
             <CsButton
-              onClick={() => setIsOpen(true)}
+              onClick={() => dispatch(openChatWidget())}
               className="h-10 w-10 rounded-full shadow-lg flex items-center justify-center p-0"
             >
               <MessageCircle className="h-6 w-6 text-white" />
@@ -53,7 +61,7 @@ const ChatWidget = () => {
               <div className="font-semibold text-lg flex items-center gap-2">
                 {selectedConversation ? (
                   <button
-                    onClick={() => setSelectedConversation(null)}
+                    onClick={() => dispatch(openConversation(null))}
                     className="hover:bg-white/20 rounded-full p-1 -ml-2 mr-1 transition-colors"
                   >
                     <ArrowLeft className="h-5 w-5" />
@@ -68,7 +76,7 @@ const ChatWidget = () => {
                 </span>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => dispatch(closeChatWidget())}
                 className="hover:bg-white/20 rounded-full p-1 transition-colors"
               >
                 <X className="h-5 w-5" />
@@ -106,7 +114,11 @@ const ChatWidget = () => {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className="absolute inset-0 overflow-y-auto"
                   >
-                    <ListChat onSelectConversation={setSelectedConversation} />
+                    <ListChat
+                      onSelectConversation={(conv) =>
+                        dispatch(openConversation(conv))
+                      }
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>

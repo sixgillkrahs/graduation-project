@@ -6,6 +6,7 @@ import listingReducer from "./listing.store";
 import authReducer from "./auth.store";
 import authDialogReducer from "./auth-dialog.store";
 import profileReducer from "./profile.store";
+import chatReducer from "./chat.store";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     auth: authReducer,
     authDialog: authDialogReducer,
     profile: profileReducer,
+    chat: chatReducer,
   },
 });
 

@@ -21,4 +21,14 @@ export default class ConversationService {
       method: AxiosMethod.GET,
     });
   };
+
+  public static readonly createConversation = (
+    participantIds: string[],
+  ): Promise<any> => {
+    return request({
+      url: ConversationsEndpoint.CreateConversation(),
+      method: AxiosMethod.POST,
+      data: { participantIds },
+    });
+  };
 }

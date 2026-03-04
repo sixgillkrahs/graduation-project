@@ -1,5 +1,6 @@
 export const ConversationsEndpoint = {
   Conversations: () => `/chat/conversations`,
+  CreateConversation: () => `/chat/conversations`,
   ConversationDetail: (conversationId: string) =>
     `/chat/conversations/${conversationId}/messages`,
 } as const;
