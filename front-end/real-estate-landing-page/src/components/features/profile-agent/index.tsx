@@ -13,19 +13,20 @@ import {
   useRegisterPasskey,
   useVerifyPasskey,
 } from "../profile/services/mutate";
-import { useProfile } from "../profile/services/query";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 import { CsButton } from "@/components/custom";
 import { BadgeCheck } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
 const Profile = () => {
   const router = useRouter();
-  const { data: profile, isLoading } = useProfile();
+  const { data: profileData, loading: isLoading } = useSelector(
+    (state: RootState) => state.profile,
+  );
   const { open, show, hide } = useModal();
   const { mutateAsync: registerPasskey } = useRegisterPasskey();
   const { mutateAsync: verifyPasskey } = useVerifyPasskey();
-
-  const profileData = profile?.data;
 
   const handleOpenModal = () => {
     show();

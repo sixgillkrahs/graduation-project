@@ -8,10 +8,14 @@ import { useEffect, useState, Suspense } from "react";
 import { ROUTES } from "@/const/routes";
 import request from "@/lib/axios/request";
 import { AxiosMethod } from "@/lib/axios/method";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/store";
+import { fetchProfileItem } from "@/store/profile.store";
 
 function UpgradeSuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading",
   );
@@ -32,8 +36,15 @@ function UpgradeSuccessContent() {
           return;
         }
 
+        const isMomo =
+          searchParams.has("partnerCode") &&
+          searchParams.get("partnerCode")?.includes("MOMO");
+        const endpoint = isMomo
+          ? "/payment/momo_return"
+          : "/payment/vnpay_return";
+
         const resp = await request({
-          url: `/payment/vnpay_return?${query}`,
+          url: `${endpoint}?${query}`,
           method: AxiosMethod.GET,
         });
 
@@ -41,6 +52,7 @@ function UpgradeSuccessContent() {
 
         if (resp.data?.code === "00") {
           setStatus("success");
+          dispatch(fetchProfileItem());
         } else {
           setStatus("error");
           setErrorMessage(resp.data?.message || "Payment verification failed.");

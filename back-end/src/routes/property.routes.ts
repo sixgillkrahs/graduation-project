@@ -4,6 +4,7 @@ import { validateRequest } from "@/middleware/validateRequest";
 import { NoticeService } from "@/services/notice.service";
 import { PropertyInteractionService } from "@/services/property-interaction.service";
 import { PropertyService } from "@/services/property.service";
+import { AgentService } from "@/services/agent.service";
 import { createPropertySchema } from "@/validators/property.validator";
 import { Router } from "express";
 
@@ -11,10 +12,12 @@ const router = Router();
 const propertyService = new PropertyService();
 const noticeService = new NoticeService();
 const propertyInteractionService = new PropertyInteractionService();
+const agentService = new AgentService();
 const propertyController = new PropertyController(
   propertyService,
   noticeService,
   propertyInteractionService,
+  agentService,
 );
 
 /**

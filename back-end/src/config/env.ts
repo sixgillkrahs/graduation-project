@@ -76,6 +76,28 @@ const envSchema = z.object({
     .url()
     .optional()
     .default("http://localhost:3000/agent/upgrade/success"),
+  // MoMo
+  MOMO_PARTNER_CODE: z.string().optional().default("MOMOBKUN20180529"),
+  MOMO_ACCESS_KEY: z.string().optional().default("klm05TvNCpectD98"),
+  MOMO_SECRET_KEY: z
+    .string()
+    .optional()
+    .default("at67qH6mk8g5i1peYrvjok4bAY6P4SGE"),
+  MOMO_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://test-payment.momo.vn/v2/gateway/api/create"),
+  MOMO_RETURN_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("http://localhost:3000/agent/upgrade/success"),
+  MOMO_NOTIFY_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://your-domain.ngrok-free.app/api/payment/momo_ipn"),
 });
 export const ENV = envSchema.parse(process.env);
 if (process.env.NODE_ENV === "production") {

@@ -2,6 +2,9 @@ import { PropertyQueryKey } from "@/components/features/properties/services/conf
 import { queryClient } from "@/lib/react-query/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import AuthService from "./AuthService";
+import { store } from "@/store";
+import { clearProfile } from "@/store/profile.store";
+import { logout } from "@/store/auth.store";
 
 export const useLogout = () => {
   return useMutation({
@@ -13,6 +16,8 @@ export const useLogout = () => {
     onSuccess: () => {
       queryClient.setQueryData(["me"], null);
       queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.onSale] });
+      store.dispatch(clearProfile());
+      store.dispatch(logout());
     },
   });
 };

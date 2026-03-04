@@ -4,12 +4,23 @@ import { Input } from "@/components/ui/input";
 import { ItemTabs } from "@/components/ui/Tabs/tabs.types";
 import { nextStep } from "@/store/listing.store";
 import clsx from "clsx";
-import { ArrowLeft, ArrowRight, Building2, Info, MapPin } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  Info,
+  MapPin,
+  Wand2,
+  Loader2,
+} from "lucide-react";
 import { Controller, useFormContext } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import PropertyService from "../../services/service";
 import { ListingFormData } from "../../dto/listingformdata.dto";
 import { CsTextarea } from "@/components/ui/textarea";
+import { RootState } from "@/store";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const BasicInfo = () => {
   const dispatch = useDispatch();
@@ -23,6 +34,34 @@ const BasicInfo = () => {
     if (isValid) {
       dispatch(nextStep());
     }
+  };
+
+  const profile = useSelector((state: RootState) => state.profile.data);
+  const isPro = profile?.planInfo?.plan === "PRO";
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  const handleGenerateAI = async () => {
+    const title = watch("title");
+    const propertyType = watch("propertyType");
+    const demandType = watch("demandType");
+
+    if (!title || !propertyType) {
+      toast.error(
+        "Please enter a title and select a property type first to prompt the AI.",
+      );
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    // Simulate AI Generation
+    setTimeout(() => {
+      const generatedDesc = `Discover this spectacular ${demandType?.toLowerCase() || "sale"} opportunity for a stunning ${propertyType.toLowerCase()} named "${title}". Boasting modern architecture, spacious interiors, and an abundance of natural light, this property is the perfect sanctuary. Enjoy top-tier amenities, an un-beatable location, and the ultimate in luxury living. This property perfectly encapsulates elegance and convenience.`;
+      setValue("description", generatedDesc);
+      setIsGeneratingAI(false);
+      toast.success("AI Description generated successfully!");
+      // Optionally trigger validation
+      trigger("description");
+    }, 1500);
   };
 
   const demandTypes: ItemTabs[] = [{ title: "Rent" }, { title: "Sale" }];
@@ -90,13 +129,29 @@ const BasicInfo = () => {
             }}
             render={({ field, fieldState }) => (
               <>
-                <div className="">
+                <div className="relative group">
                   <CsTextarea
                     label="Listing description"
                     {...field}
                     placeholder="Enter listing description"
                     error={fieldState?.error?.message}
+                    className="pr-12 min-h-[120px]"
                   />
+                  {isPro && (
+                    <button
+                      type="button"
+                      disabled={isGeneratingAI}
+                      onClick={handleGenerateAI}
+                      title="AI Content Generator (PRO)"
+                      className="absolute right-3 top-9 p-2 rounded-lg bg-linear-to-r from-amber-200 to-amber-400 text-amber-900 shadow-md hover:shadow-lg hover:from-amber-300 hover:to-amber-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed z-10"
+                    >
+                      {isGeneratingAI ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Wand2 className="w-5 h-5" />
+                      )}
+                    </button>
+                  )}
                 </div>
               </>
             )}

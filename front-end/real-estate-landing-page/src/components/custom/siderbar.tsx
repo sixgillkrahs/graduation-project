@@ -52,6 +52,7 @@ function CsSidebar({
   info?: {
     name: string;
     plan: string;
+    isLoading?: boolean;
   };
   onClick?: (url: string, title: string) => void;
   isPro?: boolean;
@@ -75,10 +76,29 @@ function CsSidebar({
               {logo}
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold text-base">
+              <span className="truncate font-semibold text-base flex items-center gap-1.5">
                 {info?.name}
+                {isPro && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="text-amber-500 shrink-0"
+                  >
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                )}
               </span>
-              <span className="truncate text-xs">{info?.plan}</span>
+              <span
+                className={cn(
+                  "truncate text-xs font-medium",
+                  isPro ? "text-amber-600 dark:text-amber-500" : "",
+                )}
+              >
+                {info?.isLoading ? "Loading plan..." : info?.plan}
+              </span>
             </div>
           </SidebarMenuButton>
         </SidebarHeader>
@@ -141,48 +161,85 @@ function CsSidebar({
               </SidebarMenu>
             </SidebarGroup>
 
-            {/* Upgrade Plan Card - Hidden when already PRO */}
-            {!isPro && (
-              <div className="mx-4 mb-4 p-4 mt-auto rounded-xl bg-linear-to-br from-neutral-900 to-neutral-800 text-white shadow-md relative overflow-hidden group">
+            {/* Upgrade/Plan Card - Hidden when Loading or Collapsed */}
+            {!info?.isLoading && (
+              <div
+                className={cn(
+                  "group-data-[collapsible=icon]:hidden mx-4 mb-4 p-4 mt-auto rounded-xl shadow-md relative overflow-hidden group",
+                  isPro
+                    ? "bg-linear-to-br from-gray-900 via-gray-800 to-black text-white border border-amber-500/30"
+                    : "bg-linear-to-br from-neutral-900 to-neutral-800 text-white border border-transparent",
+                )}
+              >
+                {isPro && (
+                  <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 to-transparent pointer-events-none" />
+                )}
                 <div className="relative z-10 flex flex-col gap-2">
                   <div className="flex items-center gap-2">
-                    <div className="bg-amber-400 p-1.5 rounded-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-neutral-900"
-                      >
-                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                        <path d="M4 22h16" />
-                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-                      </svg>
+                    <div className="bg-amber-400 p-1.5 rounded-lg flex items-center justify-center">
+                      {isPro ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="text-neutral-900"
+                        >
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-neutral-900"
+                        >
+                          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                          <path d="M4 22h16" />
+                          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                        </svg>
+                      )}
                     </div>
-                    <span className="font-bold text-sm tracking-tight">
-                      Upgrade Plan
+                    <span className="font-bold text-sm tracking-tight text-amber-400">
+                      {isPro ? "PRO Privileges" : "Upgrade Plan"}
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-300 leading-relaxed max-w-[180px]">
-                    Get unlimited listings and priority support.
+                  <p
+                    className={cn(
+                      "text-xs leading-relaxed max-w-[180px]",
+                      isPro ? "text-amber-100/70" : "text-neutral-300",
+                    )}
+                  >
+                    {isPro
+                      ? "View your unlimited features and benefits."
+                      : "Get unlimited listings and priority support."}
                   </p>
                   <button
                     type="button"
                     onClick={() => router.push("/agent/upgrade")}
-                    className="mt-1 w-full text-center bg-white text-neutral-900 hover:bg-neutral-100 py-2 rounded-lg text-sm font-semibold transition-colors duration-200"
+                    className={cn(
+                      "mt-1 w-full text-center py-2 rounded-lg text-sm font-semibold transition-all duration-300",
+                      isPro
+                        ? "bg-linear-to-r from-amber-200 to-amber-400 text-black hover:from-amber-300 hover:to-amber-500 shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:shadow-[0_0_20px_rgba(251,191,36,0.4)]"
+                        : "bg-white text-neutral-900 hover:bg-neutral-100",
+                    )}
                   >
-                    Upgrade to Pro
+                    {isPro ? "View Plan Details" : "Upgrade to Pro"}
                   </button>
                 </div>
-                <div className="absolute right-[-20px] top-[-20px] w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors duration-500 ease-in-out" />
+                {isPro && (
+                  <div className="absolute -right-10 -top-10 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-500/30 transition-colors duration-500 ease-in-out pointer-events-none" />
+                )}
               </div>
             )}
           </div>

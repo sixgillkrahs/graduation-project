@@ -5,6 +5,7 @@ import menuReducer from "./menu.store";
 import listingReducer from "./listing.store";
 import authReducer from "./auth.store";
 import authDialogReducer from "./auth-dialog.store";
+import profileReducer from "./profile.store";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     listing: listingReducer,
     auth: authReducer,
     authDialog: authDialogReducer,
+    profile: profileReducer,
   },
 });
 

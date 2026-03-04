@@ -5,15 +5,23 @@ import { Icon, Modal, useModal } from "@/components/ui";
 import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ROUTES } from "@/const/routes";
 import request from "@/lib/axios/request";
 import { AxiosMethod } from "@/lib/axios/method";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store";
+import { fetchProfileItem } from "@/store/profile.store";
+import { toast } from "sonner";
+import { ROUTES } from "@/const/routes";
 
 const AgentUpgrade = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { open, show, hide } = useModal();
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const profile = useSelector((state: RootState) => state.profile.data);
+  const isPro = profile?.planInfo?.plan === "PRO";
 
   const handleOpenModal = () => {
     setIsSuccess(false);
@@ -25,6 +33,8 @@ const AgentUpgrade = () => {
   };
 
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
+  const [isDowngrading, setIsDowngrading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"vnpay" | "momo">("vnpay");
 
   const handleVNPayPayment = async () => {
     try {
@@ -46,9 +56,52 @@ const AgentUpgrade = () => {
     }
   };
 
+  const handleMoMoPayment = async () => {
+    try {
+      setIsLoadingPayment(true);
+      const resp = await request({
+        url: "/payment/create_momo_payment_url",
+        method: AxiosMethod.POST,
+        data: {
+          amount: isAnnual ? 4800000 : 500000,
+        },
+      });
+      if (resp.data) {
+        window.location.href = resp.data;
+      }
+    } catch (err) {
+      console.error(err);
+      setIsLoadingPayment(false);
+      toast.error("Failed to initialize MoMo payment");
+    }
+  };
+
   const handleGoToDashboard = () => {
     hide();
     router.push(ROUTES.AGENT_DASHBOARD);
+  };
+
+  const handleDowngrade = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel your PRO plan? You will immediately lose access to premium features.",
+      )
+    )
+      return;
+
+    try {
+      setIsDowngrading(true);
+      await request({
+        url: "/payment/downgrade",
+        method: AxiosMethod.POST,
+      });
+      toast.success("Successfully downgraded to Basic plan");
+      dispatch(fetchProfileItem());
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to downgrade plan");
+    } finally {
+      setIsDowngrading(false);
+    }
   };
 
   return (
@@ -57,11 +110,14 @@ const AgentUpgrade = () => {
         {/* Page Header */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
-            Supercharge Your Real Estate Business
+            {isPro
+              ? "Your Subscription Details"
+              : "Supercharge Your Real Estate Business"}
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            Upgrade to Pro to unlock 3D Virtual Tours, AI tools, and unlimited
-            listings.
+            {isPro
+              ? "You are currently enjoying all the exclusive privileges of Havenly PRO."
+              : "Upgrade to Pro to unlock 3D Virtual Tours, AI tools, and unlimited listings."}
           </p>
 
           {/* Billing Toggle */}
@@ -105,9 +161,11 @@ const AgentUpgrade = () => {
                 <h3 className="text-xl font-bold text-gray-900">Basic</h3>
                 <div className="mt-2 text-gray-500">Essential tools</div>
               </div>
-              <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-                Current Plan
-              </span>
+              {!isPro && (
+                <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                  Current Plan
+                </span>
+              )}
             </div>
 
             <div className="my-6 text-center w-full">
@@ -150,20 +208,37 @@ const AgentUpgrade = () => {
             </ul>
 
             <button
-              disabled
+              disabled={!isPro || isDowngrading}
+              onClick={handleDowngrade}
               type="button"
-              className="w-full py-3.5 rounded-xl font-bold text-center bg-gray-100 text-gray-400 cursor-not-allowed"
+              className={`w-full py-3.5 rounded-xl font-bold text-center transition-colors ${
+                !isPro
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+              }`}
             >
-              Your Active Plan
+              {isDowngrading
+                ? "Processing..."
+                : !isPro
+                  ? "Your Active Plan"
+                  : "Downgrade to Basic"}
             </button>
           </div>
 
           {/* Card 2: PRO Plan */}
-          <div className="relative bg-white rounded-3xl border-2 border-black p-8 shadow-xl flex flex-col items-center bg-linear-to-b from-white to-gray-50">
+          <div
+            className={`relative bg-white rounded-3xl border-2 ${isPro ? "border-amber-400" : "border-black"} p-8 shadow-xl flex flex-col items-center bg-linear-to-b from-white to-gray-50`}
+          >
             <div className="absolute top-0 transform -translate-y-1/2">
-              <span className="bg-amber-400 text-black text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-                <Icon.Star className="w-3.5 h-3.5" /> Most Popular
-              </span>
+              {isPro ? (
+                <span className="bg-amber-400 text-black text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5" /> Active Plan
+                </span>
+              ) : (
+                <span className="bg-amber-400 text-black text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                  <Icon.Star className="w-3.5 h-3.5" /> Most Popular
+                </span>
+              )}
             </div>
 
             <div className="w-full flex justify-between items-start mb-6">
@@ -204,13 +279,26 @@ const AgentUpgrade = () => {
               </li>
             </ul>
 
-            <button
-              onClick={handleOpenModal}
-              type="button"
-              className="w-full py-3.5 rounded-xl font-bold text-center bg-black text-white hover:bg-gray-900 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
-            >
-              Upgrade Now
-            </button>
+            {!isPro ? (
+              <button
+                onClick={handleOpenModal}
+                type="button"
+                className="w-full py-3.5 rounded-xl font-bold text-center bg-black text-white hover:bg-gray-900 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
+              >
+                Upgrade Now
+              </button>
+            ) : (
+              <button
+                disabled
+                type="button"
+                className="w-full py-3.5 rounded-xl font-bold text-center bg-gray-100 text-gray-600 cursor-not-allowed shadow-none"
+              >
+                Expires:{" "}
+                {profile?.planInfo?.endDate
+                  ? new Date(profile.planInfo.endDate).toLocaleDateString()
+                  : "N/A"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -260,7 +348,9 @@ const AgentUpgrade = () => {
                     <input
                       type="radio"
                       name="payment"
-                      defaultChecked
+                      value="vnpay"
+                      checked={paymentMethod === "vnpay"}
+                      onChange={() => setPaymentMethod("vnpay")}
                       className="w-4 h-4 text-black border-gray-300 focus:ring-black"
                     />
                     <span className="font-medium text-gray-900">VNPay QR</span>
@@ -274,7 +364,10 @@ const AgentUpgrade = () => {
                     <input
                       type="radio"
                       name="payment"
-                      className="w-4 h-4 text-black border-gray-300 focus:ring-black"
+                      value="momo"
+                      checked={paymentMethod === "momo"}
+                      onChange={() => setPaymentMethod("momo")}
+                      className="w-4 h-4 text-pink-600 border-gray-300 focus:ring-pink-600"
                     />
                     <span className="font-medium text-gray-900">Ví MoMo</span>
                   </div>
@@ -285,11 +378,20 @@ const AgentUpgrade = () => {
               </div>
 
               <CsButton
-                onClick={handleVNPayPayment}
+                onClick={
+                  paymentMethod === "vnpay"
+                    ? handleVNPayPayment
+                    : handleMoMoPayment
+                }
                 loading={isLoadingPayment}
-                className="w-full cs-bg-black text-white hover:bg-gray-900 py-6 text-lg font-semibold rounded-xl"
+                className={`w-full text-white py-6 text-lg font-semibold rounded-xl transition-colors ${
+                  paymentMethod === "momo"
+                    ? "bg-pink-600 hover:bg-pink-700"
+                    : "cs-bg-black hover:bg-gray-900"
+                }`}
               >
-                Proceed to Payment (VNPay Sandbox)
+                Proceed to Payment (
+                {paymentMethod === "vnpay" ? "VNPay" : "MoMo"} Sandbox)
               </CsButton>
             </div>
           ) : (

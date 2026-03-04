@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 const defaultLocale = "en";
 const supportedLocales = ["en", "vi"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const localeCookie = request.cookies.get("locale");
 
   // If cookie exists and is valid, proceed

@@ -5,6 +5,9 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { store } from "@/store";
+import { clearProfile } from "@/store/profile.store";
+import { logout } from "@/store/auth.store";
 
 let isRefreshing = false;
 let failedQueue: {
@@ -88,6 +91,8 @@ client.interceptors.response.use(
       } catch (err) {
         processQueue(err);
         await AuthService.logout();
+        store.dispatch(clearProfile());
+        store.dispatch(logout());
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

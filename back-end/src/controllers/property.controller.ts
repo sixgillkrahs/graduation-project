@@ -1,27 +1,28 @@
-import { NextFunction, Request, Response } from "express";
-import { BaseController } from "./base.controller";
-import { PropertyService } from "@/services/property.service";
-import { ApiRequest } from "@/utils/apiRequest";
+import { redisConnection } from "@/config/redis.connection";
+import { NoticeTypeEnum } from "@/models/notice.model";
+import { InteractionType } from "@/models/property-interaction.model";
 import {
   PropertyDirectionEnum,
   PropertyFurnitureEnum,
   PropertyLegalStatusEnum,
   PropertyStatusEnum,
 } from "@/models/property.model";
+import UserModel from "@/models/user.model";
+import { AgentService } from "@/services/agent.service";
+import { NoticeService } from "@/services/notice.service";
+import { PropertyInteractionService } from "@/services/property-interaction.service";
+import { PropertyService } from "@/services/property.service";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
-import UserModel from "@/models/user.model";
-import { NoticeService } from "@/services/notice.service";
-import { NoticeTypeEnum } from "@/models/notice.model";
-import { redisConnection } from "@/config/redis.connection";
-import { PropertyInteractionService } from "@/services/property-interaction.service";
-import { InteractionType } from "@/models/property-interaction.model";
+import { NextFunction, Request, Response } from "express";
+import { BaseController } from "./base.controller";
 
 export class PropertyController extends BaseController {
   constructor(
     private propertyService: PropertyService,
     private noticeService: NoticeService,
     private propertyInteractionService: PropertyInteractionService,
+    private agentService: AgentService,
   ) {
     super();
   }
@@ -83,6 +84,43 @@ export class PropertyController extends BaseController {
       }
 
       const body = req.body;
+      const agent = await this.agentService.getAgentByUserId(user.userId._id);
+      let isPro = false; // Declare isPro here to be accessible outside the agent check
+      if (agent && agent.status === "APPROVED") {
+        if (agent.planInfo?.plan === "PRO") {
+          const now = new Date();
+          isPro =
+            !agent.planInfo.endDate || new Date(agent.planInfo.endDate) > now;
+        }
+
+        if (!isPro) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const propertiesCreatedToday = await this.propertyService.count({
+            userId: user.userId._id,
+            createdAt: { $gte: today },
+          });
+
+          if (propertiesCreatedToday >= 3) {
+            const lang = req.lang;
+            throw new AppError(
+              lang === "vi"
+                ? "Gói Free chỉ cho phép đăng tối đa 3 bất động sản mỗi ngày. Vui lòng nâng cấp lên gói Pro."
+                : "Free plan only allows max 3 properties per day. Please upgrade to Pro plan.",
+              403,
+              ErrorCode.FORBIDDEN,
+            );
+          }
+        }
+      }
+
+      // Remove virtual tour / panorama functionality for free plan
+      // Applicable to all since isPro defaults to false
+      if (!isPro) {
+        body.virtualTourUrls = [];
+      }
+
       const getDirection = (val: string) => {
         const map: Record<string, any> = {
           NORTH: PropertyDirectionEnum.NORTH,
@@ -444,6 +482,20 @@ export class PropertyController extends BaseController {
       }
 
       const body = req.body;
+      const agent = await this.agentService.getAgentByUserId(user.userId._id);
+      let isPro = false;
+      if (agent && agent.status === "APPROVED") {
+        if (agent.planInfo?.plan === "PRO") {
+          const now = new Date();
+          isPro =
+            !agent.planInfo.endDate || new Date(agent.planInfo.endDate) > now;
+        }
+      }
+
+      if (!isPro) {
+        body.virtualTourUrls = [];
+      }
+
       const getDirection = (val: string) => {
         const map: Record<string, any> = {
           NORTH: PropertyDirectionEnum.NORTH,
