@@ -96,6 +96,7 @@ export class QdrantService {
       logger.info(`Upserted embedding for property ${propertyId}`);
     } catch (error) {
       logger.error(`Error upserting embedding for ${propertyId}:`, error);
+      throw error;
     }
   };
 

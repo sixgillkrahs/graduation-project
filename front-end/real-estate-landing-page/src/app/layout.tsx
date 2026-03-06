@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={beVietnamPro.variable}>
+    <html lang="en" className={beVietnamPro.variable} suppressHydrationWarning>
       <body className={`${beVietnamPro.variable} antialiased`}>
         <NextIntlClientProvider>
           <Wrapper>{children}</Wrapper>

@@ -23,10 +23,10 @@ export const useApproveProperty = () => {
       PropertiesService.ApproveProperty(id, note),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: [PropertiesQueryKey.GetPropertiesPending, variables],
+        queryKey: [PropertiesQueryKey.GetPropertiesPending],
       });
       queryClient.invalidateQueries({
-        queryKey: [PropertiesQueryKey.GetPropertyDetail, variables],
+        queryKey: [PropertiesQueryKey.GetPropertyDetail, variables.id],
       });
     },
   });

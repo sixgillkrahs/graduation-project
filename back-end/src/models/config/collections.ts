@@ -12,6 +12,7 @@ const collections = {
   landlords: "landlords",
   schedules: "schedules",
   transactions: "transactions",
+  jobs: "jobs",
 };
 
 export default collections;

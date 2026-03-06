@@ -169,11 +169,11 @@ const PropertyDetail = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pb-20">
+    <div className="bg-background min-h-screen pb-20 transition-colors duration-300">
       <div className="container mx-auto px-4 md:px-20 pt-6 pb-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 font-medium"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 font-medium"
         >
           <ArrowLeft className="w-5 h-5" />
           {t("detail.goBack")}
@@ -266,10 +266,10 @@ const PropertyDetail = () => {
                   {findOptionLabel(prop.location.ward, LIST_WARD)}
                 </span>
               </nav>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
                 {prop.title}
               </h1>
-              <div className="flex flex-col md:flex-row md:items-center gap-4 text-gray-500">
+              <div className="flex flex-col md:flex-row md:items-center gap-4 text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-gray-100 rounded-full">
                     <MapIcon className="w-4 h-4 text-gray-600" />
@@ -313,53 +313,55 @@ const PropertyDetail = () => {
             </div>
 
             {/* Key Specs Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-t border-b border-gray-100">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-y border-border">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gray-50 rounded-lg">
-                  <Bed className="w-6 h-6 main-color-red" />
+                <div className="p-2.5 bg-muted rounded-lg border border-border/50">
+                  <Bed className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {t("detail.bedrooms")}
                   </p>
-                  <p className="font-bold text-gray-900">
+                  <p className="font-bold text-foreground">
                     {prop.features.bedrooms}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gray-50 rounded-lg">
-                  <Bath className="w-6 h-6 main-color-red" />
+                <div className="p-2.5 bg-muted rounded-lg border border-border/50">
+                  <Bath className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {t("detail.bathrooms")}
                   </p>
-                  <p className="font-bold text-gray-900">
+                  <p className="font-bold text-foreground">
                     {prop.features.bathrooms}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gray-50 rounded-lg">
-                  <Maximize className="w-6 h-6 main-color-red" />
+                <div className="p-2.5 bg-muted rounded-lg border border-border/50">
+                  <Maximize className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">{t("detail.area")}</p>
-                  <p className="font-bold text-gray-900">
+                  <p className="text-sm text-muted-foreground">
+                    {t("detail.area")}
+                  </p>
+                  <p className="font-bold text-foreground">
                     {prop.features.area} m²
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gray-50 rounded-lg">
-                  <Compass className="w-6 h-6 main-color-red" />
+                <div className="p-2.5 bg-muted rounded-lg border border-border/50">
+                  <Compass className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {t("detail.direction")}
                   </p>
-                  <p className="font-bold text-gray-900 capitalize">
+                  <p className="font-bold text-foreground capitalize">
                     {prop.features.direction || "N/A"}
                   </p>
                 </div>
@@ -408,10 +410,10 @@ const PropertyDetail = () => {
 
             {/* Description */}
             <section>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
+              <h3 className="text-xl font-bold text-foreground mb-4">
                 {t("detail.description")}
               </h3>
-              <div className="prose prose-emerald max-w-none text-gray-600 leading-relaxed">
+              <div className="prose prose-emerald max-w-none text-muted-foreground leading-relaxed">
                 <p>{prop.description}</p>
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-gray-400 border-t border-gray-50 pt-3 italic">
@@ -458,16 +460,16 @@ const PropertyDetail = () => {
           <div className="w-full lg:w-[35%] relative">
             <div className="sticky top-24 space-y-6">
               {/* Action Card */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-gray-100/50 p-6">
+              <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-md p-6">
                 <div className="mb-6">
-                  <p className="text-gray-500 text-sm mb-1">
+                  <p className="text-muted-foreground text-sm mb-1">
                     {t("detail.price")}
                   </p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-bold main-color-red">
+                    <span className="text-3xl font-bold text-foreground">
                       {t("currency.priceMain", { price: prop.features.price })}
                     </span>
-                    <span className="text-gray-400 font-medium">
+                    <span className="text-muted-foreground font-medium">
                       {t("currency.priceSuffix")}
                     </span>
                   </div>
@@ -481,10 +483,10 @@ const PropertyDetail = () => {
                   </p>
                 </div>
 
-                <div className="border-t border-b border-gray-100 py-6 mb-6">
+                <div className="border-y border-border py-6 mb-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-muted border border-border">
                         {prop.userId.avatarUrl ? (
                           <Image
                             src={prop.userId.avatarUrl}
@@ -493,13 +495,13 @@ const PropertyDetail = () => {
                             height={48}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-emerald-100 text-emerald-700 font-bold text-xl">
+                          <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-xl">
                             {prop.userId.fullName.charAt(0)}
                           </div>
                         )}
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">
+                        <h4 className="font-bold text-foreground">
                           {prop.userId.fullName}
                         </h4>
                         <div className="flex items-center gap-1 text-xs text-amber-500 font-medium">
@@ -548,16 +550,16 @@ const PropertyDetail = () => {
                         value: "tour",
                         label: t("detail.scheduleTour"),
                         content: (
-                          <div className="pt-4 space-y-4">
+                          <div className="pt-2 space-y-4">
                             <Popover>
                               <PopoverTrigger asChild>
                                 <button
                                   className={cn(
-                                    "w-full justify-start text-left font-normal h-12 rounded-xl border border-gray-200 px-4 flex items-center gap-2 hover:border-emerald-500 transition-colors",
+                                    "w-full justify-start text-left font-normal h-11 rounded-lg border border-input bg-background px-4 py-2 flex items-center gap-2 hover:bg-accent hover:text-accent-foreground transition-all outline-none",
                                     !date && "text-muted-foreground",
                                   )}
                                 >
-                                  <CalendarIcon className="mr-2 h-4 w-4 main-color-red" />
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
                                   {date ? (
                                     format(date, "PPP")
                                   ) : (
@@ -565,27 +567,27 @@ const PropertyDetail = () => {
                                   )}
                                 </button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0 border-none shadow-xl rounded-xl">
+                              <PopoverContent className="w-auto p-0 border shadow-md rounded-xl">
                                 <Calendar
                                   mode="single"
                                   selected={date}
                                   onSelect={setDate}
                                   initialFocus
-                                  className="rounded-xl border shadow-none"
+                                  className="rounded-xl"
                                 />
                               </PopoverContent>
                             </Popover>
 
-                            <select className="w-full h-12 rounded-xl border border-gray-200 px-4 text-gray-700 outline-none focus:border-emerald-500 bg-white cursor-pointer">
+                            <select className="w-full h-11 rounded-lg border border-input bg-background px-4 py-2 text-foreground outline-none hover:bg-accent/50 transition-all cursor-pointer">
                               <option>10:00 AM</option>
                               <option>02:00 PM</option>
                               <option>04:00 PM</option>
                             </select>
 
-                            <CsButton className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-200">
+                            <CsButton className="w-full" variant="default">
                               {t("detail.requestBooking")}
                             </CsButton>
-                            <p className="text-xs text-center text-gray-400">
+                            <p className="text-xs text-center text-muted-foreground">
                               {t("detail.notChargedYet")}
                             </p>
                           </div>
@@ -595,12 +597,12 @@ const PropertyDetail = () => {
                         value: "info",
                         label: t("detail.requestInfo"),
                         content: (
-                          <div className="pt-4 space-y-4">
+                          <div className="pt-2 space-y-4">
                             <textarea
-                              className="w-full h-32 rounded-xl border border-gray-200 p-4 text-sm outline-none focus:border-emerald-500 resize-none"
+                              className="w-full h-28 rounded-xl border border-input bg-background p-4 text-sm outline-none focus:ring-1 focus:ring-ring resize-none transition-all placeholder:text-muted-foreground"
                               placeholder={t("detail.messagePlaceholder")}
                             ></textarea>
-                            <CsButton className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+                            <CsButton className="w-full" variant="default">
                               {t("detail.sendMessage")}
                             </CsButton>
                           </div>
@@ -622,13 +624,13 @@ const PropertyDetail = () => {
                 ) : (
                   <button
                     onClick={() => handleSaveProperty()}
-                    className="flex items-center gap-2 text-gray-500 hover:text-red-500 text-sm font-medium transition-colors"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-destructive text-sm font-medium transition-colors"
                   >
                     <Heart className="w-4 h-4" /> {t("detail.saveHome")}
                   </button>
                 )}
-                <div className="w-px h-4 bg-gray-300"></div>
-                <button className="flex items-center gap-2 text-gray-500 hover:text-emerald-600 text-sm font-medium transition-colors">
+                <div className="w-px h-4 bg-border"></div>
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-primary text-sm font-medium transition-colors">
                   <Share2 className="w-4 h-4" /> {t("detail.shareListings")}
                 </button>
               </div>
@@ -640,9 +642,9 @@ const PropertyDetail = () => {
         {!isLoadingRecommended &&
         (!recommendedData?.data ||
           recommendedData?.data?.length === 0) ? null : (
-          <section className="mt-20 pt-10 border-t border-gray-200">
+          <section className="mt-20 pt-10 border-t border-border">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold text-foreground">
                 {t("detail.similarHomes")}
               </h2>
             </div>

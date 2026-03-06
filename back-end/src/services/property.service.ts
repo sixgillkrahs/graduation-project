@@ -36,6 +36,7 @@ export class PropertyService {
             propertyId: property._id.toString(),
             textData,
             payload: {
+              propertyId: property._id.toString(),
               price: property.features?.price,
               type: property.propertyType,
               district: property.location?.district,

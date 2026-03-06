@@ -20,16 +20,16 @@ export interface CsTabsProps {
 const CsTabs = ({ item, defaultValue }: CsTabsProps) => {
   return (
     <Tabs defaultValue={defaultValue || item[0].value}>
-      <TabsList>
+      <TabsList className="w-full h-12">
         {item.map((item) => {
           return (
-            <TabsTrigger key={item.value} value={item.value}>
+            <TabsTrigger key={item.value} value={item.value} className="h-full">
               {item.label}
             </TabsTrigger>
           );
         })}
       </TabsList>
-      <Card className="shadow-none py-0">
+      <Card className="shadow-none py-4 border-none">
         <TabsContents>
           {item.map((item) => {
             return (
