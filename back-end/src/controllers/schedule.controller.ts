@@ -5,25 +5,29 @@ import { BaseController } from "./base.controller";
 import { UserService } from "@/services/user.service";
 import { AppError } from "@/utils/appError";
 import { PropertyService } from "@/services/property.service";
-import { EmailService } from "@/services/email.service";
+import { EmailQueue } from "@/queues/email.queue";
+import { NotificationQueue } from "@/queues/notification.queue";
 
 export class ScheduleController extends BaseController {
   private scheduleService: ScheduleService;
   private userService: UserService;
   private propertyService: PropertyService;
-  private emailService: EmailService;
+  private emailQueue: EmailQueue;
+  private notificationQueue: NotificationQueue;
 
   constructor(
     scheduleService: ScheduleService,
     userService: UserService,
     propertyService: PropertyService,
-    emailService: EmailService,
+    emailQueue: EmailQueue,
+    notificationQueue: NotificationQueue,
   ) {
     super();
     this.scheduleService = scheduleService;
     this.userService = userService;
     this.propertyService = propertyService;
-    this.emailService = emailService;
+    this.emailQueue = emailQueue;
+    this.notificationQueue = notificationQueue;
   }
 
   createSchedule = (
@@ -128,6 +132,28 @@ export class ScheduleController extends BaseController {
         color: "#10b981",
       });
 
+      // Notify the agent about the new booking request
+      const agentId = String(
+        (property as any).userId?._id || (property as any).userId,
+      );
+      this.notificationQueue.enqueueNotification({
+        userId: agentId,
+        title: "Yêu cầu đặt lịch mới",
+        content: `${customerName} muốn đặt lịch xem nhà tại ${(property as any).title || (property as any).location?.address || "bất động sản"}`,
+        type: "SCHEDULE",
+        socketEvent: "schedule:new_request",
+        metadata: {
+          customerName,
+          customerPhone,
+          customerEmail,
+          date,
+          startTime,
+          customerNote,
+          listingId,
+          propertyTitle: (property as any).title,
+        },
+      });
+
       return "Booking requested successfully";
     });
   };
@@ -193,7 +219,7 @@ export class ScheduleController extends BaseController {
         color,
       });
 
-      // Send email if status changes from something else to CONFIRMED
+      // Enqueue email job if status changes to CONFIRMED
       if (status === "CONFIRMED" && schedule.status !== "CONFIRMED") {
         const appointmentDate =
           date instanceof Date
@@ -201,13 +227,40 @@ export class ScheduleController extends BaseController {
             : new Date(date).toLocaleDateString("vi-VN");
         const appointmentTime = `${startTime} - ${endTime}`;
 
-        await this.emailService.sendAppointmentConfirmedEmail(
-          schedule.customerEmail,
-          schedule.customerName,
+        this.emailQueue.enqueueAppointmentConfirmedEmail({
+          to: schedule.customerEmail,
+          customerName: schedule.customerName,
           appointmentDate,
           appointmentTime,
-          location || schedule.location,
-        );
+          location: location || schedule.location,
+        });
+      }
+
+      // Notify the customer about status change
+      if (
+        schedule.userId &&
+        (status === "CONFIRMED" || status === "CANCELLED") &&
+        schedule.status !== status
+      ) {
+        const statusLabel = status === "CONFIRMED" ? "chấp nhận" : "từ chối";
+        this.notificationQueue.enqueueNotification({
+          userId: String(schedule.userId),
+          title: `Lịch hẹn đã được ${statusLabel}`,
+          content:
+            status === "CONFIRMED"
+              ? `Yêu cầu xem nhà tại ${location || schedule.location} đã được môi giới chấp nhận. Kiểm tra email để biết chi tiết.`
+              : `Yêu cầu xem nhà tại ${location || schedule.location} đã bị từ chối.`,
+          type: "SCHEDULE",
+          socketEvent: "schedule:status_update",
+          metadata: {
+            scheduleId: id,
+            status,
+            date,
+            startTime,
+            endTime,
+            location: location || schedule.location,
+          },
+        });
       }
 
       return "Schedule updated successfully";

@@ -8,7 +8,8 @@ import {
   validateRequestScheduleSchema,
 } from "@/validators/schedule.validator";
 import { PropertyService } from "@/services/property.service";
-import { EmailService } from "@/services/email.service";
+import { EmailQueue } from "@/queues/email.queue";
+import { NotificationQueue } from "@/queues/notification.queue";
 import { Router } from "express";
 import { validateIdHeaderSchema } from "@/validators/base.validator";
 
@@ -20,7 +21,8 @@ const scheduleController = new ScheduleController(
   scheduleService,
   userService,
   propertyService,
-  new EmailService(),
+  new EmailQueue(),
+  new NotificationQueue(),
 );
 
 router.use(requireAuth);

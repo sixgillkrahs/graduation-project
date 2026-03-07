@@ -163,19 +163,50 @@ const Header = () => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("property_status_update", (data: NotificationDetail) => {
-      setNotifications((prev) => [data, ...prev]);
+
+    const handleNewNotification = (data: any) => {
+      console.log("[Notice] Socket signal received:", data);
+
+      const notif: NotificationDetail = {
+        id: data.id || data._id || `temp-${Date.now()}`,
+        message: data.message || data.content || "Bạn có thông báo mới",
+        status: data.status || data.type || "INFO",
+        timestamp: data.timestamp || new Date().toISOString(),
+        isRead: false,
+        type: data.type || "SYSTEM",
+        metadata: data.metadata,
+      };
+
+      setNotifications((prev) => [notif, ...prev]);
       setUnreadCount((prev) => prev + 1);
       refetch();
 
-      toast.info(data.message, {
-        description: `Status: ${data.status}`,
-        duration: 5000,
-      });
-    });
+      // Premium toast
+      setTimeout(() => {
+        toast.info(data.title || "🔔 Thông báo mới", {
+          description: notif.message,
+          duration: 8000,
+          action: {
+            label: "Xem",
+            onClick: () => {
+              setSelectedNotice(notif);
+              setIsModalOpen(true);
+            },
+          },
+        });
+      }, 100);
+    };
+
+    socket.on("notification:new", handleNewNotification);
+    socket.on("property_status_update", handleNewNotification);
+    socket.on("schedule:new_request", handleNewNotification);
+    socket.on("schedule:status_update", handleNewNotification);
 
     return () => {
-      socket.off("property_status_update");
+      socket.off("notification:new", handleNewNotification);
+      socket.off("property_status_update", handleNewNotification);
+      socket.off("schedule:new_request", handleNewNotification);
+      socket.off("schedule:status_update", handleNewNotification);
     };
   }, [socket]);
 
@@ -330,15 +361,31 @@ const Header = () => {
                         <div className="flex justify-between items-center mt-2">
                           <Badge
                             variant={
-                              notif.status === "PUBLISHED"
+                              notif.status === "PUBLISHED" ||
+                              notif.status === "CONFIRMED"
                                 ? "default"
-                                : notif.status === "REJECTED"
+                                : notif.status === "REJECTED" ||
+                                    notif.status === "CANCELLED"
                                   ? "destructive"
-                                  : "secondary"
+                                  : notif.type === "SCHEDULE" &&
+                                      notif.status === "PENDING"
+                                    ? "outline"
+                                    : "secondary"
                             }
-                            className="text-[10px] h-5 px-2"
+                            className={cn(
+                              "text-[10px] h-5 px-2",
+                              notif.type === "SCHEDULE" &&
+                                notif.status === "PENDING" &&
+                                "border-amber-500 text-amber-600 bg-amber-50",
+                            )}
                           >
-                            {notif.status}
+                            {notif.status === "PENDING"
+                              ? "Chờ duyệt"
+                              : notif.status === "CONFIRMED"
+                                ? "Đã duyệt"
+                                : notif.status === "CANCELLED"
+                                  ? "Đã hủy"
+                                  : notif.status}
                           </Badge>
                           <span className="text-[10px] text-gray-400">
                             {new Date(notif.timestamp).toLocaleTimeString([], {

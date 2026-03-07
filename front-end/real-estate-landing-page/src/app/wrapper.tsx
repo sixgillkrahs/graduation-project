@@ -23,7 +23,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
         <Provider store={store}>
           <SocketProvider>
             <PhotoProvider>{children}</PhotoProvider>
-            <Toaster />
+            <Toaster richColors position="top-right" />
             <GlobalAuthDialog />
           </SocketProvider>
         </Provider>

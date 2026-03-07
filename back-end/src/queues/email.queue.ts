@@ -1,4 +1,5 @@
 import {
+  SendAppointmentConfirmedEmailJob,
   SendOTPEmailJob,
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
@@ -54,6 +55,17 @@ export class EmailQueue {
   sendOTPEmail(data: SendOTPEmailJob) {
     const jobId = `otp-email-${data.to}`;
     return this.queue.add("sendOTPEmail", data, {
+      jobId,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+  }
+
+  enqueueAppointmentConfirmedEmail(data: SendAppointmentConfirmedEmailJob) {
+    const jobId = `appointment-confirmed:${data.to}:${Date.now()}`;
+    return this.queue.add("sendAppointmentConfirmedEmail", data, {
       jobId,
       attempts: 5,
       backoff: { type: "exponential", delay: 3000 },

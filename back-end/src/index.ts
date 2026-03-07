@@ -26,6 +26,12 @@ import { QdrantWorker } from "@/workers/qdrant.worker";
 const qdrantService = new QdrantService();
 new QdrantWorker(qdrantService);
 
+// Initialize Notification Worker
+import { NoticeService } from "@/services/notice.service";
+import { NotificationWorker } from "@/workers/notification.worker";
+const noticeService = new NoticeService();
+new NotificationWorker(noticeService);
+
 // Lắng nghe message từ client
 // wsService.onMessage((ws, msg) => {
 //   if (msg.type === 'ping') {

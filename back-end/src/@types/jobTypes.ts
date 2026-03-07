@@ -32,3 +32,21 @@ export type UpsertPropertyEmbeddingJob = {
   textData: string;
   payload?: any;
 };
+
+export type SendAppointmentConfirmedEmailJob = {
+  to: string;
+  customerName: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  location: string;
+};
+
+export type SendNotificationJob = {
+  userId: string;
+  title: string;
+  content: string;
+  type: "SYSTEM" | "PROPERTY" | "ACCOUNT" | "SCHEDULE";
+  metadata?: Record<string, any>;
+  /** Socket event name to emit (e.g. "schedule:new_request") */
+  socketEvent?: string;
+};
