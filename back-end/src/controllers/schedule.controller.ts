@@ -5,21 +5,25 @@ import { BaseController } from "./base.controller";
 import { UserService } from "@/services/user.service";
 import { AppError } from "@/utils/appError";
 import { PropertyService } from "@/services/property.service";
+import { EmailService } from "@/services/email.service";
 
 export class ScheduleController extends BaseController {
   private scheduleService: ScheduleService;
   private userService: UserService;
   private propertyService: PropertyService;
+  private emailService: EmailService;
 
   constructor(
     scheduleService: ScheduleService,
     userService: UserService,
     propertyService: PropertyService,
+    emailService: EmailService,
   ) {
     super();
     this.scheduleService = scheduleService;
     this.userService = userService;
     this.propertyService = propertyService;
+    this.emailService = emailService;
   }
 
   createSchedule = (
@@ -85,6 +89,49 @@ export class ScheduleController extends BaseController {
     });
   };
 
+  requestSchedule = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+      const {
+        listingId,
+        customerName,
+        customerPhone,
+        customerEmail,
+        date,
+        startTime,
+        customerNote,
+      } = req.body;
+
+      const property = await this.propertyService.getPropertyById(listingId);
+      if (!property) {
+        throw new AppError("Property not found", 404);
+      }
+
+      await this.scheduleService.createSchedule({
+        agentId: (property as any).userId?._id || (property as any).userId,
+        userId: currentUser?.userId?._id as any,
+        listingId: (property as any)?._id,
+        customerName,
+        customerPhone,
+        customerEmail,
+        title: "Yêu cầu đặt lịch xem nhà",
+        date,
+        startTime,
+        endTime: startTime, // Default to same as start
+        location:
+          (property as any).location?.address ||
+          "Liên hệ để biết thêm chi tiết",
+        type: "VIEWING" as any,
+        status: "PENDING" as any,
+        customerNote,
+        agentNote: "",
+        color: "#10b981",
+      });
+
+      return "Booking requested successfully";
+    });
+  };
+
   getSchedulesMe = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const currentUser = req.user;
@@ -127,6 +174,12 @@ export class ScheduleController extends BaseController {
         agentNote,
         color,
       } = req.body;
+
+      const schedule = await this.scheduleService.getScheduleById(id);
+      if (!schedule) {
+        throw new AppError("Schedule not found", 404);
+      }
+
       await this.scheduleService.updateSchedule(id, {
         title,
         date,
@@ -139,6 +192,24 @@ export class ScheduleController extends BaseController {
         agentNote,
         color,
       });
+
+      // Send email if status changes from something else to CONFIRMED
+      if (status === "CONFIRMED" && schedule.status !== "CONFIRMED") {
+        const appointmentDate =
+          date instanceof Date
+            ? date.toLocaleDateString("vi-VN")
+            : new Date(date).toLocaleDateString("vi-VN");
+        const appointmentTime = `${startTime} - ${endTime}`;
+
+        await this.emailService.sendAppointmentConfirmedEmail(
+          schedule.customerEmail,
+          schedule.customerName,
+          appointmentDate,
+          appointmentTime,
+          location || schedule.location,
+        );
+      }
+
       return "Schedule updated successfully";
     });
   };

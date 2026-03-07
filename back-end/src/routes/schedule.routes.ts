@@ -3,8 +3,12 @@ import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { ScheduleService } from "@/services/schedule.service";
 import { UserService } from "@/services/user.service";
-import { validateBodyScheduleSchema } from "@/validators/schedule.validator";
+import {
+  validateBodyScheduleSchema,
+  validateRequestScheduleSchema,
+} from "@/validators/schedule.validator";
 import { PropertyService } from "@/services/property.service";
+import { EmailService } from "@/services/email.service";
 import { Router } from "express";
 import { validateIdHeaderSchema } from "@/validators/base.validator";
 
@@ -16,6 +20,7 @@ const scheduleController = new ScheduleController(
   scheduleService,
   userService,
   propertyService,
+  new EmailService(),
 );
 
 router.use(requireAuth);
@@ -201,6 +206,12 @@ router.post(
   "/",
   validateRequest((lang) => validateBodyScheduleSchema(lang)),
   scheduleController.createSchedule,
+);
+
+router.post(
+  "/request",
+  validateRequest((lang) => validateRequestScheduleSchema(lang)),
+  scheduleController.requestSchedule,
 );
 
 /**

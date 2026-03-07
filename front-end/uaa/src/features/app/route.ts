@@ -1,13 +1,6 @@
 import MainLayout from "@/layouts/MainLayout";
 import { type RouterConfig } from "@shared/types/router";
-import {
-  Settings,
-  LayoutDashboard,
-  UserCog,
-  Building2,
-  Users,
-  ListTodo,
-} from "lucide-react";
+import { Settings, LayoutDashboard, UserCog, Building2, Users, ListTodo } from "lucide-react";
 import { lazy } from "react";
 
 const router: RouterConfig = {

@@ -5,7 +5,8 @@ import {
   getVerificationEmailTemplate,
   getPasswordResetEmailTemplate,
   getRejectApplicationEmailTemplate,
-  sendOTPEmailTemplate
+  sendOTPEmailTemplate,
+  getAppointmentConfirmedEmailTemplate,
 } from "@/templates/email";
 
 export class EmailService {
@@ -142,10 +143,7 @@ export class EmailService {
     }
   }
 
-  async sendOTPEmail(
-    to: string,
-    otp: string,
-  ): Promise<void> {
+  async sendOTPEmail(to: string, otp: string): Promise<void> {
     try {
       const info = await this.transporter.sendMail({
         from: this.fromAddress,
@@ -161,6 +159,35 @@ export class EmailService {
     } catch (error) {
       logger.error("Failed to send OTP email", {
         context: "EmailService.sendOTPEmail",
+        error: error instanceof Error ? error.message : "Unknown error",
+        to,
+      });
+      throw error;
+    }
+  }
+
+  async sendAppointmentConfirmedEmail(
+    to: string,
+    name: string,
+    date: string,
+    time: string,
+    location: string,
+  ): Promise<void> {
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to,
+        subject: "Lịch hẹn dự án của bạn đã được xác nhận",
+        html: getAppointmentConfirmedEmailTemplate(name, date, time, location),
+      });
+      logger.info("Appointment confirmation email sent", {
+        context: "EmailService.sendAppointmentConfirmedEmail",
+        to,
+        messageId: info.messageId,
+      });
+    } catch (error) {
+      logger.error("Failed to send appointment confirmation email", {
+        context: "EmailService.sendAppointmentConfirmedEmail",
         error: error instanceof Error ? error.message : "Unknown error",
         to,
       });

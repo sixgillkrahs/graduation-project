@@ -40,3 +40,28 @@ export const validateBodyScheduleSchema = (
     }),
   });
 };
+
+export const validateRequestScheduleSchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+  return z.object({
+    body: z.object({
+      listingId: createObjectIdSchema(lang),
+      customerName: z
+        .string({ message: t.invalidName })
+        .min(1, { message: t.invalidName }),
+      customerPhone: z
+        .string({ message: t.phoneInvalid })
+        .min(1, { message: t.phoneInvalid }),
+      customerEmail: z
+        .string({ message: t.email })
+        .min(1, { message: t.email }),
+      date: z.coerce.date({ message: t.required("date") }),
+      startTime: z.string({ message: t.required("startTime") }),
+      customerNote: z.optional(
+        z.string({ message: t.required("customerNote") }),
+      ),
+    }),
+  });
+};

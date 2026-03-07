@@ -61,12 +61,16 @@ const CalendarArea = ({
           dateClick={handleDateClick}
           eventClick={handleEventClick}
           datesSet={handleDatesSet} // Fetch data on view change
-          events={filteredEvents.map((e: any) => ({
-            ...e,
-            backgroundColor: "transparent",
-            borderColor: "transparent",
-            textColor: "#1f2937",
-          }))}
+          events={filteredEvents.map((e: any) => {
+            // Destructure out FullCalendar reserved props that conflict
+            const { date: _date, startTime: _st, endTime: _et, ...rest } = e;
+            return {
+              ...rest,
+              backgroundColor: "transparent",
+              borderColor: "transparent",
+              textColor: "#1f2937",
+            };
+          })}
           eventContent={(eventInfo: any) =>
             renderEventContent(eventInfo, filteredEvents)
           }

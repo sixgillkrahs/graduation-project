@@ -51,6 +51,16 @@ export interface CreateScheduleRequest {
   color?: string;
 }
 
+export interface RequestScheduleDto {
+  listingId: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  date: Date;
+  startTime: string;
+  customerNote?: string;
+}
+
 export interface ScheduleEvent {
   title: string;
   groupId: string;

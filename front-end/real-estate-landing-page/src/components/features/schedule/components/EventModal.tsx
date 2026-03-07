@@ -202,18 +202,18 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
             )}
           </div>
           <div className="flex gap-3 justify-end">
-            {/* <CsButton onClick={onClose} disabled={deleteSchedulePending}>
-                Cancel
-              </CsButton>
-              <CsButton
-                type="submit"
-                form="form-event"
-                className="bg-primary text-white shadow-lg hover:shadow-xl transition-all"
-                loading={createSchedulePending || updateSchedulePending}
-                disabled={deleteSchedulePending}
-              >
-                {selectedEvent ? "Update Schedule" : "Save Schedule"}
-              </CsButton> */}
+            <CsButton onClick={onClose} disabled={deleteSchedulePending}>
+              Cancel
+            </CsButton>
+            <CsButton
+              type="submit"
+              form="form-event"
+              className="bg-primary text-white shadow-lg hover:shadow-xl transition-all"
+              loading={createSchedulePending || updateSchedulePending}
+              disabled={deleteSchedulePending}
+            >
+              {selectedEvent ? "Update Schedule" : "Save Schedule"}
+            </CsButton>
           </div>
         </div>
       }
@@ -229,7 +229,7 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
       ) : (
         <form
           className="flex flex-col gap-5 p-1 min-h-[300px]"
-          // onSubmit={handleSubmit(onSubmit, onError)}
+          onSubmit={handleSubmit(onSubmit, onError)}
           id="form-event"
         >
           <div

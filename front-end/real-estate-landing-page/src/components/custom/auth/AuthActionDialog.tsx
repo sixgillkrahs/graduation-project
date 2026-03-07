@@ -39,7 +39,11 @@ export function AuthActionDialog({
   const handleLogin = () => {
     setIsLoading(true);
     setTimeout(() => {
-      const returnUrl = redirectUrl || pathname;
+      const currentUrl =
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : pathname;
+      const returnUrl = redirectUrl || currentUrl;
       const loginUrl = `${ROUTES.SIGN_IN}?callbackUrl=${encodeURIComponent(returnUrl)}`;
 
       onOpenChange(false);

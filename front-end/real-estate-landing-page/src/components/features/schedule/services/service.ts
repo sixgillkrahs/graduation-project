@@ -4,6 +4,7 @@ import request from "@/lib/axios/request";
 import {
   CreateScheduleRequest,
   IScheduleDTO,
+  RequestScheduleDto,
   SCHEDULE_STATUS,
   SCHEDULE_TYPE,
 } from "../dto/schedule.dto";
@@ -38,6 +39,16 @@ export default class ScheduleService {
   ): Promise<IResp<string>> => {
     return request({
       url: ScheduleEndpoint.createSchedule(),
+      method: AxiosMethod.POST,
+      data,
+    });
+  };
+
+  public static readonly requestSchedule = (
+    data: RequestScheduleDto,
+  ): Promise<IResp<string>> => {
+    return request({
+      url: ScheduleEndpoint.requestSchedule(),
       method: AxiosMethod.POST,
       data,
     });

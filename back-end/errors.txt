@@ -1,0 +1,1 @@
+src/controllers/auth.controller.ts(555,41): error TS2339: Property 'passkeys' does not exist on type '{}'.

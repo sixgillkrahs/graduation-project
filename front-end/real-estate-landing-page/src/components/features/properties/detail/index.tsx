@@ -51,6 +51,7 @@ import { useCreateConversation } from "../../message/services/mutate";
 import { openConversation } from "@/store/chat.store";
 import { toast } from "sonner";
 import { usePropertyDetail, useRecommendedProperties } from "../services/query";
+import { useRequestSchedule } from "../../schedule/services/mutation";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 
@@ -63,6 +64,8 @@ const PropertyDetail = () => {
     useRecommendedProperties(id);
   const dispatch = useAppDispatch();
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [timeSlot, setTimeSlot] = useState("10:00");
+  const [customerNote, setCustomerNote] = useState("");
   const [show3D, setShow3D] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -72,6 +75,8 @@ const PropertyDetail = () => {
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const { mutateAsync: createConversation, isPending: isCreatingChat } =
     useCreateConversation();
+  const { mutateAsync: requestBooking, isPending: isRequestingBooking } =
+    useRequestSchedule();
   const t = useTranslations("PropertiesPage");
 
   useEffect(() => {
@@ -166,6 +171,54 @@ const PropertyDetail = () => {
         }
         break;
     }
+  };
+
+  const handleRequestBooking = async () => {
+    if (!isClientLoggedIn) {
+      dispatch(
+        showAuthDialog({
+          title: "Đăng nhập để đặt lịch",
+          description:
+            "Vui lòng đăng nhập để thực hiện đặt lịch hẹn xem bất động sản này.",
+        }),
+      );
+      return;
+    }
+
+    if (!date) {
+      toast.error("Vui lòng chọn ngày muốn đặt lịch");
+      return;
+    }
+
+    try {
+      await requestBooking({
+        listingId: id,
+        customerName: me?.data?.userId?.fullName || "Khách hàng",
+        customerPhone: me?.data?.userId?.phone || "",
+        customerEmail: me?.data?.userId?.email || "",
+        date: date,
+        startTime: timeSlot,
+        customerNote: customerNote,
+      });
+      // Optionally fire record interaction
+      recordInteraction({ id, type: "SCHEDULE_REQUEST" });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (!isClientLoggedIn) {
+      dispatch(
+        showAuthDialog({
+          title: "Đăng nhập để gửi tin",
+          description:
+            "Vui lòng đăng nhập để gửi yêu cầu đến người bán/môi giới.",
+        }),
+      );
+      return;
+    }
+    toast.info("Tính năng gửi yêu cầu đang được phát triển.");
   };
 
   return (
@@ -578,13 +631,38 @@ const PropertyDetail = () => {
                               </PopoverContent>
                             </Popover>
 
-                            <select className="w-full h-11 rounded-lg border border-input bg-background px-4 py-2 text-foreground outline-none hover:bg-accent/50 transition-all cursor-pointer">
-                              <option>10:00 AM</option>
-                              <option>02:00 PM</option>
-                              <option>04:00 PM</option>
+                            <select
+                              className="w-full h-11 rounded-lg border border-input bg-background px-4 py-2 text-foreground outline-none hover:bg-accent/50 transition-all cursor-pointer"
+                              value={timeSlot}
+                              onChange={(e) => setTimeSlot(e.target.value)}
+                            >
+                              <option value="09:00">09:00</option>
+                              <option value="10:00">10:00</option>
+                              <option value="11:00">11:00</option>
+                              <option value="14:00">14:00</option>
+                              <option value="15:00">15:00</option>
+                              <option value="16:00">16:00</option>
                             </select>
 
-                            <CsButton className="w-full" variant="default">
+                            {isClientLoggedIn && (
+                              <textarea
+                                className="w-full h-20 rounded-lg border border-input bg-background p-3 text-sm outline-none focus:ring-1 focus:ring-ring resize-none transition-all placeholder:text-muted-foreground mt-2"
+                                placeholder={
+                                  "Thêm ghi chú của bạn cho môi giới..."
+                                }
+                                value={customerNote}
+                                onChange={(e) =>
+                                  setCustomerNote(e.target.value)
+                                }
+                              ></textarea>
+                            )}
+
+                            <CsButton
+                              className="w-full"
+                              variant="default"
+                              onClick={handleRequestBooking}
+                              loading={isRequestingBooking}
+                            >
                               {t("detail.requestBooking")}
                             </CsButton>
                             <p className="text-xs text-center text-muted-foreground">
@@ -602,7 +680,11 @@ const PropertyDetail = () => {
                               className="w-full h-28 rounded-xl border border-input bg-background p-4 text-sm outline-none focus:ring-1 focus:ring-ring resize-none transition-all placeholder:text-muted-foreground"
                               placeholder={t("detail.messagePlaceholder")}
                             ></textarea>
-                            <CsButton className="w-full" variant="default">
+                            <CsButton
+                              className="w-full"
+                              variant="default"
+                              onClick={handleSendMessage}
+                            >
                               {t("detail.sendMessage")}
                             </CsButton>
                           </div>

@@ -1,6 +1,6 @@
 import { IResp } from "@/@types/service";
 import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import { CreateScheduleRequest } from "../dto/schedule.dto";
+import { CreateScheduleRequest, RequestScheduleDto } from "../dto/schedule.dto";
 import ScheduleService from "./service";
 import { queryClient } from "@/lib/react-query/queryClient";
 import { ScheduleQueryKey } from "./config";
@@ -23,6 +23,23 @@ export const useCreateSchedule = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getSchedules],
       });
+    },
+  });
+};
+
+export const useRequestSchedule = (): UseMutationResult<
+  IResp<string>,
+  Error,
+  RequestScheduleDto,
+  void
+> => {
+  return useMutation({
+    mutationFn: (data: RequestScheduleDto) => {
+      return ScheduleService.requestSchedule(data);
+    },
+    meta: {
+      ERROR_SOURCE: "notifications.requestScheduleFailed",
+      SUCCESS_MESSAGE: "notifications.requestScheduleSuccess",
     },
   });
 };

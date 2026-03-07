@@ -17,6 +17,22 @@ import CalendarArea from "./components/CalendarArea";
 import { SCHEDULE_STATUS, SCHEDULE_TYPE } from "./dto/schedule.dto";
 import { reducer } from "./hooks/useReduce";
 import { useGetSchedulesMe } from "./services/query";
+import { useUpdateSchedule } from "./services/mutation";
+import { toast } from "sonner";
+
+/** Convert "10:00 AM" / "02:00 PM" to "10:00" / "14:00". Already-24h strings pass through. */
+const parseTo24h = (time: string): string => {
+  if (!time) return "";
+  const trimmed = time.trim().toUpperCase();
+  const match = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if (!match) return time; // already HH:mm
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const period = match[3];
+  if (period === "PM" && hours < 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
+  return `${String(hours).padStart(2, "0")}:${minutes}`;
+};
 
 const Schedule = () => {
   const [state, dispatch] = useReducer(reducer, {
@@ -29,6 +45,8 @@ const Schedule = () => {
   }>();
 
   const { data: schedulesData } = useGetSchedulesMe(currentRange);
+  const { mutateAsync: updateSchedule, isPending: isUpdating } =
+    useUpdateSchedule();
 
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0],
@@ -48,8 +66,8 @@ const Schedule = () => {
 
               if (s.date) {
                 dateStr = format(new Date(s.date), "yyyy-MM-dd");
-                startTimeStr = s.startTime || "";
-                endTimeStr = s.endTime || "";
+                startTimeStr = parseTo24h(s.startTime || "");
+                endTimeStr = parseTo24h(s.endTime || "");
               } else if (
                 s.startTime &&
                 (s.startTime.includes("T") || s.startTime.length > 8)
@@ -94,8 +112,15 @@ const Schedule = () => {
                 status: s.status,
                 location: s.location,
                 customerName: s.customerName,
+                customerPhone: s.customerPhone,
+                customerEmail: s.customerEmail,
                 description: s.customerNote,
                 color: s.color,
+                customerNote: s.customerNote,
+                agentNote: s.agentNote,
+                date: s.date || dateStr,
+                startTime: s.startTime || startTimeStr,
+                endTime: s.endTime || endTimeStr,
               };
             } catch (err) {
               return null;
@@ -127,6 +152,60 @@ const Schedule = () => {
   const handleDateClick = useCallback((info: any) => {
     setSelectedDate(info.dateStr);
   }, []);
+
+  const handleApprove = async (event: any) => {
+    try {
+      await updateSchedule({
+        id: event.id,
+        data: {
+          title: event.title,
+          date: event.date,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          location: event.location,
+          type: event.type,
+          status: SCHEDULE_STATUS.CONFIRMED,
+          customerName: event.customerName,
+          customerPhone: event.customerPhone,
+          customerEmail: event.customerEmail,
+          customerNote: event.customerNote,
+          agentNote: event.agentNote || "",
+          color: event.color,
+        } as any,
+      });
+      toast.success("Schedule confirmed successfully and email sent!");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to confirm schedule.");
+    }
+  };
+
+  const handleReject = async (event: any) => {
+    try {
+      await updateSchedule({
+        id: event.id,
+        data: {
+          title: event.title,
+          date: event.date,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          location: event.location,
+          type: event.type,
+          status: SCHEDULE_STATUS.CANCELLED,
+          customerName: event.customerName,
+          customerPhone: event.customerPhone,
+          customerEmail: event.customerEmail,
+          customerNote: event.customerNote,
+          agentNote: event.agentNote || "",
+          color: event.color,
+        } as any,
+      });
+      toast.success("Schedule cancelled successfully.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to cancel schedule.");
+    }
+  };
 
   return (
     <div className="h-full flex flex-col gap-6 p-6 animate-in fade-in duration-500 bg-gray-50/50 font-sans">
@@ -343,7 +422,31 @@ const Schedule = () => {
                               >
                                 {event.status || "PENDING"}
                               </span>
-                              <span className="text-[10px] text-gray-400 font-medium">
+                              <span className="text-[10px] text-gray-400 font-medium flex items-center gap-2">
+                                {event.status === SCHEDULE_STATUS.PENDING && (
+                                  <>
+                                    <button
+                                      className="text-emerald-600 hover:text-emerald-700 font-semibold disabled:opacity-50"
+                                      disabled={isUpdating}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleApprove(event);
+                                      }}
+                                    >
+                                      Approve
+                                    </button>
+                                    <button
+                                      className="text-red-600 hover:text-red-700 font-semibold disabled:opacity-50"
+                                      disabled={isUpdating}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleReject(event);
+                                      }}
+                                    >
+                                      Reject
+                                    </button>
+                                  </>
+                                )}
                                 {event.type}
                               </span>
                             </div>

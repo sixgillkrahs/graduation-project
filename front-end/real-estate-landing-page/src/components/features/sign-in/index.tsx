@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Password } from "@/components/ui/password";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -21,6 +21,8 @@ import {
 
 const SignIn = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || ROUTES.HOME;
   const t = useTranslations("SignIn");
   const { mutateAsync: signIn, isPending } = useSignIn();
   const { mutateAsync: signInPasskey, isPending: isPendingPasskey } =
@@ -57,7 +59,7 @@ const SignIn = () => {
       password: data.password,
       rememberMe: data.rememberMe,
     });
-    router.push(ROUTES.HOME);
+    router.push(callbackUrl);
   };
 
   const onSubmitPasskey = async () => {
@@ -69,7 +71,7 @@ const SignIn = () => {
           response: authRes,
         });
         if (verifyRes.success) {
-          router.push(ROUTES.HOME);
+          router.push(callbackUrl);
         }
       }
     } catch (err: any) {
