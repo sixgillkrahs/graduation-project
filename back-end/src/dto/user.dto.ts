@@ -1,6 +1,7 @@
 export interface EditProfileDto {
   nameRegister: string;
   phone: string;
+  description: string;
   certificateNumber: string;
   taxCode: string;
   yearsOfExperience: string;

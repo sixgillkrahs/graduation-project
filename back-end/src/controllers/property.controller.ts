@@ -2,6 +2,7 @@ import { redisConnection } from "@/config/redis.connection";
 import { NoticeTypeEnum } from "@/models/notice.model";
 import { InteractionType } from "@/models/property-interaction.model";
 import {
+  PropertyDemandTypeEnum,
   PropertyDirectionEnum,
   PropertyFurnitureEnum,
   PropertyLegalStatusEnum,
@@ -25,6 +26,66 @@ export class PropertyController extends BaseController {
     private agentService: AgentService,
   ) {
     super();
+  }
+
+  private async enrichPropertiesWithAgentPlan<T extends any>(properties: T[]) {
+    const uniqueUserIds = Array.from(
+      new Set(
+        properties
+          .map(
+            (property: any) =>
+              property?.userId?._id?.toString?.() ||
+              property?.userId?.toString?.() ||
+              "",
+          )
+          .filter(Boolean),
+      ),
+    );
+
+    if (uniqueUserIds.length === 0) {
+      return properties;
+    }
+
+    const agents = await this.agentService.getAgentsByUserIds(uniqueUserIds);
+    const now = new Date();
+    const agentPlanMap = new Map(
+      agents.map((agent: any) => {
+        const isPro =
+          agent.planInfo?.plan === "PRO" &&
+          (!agent.planInfo?.endDate || new Date(agent.planInfo.endDate) > now);
+
+        return [
+          agent.userId.toString(),
+          {
+            isPro,
+            plan: agent.planInfo?.plan || "BASIC",
+          },
+        ];
+      }),
+    );
+
+    return properties.map((property: any) => {
+      const userId =
+        property?.userId?._id?.toString?.() || property?.userId?.toString?.();
+
+      if (!userId || !property.userId || typeof property.userId !== "object") {
+        return property;
+      }
+
+      const planInfo = agentPlanMap.get(userId) || {
+        isPro: false,
+        plan: "BASIC",
+      };
+
+      return {
+        ...property,
+        userId: {
+          ...property.userId,
+          isPro: planInfo.isPro,
+          plan: planInfo.plan,
+        },
+      };
+    });
   }
 
   /**
@@ -823,7 +884,81 @@ export class PropertyController extends BaseController {
           })
         : [];
 
-      return { ...properties, results: resultsWithFavorite };
+      const resultsWithAgentPlan =
+        await this.enrichPropertiesWithAgentPlan(resultsWithFavorite);
+
+      return { ...properties, results: resultsWithAgentPlan };
+    });
+  };
+
+  getAgentOnSaleProperties = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { agentId } = req.params;
+      const { limit, page, sortField, sortOrder, ...filters } = req.query;
+      const user = (req as any).user;
+
+      const options = {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 9,
+        sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
+        populate: "userId",
+      };
+
+      const filterQuery = {
+        ...this.parseFilters(filters as Record<string, any>),
+        userId: agentId,
+        demandType: PropertyDemandTypeEnum.SALE,
+        status: PropertyStatusEnum.PUBLISHED,
+      };
+
+      const properties = (await this.propertyService.getProperties(
+        options,
+        filterQuery,
+      )) as any;
+
+      let favoritedPropertyIds = new Set<string>();
+      if (user && properties.results && properties.results.length > 0) {
+        const propertyIds = properties.results.map(
+          (p: any) => p._id || p.id,
+        ) as string[];
+        const userId = user.userId._id
+          ? user.userId._id.toString()
+          : user.userId.toString();
+        const interactions =
+          await this.propertyInteractionService.getLatestInteractionsForUser(
+            userId,
+            propertyIds,
+            InteractionType.FAVORITE,
+          );
+
+        interactions.forEach((i: any) => {
+          if (
+            i.latestInteraction &&
+            i.latestInteraction.metadata?.action !== "UNSAVE"
+          ) {
+            favoritedPropertyIds.add(i._id.toString());
+          }
+        });
+      }
+
+      const resultsWithFavorite = properties.results
+        ? properties.results.map((p: any) => {
+            const doc = p.toObject ? p.toObject() : p;
+            return {
+              ...doc,
+              isFavorite: favoritedPropertyIds.has(doc._id.toString()),
+            };
+          })
+        : [];
+
+      const resultsWithAgentPlan =
+        await this.enrichPropertiesWithAgentPlan(resultsWithFavorite);
+
+      return { ...properties, results: resultsWithAgentPlan };
     });
   };
 
@@ -892,10 +1027,14 @@ export class PropertyController extends BaseController {
       const isFavorite =
         !!latestInteraction && latestInteraction.metadata?.action !== "UNSAVE";
 
-      return {
-        ...property,
-        isFavorite,
-      };
+      const [propertyWithAgentPlan] = await this.enrichPropertiesWithAgentPlan([
+        {
+          ...property,
+          isFavorite,
+        },
+      ]);
+
+      return propertyWithAgentPlan;
     });
   };
 
@@ -975,7 +1114,7 @@ export class PropertyController extends BaseController {
         limit,
       );
 
-      return properties;
+      return await this.enrichPropertiesWithAgentPlan(properties as any[]);
     });
   };
 }

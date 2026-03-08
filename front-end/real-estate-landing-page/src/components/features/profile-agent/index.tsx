@@ -8,6 +8,7 @@ import { useCallback } from "react";
 import CardField from "./components/CardField";
 import CardIdentity from "./components/CardIdentity";
 import { ModalChangePassword } from "./components/ModalChangePassword";
+import ProfileCompletionCard from "./components/ProfileCompletionCard";
 import RenderField from "./components/RenderField";
 import {
   useRegisterPasskey,
@@ -16,7 +17,8 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { CsButton } from "@/components/custom";
-import { BadgeCheck } from "lucide-react";
+import DOMPurify from "dompurify";
+import { BadgeCheck, FileText } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 
 const Profile = () => {
@@ -56,10 +58,41 @@ const Profile = () => {
 
   const isBankInfoMissing =
     !isLoading && !!profileData && !profileData.bankInfo;
+  const profileCompletionFields = [
+    profileData?.avatarUrl,
+    profileData?.basicInfo?.nameRegister,
+    profileData?.basicInfo?.email,
+    profileData?.basicInfo?.phoneNumber,
+    profileData?.description,
+    profileData?.businessInfo?.certificateNumber,
+    profileData?.businessInfo?.taxCode,
+    profileData?.businessInfo?.yearsOfExperience,
+    profileData?.businessInfo?.specialization?.length,
+    profileData?.businessInfo?.workingArea?.length,
+    profileData?.bankInfo?.bankAccountName,
+    profileData?.bankInfo?.bankAccountNumber,
+    profileData?.bankInfo?.bankName,
+    profileData?.imageInfo?.identityFront,
+    profileData?.imageInfo?.identityBack,
+    profileData?.imageInfo?.certificateImage?.length,
+  ];
+  const completedProfileItems = profileCompletionFields.filter(Boolean).length;
+  const totalProfileItems = profileCompletionFields.length;
+  const profileCompletion = Math.round(
+    (completedProfileItems / totalProfileItems) * 100,
+  );
+  const sanitizedDescription = DOMPurify.sanitize(
+    profileData?.description || "<p>No public description has been added yet.</p>",
+  );
 
   return (
     <section className="p-6 md:p-8 bg-black/10">
       <div className="container mx-auto grid gap-6">
+        <ProfileCompletionCard
+          completion={profileCompletion}
+          completedItems={completedProfileItems}
+          totalItems={totalProfileItems}
+        />
         {isBankInfoMissing && (
           <div className="w-full rounded-[18px] bg-amber-50 border border-amber-200 p-6 flex gap-3 items-start">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 shrink-0">
@@ -234,6 +267,24 @@ const Profile = () => {
                     value={profileData?.businessInfo.certificateNumber || ""}
                   />
                 </div>
+              </div>
+              <div className="my-4 bg-white w-full h-px" />
+              <div className="grid gap-2">
+                <span className="flex items-center gap-2 cs-typography text-[14px]! font-bold!">
+                  <span>
+                    <FileText className="size-5" />
+                  </span>{" "}
+                  Description
+                </span>
+                <CardField
+                  className="whitespace-pre-wrap leading-7"
+                  value={
+                    <div
+                      className="[&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-black [&_a]:underline"
+                      dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
+                    />
+                  }
+                />
               </div>
               <div className="my-4 bg-white w-full h-px" />
               <div className="grid gap-2">

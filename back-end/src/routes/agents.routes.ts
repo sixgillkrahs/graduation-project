@@ -108,6 +108,76 @@ router.get("/", agentController.getAgents);
 
 /**
  * @swagger
+ * /agents/{agentId}/public-profile:
+ *   get:
+ *     summary: Get public profile of an approved agent
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: agentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Agent user ID
+ *     responses:
+ *       200:
+ *         description: Public profile of the agent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userId:
+ *                   type: string
+ *                 fullName:
+ *                   type: string
+ *                 avatarUrl:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 phone:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                 location:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 yearsOfExperience:
+ *                   type: string
+ *                 specialties:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 workingAreas:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 verified:
+ *                   type: boolean
+ *                 plan:
+ *                   type: string
+ *                   enum: [BASIC, PRO]
+ *                 isPro:
+ *                   type: boolean
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     activeSaleListingsCount:
+ *                       type: integer
+ *                     totalPublishedListingsCount:
+ *                       type: integer
+ *                     soldPropertiesCount:
+ *                       type: integer
+ *                     totalViews:
+ *                       type: integer
+ *       404:
+ *         description: Agent not found
+ */
+router.get("/:agentId/public-profile", agentController.getPublicProfile);
+
+/**
+ * @swagger
  * /agents/me/properties/count:
  *   get:
  *     summary: Get total count of published properties by agent

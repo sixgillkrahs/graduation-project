@@ -362,6 +362,77 @@ router.get("/on-sale", optionalAuth, propertyController.getOnSaleProperties);
 
 /**
  * @swagger
+ * /properties/agent/{agentId}/on-sale:
+ *   get:
+ *     summary: Get published sale properties by agent
+ *     tags: [Properties]
+ *     parameters:
+ *       - in: path
+ *         name: agentId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Agent user ID
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 9
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *       - in: query
+ *         name: propertyType
+ *         schema:
+ *           type: string
+ *           enum: [APARTMENT, HOUSE, STREET_HOUSE, VILLA, LAND, OTHER]
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         description: Search by title or location
+ *     responses:
+ *       200:
+ *         description: List of published sale properties for the agent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 results:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Property'
+ *                 page:
+ *                   type: integer
+ *                 limit:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalResults:
+ *                   type: integer
+ */
+router.get(
+  "/agent/:agentId/on-sale",
+  optionalAuth,
+  propertyController.getAgentOnSaleProperties,
+);
+
+/**
+ * @swagger
  * /properties/{id}:
  *   get:
  *     summary: Get property details by ID

@@ -8,6 +8,7 @@ import { useProfile } from "../profile/services/query";
 import { useEditProfile } from "./services/mutate";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { CsButton } from "@/components/custom";
 import { Edit } from "lucide-react";
 import { CsSelect } from "@/components/ui/select";
@@ -25,6 +26,7 @@ const EditProfile = () => {
     defaultValues: {
       nameRegister: "",
       phone: "",
+      description: "",
       certificateNumber: "",
       taxCode: "",
       yearsOfExperience: "",
@@ -42,6 +44,7 @@ const EditProfile = () => {
       reset({
         nameRegister: profile.data.basicInfo.nameRegister || "",
         phone: profile.data.basicInfo.phoneNumber || "",
+        description: profile.data.description || "",
         certificateNumber: profile.data.businessInfo.certificateNumber || "",
         taxCode: profile.data.businessInfo.taxCode || "",
         yearsOfExperience: profile.data.businessInfo.yearsOfExperience || "",
@@ -56,6 +59,7 @@ const EditProfile = () => {
 
   const onSubmit = async (data: IEditProfileService.IFormData) => {
     await editProfile(data);
+    router.push("/agent/profile");
   };
 
   const onBack = () => {
@@ -129,6 +133,23 @@ const EditProfile = () => {
                       )}
                     />
                   </div>
+                  <Controller
+                    name="description"
+                    control={control}
+                    rules={{
+                      validate: (value) =>
+                        value.replace(/<(.|\n)*?>/g, "").trim().length > 0 ||
+                        "Description is required",
+                    }}
+                    render={({ field }) => (
+                      <RichTextEditor
+                        label="Description"
+                        placeholder="Introduce yourself, your market expertise, and how you support clients"
+                        error={errors.description?.message}
+                        {...field}
+                      />
+                    )}
+                  />
                 </div>
                 <div className="border-b border-black/10 my-4"></div>
                 <div className="space-y-4">
@@ -350,11 +371,7 @@ const EditProfile = () => {
                   </div>
                 </div>
                 <div className="mt-10 flex justify-end gap-4">
-                  <CsButton
-                    type="button"
-                    onClick={onBack}
-                    className="text-black"
-                  >
+                  <CsButton type="button" onClick={onBack}>
                     Cancel
                   </CsButton>
                   <CsButton

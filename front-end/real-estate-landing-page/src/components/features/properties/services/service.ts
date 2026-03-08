@@ -15,6 +15,17 @@ export default class PropertyService {
     });
   };
 
+  public static readonly agentOnSale = (
+    agentId: string,
+    params: IParamsPagination,
+  ): Promise<IPaginationResp<PropertyDto & { isFavorite: boolean }>> => {
+    return request({
+      url: PropertyEndpoint.agentOnSale(agentId),
+      method: AxiosMethod.GET,
+      params,
+    });
+  };
+
   public static readonly favorites = (
     params: IParamsPagination,
   ): Promise<IPaginationResp<PropertyDto & { isFavorite: boolean }>> => {

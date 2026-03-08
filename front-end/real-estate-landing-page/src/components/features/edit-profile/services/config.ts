@@ -1,5 +1,3 @@
-import { ParamValue } from "next/dist/server/request/params";
-
 export const EditProfileEndpoint = {
   editProfile: () => `/users/profile`,
 } as const;

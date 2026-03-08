@@ -414,6 +414,96 @@ export class AgentController extends BaseController {
     });
   };
 
+  getPublicProfile = (
+    req: Request<{ agentId: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { agentId } = req.params;
+      const lang = req.lang;
+
+      const [agentProfile, userProfile] = await Promise.all([
+        this.agentService.getAgentByUserId(agentId),
+        this.userService.getUserById(agentId),
+      ]);
+
+      if (
+        !agentProfile ||
+        agentProfile.status !== AgentStatusEnum.APPROVED ||
+        !userProfile ||
+        userProfile.isDeleted ||
+        !userProfile.isActive
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Môi giới không tồn tại" : "Agent not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      const [
+        activeSaleListingsCount,
+        totalPublishedListingsCount,
+        soldPropertiesCount,
+        totalViews,
+      ] = await Promise.all([
+        this.propertyService.count({
+          userId: agentId,
+          demandType: "SALE",
+          status: PropertyStatusEnum.PUBLISHED,
+        }),
+        this.propertyService.count({
+          userId: agentId,
+          status: PropertyStatusEnum.PUBLISHED,
+        }),
+        this.propertyService.count({
+          userId: agentId,
+          status: PropertyStatusEnum.SOLD,
+        }),
+        this.propertyService.getTotalViews(agentId),
+      ]);
+
+      const now = new Date();
+      const isPro =
+        agentProfile.planInfo?.plan === "PRO" &&
+        (!agentProfile.planInfo.endDate ||
+          new Date(agentProfile.planInfo.endDate) > now);
+      const rawPhone =
+        userProfile.phone || agentProfile.basicInfo.phoneNumber || "";
+      const phone =
+        userProfile.prefixPhone &&
+        rawPhone &&
+        !rawPhone.startsWith(userProfile.prefixPhone)
+          ? `${userProfile.prefixPhone} ${rawPhone}`
+          : rawPhone;
+
+      return {
+        userId: userProfile._id,
+        fullName: userProfile.fullName || agentProfile.basicInfo.nameRegister,
+        avatarUrl: userProfile.avatarUrl || "",
+        email: userProfile.email,
+        phone,
+        role: "Professional Real Estate Agent",
+        location:
+          userProfile.address || agentProfile.businessInfo.workingArea?.[0] || "",
+        description: agentProfile.description || "",
+        yearsOfExperience: agentProfile.businessInfo.yearsOfExperience,
+        specialties: agentProfile.businessInfo.specialization || [],
+        workingAreas: agentProfile.businessInfo.workingArea || [],
+        verified: true,
+        plan: agentProfile.planInfo?.plan || "BASIC",
+        isPro,
+        stats: {
+          activeSaleListingsCount,
+          totalPublishedListingsCount,
+          soldPropertiesCount,
+          totalViews,
+        },
+      };
+    });
+  };
+
   createPasswordAgent = (
     req: Request<
       { token: string },

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-quill-new/dist/quill.snow.css";
 @import "./variables.css";
 @import "./toast.css";
 @import "./tw-animate.css";
@@ -151,4 +152,44 @@ input[type="range"]::-moz-range-thumb {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.cs-rich-text .ql-toolbar.ql-snow {
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in oklab, var(--color-muted) 45%, white);
+}
+
+.cs-rich-text .ql-container.ql-snow {
+  border: 0;
+  min-height: 220px;
+  font-family: var(--font-satoshi);
+}
+
+.cs-rich-text .ql-editor {
+  min-height: 220px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.cs-rich-text .ql-editor.ql-blank::before {
+  color: var(--color-muted-foreground);
+  font-style: normal;
+}
+
+.cs-rich-text .ql-snow .ql-picker,
+.cs-rich-text .ql-snow .ql-stroke {
+  color: var(--color-foreground);
+  stroke: currentColor;
+}
+
+.cs-rich-text .ql-snow .ql-fill {
+  fill: currentColor;
+}
+
+.cs-rich-text .ql-editor blockquote {
+  border-left: 3px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  margin: 1rem 0;
+  padding-left: 1rem;
 }

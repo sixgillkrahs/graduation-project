@@ -42,6 +42,7 @@ import {
 import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PhotoSlider } from "react-photo-view";
@@ -52,6 +53,7 @@ import { openConversation } from "@/store/chat.store";
 import { toast } from "sonner";
 import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 import { useRequestSchedule } from "../../schedule/services/mutation";
+import { ROUTES } from "@/const/routes";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 const TOUR_TIME_SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
@@ -196,7 +198,7 @@ const PropertyDetail = () => {
       case "message":
         // Tạo hoặc lấy hội thoại hiện tại
         try {
-          const res = await createConversation([prop.userId.id]);
+          const res = await createConversation([prop.userId._id]);
           if (res.data) {
             dispatch(openConversation(res.data));
           }
@@ -603,9 +605,12 @@ const PropertyDetail = () => {
                         )}
                       </div>
                       <div>
-                        <h4 className="font-bold text-foreground">
+                        <Link
+                          href={ROUTES.AGENT_PUBLIC_PROFILE(prop.userId._id)}
+                          className="inline-flex items-center font-bold text-foreground transition-colors hover:text-primary"
+                        >
                           {prop.userId.fullName}
-                        </h4>
+                        </Link>
                         <div className="flex items-center gap-1 text-xs text-amber-500 font-medium">
                           <Star className="w-3 h-3 fill-current" />
                           <span>4.8 (124 reviews)</span>
@@ -679,8 +684,12 @@ const PropertyDetail = () => {
                                       return;
                                     }
 
-                                    if (isBefore(startOfDay(selectedDate), today)) {
-                                      toast.error("Chỉ có thể chọn từ hôm nay trở đi");
+                                    if (
+                                      isBefore(startOfDay(selectedDate), today)
+                                    ) {
+                                      toast.error(
+                                        "Chỉ có thể chọn từ hôm nay trở đi",
+                                      );
                                       return;
                                     }
 

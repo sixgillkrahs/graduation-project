@@ -133,6 +133,7 @@ export class UserController extends BaseController {
       const {
         nameRegister,
         phone,
+        description,
         certificateNumber,
         taxCode,
         yearsOfExperience,
@@ -160,6 +161,7 @@ export class UserController extends BaseController {
             bankAccountNumber || resp.bankInfo?.bankAccountNumber || "",
           bankName: bankName || resp.bankInfo?.bankName || "",
         },
+        description: description ?? resp.description ?? "",
         basicInfo: {
           nameRegister: nameRegister || resp.basicInfo.nameRegister,
           phoneNumber: phone || resp.basicInfo.phoneNumber,

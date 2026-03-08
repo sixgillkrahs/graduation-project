@@ -44,6 +44,7 @@ export interface IAgent {
     bankAccountNumber: string;
     bankName: string;
   };
+  description?: string;
   expirationDate?: Date;
   registrationLink?: string;
   reasonReject?: string;
@@ -203,6 +204,11 @@ const agentSchema = new mongoose.Schema<IAgent, AgentModel, IAgentMethods>(
         type: String,
         trim: true,
       },
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: "",
     },
     expirationDate: {
       type: Date,

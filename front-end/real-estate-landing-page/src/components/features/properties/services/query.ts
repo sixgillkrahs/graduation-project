@@ -11,6 +11,18 @@ export const useOnSale = (params: IParamsPagination) => {
   });
 };
 
+export const useAgentOnSaleProperties = (
+  agentId: string,
+  params: IParamsPagination,
+) => {
+  return useQuery({
+    queryKey: [PropertyQueryKey.agentOnSale, agentId, params],
+    queryFn: () => PropertyService.agentOnSale(agentId, params),
+    enabled: !!agentId,
+    placeholderData: keepPreviousData,
+  });
+};
+
 export const useFavoriteProperties = (params: IParamsPagination) => {
   return useQuery({
     queryKey: [PropertyQueryKey.favorites, params],

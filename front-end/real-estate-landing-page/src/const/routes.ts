@@ -21,6 +21,7 @@ export const ROUTES = {
   RECRUITMENT: "/work/become-agent/recruitment",
 
   // Agent
+  AGENT_PUBLIC_PROFILE: (id: string) => `/agents/${id}` as const,
   AGENT_DASHBOARD: "/agent/dashboard",
   AGENT_LISTINGS: "/agent/listings",
   AGENT_LISTINGS_ADD: "/agent/listings/add",

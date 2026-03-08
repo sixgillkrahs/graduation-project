@@ -26,7 +26,9 @@ export interface UserId {
   createdAt: string;
   updatedAt: string;
   avatarUrl: string;
-  id: string;
+  isPro?: boolean;
+  plan?: "BASIC" | "PRO";
+  _id: string;
 }
 
 export interface Location {

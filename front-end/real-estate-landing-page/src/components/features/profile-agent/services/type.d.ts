@@ -1,6 +1,7 @@
 namespace IProfileService {
   export interface ProfileDTO {
     _id: string;
+    description?: string;
     basicInfo: BasicInfo;
     businessInfo: BusinessInfo;
     imageInfo: ImageInfo;

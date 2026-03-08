@@ -2,6 +2,7 @@ namespace IEditProfileService {
   export interface IFormData {
     nameRegister: string;
     phone: string;
+    description: string;
     certificateNumber: string;
     taxCode: string;
     yearsOfExperience: string;
@@ -16,6 +17,7 @@ namespace IEditProfileService {
     basicInfo: BasicInfo;
     businessInfo: BusinessInfo;
     bankInfo: BankInfo;
+    description: string;
   }
 
   export interface BasicInfo {

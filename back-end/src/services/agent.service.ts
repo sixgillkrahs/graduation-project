@@ -1,5 +1,5 @@
 import { singleton } from "@/decorators/singleton";
-import AgentModel, { IAgent } from "@/models/agent.model";
+import AgentModel, { AgentStatusEnum, IAgent } from "@/models/agent.model";
 
 @singleton
 export class AgentService {
@@ -53,5 +53,15 @@ export class AgentService {
 
   getAgentRegistrationById = async (id: string) => {
     return await AgentModel.findById(id).lean().exec();
+  };
+
+  getAgentsByUserIds = async (userIds: string[]) => {
+    return await AgentModel.find({
+      userId: { $in: userIds },
+      status: AgentStatusEnum.APPROVED,
+    })
+      .select("userId planInfo status")
+      .lean()
+      .exec();
   };
 }
