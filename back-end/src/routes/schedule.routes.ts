@@ -150,7 +150,7 @@ router.use(requireAuth);
  *                 example: VIEWING
  *               status:
  *                 type: string
- *                 enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+ *                 enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED, EXPIRED]
  *                 example: PENDING
  *               customerNote:
  *                 type: string

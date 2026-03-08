@@ -30,7 +30,7 @@ const CsTabs = ({ item, defaultValue }: CsTabsProps) => {
         })}
       </TabsList>
       <Card className="shadow-none py-4 border-none">
-        <TabsContents>
+        <TabsContents className="px-1">
           {item.map((item) => {
             return (
               <TabsContent key={item.value} value={item.value}>

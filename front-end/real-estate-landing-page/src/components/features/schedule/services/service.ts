@@ -22,6 +22,7 @@ export default class ScheduleService {
     { label: "Confirmed", value: SCHEDULE_STATUS.CONFIRMED },
     { label: "Cancelled", value: SCHEDULE_STATUS.CANCELLED },
     { label: "Completed", value: SCHEDULE_STATUS.COMPLETED },
+    { label: "Expired", value: SCHEDULE_STATUS.EXPIRED },
   ];
 
   public static readonly EVENT_COLORS = [

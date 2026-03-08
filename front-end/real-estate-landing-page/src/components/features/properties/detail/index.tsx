@@ -16,7 +16,7 @@ import {
 import { useAppDispatch } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { showAuthDialog } from "@/store/auth-dialog.store";
-import { format } from "date-fns";
+import { format, isBefore, startOfDay } from "date-fns";
 import {
   LIST_PROVINCE,
   LIST_WARD,
@@ -54,6 +54,7 @@ import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 import { useRequestSchedule } from "../../schedule/services/mutation";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
+const TOUR_TIME_SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
 const PropertyDetail = () => {
   const params = useParams();
@@ -78,6 +79,22 @@ const PropertyDetail = () => {
   const { mutateAsync: requestBooking, isPending: isRequestingBooking } =
     useRequestSchedule();
   const t = useTranslations("PropertiesPage");
+  const today = startOfDay(new Date());
+
+  const isPastTimeSlot = (selectedDate: Date | undefined, slot: string) => {
+    if (!selectedDate) return false;
+
+    const normalizedSelectedDate = startOfDay(selectedDate);
+    if (normalizedSelectedDate.getTime() !== today.getTime()) {
+      return false;
+    }
+
+    const [hours, minutes] = slot.split(":").map(Number);
+    const slotDate = new Date(selectedDate);
+    slotDate.setHours(hours, minutes, 0, 0);
+
+    return slotDate <= new Date();
+  };
 
   useEffect(() => {
     if (id) {
@@ -86,6 +103,23 @@ const PropertyDetail = () => {
       }, 3000);
     }
   }, [id, increaseView]);
+
+  useEffect(() => {
+    if (!date || !isPastTimeSlot(date, timeSlot)) {
+      return;
+    }
+
+    const nextAvailableTimeSlot = TOUR_TIME_SLOTS.find(
+      (slot) => !isPastTimeSlot(date, slot),
+    );
+
+    if (nextAvailableTimeSlot) {
+      setTimeSlot(nextAvailableTimeSlot);
+      return;
+    }
+
+    setTimeSlot("");
+  }, [date, timeSlot]);
 
   if (isLoading) {
     return (
@@ -187,6 +221,21 @@ const PropertyDetail = () => {
 
     if (!date) {
       toast.error("Vui lòng chọn ngày muốn đặt lịch");
+      return;
+    }
+
+    if (isBefore(startOfDay(date), today)) {
+      toast.error("Chỉ có thể đặt lịch từ hôm nay trở đi");
+      return;
+    }
+
+    if (!timeSlot) {
+      toast.error("Vui lòng chọn giờ muốn đặt lịch");
+      return;
+    }
+
+    if (isPastTimeSlot(date, timeSlot)) {
+      toast.error("Giờ hẹn phải lớn hơn thời điểm hiện tại");
       return;
     }
 
@@ -624,7 +673,22 @@ const PropertyDetail = () => {
                                 <Calendar
                                   mode="single"
                                   selected={date}
-                                  onSelect={setDate}
+                                  onSelect={(selectedDate) => {
+                                    if (!selectedDate) {
+                                      setDate(undefined);
+                                      return;
+                                    }
+
+                                    if (isBefore(startOfDay(selectedDate), today)) {
+                                      toast.error("Chỉ có thể chọn từ hôm nay trở đi");
+                                      return;
+                                    }
+
+                                    setDate(selectedDate);
+                                  }}
+                                  disabled={(calendarDate) =>
+                                    isBefore(startOfDay(calendarDate), today)
+                                  }
                                   initialFocus
                                   className="rounded-xl"
                                 />
@@ -636,12 +700,18 @@ const PropertyDetail = () => {
                               value={timeSlot}
                               onChange={(e) => setTimeSlot(e.target.value)}
                             >
-                              <option value="09:00">09:00</option>
-                              <option value="10:00">10:00</option>
-                              <option value="11:00">11:00</option>
-                              <option value="14:00">14:00</option>
-                              <option value="15:00">15:00</option>
-                              <option value="16:00">16:00</option>
+                              <option value="" disabled>
+                                Chọn giờ hẹn
+                              </option>
+                              {TOUR_TIME_SLOTS.map((slot) => (
+                                <option
+                                  key={slot}
+                                  value={slot}
+                                  disabled={isPastTimeSlot(date, slot)}
+                                >
+                                  {slot}
+                                </option>
+                              ))}
                             </select>
 
                             {isClientLoggedIn && (

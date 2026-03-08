@@ -29,9 +29,12 @@ export const validateBodyScheduleSchema = (
       type: z.enum(["VIEWING", "MEETING", "CALL"], {
         message: t.required("type"),
       }),
-      status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"], {
-        message: t.required("status"),
-      }),
+      status: z.enum(
+        ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED", "EXPIRED"],
+        {
+          message: t.required("status"),
+        },
+      ),
       customerNote: z.optional(
         z.string({ message: t.required("customerNote") }),
       ),

@@ -14,6 +14,7 @@ export enum SCHEDULE_STATUS {
   CONFIRMED = "CONFIRMED",
   CANCELLED = "CANCELLED",
   COMPLETED = "COMPLETED",
+  EXPIRED = "EXPIRED",
 }
 
 export interface ISchedule {

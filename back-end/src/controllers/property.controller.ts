@@ -662,9 +662,11 @@ export class PropertyController extends BaseController {
         const roomName = ownerId.toString();
 
         io.to(roomName).emit("property_status_update", {
-          message: `Your property "${existingProperty.projectName || "Listing"}" has been approved!`,
+          title: "Bất động sản đã được duyệt 🚀",
+          message: `Dự án "${existingProperty.projectName || "Bất động sản"}" của bạn đã được phê duyệt!`,
           propertyId: id,
-          status: targetStatus,
+          status: "PUBLISHED",
+          type: "PROPERTY",
           timestamp: new Date().toISOString(),
         });
 
@@ -726,9 +728,11 @@ export class PropertyController extends BaseController {
         const roomName = ownerId.toString();
 
         io.to(roomName).emit("property_status_update", {
-          message: `Your property "${existingProperty.projectName || "Listing"}" has been rejected. Reason: ${reason}`,
+          title: "Bất động sản bị từ chối ⚠️",
+          message: `Dự án "${existingProperty.projectName || "Bất động sản"}" của bạn bị từ chối. Lý do: ${reason}`,
           propertyId: id,
-          status: targetStatus,
+          status: "REJECTED",
+          type: "PROPERTY",
           timestamp: new Date().toISOString(),
         });
 

@@ -246,6 +246,12 @@ const Schedule = () => {
         bg: "bg-blue-50",
         border: "border-blue-200",
       },
+      [SCHEDULE_STATUS.EXPIRED]: {
+        label: "Quá hạn",
+        color: "text-orange-700",
+        bg: "bg-orange-50",
+        border: "border-orange-200",
+      },
       [SCHEDULE_STATUS.PENDING]: {
         label: "Chờ duyệt",
         color: "text-amber-700",
@@ -263,7 +269,9 @@ const Schedule = () => {
           ? "#ef4444"
           : event.status === SCHEDULE_STATUS.COMPLETED
             ? "#3b82f6"
-            : "#f59e0b";
+            : event.status === SCHEDULE_STATUS.EXPIRED
+              ? "#f97316"
+              : "#f59e0b";
 
     return (
       <div
@@ -522,7 +530,7 @@ const Schedule = () => {
                     Yêu cầu đặt lịch ({pendingRequests.length})
                   </h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3 pr-1 max-h-[calc(100vh-24rem)] overflow-y-auto custom-scrollbar">
                   {pendingRequests.map(renderEventCard)}
                 </div>
               </div>

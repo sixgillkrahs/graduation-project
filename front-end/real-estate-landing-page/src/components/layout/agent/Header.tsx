@@ -167,10 +167,14 @@ const Header = () => {
     const handleNewNotification = (data: any) => {
       console.log("[Notice] Socket signal received:", data);
 
+      const message = data.message || data.content || "Bạn có thông báo mới";
+      const title = data.title || "🔔 Thông báo";
+      const status = data.status || data.type || "INFO";
+
       const notif: NotificationDetail = {
         id: data.id || data._id || `temp-${Date.now()}`,
-        message: data.message || data.content || "Bạn có thông báo mới",
-        status: data.status || data.type || "INFO",
+        message: message,
+        status: status,
         timestamp: data.timestamp || new Date().toISOString(),
         isRead: false,
         type: data.type || "SYSTEM",
@@ -181,11 +185,11 @@ const Header = () => {
       setUnreadCount((prev) => prev + 1);
       refetch();
 
-      // Premium toast
+      // Trigger toast after a tiny delay to ensure component stability
       setTimeout(() => {
-        toast.info(data.title || "🔔 Thông báo mới", {
-          description: notif.message,
-          duration: 8000,
+        const toastOptions = {
+          description: message,
+          duration: 10000, // Tăng lên 10s cho chắc chắn
           action: {
             label: "Xem",
             onClick: () => {
@@ -193,8 +197,24 @@ const Header = () => {
               setIsModalOpen(true);
             },
           },
-        });
-      }, 100);
+        };
+
+        if (
+          status === "PUBLISHED" ||
+          status === "CONFIRMED" ||
+          status === "SUCCESS"
+        ) {
+          toast.success(title, toastOptions);
+        } else if (
+          status === "REJECTED" ||
+          status === "CANCELLED" ||
+          status === "ERROR"
+        ) {
+          toast.error(title, toastOptions);
+        } else {
+          toast.info(title, toastOptions);
+        }
+      }, 50);
     };
 
     socket.on("notification:new", handleNewNotification);
