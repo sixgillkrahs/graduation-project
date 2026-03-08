@@ -29,8 +29,15 @@ new QdrantWorker(qdrantService);
 // Initialize Notification Worker
 import { NoticeService } from "@/services/notice.service";
 import { NotificationWorker } from "@/workers/notification.worker";
+import { ScheduleService } from "@/services/schedule.service";
+import { ScheduleExpiryWorker } from "@/workers/schedule-expiry.worker";
 const noticeService = new NoticeService();
 new NotificationWorker(noticeService);
+
+// Initialize Schedule Expiry Worker
+const scheduleService = new ScheduleService();
+const scheduleExpiryWorker = new ScheduleExpiryWorker(scheduleService);
+scheduleExpiryWorker.start();
 
 // Lắng nghe message từ client
 // wsService.onMessage((ws, msg) => {
@@ -41,6 +48,7 @@ new NotificationWorker(noticeService);
 
 const shutdown = async () => {
   logger.info("Shutdown signal received");
+  scheduleExpiryWorker.stop();
 
   const wsService = WebSocketService.getInstance();
   // wsService.broadcast({ type: 'shutdown', data: { message: 'Server shutting down' } });

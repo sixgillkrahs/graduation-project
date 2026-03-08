@@ -713,6 +713,9 @@ const PropertyDetail = () => {
                                 </option>
                               ))}
                             </select>
+                            <p className="text-xs text-muted-foreground -mt-2">
+                              Mỗi lịch xem nhà mặc định kéo dài 60 phút.
+                            </p>
 
                             {isClientLoggedIn && (
                               <textarea

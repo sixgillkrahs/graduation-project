@@ -9,6 +9,7 @@ import { EmailQueue } from "@/queues/email.queue";
 import { NotificationQueue } from "@/queues/notification.queue";
 
 export class ScheduleController extends BaseController {
+  private static readonly DEFAULT_VIEWING_DURATION_MINUTES = 60;
   private scheduleService: ScheduleService;
   private userService: UserService;
   private propertyService: PropertyService;
@@ -111,6 +112,11 @@ export class ScheduleController extends BaseController {
         throw new AppError("Property not found", 404);
       }
 
+      const computedEndTime = this.scheduleService.addMinutesToTime(
+        startTime,
+        ScheduleController.DEFAULT_VIEWING_DURATION_MINUTES,
+      );
+
       await this.scheduleService.createSchedule({
         agentId: (property as any).userId?._id || (property as any).userId,
         userId: currentUser?.userId?._id as any,
@@ -121,7 +127,7 @@ export class ScheduleController extends BaseController {
         title: "Yêu cầu đặt lịch xem nhà",
         date,
         startTime,
-        endTime: startTime, // Default to same as start
+        endTime: computedEndTime,
         location:
           (property as any).location?.address ||
           "Liên hệ để biết thêm chi tiết",
@@ -148,6 +154,7 @@ export class ScheduleController extends BaseController {
           customerEmail,
           date,
           startTime,
+          endTime: computedEndTime,
           customerNote,
           listingId,
           propertyTitle: (property as any).title,

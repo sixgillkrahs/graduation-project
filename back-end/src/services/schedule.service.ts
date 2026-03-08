@@ -36,57 +36,63 @@ export class ScheduleService {
     return scheduleEndDate;
   }
 
+  private formatTime(hours: number, minutes: number) {
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  addMinutesToTime(time: string, minutesToAdd: number) {
+    const { hours, minutes } = this.parseTime(time);
+    const date = new Date();
+
+    date.setHours(hours, minutes, 0, 0);
+    date.setMinutes(date.getMinutes() + minutesToAdd);
+
+    return this.formatTime(date.getHours(), date.getMinutes());
+  }
+
+  async expireConfirmedSchedules(agentId?: string) {
+    const now = new Date();
+    const filter: Record<string, unknown> = {
+      status: SCHEDULE_STATUS.CONFIRMED,
+      date: { $lte: now },
+    };
+
+    if (agentId) {
+      filter.agentId = agentId;
+    }
+
+    const expiredCandidates = await ScheduleModel.find(filter).select(
+      "_id date endTime",
+    );
+
+    const expiredIds = expiredCandidates
+      .filter((schedule) => this.getScheduleEndDate(schedule) < now)
+      .map((schedule) => schedule._id);
+
+    if (expiredIds.length === 0) {
+      return 0;
+    }
+
+    const result = await ScheduleModel.updateMany(
+      {
+        _id: { $in: expiredIds },
+        status: SCHEDULE_STATUS.CONFIRMED,
+      },
+      { $set: { status: SCHEDULE_STATUS.EXPIRED } },
+    );
+
+    return result.modifiedCount;
+  }
+
   async createSchedule(data: ISchedule & { agentId: string }) {
     return await ScheduleModel.create(data);
   }
 
   async getSchedules(filter: { agentId: string; start: Date; end: Date }) {
-    const now = new Date();
-    const expiredCandidates = await ScheduleModel.find({
-      agentId: filter.agentId,
-      status: SCHEDULE_STATUS.PENDING,
-      date: { $lte: now },
-    })
-      .select("_id date endTime status")
-      .lean();
-
-    const expiredSchedules = expiredCandidates.filter(
-      (schedule) =>
-        schedule.status === SCHEDULE_STATUS.PENDING &&
-        this.getScheduleEndDate(schedule) < now,
-    );
-
-    if (expiredSchedules.length > 0) {
-      const expiredIds = expiredSchedules.map((schedule) => schedule._id);
-
-      await ScheduleModel.updateMany(
-        {
-          _id: { $in: expiredIds },
-          status: SCHEDULE_STATUS.CONFIRMED,
-        },
-        { $set: { status: SCHEDULE_STATUS.EXPIRED } },
-      );
-
-      expiredSchedules.forEach((schedule) => {
-        schedule.status = SCHEDULE_STATUS.EXPIRED;
-      });
-    }
-
-    const schedules = await ScheduleModel.find({
+    return await ScheduleModel.find({
       agentId: filter.agentId,
       date: { $gte: filter.start, $lte: filter.end },
     }).sort({ date: 1 });
-
-    const expiredIdSet = new Set(
-      expiredSchedules.map((schedule) => String(schedule._id)),
-    );
-    schedules.forEach((schedule) => {
-      if (expiredIdSet.has(String(schedule._id))) {
-        schedule.status = SCHEDULE_STATUS.EXPIRED;
-      }
-    });
-
-    return schedules;
   }
 
   async deleteSchedule(id: string) {
