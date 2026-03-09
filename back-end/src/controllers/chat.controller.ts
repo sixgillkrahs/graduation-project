@@ -35,7 +35,7 @@ export class ChatController extends BaseController {
           page: page ? Number(page) : 1,
           limit: limit ? Number(limit) : 10,
           sortBy: `${(sortField as string) || "updatedAt"}:${(sortOrder as string) || "desc"}`,
-          populate: "participants:fullName ,lastMessageId",
+          populate: "participants:fullName email avatarUrl,lastMessageId",
         },
         filter,
         userId._id.toString(),
@@ -74,7 +74,10 @@ export class ChatController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const { participantIds } = req.body;
-      return await this.chatService.createConversation(participantIds);
+      return await this.chatService.createConversation(
+        req.user.userId._id.toString(),
+        participantIds,
+      );
     });
   };
 }

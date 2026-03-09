@@ -131,6 +131,7 @@ export class UserController extends BaseController {
       const lang = req.lang;
       const currentUser = req.user;
       const {
+        avatarUrl,
         nameRegister,
         phone,
         description,
@@ -153,6 +154,9 @@ export class UserController extends BaseController {
           ErrorCode.USER_NOT_FOUND,
         );
       }
+      await this.userService.updateUser(currentUser.userId._id, {
+        avatarUrl: avatarUrl ?? currentUser.userId.avatarUrl,
+      });
       await this.agentService.updateAgentRegistration(resp._id.toString(), {
         bankInfo: {
           bankAccountName:

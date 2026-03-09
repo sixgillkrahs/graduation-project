@@ -17,8 +17,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
+    const socketBaseUrl =
+      process.env.NEXT_PUBLIC_API_BASE_SOCKET ||
+      process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/api\/?$/, "") ||
+      "http://localhost:8080";
+
     const socketInstance = io(
-      process.env.NEXT_PUBLIC_API_BASE_SOCKET || "http://localhost:3000",
+      socketBaseUrl,
       {
         transports: ["websocket"],
         autoConnect: true,

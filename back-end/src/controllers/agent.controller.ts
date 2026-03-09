@@ -487,6 +487,7 @@ export class AgentController extends BaseController {
         role: "Professional Real Estate Agent",
         location:
           userProfile.address || agentProfile.businessInfo.workingArea?.[0] || "",
+        rating: agentProfile.rating ?? 0,
         description: agentProfile.description || "",
         yearsOfExperience: agentProfile.businessInfo.yearsOfExperience,
         specialties: agentProfile.businessInfo.specialization || [],

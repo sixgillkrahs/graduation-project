@@ -65,13 +65,13 @@ const Properties = () => {
         </div>
         <div className="flex gap-2">
           <CsButton
-            className={`font-medium border-none rounded-full transition-opacity ${page === 1 ? "opacity-30 cursor-not-allowed" : ""}`}
+            className={`size-11 p-0 font-medium border-none rounded-full transition-opacity ${page === 1 ? "opacity-30 cursor-not-allowed" : ""}`}
             icon={<Icon.ArrowLeft />}
             onClick={handlePrev}
             disabled={page === 1 || isLoading}
           />
           <CsButton
-            className={`font-medium border-none rounded-full transition-opacity ${page === totalPages || totalPages === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
+            className={`size-11 p-0 font-medium border-none rounded-full transition-opacity ${page === totalPages || totalPages === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
             icon={<Icon.ArrowRight />}
             onClick={handleNext}
             disabled={page === totalPages || totalPages === 0 || isLoading}

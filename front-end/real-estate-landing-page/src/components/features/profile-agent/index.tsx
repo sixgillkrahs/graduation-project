@@ -245,7 +245,7 @@ const Profile = () => {
                   value={
                     <span className="flex items-center gap-1 ">
                       <span className="cs-typography text-[18px]! font-bold!">
-                        {profileData?.businessInfo.yearsOfExperience}
+                        {profileData?.rating ?? 0}
                       </span>{" "}
                       <Icon.Star className="size-3 " />
                     </span>

@@ -7,6 +7,7 @@ namespace IAgentPublicProfileService {
     phone: string;
     role: string;
     location: string;
+    rating: number;
     description: string;
     yearsOfExperience: string;
     specialties: string[];

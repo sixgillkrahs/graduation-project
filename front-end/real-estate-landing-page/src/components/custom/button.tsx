@@ -67,7 +67,9 @@ const CsButton = ({
         </svg>
       )}
       {!loading && icon && (
-        <span className="mr-2 flex items-center">{icon}</span>
+        <span className={cn("flex items-center", children && "mr-2")}>
+          {icon}
+        </span>
       )}
       {children}
       <RippleButtonRipples />

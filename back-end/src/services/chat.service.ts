@@ -2,21 +2,27 @@ import ConversationModel from "@/models/chat/conversation.model";
 import MessageModel from "@/models/chat/message.model";
 import { singleton } from "@/decorators/singleton";
 import mongoose from "mongoose";
+import { AppError } from "@/utils/appError";
 
 @singleton
 export class ChatService {
   constructor() {
     console.log("init chat service");
   }
-  /**
-   * Create or get existing conversation between participants
-   */
-  public async createConversation(participantIds: string[]) {
-    // Check if conversation exists
+
+  public async createConversationFromParticipantSet(participantIds: string[]) {
+    const normalizedParticipantIds = Array.from(
+      new Set((participantIds || []).filter(Boolean)),
+    );
+
+    if (normalizedParticipantIds.length < 2) {
+      throw new AppError("Conversation requires at least 2 participants", 400);
+    }
+
     const query = {
       participants: {
-        $all: participantIds,
-        $size: participantIds.length,
+        $all: normalizedParticipantIds,
+        $size: normalizedParticipantIds.length,
       },
     };
 
@@ -24,11 +30,89 @@ export class ChatService {
 
     if (!conversation) {
       conversation = await ConversationModel.create({
-        participants: participantIds,
+        participants: normalizedParticipantIds,
       });
     }
 
     return conversation;
+  }
+
+  private buildConversationDTO(conv: any, currentUserId: string) {
+    const participants = Array.isArray(conv.participants) ? conv.participants : [];
+    const otherParticipant =
+      participants.find((p: any) => p.id?.toString() !== currentUserId) ||
+      participants.find((p: any) => p._id?.toString() !== currentUserId) ||
+      participants[0];
+    const lastMsg = conv.lastMessageId;
+
+    let senderName = "Unknown";
+    let senderId = lastMsg?.senderId;
+
+    if (lastMsg?.senderId && typeof lastMsg.senderId === "object") {
+      senderName = lastMsg.senderId.fullName || "User";
+      senderId = lastMsg.senderId._id || lastMsg.senderId.id;
+    } else if (typeof lastMsg?.senderId === "string") {
+      const senderObj = participants.find(
+        (p: any) =>
+          p.id?.toString() === lastMsg.senderId ||
+          p._id?.toString() === lastMsg.senderId,
+      );
+      if (senderObj) {
+        senderName = senderObj.fullName;
+      }
+    }
+
+    return {
+      id: conv.id,
+      type: "PRIVATE",
+      displayName: otherParticipant?.fullName || "Chat",
+      displayAvatar: otherParticipant?.avatarUrl || otherParticipant?.avatar || "",
+      participants: participants.map((participant: any) => ({
+        id: participant.id || participant._id?.toString(),
+        fullName: participant.fullName,
+        email: participant.email,
+        avatar: participant.avatarUrl || participant.avatar || "",
+      })),
+      lastMessage: lastMsg
+        ? {
+            id: lastMsg._id || lastMsg.id,
+            content: lastMsg.content,
+            type: "TEXT",
+            senderId: senderId,
+            createdAt: lastMsg.createdAt,
+            isRead: lastMsg.isRead,
+          }
+        : null,
+      lastMessageSender: {
+        id: senderId,
+        name: senderName,
+      },
+      unreadCount:
+        lastMsg && !lastMsg.isRead && senderId?.toString() !== currentUserId
+          ? 1
+          : 0,
+      updatedAt: conv.updatedAt,
+      isPinned: false,
+      isMuted: false,
+    };
+  }
+  /**
+   * Create or get existing conversation between participants
+   */
+  public async createConversation(
+    currentUserId: string,
+    participantIds: string[],
+  ) {
+    const conversation = await this.createConversationFromParticipantSet([
+      currentUserId,
+      ...(participantIds || []),
+    ]);
+
+    const populatedConversation = await ConversationModel.findById(conversation._id)
+      .populate("participants", "fullName email avatarUrl")
+      .populate("lastMessageId");
+
+    return this.buildConversationDTO(populatedConversation || conversation, currentUserId);
   }
 
   /**
@@ -84,58 +168,9 @@ export class ChatService {
     );
 
     if (result?.results && currentUserId) {
-      result.results = result.results.map((conv: any) => {
-        const otherParticipant =
-          conv.participants.find(
-            (p: any) => p._id.toString() !== currentUserId,
-          ) || conv.participants[0];
-        const lastMsg = conv.lastMessageId;
-
-        // Ensure senderId in lastMsg is populated or handled if it's just an ID
-        let senderName = "Unknown";
-        let senderId = lastMsg?.senderId;
-
-        // If senderId is populated object
-        if (lastMsg?.senderId && typeof lastMsg.senderId === "object") {
-          senderName = lastMsg.senderId.fullName || "User";
-          senderId = lastMsg.senderId._id || lastMsg.senderId.id;
-        }
-        // If senderId is string (not populated), we might need to look it up from participants
-        else if (typeof lastMsg?.senderId === "string") {
-          const senderObj = conv.participants.find(
-            (p: any) => p._id.toString() === lastMsg.senderId,
-          );
-          if (senderObj) senderName = senderObj.fullName;
-        }
-
-        return {
-          id: conv.id,
-          type: "PRIVATE", // Assuming default for now
-          displayName: otherParticipant?.fullName || "Chat",
-          displayAvatar: otherParticipant?.avatar || "",
-          lastMessage: lastMsg
-            ? {
-                id: lastMsg._id || lastMsg.id,
-                content: lastMsg.content,
-                type: "TEXT", // Assuming text
-                senderId: senderId,
-                createdAt: lastMsg.createdAt,
-                isRead: lastMsg.isRead,
-              }
-            : null,
-          lastMessageSender: {
-            id: senderId,
-            name: senderName,
-          },
-          unreadCount:
-            lastMsg && !lastMsg.isRead && senderId?.toString() !== currentUserId
-              ? 1
-              : 0, // Basic logic
-          updatedAt: conv.updatedAt,
-          isPinned: false,
-          isMuted: false,
-        };
-      });
+      result.results = result.results.map((conv: any) =>
+        this.buildConversationDTO(conv, currentUserId),
+      );
     }
 
     return result;

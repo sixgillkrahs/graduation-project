@@ -1,4 +1,5 @@
 export interface EditProfileDto {
+  avatarUrl?: string;
   nameRegister: string;
   phone: string;
   description: string;

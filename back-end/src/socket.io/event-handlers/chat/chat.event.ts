@@ -60,14 +60,17 @@ export class ChatEvent extends BaseEvent {
           };
         }
         const conversation =
-          await this.chatService.createConversation(participants);
-        const room = conversation._id.toString();
+          await this.chatService.createConversationFromParticipantSet(
+            participants,
+          );
+        const room = conversation.id.toString();
         socket.join(room);
         return {
           code: 200,
           state: 1,
           data: {
             users: user,
+            conversationId: room,
           },
         };
       }

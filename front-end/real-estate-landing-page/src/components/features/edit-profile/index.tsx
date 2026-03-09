@@ -2,7 +2,7 @@
 
 import { bankList } from "@/const/bank";
 import { vietnamProvinces } from "@/const/vietnam-provinces";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useProfile } from "../profile/services/query";
 import { useEditProfile } from "./services/mutate";
@@ -10,20 +10,33 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { CsButton } from "@/components/custom";
-import { Edit } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
+import { useUploadImages } from "@/shared/upload/mutate";
+import { fetchProfileItem } from "@/store/profile.store";
+import { AppDispatch } from "@/store";
+import { Camera, Edit } from "lucide-react";
 import { CsSelect } from "@/components/ui/select";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
 
 const EditProfile = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: profile } = useProfile();
   const { mutateAsync: editProfile, isPending } = useEditProfile();
+  const { mutateAsync: uploadImages, isPending: isUploadingAvatar } =
+    useUploadImages();
   const {
     handleSubmit,
     formState: { errors },
     control,
     reset,
+    watch,
+    setValue,
   } = useForm<IEditProfileService.IFormData>({
     defaultValues: {
+      avatarUrl: "",
       nameRegister: "",
       phone: "",
       description: "",
@@ -42,6 +55,7 @@ const EditProfile = () => {
   useEffect(() => {
     if (profile?.data) {
       reset({
+        avatarUrl: profile.data.avatarUrl || "",
         nameRegister: profile.data.basicInfo.nameRegister || "",
         phone: profile.data.basicInfo.phoneNumber || "",
         description: profile.data.description || "",
@@ -57,8 +71,44 @@ const EditProfile = () => {
     }
   }, [profile, reset]);
 
+  const avatarUrl = watch("avatarUrl");
+
+  const handleSelectAvatar = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleUploadAvatar = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      const response = await uploadImages([file]);
+      const uploadedAvatar = response.data.files[0]?.url;
+
+      if (!uploadedAvatar) {
+        toast.error("Avatar upload failed");
+        return;
+      }
+
+      setValue("avatarUrl", uploadedAvatar, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    } catch (error) {
+      toast.error("Avatar upload failed");
+    } finally {
+      event.target.value = "";
+    }
+  };
+
   const onSubmit = async (data: IEditProfileService.IFormData) => {
     await editProfile(data);
+    dispatch(fetchProfileItem());
     router.push("/agent/profile");
   };
 
@@ -84,6 +134,50 @@ const EditProfile = () => {
           <div className="rounded-[18px] bg-white p-10">
             <div className="grid gap-4">
               <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex items-center gap-5 rounded-[18px] border border-black/10 bg-black/[0.02] p-5">
+                  <div className="relative">
+                    <Avatar
+                      src={avatarUrl}
+                      alt={watch("nameRegister") || "Agent avatar"}
+                      className="size-24 rounded-full bg-gray-200 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSelectAvatar}
+                      disabled={isUploadingAvatar}
+                      className="absolute -right-1 -bottom-1 flex size-9 items-center justify-center rounded-full border border-black/10 bg-white text-black shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Camera className="size-4" />
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleUploadAvatar}
+                    />
+                  </div>
+
+                  <div className="grid gap-1">
+                    <h4 className="text-[16px] font-bold text-black">
+                      Profile Avatar
+                    </h4>
+                    <p className="text-[14px] leading-6 text-[#4B5563]">
+                      Upload a clear profile photo to make your agent profile
+                      more trustworthy and recognizable.
+                    </p>
+                    <div>
+                      <CsButton
+                        type="button"
+                        onClick={handleSelectAvatar}
+                        className="bg-white! border border-black/10! text-black"
+                        loading={isUploadingAvatar}
+                      >
+                        Change Avatar
+                      </CsButton>
+                    </div>
+                  </div>
+                </div>
                 <div className="space-y-4">
                   <div className="flex gap-3 items-center ">
                     <div className="w-10 h-10 rounded-full bg-[#F5F5F5] flex items-center justify-center text-[18px] font-black text-black">
@@ -377,7 +471,7 @@ const EditProfile = () => {
                   <CsButton
                     type="submit"
                     className="bg-black text-white"
-                    loading={isPending}
+                    loading={isPending || isUploadingAvatar}
                   >
                     Save
                   </CsButton>

@@ -11,7 +11,7 @@ import {
   openConversation,
 } from "@/store/chat.store";
 import ListChat from "./components/ListChat";
-import { useConversationDetail } from "./services/query";
+import { useConversationDetail, useConversations } from "./services/query";
 import { Spinner } from "@/components/ui/spinner";
 import ChatDetail from "./components/ChatDetail";
 import { SocketProvider } from "./services/socket-context";
@@ -23,7 +23,16 @@ const ChatWidget = () => {
   const { isOpen, selectedConversation } = useAppSelector(
     (state) => state.chat,
   );
-  const { data, isLoading } = useConversationDetail(selectedConversation?._id);
+  const currentConversationId =
+    selectedConversation?.id || selectedConversation?._id;
+  const { data: conversationsData } = useConversations();
+  const { data, isLoading } = useConversationDetail(currentConversationId);
+  const totalUnreadCount =
+    conversationsData?.data?.results?.reduce(
+      (sum: number, conversation: IConversationService.ConversationDTO) =>
+        sum + (conversation.unreadCount || 0),
+      0,
+    ) || 0;
 
   if (!me?.data?.userId) {
     return null;
@@ -41,9 +50,14 @@ const ChatWidget = () => {
           >
             <CsButton
               onClick={() => dispatch(openChatWidget())}
-              className="h-10 w-10 rounded-full shadow-lg flex items-center justify-center p-0"
+              className="relative h-10 w-10 rounded-full shadow-lg flex items-center justify-center p-0"
             >
               <MessageCircle className="h-6 w-6 text-white" />
+              {totalUnreadCount > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex min-h-5 min-w-5 items-center justify-center rounded-full border border-primary/15 bg-white px-1 text-[10px] font-bold leading-none text-primary shadow-lg ring-2 ring-background">
+                  {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
+                </span>
+              )}
             </CsButton>
           </motion.div>
         )}
@@ -71,7 +85,12 @@ const ChatWidget = () => {
                 )}
                 <span className="truncate max-w-[200px]">
                   {selectedConversation
-                    ? selectedConversation.participants?.[1]?.fullName || "Chat"
+                    ? selectedConversation.displayName ||
+                      selectedConversation.participants?.find(
+                        (participant: IConversationService.Participant) =>
+                          participant.id !== me?.data?.userId?._id,
+                      )?.fullName ||
+                      "Chat"
                     : "Messages"}
                 </span>
               </div>

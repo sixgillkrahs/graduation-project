@@ -2,10 +2,16 @@
 
 import { CsButton } from "@/components/custom";
 import { useAgentPublicProfile } from "@/components/features/agent-public-profile/services/query";
+import { useCreateConversation } from "@/components/features/message/services/mutate";
 import PropertyCard from "@/components/features/properties/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
 import { useAgentOnSaleProperties } from "@/components/features/properties/services/query";
+import { Avatar } from "@/components/ui/avatar";
 import bgImage from "@/assets/images/bg.jpg";
+import { ROUTES } from "@/const/routes";
+import { useAppDispatch } from "@/lib/hooks";
+import { openConversation } from "@/store/chat.store";
+import { showAuthDialog } from "@/store/auth-dialog.store";
 import DOMPurify from "dompurify";
 import {
   ArrowUpRight,
@@ -20,6 +26,7 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { useGetMe } from "@/shared/auth/query";
 
 const fallbackAgent = {
   name: "Verified Real Estate Agent",
@@ -28,11 +35,7 @@ const fallbackAgent = {
   phone: "Phone available on request",
   about:
     "This profile represents a verified real estate professional with active market coverage, client support, and property advisory services. Public details will appear here once the agent profile has been fully completed.",
-  specialties: [
-    "Residential Sales",
-    "Property Advisory",
-    "Market Guidance",
-  ],
+  specialties: ["Residential Sales", "Property Advisory", "Market Guidance"],
   stats: {
     rating: 4.8,
     reviews: 0,
@@ -75,16 +78,21 @@ const reviews = [
 const AgentPublicProfile = () => {
   const params = useParams();
   const agentId = params?.id as string;
+  const dispatch = useAppDispatch();
   const [isPhoneVisible, setIsPhoneVisible] = useState(false);
+  const { data: me } = useGetMe();
   const { data: profileData } = useAgentPublicProfile(agentId);
   const { data: activeListingsData, isLoading: isLoadingActiveListings } =
     useAgentOnSaleProperties(agentId, {
       page: 1,
       limit: 4,
     });
+  const { mutateAsync: createConversation, isPending: isCreatingConversation } =
+    useCreateConversation();
 
   const activeListings = activeListingsData?.data?.results || [];
   const profile = profileData?.data;
+  const isClientLoggedIn = Boolean(me?.data?.userId);
   const displayName =
     profile?.fullName ||
     activeListings[0]?.userId?.fullName ||
@@ -96,11 +104,14 @@ const AgentPublicProfile = () => {
   const displaySpecialties = profile?.specialties?.length
     ? profile.specialties
     : fallbackAgent.specialties;
+  const displayAvatar =
+    profile?.avatarUrl || activeListings[0]?.userId?.avatarUrl || "";
+  const displayRating = profile?.rating ?? fallbackAgent.stats.rating;
   const activeListingsCount =
-    profile?.stats.activeSaleListingsCount ??
-    (activeListingsData?.data?.totalResults
+    activeListingsData?.data?.totalResults != null
       ? Number(activeListingsData.data.totalResults)
-      : fallbackAgent.stats.listings);
+      : (profile?.stats.activeSaleListingsCount ??
+        fallbackAgent.stats.listings);
   const displayInitials = displayName
     .split(" ")
     .slice(0, 2)
@@ -112,6 +123,50 @@ const AgentPublicProfile = () => {
       ? `${displayName} is an approved real estate agent with ${profile.yearsOfExperience} years of experience, specializing in ${displaySpecialties.join(", ")}${profile.workingAreas.length ? ` across ${profile.workingAreas.join(", ")}` : ""}.`
       : fallbackAgent.about;
   const sanitizedAboutHtml = DOMPurify.sanitize(aboutText);
+
+  const openLoginDialog = (mode: "phone" | "message") => {
+    dispatch(
+      showAuthDialog({
+        title:
+          mode === "phone"
+            ? "Đăng nhập để xem số điện thoại"
+            : "Đăng nhập để nhắn tin với môi giới",
+        description:
+          mode === "phone"
+            ? "Vui lòng đăng nhập để xem thông tin liên hệ của môi giới này."
+            : "Vui lòng đăng nhập để bắt đầu cuộc trò chuyện với môi giới này.",
+        redirectUrl: ROUTES.AGENT_PUBLIC_PROFILE(agentId),
+      }),
+    );
+  };
+
+  const handleRevealPhone = () => {
+    if (!isClientLoggedIn) {
+      openLoginDialog("phone");
+      return;
+    }
+
+    setIsPhoneVisible(true);
+  };
+
+  const handleOpenConversation = async () => {
+    if (!isClientLoggedIn) {
+      openLoginDialog("message");
+      return;
+    }
+
+    const participantId = profile?.userId || agentId;
+
+    if (!participantId) {
+      return;
+    }
+
+    const res = await createConversation([participantId]);
+
+    if (res.data) {
+      dispatch(openConversation(res.data));
+    }
+  };
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -126,8 +181,17 @@ const AgentPublicProfile = () => {
             <div className="relative px-5 pb-6 md:px-8 md:pb-8">
               <div className="-mt-16 flex flex-col gap-6 md:-mt-18 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-5 md:flex-row md:items-end">
-                  <div className="flex size-28 items-center justify-center rounded-full border-4 border-background bg-primary text-3xl font-semibold text-primary-foreground shadow-lg md:size-32">
-                    {displayInitials}
+                  <div className="size-28 rounded-full border-4 border-background shadow-lg md:size-32">
+                    <Avatar
+                      src={displayAvatar}
+                      alt={displayName}
+                      className="size-full rounded-full bg-primary text-3xl font-semibold text-primary-foreground"
+                    />
+                    {!displayAvatar && (
+                      <div className="-mt-full flex size-full items-center justify-center rounded-full bg-primary text-3xl font-semibold text-primary-foreground">
+                        {displayInitials}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-4">
@@ -159,9 +223,7 @@ const AgentPublicProfile = () => {
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
                         <div className="flex items-center gap-2 text-sm font-semibold">
-                          <span className="text-lg">
-                            {fallbackAgent.stats.rating}/5
-                          </span>
+                          <span className="text-lg">{displayRating}/5</span>
                           <div className="flex items-center gap-1 text-amber-400">
                             {Array.from({ length: 5 }).map((_, index) => (
                               <Star
@@ -203,13 +265,15 @@ const AgentPublicProfile = () => {
                     className="border-border bg-background text-foreground hover:bg-accent"
                     variant="outline"
                     icon={<Phone className="mr-2 size-4" />}
-                    onClick={() => setIsPhoneVisible(true)}
+                    onClick={handleRevealPhone}
                   >
                     {isPhoneVisible ? displayPhone : "Show Phone Number"}
                   </CsButton>
                   <CsButton
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                     icon={<MessageSquare className="mr-2 size-4" />}
+                    onClick={handleOpenConversation}
+                    loading={isCreatingConversation}
                   >
                     Chat / Message
                   </CsButton>
@@ -249,8 +313,8 @@ const AgentPublicProfile = () => {
                         Properties currently represented by {displayName}
                       </h2>
                       <p className="mt-3 text-sm leading-6 text-muted-foreground md:text-base">
-                        A curated snapshot of this agent&apos;s live sale listings,
-                        presented for active buyers and investors.
+                        A curated snapshot of this agent&apos;s live sale
+                        listings, presented for active buyers and investors.
                       </p>
                     </div>
 
@@ -322,14 +386,13 @@ const AgentPublicProfile = () => {
                             name: listing.userId?.fullName || displayName,
                             avatar: listing.userId?.avatarUrl,
                           }}
-                          postedAt={new Date(listing.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "2-digit",
-                              year: "numeric",
-                            },
-                          )}
+                          postedAt={new Date(
+                            listing.createdAt,
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "2-digit",
+                            year: "numeric",
+                          })}
                           type="sale"
                           isFavorite={listing.isFavorite}
                         />
@@ -382,7 +445,7 @@ const AgentPublicProfile = () => {
               <div className="grid gap-8 border-b border-border pb-8 lg:grid-cols-[220px_minmax(0,1fr)]">
                 <div className="rounded-[24px] bg-muted/50 p-5">
                   <p className="text-5xl font-bold tracking-tight">
-                    {fallbackAgent.stats.rating}
+                    {displayRating}
                   </p>
                   <div className="mt-3 flex items-center gap-1 text-amber-400">
                     {Array.from({ length: 5 }).map((_, index) => (

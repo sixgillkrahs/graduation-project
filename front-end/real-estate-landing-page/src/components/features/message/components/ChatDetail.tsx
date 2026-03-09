@@ -1,4 +1,5 @@
 import { Avatar } from "@/components/ui/avatar";
+import { queryClient } from "@/lib/react-query/queryClient";
 import { cn } from "@/lib/utils";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -6,6 +7,7 @@ import { useSocket } from "../services/socket-context";
 import { CsButton } from "@/components/custom";
 import { useGetMe } from "@/shared/auth/query";
 import { formatChatTime } from "gra-helper";
+import { ConversationsQueryKey } from "../services/config";
 
 interface ChatDetailProps {
   messages: IConversationService.ConversationDetailDTO[];
@@ -25,6 +27,102 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
   // We need current user ID for sending messages and typing events
   const { data: userData } = useGetMe();
   const myId = userData?.data?.userId?._id;
+  const conversationId = conversation?.id || conversation?._id;
+
+  const mergeMessages = (
+    prevMessages: IConversationService.ConversationDetailDTO[],
+    nextMessage: IConversationService.ConversationDetailDTO,
+  ) => {
+    const exists = prevMessages.some((message) => message.id === nextMessage.id);
+
+    if (exists) {
+      return prevMessages.map((message) =>
+        message.id === nextMessage.id ? { ...message, ...nextMessage } : message,
+      );
+    }
+
+    return [...prevMessages, nextMessage];
+  };
+
+  const updateConversationDetailCache = (
+    nextMessage: IConversationService.ConversationDetailDTO,
+  ) => {
+    if (!conversationId) {
+      return;
+    }
+
+    queryClient.setQueryData(
+      [ConversationsQueryKey.conversationDetail, conversationId],
+      (oldData: any) => {
+        if (!oldData?.data) {
+          return oldData;
+        }
+
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            results: mergeMessages(oldData.data.results || [], nextMessage),
+          },
+        };
+      },
+    );
+  };
+
+  const updateConversationsCache = (
+    nextMessage: IConversationService.ConversationDetailDTO,
+  ) => {
+    queryClient.setQueryData(
+      [ConversationsQueryKey.conversations],
+      (oldData: any) => {
+        if (!oldData?.data?.results) {
+          return oldData;
+        }
+
+        const nextResults = [...oldData.data.results];
+        const targetIndex = nextResults.findIndex(
+          (item) => item.id === conversationId,
+        );
+
+        if (targetIndex === -1) {
+          return oldData;
+        }
+
+        const targetConversation = nextResults[targetIndex];
+        const senderId =
+          typeof nextMessage.senderId === "string"
+            ? nextMessage.senderId
+            : nextMessage.senderId.id;
+        const isIncomingMessage = senderId !== myId;
+        nextResults[targetIndex] = {
+          ...targetConversation,
+          lastMessage: {
+            id: nextMessage.id,
+            content: nextMessage.content,
+            type: "TEXT",
+            senderId,
+            createdAt: nextMessage.createdAt,
+            isRead: nextMessage.isRead,
+          },
+          updatedAt: nextMessage.createdAt,
+          unreadCount:
+            isIncomingMessage && !nextMessage.isRead
+              ? (targetConversation.unreadCount || 0) + 1
+              : 0,
+        };
+
+        const [latestConversation] = nextResults.splice(targetIndex, 1);
+
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            results: [latestConversation, ...nextResults],
+          },
+        };
+      },
+    );
+  };
 
   // Sync props messsages to local state when conversation changes or messages load
   useEffect(() => {
@@ -35,21 +133,16 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
 
   // Join conversation room
   useEffect(() => {
-    if (!socket || !conversation?.id) return;
+    if (!socket || !conversationId) return;
 
     socket.emit("chat:start", {
       header: { method: "GET" },
-      body: { conversationId: conversation.id },
+      body: { conversationId },
     });
 
     const handleReceiveMessage = (
       message: IConversationService.ConversationDetailDTO,
     ) => {
-      // If the incoming message is from me, ensure isMine is true locally if backend handles it
-      // or we check senderId here.
-      // But for incoming real-time message, we might not have 'isMine' computed yet if it comes straight from socket broadcast without enrichment?
-      // Actually, socket broadcast usually sends the raw object.
-      // We can patch it here:
       const enrichedMessage = {
         ...message,
         isMine:
@@ -57,13 +150,14 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
             ? message.senderId
             : message.senderId.id) === myId,
       };
-      setLocalMessages((prev) => [...prev, enrichedMessage]);
+      setLocalMessages((prev) => mergeMessages(prev, enrichedMessage));
+      updateConversationDetailCache(enrichedMessage);
+      updateConversationsCache(enrichedMessage);
 
-      // If message is NOT mine, mark it as read immediately if window is focused (or just do it since we are in the chat)
       if (!enrichedMessage.isMine && myId) {
         socket.emit("chat:read", {
           header: { method: "POST" },
-          body: { conversationId: conversation.id, userId: myId },
+          body: { conversationId, userId: myId },
         });
       }
     };
@@ -80,10 +174,54 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
 
     // Handle read receipt from other user
     const handleRead = (data: { conversationId: string; userId: string }) => {
-      if (data.conversationId === conversation.id) {
-        // Other user read my messages. Update local messages "isRead" status
+      if (data.conversationId === conversationId) {
         setLocalMessages((prev) =>
           prev.map((msg) => ({ ...msg, isRead: true })),
+        );
+        queryClient.setQueryData(
+          [ConversationsQueryKey.conversations],
+          (oldData: any) => {
+            if (!oldData?.data?.results) {
+              return oldData;
+            }
+
+            return {
+              ...oldData,
+              data: {
+                ...oldData.data,
+                results: oldData.data.results.map((item: any) =>
+                  item.id === conversationId
+                    ? {
+                        ...item,
+                        unreadCount: 0,
+                        lastMessage: item.lastMessage
+                          ? { ...item.lastMessage, isRead: true }
+                          : item.lastMessage,
+                      }
+                    : item,
+                ),
+              },
+            };
+          },
+        );
+        queryClient.setQueryData(
+          [ConversationsQueryKey.conversationDetail, conversationId],
+          (oldData: any) => {
+            if (!oldData?.data?.results) {
+              return oldData;
+            }
+
+            return {
+              ...oldData,
+              data: {
+                ...oldData.data,
+                results: oldData.data.results.map((message: any) => ({
+                  ...message,
+                  isRead: true,
+                })),
+              },
+            };
+          },
         );
       }
     };
@@ -97,7 +235,7 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
     if (myId) {
       socket.emit("chat:read", {
         header: { method: "POST" },
-        body: { conversationId: conversation.id, userId: myId },
+        body: { conversationId, userId: myId },
       });
     }
 
@@ -106,7 +244,7 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
       socket.off("chat:typing", handleTyping);
       socket.off("chat:read", handleRead);
     };
-  }, [socket, conversation?.id, myId]);
+  }, [socket, conversationId, myId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -123,7 +261,7 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
     const payload = {
       header: { method: "POST" },
       body: {
-        conversationId: conversation.id,
+        conversationId,
         senderId: myId,
         content: inputValue.trim(),
       },
@@ -144,14 +282,14 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
 
     socket.emit("chat:typing", {
       header: { method: "POST" },
-      body: { conversationId: conversation.id, userId: myId, isTyping: "true" },
+      body: { conversationId, userId: myId, isTyping: "true" },
     });
 
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit("chat:typing", {
         header: { method: "POST" },
         body: {
-          conversationId: conversation.id,
+          conversationId,
           userId: myId,
           isTyping: "false",
         },

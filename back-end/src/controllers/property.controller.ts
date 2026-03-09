@@ -911,7 +911,6 @@ export class PropertyController extends BaseController {
       const filterQuery = {
         ...this.parseFilters(filters as Record<string, any>),
         userId: agentId,
-        demandType: PropertyDemandTypeEnum.SALE,
         status: PropertyStatusEnum.PUBLISHED,
       };
 

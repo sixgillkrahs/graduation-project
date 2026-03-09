@@ -141,6 +141,8 @@ router.get("/", agentController.getAgents);
  *                   type: string
  *                 location:
  *                   type: string
+ *                 rating:
+ *                   type: number
  *                 description:
  *                   type: string
  *                 yearsOfExperience:
