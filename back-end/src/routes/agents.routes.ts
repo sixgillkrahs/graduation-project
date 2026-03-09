@@ -274,6 +274,9 @@ router.get(
  */
 router.get("/me/analytics", requireAuth, agentController.getAnalytics);
 
+// Public leaderboard (no auth required)
+router.get("/public/leaderboard", agentController.getRevenueLeaderboard);
+
 router.get(
   "/me/revenue-summary",
   requireAuth,

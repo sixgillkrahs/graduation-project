@@ -34,6 +34,7 @@ export const ROUTES = {
   AGENT_PROFILE: "/agent/profile",
 
   // Misc
+  LEADERBOARD: "/leaderboard",
   POLICY: "/policy",
   FAQ: "/faq",
   PRIVACY_POLICY: "/privacy-policy",
