@@ -39,7 +39,7 @@ import {
   Star,
   Video,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -54,6 +54,10 @@ import { toast } from "sonner";
 import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 import { useRequestSchedule } from "../../schedule/services/mutation";
 import { ROUTES } from "@/const/routes";
+import {
+  formatPropertyPrice,
+  formatPropertyPricePerSqm,
+} from "@/lib/property-price";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 const TOUR_TIME_SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
@@ -81,6 +85,7 @@ const PropertyDetail = () => {
   const { mutateAsync: requestBooking, isPending: isRequestingBooking } =
     useRequestSchedule();
   const t = useTranslations("PropertiesPage");
+  const locale = useLocale();
   const today = startOfDay(new Date());
 
   const isPastTimeSlot = (selectedDate: Date | undefined, slot: string) => {
@@ -145,6 +150,19 @@ const PropertyDetail = () => {
   }
 
   const prop = property.data;
+  const displayPrice = formatPropertyPrice(
+    prop.features.price,
+    prop.features.priceUnit,
+    prop.features.currency,
+    locale,
+  );
+  const pricePerSqm = formatPropertyPricePerSqm(
+    prop.features.price,
+    prop.features.priceUnit,
+    prop.features.area,
+    prop.features.currency,
+    locale,
+  );
 
   const AMENITIES = [
     { name: t("detail.swimmingPool"), icon: "🏊‍♂️" },
@@ -571,20 +589,12 @@ const PropertyDetail = () => {
                   </p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold text-foreground">
-                      {t("currency.priceMain", { price: prop.features.price })}
-                    </span>
-                    <span className="text-muted-foreground font-medium">
-                      {t("currency.priceSuffix")}
+                      {displayPrice}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-400 mt-1">
-                    {t("currency.pricePerSqm", {
-                      price: (
-                        (prop.features.price * 1000) /
-                        prop.features.area
-                      ).toFixed(0),
-                    })}
-                  </p>
+                  {pricePerSqm && (
+                    <p className="text-sm text-gray-400 mt-1">{pricePerSqm}</p>
+                  )}
                 </div>
 
                 <div className="border-y border-border py-6 mb-6">
@@ -829,6 +839,7 @@ const PropertyDetail = () => {
                       }}
                       address={`${prop.location?.address}, ${findOptionLabel(prop.location?.ward, LIST_WARD)}, ${findOptionLabel(prop.location?.province, LIST_PROVINCE)}`}
                       price={prop.features?.price?.toString()}
+                      currency={prop.features?.currency}
                       specs={{
                         beds: prop.features?.bedrooms,
                         baths: prop.features?.bathrooms,

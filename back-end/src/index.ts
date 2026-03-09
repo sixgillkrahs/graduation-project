@@ -31,6 +31,8 @@ import { NoticeService } from "@/services/notice.service";
 import { NotificationWorker } from "@/workers/notification.worker";
 import { ScheduleService } from "@/services/schedule.service";
 import { ScheduleExpiryWorker } from "@/workers/schedule-expiry.worker";
+import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
+import { AgentLeaderboardWorker } from "@/workers/agent-leaderboard.worker";
 const noticeService = new NoticeService();
 new NotificationWorker(noticeService);
 
@@ -38,6 +40,9 @@ new NotificationWorker(noticeService);
 const scheduleService = new ScheduleService();
 const scheduleExpiryWorker = new ScheduleExpiryWorker(scheduleService);
 scheduleExpiryWorker.start();
+
+const agentLeaderboardService = new AgentLeaderboardService();
+new AgentLeaderboardWorker(agentLeaderboardService);
 
 // Lắng nghe message từ client
 // wsService.onMessage((ws, msg) => {

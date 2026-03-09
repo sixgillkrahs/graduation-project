@@ -7,6 +7,7 @@ import {
   getRejectApplicationEmailTemplate,
   sendOTPEmailTemplate,
   getAppointmentConfirmedEmailTemplate,
+  getDealClosedEmailTemplate,
 } from "@/templates/email";
 
 export class EmailService {
@@ -188,6 +189,33 @@ export class EmailService {
     } catch (error) {
       logger.error("Failed to send appointment confirmation email", {
         context: "EmailService.sendAppointmentConfirmedEmail",
+        error: error instanceof Error ? error.message : "Unknown error",
+        to,
+      });
+      throw error;
+    }
+  }
+
+  async sendDealClosedEmail(
+    to: string,
+    customerName: string,
+    propertyName: string,
+  ): Promise<void> {
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to,
+        subject: "EstateX - Xin chúc mừng giao dịch thành công! 🎉",
+        html: getDealClosedEmailTemplate(customerName, propertyName),
+      });
+      logger.info("Deal closed email sent", {
+        context: "EmailService.sendDealClosedEmail",
+        to,
+        messageId: info.messageId,
+      });
+    } catch (error) {
+      logger.error("Failed to send deal closed email", {
+        context: "EmailService.sendDealClosedEmail",
         error: error instanceof Error ? error.message : "Unknown error",
         to,
       });

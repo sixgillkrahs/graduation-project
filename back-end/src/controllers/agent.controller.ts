@@ -14,7 +14,12 @@ import bcrypt from "bcrypt";
 import { EmailQueue } from "@/queues/email.queue";
 import { IAuth } from "@/models/auth.model";
 import { PropertyService } from "@/services/property.service";
-import { PropertyStatusEnum } from "@/models/property.model";
+import {
+  CurrencyEnum,
+  PropertyStatusEnum,
+} from "@/models/property.model";
+import { PropertySaleService } from "@/services/property-sale.service";
+import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
 
 export class AgentController extends BaseController {
   constructor(
@@ -25,6 +30,8 @@ export class AgentController extends BaseController {
     private roleService: RoleService,
     private emailQueue: EmailQueue,
     private propertyService: PropertyService,
+    private propertySaleService: PropertySaleService,
+    private agentLeaderboardService: AgentLeaderboardService,
   ) {
     super();
   }
@@ -447,6 +454,8 @@ export class AgentController extends BaseController {
         totalPublishedListingsCount,
         soldPropertiesCount,
         totalViews,
+        vndLeaderboardSnapshot,
+        usdLeaderboardSnapshot,
       ] = await Promise.all([
         this.propertyService.count({
           userId: agentId,
@@ -462,7 +471,22 @@ export class AgentController extends BaseController {
           status: PropertyStatusEnum.SOLD,
         }),
         this.propertyService.getTotalViews(agentId),
+        this.agentLeaderboardService.getAgentMonthlyRank(agentId, {
+          currency: CurrencyEnum.VND,
+        }),
+        this.agentLeaderboardService.getAgentMonthlyRank(agentId, {
+          currency: CurrencyEnum.USD,
+        }),
       ]);
+      const leaderboardSnapshot = [vndLeaderboardSnapshot, usdLeaderboardSnapshot]
+        .filter(Boolean)
+        .sort((left, right) => {
+          if ((left?.rank || Infinity) !== (right?.rank || Infinity)) {
+            return (left?.rank || Infinity) - (right?.rank || Infinity);
+          }
+
+          return (right?.revenue || 0) - (left?.revenue || 0);
+        })[0];
 
       const now = new Date();
       const isPro =
@@ -501,6 +525,17 @@ export class AgentController extends BaseController {
           soldPropertiesCount,
           totalViews,
         },
+        leaderboard: leaderboardSnapshot
+          ? {
+              month: leaderboardSnapshot.month,
+              year: leaderboardSnapshot.year,
+              currency: leaderboardSnapshot.currency,
+              rank: leaderboardSnapshot.rank,
+              revenue: leaderboardSnapshot.revenue,
+              deals: leaderboardSnapshot.deals,
+              latestSoldAt: leaderboardSnapshot.latestSoldAt,
+            }
+          : null,
       };
     });
   };
@@ -654,6 +689,86 @@ export class AgentController extends BaseController {
 
       // Service now returns full merged array { label, views, leads }
       return analyticsData;
+    });
+  };
+
+  getRevenueSummary = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const userId = req.user?.userId?._id?.toString();
+      if (!userId) {
+        return {
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
+          currency: CurrencyEnum.VND,
+          revenue: 0,
+          deals: 0,
+        };
+      }
+
+      const { month, year, currency } = req.query as {
+        month?: string;
+        year?: string;
+        currency?: CurrencyEnum;
+      };
+
+      return await this.propertySaleService.getAgentRevenueSummary(userId, {
+        month: month ? Number(month) : undefined,
+        year: year ? Number(year) : undefined,
+        currency,
+      });
+    });
+  };
+
+  getMySalesLog = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const userId = req.user?.userId?._id?.toString();
+      if (!userId) {
+        return {
+          results: [],
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+          totalResults: 0,
+        };
+      }
+
+      const { page, limit, month, year, currency } = req.query as {
+        page?: string;
+        limit?: string;
+        month?: string;
+        year?: string;
+        currency?: CurrencyEnum;
+      };
+
+      return await this.propertySaleService.getAgentSalesLog(userId, {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 5,
+        month: month ? Number(month) : undefined,
+        year: year ? Number(year) : undefined,
+        currency,
+      });
+    });
+  };
+
+  getRevenueLeaderboard = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { month, year, currency, limit } = req.query as {
+        month?: string;
+        year?: string;
+        currency?: CurrencyEnum;
+        limit?: string;
+      };
+
+      return await this.agentLeaderboardService.getRevenueLeaderboard({
+        month: month ? Number(month) : undefined,
+        year: year ? Number(year) : undefined,
+        currency,
+        limit: limit ? Number(limit) : undefined,
+      });
     });
   };
 }

@@ -53,6 +53,8 @@ const EditListing = () => {
         longitude: p.location?.coordinates?.long || null,
         area: p.features?.area || "",
         price: p.features?.price || "",
+        currency: p.features?.currency || "VND",
+        priceUnit: p.features?.priceUnit || "MILLION",
         bedrooms: p.features?.bedrooms || 1,
         bathrooms: p.features?.bathrooms || 1,
         direction: p.features?.direction || "",
@@ -86,6 +88,8 @@ const EditListing = () => {
           features: {
             area: hydratedData.area,
             price: hydratedData.price,
+            currency: hydratedData.currency,
+            priceUnit: hydratedData.priceUnit,
             bedrooms: hydratedData.bedrooms,
             bathrooms: hydratedData.bathrooms,
             direction: hydratedData.direction,

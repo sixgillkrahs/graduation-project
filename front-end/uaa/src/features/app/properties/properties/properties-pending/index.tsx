@@ -6,6 +6,7 @@ import type { ColumnsType } from "antd/es/table";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { formatPropertyPrice } from "@/shared/utils/propertyPrice";
 
 const PropertiesPending = () => {
   const { t } = useTranslation();
@@ -45,7 +46,12 @@ const PropertiesPending = () => {
     {
       title: t("properties.price"),
       key: "price",
-      render: (_, record) => `${record.features.price} ${record.features.priceUnit}`,
+      render: (_, record) =>
+        formatPropertyPrice(
+          record.features.price,
+          record.features.priceUnit,
+          record.features.currency,
+        ),
     },
     {
       title: t("properties.location"),

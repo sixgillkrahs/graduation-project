@@ -17,6 +17,8 @@ export interface ListingFormData {
   // Step 3: Features & Pricing
   area: string;
   price: string;
+  currency: "VND" | "USD";
+  priceUnit: "VND" | "MILLION" | "BILLION" | "MILLION_PER_M2";
   bedrooms: number;
   bathrooms: number;
   direction: string;

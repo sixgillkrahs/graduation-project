@@ -440,6 +440,142 @@
       "questionsAbout": "Bạn có câu hỏi liên quan?",
       "reachOut": "Bất cứ thắc mắc nảy sinh về Chính sách Bảo Mật, làm ơn gửi thư điện tử cho Viên Chức Xử Lý Bảo Mật của trang web bằng liên kết"
     }
+  },
+  "AgentDashboard": {
+    "header": {
+      "title": "Trung tâm điều phối môi giới",
+      "description": "Chào mừng bạn quay lại, đây là những gì đang diễn ra hôm nay."
+    },
+    "stats": {
+      "monthlyRevenue": "Doanh thu tháng",
+      "revenue": "Doanh thu",
+      "closedDeals": "Giao dịch đã chốt",
+      "sales": "Bán hàng",
+      "activeListings": "Tin đăng hoạt động",
+      "listings": "Tin đăng",
+      "totalViews": "Tổng lượt xem",
+      "performance": "Hiệu suất"
+    },
+    "sales": {
+      "loading": "Đang tải nhật ký giao dịch...",
+      "title": "Các giao dịch vừa chốt",
+      "deals": "{count} giao dịch",
+      "empty": "Chưa có giao dịch nào được ghi nhận trong tháng này.",
+      "customerFallback": "Chưa có thông tin khách hàng"
+    },
+    "leaderboard": {
+      "title": "Đường đua doanh thu tháng",
+      "description": "Top môi giới theo doanh thu giao dịch đã chốt bằng {currency}",
+      "empty": "Chưa có doanh thu nào được ghi nhận trong tháng này với {currency}.",
+      "agentFallback": "Môi giới",
+      "unknownAgent": "Môi giới chưa xác định",
+      "deals": "{count} giao dịch đã chốt"
+    },
+    "sidebar": {
+      "scheduleTitle": "Lịch hẹn hôm nay",
+      "scheduleEmpty": "Hôm nay chưa có lịch hẹn nào.",
+      "opportunitiesTitle": "Cơ hội tìm nguồn hàng",
+      "opportunitiesDescriptionPrefix": "Có 3 chủ nhà mới đăng tin tại",
+      "opportunitiesHighlight": "Cầu Giấy",
+      "opportunitiesAction": "Xem và nhận"
+    },
+    "chart": {
+      "title": "Tổng quan hiệu suất",
+      "descriptionYear": "So sánh lượt xem và lead (Tháng 1 - Tháng 12)",
+      "descriptionMonth": "Hiệu suất theo ngày (30 ngày gần nhất)",
+      "month": "Tháng",
+      "year": "Nam",
+      "pageViews": "Lượt xem trang",
+      "contactLeads": "Lead liên hệ"
+    }
+  },
+  "AgentPublicProfile": {
+    "fallback": {
+      "name": "Môi giới bất động sản đã xác minh",
+      "role": "Chuyên gia tư vấn bất động sản",
+      "location": "Hà Nội, Việt Nam",
+      "phone": "Số điện thoại sẽ hiển thị khi cần",
+      "about": "Hồ sơ này đại diện cho một môi giới bất động sản đã xác minh, đang hoạt động tích cực trên thị trường và hỗ trợ khách hàng trong suốt quá trình tư vấn. Thông tin công khai sẽ hiển thị đầy đủ khi hồ sơ được hoàn thiện.",
+      "specialty1": "Bán nhà ở",
+      "specialty2": "Tư vấn bất động sản",
+      "specialty3": "Hướng dẫn thị trường"
+    },
+    "auth": {
+      "phoneTitle": "Đăng nhập để xem số điện thoại",
+      "phoneDescription": "Vui lòng đăng nhập để xem thông tin liên hệ của môi giới này.",
+      "messageTitle": "Đăng nhập để nhắn tin với môi giới",
+      "messageDescription": "Vui lòng đăng nhập để bắt đầu cuộc trò chuyện với môi giới này."
+    },
+    "hero": {
+      "verified": "Môi giới đã xác minh",
+      "topRevenueBadge": "Top #{rank} doanh thu tháng này",
+      "pro": "Thành viên PRO"
+    },
+    "stats": {
+      "topThisMonth": "Top #{rank} tháng này",
+      "notRanked": "Chưa vào bảng xếp hạng",
+      "topRevenueDescription": "{revenue} từ {deals} giao dịch",
+      "notRankedDescription": "Môi giới sẽ xuất hiện tại đây sau khi chốt thêm giao dịch mới.",
+      "reviews": "{count} đánh giá",
+      "activeListings": "Tin đăng hoạt động",
+      "primaryMarket": "Thị trường chính"
+    },
+    "actions": {
+      "showPhone": "Hiện số điện thoại",
+      "chat": "Chat / Nhắn tin"
+    },
+    "about": {
+      "title": "Về tôi",
+      "generated": "{name} là một môi giới bất động sản đã được phê duyệt với {years} năm kinh nghiệm, chuyên về {specialties}{areas}.",
+      "areaSuffix": " tại {areas}"
+    },
+    "listings": {
+      "badge": "Tin đăng hoạt động",
+      "title": "Các bất động sản hiện đang được {name} đại diện",
+      "description": "Tổng hợp những tin đăng mua bán đang hoạt động của môi giới này, dành cho người mua và nhà đầu tư đang tìm cơ hội phù hợp.",
+      "liveInventory": "Kho tin đăng",
+      "focusMarket": "Khu vực trọng tâm",
+      "emptyTitle": "Chưa có bất động sản đang bán",
+      "emptyDescription": "Môi giới này hiện không có tin đăng bán nào đang được xuất bản.",
+      "footerDescription": "Đang hiển thị những điểm nhấn mới nhất trong danh mục đang mở bán của môi giới này.",
+      "viewAll": "Xem tất cả bất động sản của môi giới này"
+    },
+    "reviews": {
+      "title": "Đánh giá và nhận xét",
+      "subtitle": "Khách hàng nói gì khi làm việc với {name}",
+      "basedOn": "Được tổng hợp từ {count} đánh giá đã xác minh",
+      "breakdown": {
+        "fiveStar": "5 sao",
+        "fourStar": "4 sao",
+        "threeStar": "3 sao",
+        "twoStar": "2 sao",
+        "oneStar": "1 sao"
+      },
+      "items": [
+        {
+          "comment": "Làm việc rất chuyên nghiệp và hỗ trợ xuyên suốt quá trình. Phản hồi nhanh và danh sách bất động sản gợi ý rất sát với nhu cầu của tôi."
+        },
+        {
+          "comment": "Tư vấn rõ ràng, nắm thị trường tốt và không ép khách. Lịch xem nhà được sắp xếp gọn gàng từ đầu đến cuối."
+        },
+        {
+          "comment": "Là một môi giới đáng tin cậy và có hiểu biết tốt về khu vực. Tôi muốn có thêm vài lựa chọn ở giai đoạn đầu, nhưng gợi ý cuối cùng rất phù hợp."
+        }
+      ]
+    },
+    "contact": {
+      "title": "Liên hệ {name}",
+      "heading": "Bắt đầu cuộc trò chuyện",
+      "description": "Để lại thông tin và một lời nhắn ngắn. Môi giới sẽ liên hệ lại sớm để trao đổi về tin đăng phù hợp, giá cả hoặc lịch xem nhà.",
+      "namePlaceholder": "Tên của bạn",
+      "phonePlaceholder": "Số điện thoại",
+      "messagePlaceholder": "Hãy cho môi giới biết bạn đang tìm loại bất động sản nào...",
+      "send": "Gửi tin nhắn"
+    },
+    "specialties": {
+      "title": "Chuyên môn",
+      "heading": "Dịch vụ và khu vực cốt lõi"
+    }
   }
 }
 

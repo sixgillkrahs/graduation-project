@@ -21,5 +21,14 @@ namespace IAgentPublicProfileService {
       soldPropertiesCount: number;
       totalViews: number;
     };
+    leaderboard: null | {
+      month: number;
+      year: number;
+      currency: "VND" | "USD";
+      rank: number;
+      revenue: number;
+      deals: number;
+      latestSoldAt?: string;
+    };
   }
 }

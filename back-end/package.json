@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "npx nodemon",
     "worker:email": "tsx src/bootstrap/email-worker.bootstrap.ts",
+    "backfill:property-sales": "tsx src/scripts/backfill-property-sales.ts",
+    "refresh:agent-leaderboards": "tsx src/scripts/refresh-agent-leaderboards.ts",
     "dev:clean": "rimraf dist && tsx watch src/index.ts",
     "start": "node --expose-gc --trace-gc --trace-gc-ignore-scavenger dist/index.js",
     "build": "tsc -p . && tsc-alias",

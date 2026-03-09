@@ -4,6 +4,7 @@ import {
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
   SendVerifyEmailJob,
+  SendDealClosedEmailJob,
 } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
 import { Queue } from "bullmq";
@@ -66,6 +67,17 @@ export class EmailQueue {
   enqueueAppointmentConfirmedEmail(data: SendAppointmentConfirmedEmailJob) {
     const jobId = `appointment-confirmed:${data.to}:${Date.now()}`;
     return this.queue.add("sendAppointmentConfirmedEmail", data, {
+      jobId,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+  }
+
+  enqueueDealClosedEmail(data: SendDealClosedEmailJob) {
+    const jobId = `deal-closed:${data.to}:${Date.now()}`;
+    return this.queue.add("sendDealClosedEmail", data, {
       jobId,
       attempts: 5,
       backoff: { type: "exponential", delay: 3000 },

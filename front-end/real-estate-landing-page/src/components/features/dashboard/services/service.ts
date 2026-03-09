@@ -3,6 +3,11 @@ import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
 import { DashboardEndpoint } from "./config";
 import { IScheduleDTO } from "../../schedule/dto/schedule.dto";
+import {
+  IRevenueLeaderboardDto,
+  IRevenueSummaryDto,
+  ISalesLogItemDto,
+} from "../dto/revenue.dto";
 
 export default class DashboardService {
   public static readonly countPropertiesByAgent = (
@@ -67,6 +72,35 @@ export default class DashboardService {
   > => {
     return request({
       url: DashboardEndpoint.analytics(period),
+      method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly getRevenueSummary = (
+    currency: "VND" | "USD",
+  ): Promise<IResp<IRevenueSummaryDto>> => {
+    return request({
+      url: DashboardEndpoint.revenueSummary(currency),
+      method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly getSalesLog = (
+    currency: "VND" | "USD",
+    limit = 5,
+  ): Promise<IPaginationResp<ISalesLogItemDto>> => {
+    return request({
+      url: DashboardEndpoint.salesLog(currency, limit),
+      method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly getRevenueLeaderboard = (
+    currency: "VND" | "USD",
+    limit = 10,
+  ): Promise<IResp<IRevenueLeaderboardDto>> => {
+    return request({
+      url: DashboardEndpoint.revenueLeaderboard(currency, limit),
       method: AxiosMethod.GET,
     });
   };

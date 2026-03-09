@@ -6,6 +6,8 @@ const collections = {
   auths: "auths",
   agents: "agents",
   properties: "properties",
+  propertySales: "propertySales",
+  agentLeaderboardSnapshots: "agentLeaderboardSnapshots",
   conversations: "conversations",
   messages: "messages",
   notices: "notices",

@@ -3,21 +3,30 @@ import { optionalAuth, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { NoticeService } from "@/services/notice.service";
 import { PropertyInteractionService } from "@/services/property-interaction.service";
+import { PropertySaleService } from "@/services/property-sale.service";
 import { PropertyService } from "@/services/property.service";
 import { AgentService } from "@/services/agent.service";
 import { createPropertySchema } from "@/validators/property.validator";
 import { Router } from "express";
+import { EmailQueue } from "@/queues/email.queue";
+import { AgentLeaderboardQueue } from "@/queues/agent-leaderboard.queue";
 
 const router = Router();
 const propertyService = new PropertyService();
 const noticeService = new NoticeService();
 const propertyInteractionService = new PropertyInteractionService();
 const agentService = new AgentService();
+const propertySaleService = new PropertySaleService();
+const emailQueue = new EmailQueue();
+const agentLeaderboardQueue = new AgentLeaderboardQueue();
 const propertyController = new PropertyController(
   propertyService,
   noticeService,
   propertyInteractionService,
   agentService,
+  propertySaleService,
+  emailQueue,
+  agentLeaderboardQueue,
 );
 
 /**

@@ -2,21 +2,26 @@ import { redisConnection } from "@/config/redis.connection";
 import { NoticeTypeEnum } from "@/models/notice.model";
 import { InteractionType } from "@/models/property-interaction.model";
 import {
+  CurrencyEnum,
   PropertyDemandTypeEnum,
   PropertyDirectionEnum,
   PropertyFurnitureEnum,
   PropertyLegalStatusEnum,
+  PriceUnitEnum,
   PropertyStatusEnum,
 } from "@/models/property.model";
 import UserModel from "@/models/user.model";
 import { AgentService } from "@/services/agent.service";
 import { NoticeService } from "@/services/notice.service";
 import { PropertyInteractionService } from "@/services/property-interaction.service";
+import { PropertySaleService } from "@/services/property-sale.service";
 import { PropertyService } from "@/services/property.service";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
+import { EmailQueue } from "@/queues/email.queue";
+import { AgentLeaderboardQueue } from "@/queues/agent-leaderboard.queue";
 
 export class PropertyController extends BaseController {
   constructor(
@@ -24,8 +29,91 @@ export class PropertyController extends BaseController {
     private noticeService: NoticeService,
     private propertyInteractionService: PropertyInteractionService,
     private agentService: AgentService,
+    private propertySaleService: PropertySaleService,
+    private emailQueue: EmailQueue,
+    private agentLeaderboardQueue: AgentLeaderboardQueue,
   ) {
     super();
+  }
+
+  private enqueueLeaderboardRefreshJobs = async (
+    currency: CurrencyEnum,
+    periods: Array<Date | undefined>,
+  ) => {
+    const uniquePeriods = new Map<string, { month: number; year: number }>();
+
+    periods.forEach((period) => {
+      if (!period) {
+        return;
+      }
+
+      const soldAt = new Date(period);
+      if (Number.isNaN(soldAt.getTime())) {
+        return;
+      }
+
+      const month = soldAt.getMonth() + 1;
+      const year = soldAt.getFullYear();
+      uniquePeriods.set(`${year}-${month}`, { month, year });
+    });
+
+    await Promise.all(
+      Array.from(uniquePeriods.values()).map(({ month, year }) =>
+        this.agentLeaderboardQueue.enqueueRefreshMonthlyLeaderboard({
+          month,
+          year,
+          currency,
+        }),
+      ),
+    );
+  };
+
+  private getPriceUnit(value?: string) {
+    const priceUnitMap: Record<string, PriceUnitEnum> = {
+      VND: PriceUnitEnum.VND,
+      MILLION: PriceUnitEnum.MILLION,
+      BILLION: PriceUnitEnum.BILLION,
+      MILLION_PER_M2: PriceUnitEnum.MILLION_PER_M2,
+    };
+
+    return priceUnitMap[value || ""] || PriceUnitEnum.MILLION;
+  }
+
+  private getCurrency(value?: string) {
+    const currencyMap: Record<string, CurrencyEnum> = {
+      VND: CurrencyEnum.VND,
+      USD: CurrencyEnum.USD,
+    };
+
+    return currencyMap[value || ""] || CurrencyEnum.VND;
+  }
+
+  private calculateTotalPrice(
+    price: number,
+    priceUnit: PriceUnitEnum,
+    currency: CurrencyEnum,
+    area?: number,
+  ) {
+    if (!Number.isFinite(price) || price <= 0) {
+      return undefined;
+    }
+
+    if (currency === CurrencyEnum.USD) {
+      return undefined;
+    }
+
+    switch (priceUnit) {
+      case PriceUnitEnum.VND:
+        return price;
+      case PriceUnitEnum.MILLION:
+        return price * 1_000_000;
+      case PriceUnitEnum.BILLION:
+        return price * 1_000_000_000;
+      case PriceUnitEnum.MILLION_PER_M2:
+        return area && area > 0 ? price * 1_000_000 * area : 0;
+      default:
+        return price * 1_000_000;
+    }
   }
 
   private async enrichPropertiesWithAgentPlan<T extends any>(properties: T[]) {
@@ -216,6 +304,11 @@ export class PropertyController extends BaseController {
         return map[val] || undefined;
       };
 
+      const currency = this.getCurrency(body.currency);
+      const priceUnit = this.getPriceUnit(body.priceUnit);
+      const area = Number(body.area);
+      const price = Number(body.price);
+
       const propertyData = {
         userId: user.userId._id as any,
         demandType: body.demandType,
@@ -234,9 +327,16 @@ export class PropertyController extends BaseController {
           },
         },
         features: {
-          area: Number(body.area),
-          price: Number(body.price),
-          priceUnit: "MILLION" as any, // Default or derived
+          area,
+          price,
+          currency,
+          priceUnit,
+          totalPrice: this.calculateTotalPrice(
+            price,
+            priceUnit,
+            currency,
+            area,
+          ),
           bedrooms: Number(body.bedrooms) || 0,
           bathrooms: Number(body.bathrooms) || 0,
           direction: getDirection(body.direction),
@@ -591,6 +691,15 @@ export class PropertyController extends BaseController {
         return map[val] || existingProperty.features?.furniture;
       };
 
+      const area = Number(body.area) || existingProperty.features?.area;
+      const price = Number(body.price) || existingProperty.features?.price;
+      const currency = body.currency
+        ? this.getCurrency(body.currency)
+        : existingProperty.features?.currency || CurrencyEnum.VND;
+      const priceUnit = body.priceUnit
+        ? this.getPriceUnit(body.priceUnit)
+        : existingProperty.features?.priceUnit || PriceUnitEnum.MILLION;
+
       const propertyData = {
         demandType: body.demandType || existingProperty.demandType,
         title: body.title || existingProperty.title,
@@ -614,9 +723,16 @@ export class PropertyController extends BaseController {
           },
         },
         features: {
-          area: Number(body.area) || existingProperty.features?.area,
-          price: Number(body.price) || existingProperty.features?.price,
-          priceUnit: "MILLION" as any, // Default or derived
+          area,
+          price,
+          currency,
+          priceUnit,
+          totalPrice: this.calculateTotalPrice(
+            price,
+            priceUnit,
+            currency,
+            area,
+          ),
           bedrooms:
             Number(body.bedrooms) || existingProperty.features?.bedrooms || 0,
           bathrooms:
@@ -651,9 +767,10 @@ export class PropertyController extends BaseController {
   updatePropertyStatus = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;
-      const { status, soldPrice, soldTo, soldAt } = req.body;
+      const { status, soldPrice, soldTo, soldToEmail, soldAt } = req.body;
       const user = req.user;
       const lang = req.lang;
+      const refreshPeriods: Array<Date | undefined> = [];
 
       // Check ownership
       const existingProperty = await this.propertyService.getPropertyById(id);
@@ -663,6 +780,13 @@ export class PropertyController extends BaseController {
           404,
           ErrorCode.NOT_FOUND,
         );
+      }
+
+      if (
+        existingProperty.status === PropertyStatusEnum.SOLD &&
+        existingProperty.salesInfo?.soldAt
+      ) {
+        refreshPeriods.push(new Date(existingProperty.salesInfo.soldAt));
       }
 
       if (existingProperty.userId.toString() !== user.userId._id.toString()) {
@@ -692,12 +816,29 @@ export class PropertyController extends BaseController {
       const updateData: any = { status };
 
       if (status === PropertyStatusEnum.SOLD) {
-        if (soldPrice !== undefined || soldTo || soldAt) {
+        if (soldPrice !== undefined || soldTo || soldToEmail || soldAt) {
+          const normalizedSoldPrice =
+            soldPrice !== undefined && soldPrice !== null
+              ? String(soldPrice).trim()
+              : undefined;
+
           updateData.salesInfo = {
-            soldPrice: soldPrice !== undefined ? Number(soldPrice) : undefined,
+            soldPrice: normalizedSoldPrice || undefined,
             soldTo: soldTo || undefined,
+            soldToEmail: soldToEmail || undefined,
             soldAt: soldAt ? new Date(soldAt) : new Date(),
           };
+
+          if (
+            soldToEmail &&
+            existingProperty.status !== PropertyStatusEnum.SOLD
+          ) {
+            this.emailQueue.enqueueDealClosedEmail({
+              to: soldToEmail,
+              customerName: soldTo || soldToEmail,
+              propertyName: existingProperty.title || "Bất động sản của bạn",
+            });
+          }
         } else {
           updateData.salesInfo = {
             soldAt: new Date(),
@@ -708,6 +849,30 @@ export class PropertyController extends BaseController {
       const updatedProperty = await this.propertyService.updateProperty(
         id,
         updateData,
+      );
+
+      if (status === PropertyStatusEnum.SOLD) {
+        await this.propertySaleService.upsertPropertySale(
+          existingProperty as any,
+          {
+            ...updateData.salesInfo,
+            soldPrice:
+              updateData.salesInfo?.soldPrice ??
+              existingProperty.features?.price,
+            soldAt: updateData.salesInfo?.soldAt || new Date(),
+          },
+        );
+
+        refreshPeriods.push(
+          (updateData.salesInfo?.soldAt as Date | undefined) || new Date(),
+        );
+      } else {
+        await this.propertySaleService.revokePropertySale(id);
+      }
+
+      await this.enqueueLeaderboardRefreshJobs(
+        existingProperty.features?.currency || CurrencyEnum.VND,
+        refreshPeriods,
       );
 
       return updatedProperty;

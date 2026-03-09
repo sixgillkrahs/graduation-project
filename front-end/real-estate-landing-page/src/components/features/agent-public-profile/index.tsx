@@ -10,9 +10,11 @@ import { Avatar } from "@/components/ui/avatar";
 import bgImage from "@/assets/images/bg.jpg";
 import { ROUTES } from "@/const/routes";
 import { useAppDispatch } from "@/lib/hooks";
+import { formatPropertyPrice } from "@/lib/property-price";
 import { openConversation } from "@/store/chat.store";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import DOMPurify from "dompurify";
+import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -23,59 +25,16 @@ import {
   Phone,
   ShieldCheck,
   Star,
+  Trophy,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useGetMe } from "@/shared/auth/query";
 
-const fallbackAgent = {
-  name: "Verified Real Estate Agent",
-  role: "Professional Real Estate Consultant",
-  location: "Hanoi, Vietnam",
-  phone: "Phone available on request",
-  about:
-    "This profile represents a verified real estate professional with active market coverage, client support, and property advisory services. Public details will appear here once the agent profile has been fully completed.",
-  specialties: ["Residential Sales", "Property Advisory", "Market Guidance"],
-  stats: {
-    rating: 4.8,
-    reviews: 0,
-    listings: 0,
-  },
-};
-
-const ratingBreakdown = [
-  { label: "5 star", value: 90 },
-  { label: "4 star", value: 5 },
-  { label: "3 star", value: 3 },
-  { label: "2 star", value: 1 },
-  { label: "1 star", value: 1 },
-];
-
-const reviews = [
-  {
-    name: "Nguyen T***",
-    date: "March 3, 2026",
-    rating: 5,
-    comment:
-      "Very professional and helpful during the entire process. Communication was quick and the property shortlist was exactly what I needed.",
-  },
-  {
-    name: "Le H***",
-    date: "February 24, 2026",
-    rating: 5,
-    comment:
-      "Clear advice, strong market knowledge, and no pressure selling. The viewing schedule was handled smoothly from start to finish.",
-  },
-  {
-    name: "Pham A***",
-    date: "February 17, 2026",
-    rating: 4,
-    comment:
-      "A trustworthy agent with good local expertise. I would have liked more options initially, but the final recommendation was a strong fit.",
-  },
-];
-
 const AgentPublicProfile = () => {
+  const t = useTranslations("AgentPublicProfile");
+  const locale = useLocale();
+  const localeTag = locale.toLowerCase().startsWith("vi") ? "vi-VN" : "en-US";
   const params = useParams();
   const agentId = params?.id as string;
   const dispatch = useAppDispatch();
@@ -89,6 +48,53 @@ const AgentPublicProfile = () => {
     });
   const { mutateAsync: createConversation, isPending: isCreatingConversation } =
     useCreateConversation();
+
+  const fallbackAgent = {
+    name: t("fallback.name"),
+    role: t("fallback.role"),
+    location: t("fallback.location"),
+    phone: t("fallback.phone"),
+    about: t("fallback.about"),
+    specialties: [
+      t("fallback.specialty1"),
+      t("fallback.specialty2"),
+      t("fallback.specialty3"),
+    ],
+    stats: {
+      rating: 4.8,
+      reviews: 0,
+      listings: 0,
+    },
+  };
+
+  const ratingBreakdown = [
+    { label: t("reviews.breakdown.fiveStar"), value: 90 },
+    { label: t("reviews.breakdown.fourStar"), value: 5 },
+    { label: t("reviews.breakdown.threeStar"), value: 3 },
+    { label: t("reviews.breakdown.twoStar"), value: 1 },
+    { label: t("reviews.breakdown.oneStar"), value: 1 },
+  ];
+
+  const reviews = [
+    {
+      name: "Nguyen T***",
+      date: new Date("2026-03-03"),
+      rating: 5,
+      comment: t("reviews.items.0.comment"),
+    },
+    {
+      name: "Le H***",
+      date: new Date("2026-02-24"),
+      rating: 5,
+      comment: t("reviews.items.1.comment"),
+    },
+    {
+      name: "Pham A***",
+      date: new Date("2026-02-17"),
+      rating: 4,
+      comment: t("reviews.items.2.comment"),
+    },
+  ];
 
   const activeListings = activeListingsData?.data?.results || [];
   const profile = profileData?.data;
@@ -120,7 +126,16 @@ const AgentPublicProfile = () => {
   const aboutText = profile?.description
     ? profile.description
     : profile
-      ? `${displayName} is an approved real estate agent with ${profile.yearsOfExperience} years of experience, specializing in ${displaySpecialties.join(", ")}${profile.workingAreas.length ? ` across ${profile.workingAreas.join(", ")}` : ""}.`
+      ? t("about.generated", {
+          name: displayName,
+          years: profile.yearsOfExperience || "0",
+          specialties: displaySpecialties.join(", "),
+          areas: profile.workingAreas.length
+            ? t("about.areaSuffix", {
+                areas: profile.workingAreas.join(", "),
+              })
+            : "",
+        })
       : fallbackAgent.about;
   const sanitizedAboutHtml = DOMPurify.sanitize(aboutText);
 
@@ -128,13 +143,11 @@ const AgentPublicProfile = () => {
     dispatch(
       showAuthDialog({
         title:
-          mode === "phone"
-            ? "Đăng nhập để xem số điện thoại"
-            : "Đăng nhập để nhắn tin với môi giới",
+          mode === "phone" ? t("auth.phoneTitle") : t("auth.messageTitle"),
         description:
           mode === "phone"
-            ? "Vui lòng đăng nhập để xem thông tin liên hệ của môi giới này."
-            : "Vui lòng đăng nhập để bắt đầu cuộc trò chuyện với môi giới này.",
+            ? t("auth.phoneDescription")
+            : t("auth.messageDescription"),
         redirectUrl: ROUTES.AGENT_PUBLIC_PROFILE(agentId),
       }),
     );
@@ -156,13 +169,11 @@ const AgentPublicProfile = () => {
     }
 
     const participantId = profile?.userId || agentId;
-
     if (!participantId) {
       return;
     }
 
     const res = await createConversation([participantId]);
-
     if (res.data) {
       dispatch(openConversation(res.data));
     }
@@ -175,7 +186,6 @@ const AgentPublicProfile = () => {
           <div className="relative overflow-hidden rounded-[32px] border border-border/60 bg-card shadow-[0_24px_80px_-40px_rgba(0,0,0,0.25)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.7),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.75),transparent_55%)]" />
             <div className="absolute inset-0 opacity-50 [background-image:linear-gradient(to_right,color-mix(in_oklab,var(--color-border)_55%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklab,var(--color-border)_55%,transparent)_1px,transparent_1px)] [background-size:32px_32px]" />
-
             <div className="relative h-36 md:h-44 bg-gradient-to-r from-primary/15 via-transparent to-blue-500/10" />
 
             <div className="relative px-5 pb-6 md:px-8 md:pb-8">
@@ -200,13 +210,21 @@ const AgentPublicProfile = () => {
                         {profile?.verified !== false && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
                             <CheckCircle2 className="size-3.5" />
-                            Verified Agent
+                            {t("hero.verified")}
+                          </span>
+                        )}
+                        {profile?.leaderboard && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                            <Trophy className="size-3.5" />
+                            {t("hero.topRevenueBadge", {
+                              rank: profile.leaderboard.rank,
+                            })}
                           </span>
                         )}
                         {profile?.isPro && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
                             <ShieldCheck className="size-3.5" />
-                            PRO Member
+                            {t("hero.pro")}
                           </span>
                         )}
                       </div>
@@ -220,7 +238,31 @@ const AgentPublicProfile = () => {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 backdrop-blur-sm">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-amber-800">
+                          <Trophy className="size-4" />
+                          {profile?.leaderboard
+                            ? t("stats.topThisMonth", {
+                                rank: profile.leaderboard.rank,
+                              })
+                            : t("stats.notRanked")}
+                        </div>
+                        <p className="mt-1 text-xs text-amber-700/80">
+                          {profile?.leaderboard
+                            ? t("stats.topRevenueDescription", {
+                                revenue: formatPropertyPrice(
+                                  profile.leaderboard.revenue,
+                                  "VND",
+                                  profile.leaderboard.currency,
+                                  locale,
+                                ),
+                                deals: profile.leaderboard.deals,
+                              })
+                            : t("stats.notRankedDescription")}
+                        </p>
+                      </div>
+
                       <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
                         <div className="flex items-center gap-2 text-sm font-semibold">
                           <span className="text-lg">{displayRating}/5</span>
@@ -234,7 +276,9 @@ const AgentPublicProfile = () => {
                           </div>
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {fallbackAgent.stats.reviews} Reviews
+                          {t("stats.reviews", {
+                            count: fallbackAgent.stats.reviews,
+                          })}
                         </p>
                       </div>
 
@@ -243,7 +287,7 @@ const AgentPublicProfile = () => {
                           {activeListingsCount}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Active Listings
+                          {t("stats.activeListings")}
                         </p>
                       </div>
 
@@ -253,7 +297,7 @@ const AgentPublicProfile = () => {
                           {displayLocation}
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Primary Market
+                          {t("stats.primaryMarket")}
                         </p>
                       </div>
                     </div>
@@ -267,7 +311,7 @@ const AgentPublicProfile = () => {
                     icon={<Phone className="mr-2 size-4" />}
                     onClick={handleRevealPhone}
                   >
-                    {isPhoneVisible ? displayPhone : "Show Phone Number"}
+                    {isPhoneVisible ? displayPhone : t("actions.showPhone")}
                   </CsButton>
                   <CsButton
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -275,7 +319,7 @@ const AgentPublicProfile = () => {
                     onClick={handleOpenConversation}
                     loading={isCreatingConversation}
                   >
-                    Chat / Message
+                    {t("actions.chat")}
                   </CsButton>
                 </div>
               </div>
@@ -290,7 +334,7 @@ const AgentPublicProfile = () => {
             <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8">
               <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-primary">
                 <BadgeCheck className="size-4" />
-                About Me
+                {t("about.title")}
               </div>
               <div
                 className="mt-4 max-w-3xl leading-7 [&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-primary [&_a]:underline"
@@ -307,21 +351,20 @@ const AgentPublicProfile = () => {
                     <div className="max-w-2xl">
                       <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/8 px-3 py-1 text-xs font-semibold text-primary ring-1 ring-primary/10">
                         <Building2 className="size-3.5" />
-                        Active Listings
+                        {t("listings.badge")}
                       </div>
                       <h2 className="text-2xl font-semibold tracking-tight md:text-[30px]">
-                        Properties currently represented by {displayName}
+                        {t("listings.title", { name: displayName })}
                       </h2>
                       <p className="mt-3 text-sm leading-6 text-muted-foreground md:text-base">
-                        A curated snapshot of this agent&apos;s live sale
-                        listings, presented for active buyers and investors.
+                        {t("listings.description")}
                       </p>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
                       <div className="min-w-[140px] rounded-2xl border border-border/70 bg-background px-4 py-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                          Live inventory
+                          {t("listings.liveInventory")}
                         </p>
                         <p className="mt-2 text-2xl font-semibold tracking-tight">
                           {activeListingsCount}
@@ -329,7 +372,7 @@ const AgentPublicProfile = () => {
                       </div>
                       <div className="min-w-[180px] rounded-2xl border border-border/70 bg-background px-4 py-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                          Focus market
+                          {t("listings.focusMarket")}
                         </p>
                         <div className="mt-2 flex items-center gap-2 text-sm font-medium text-foreground">
                           <MapPin className="size-4 text-primary" />
@@ -388,7 +431,7 @@ const AgentPublicProfile = () => {
                           }}
                           postedAt={new Date(
                             listing.createdAt,
-                          ).toLocaleDateString("en-US", {
+                          ).toLocaleDateString(localeTag, {
                             month: "short",
                             day: "2-digit",
                             year: "numeric",
@@ -405,11 +448,10 @@ const AgentPublicProfile = () => {
                         <Building2 className="size-5" />
                       </div>
                       <p className="mt-4 text-base font-semibold text-foreground">
-                        No active properties for sale
+                        {t("listings.emptyTitle")}
                       </p>
                       <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                        This agent does not have any published sale listings at
-                        the moment.
+                        {t("listings.emptyDescription")}
                       </p>
                     </div>
                   )}
@@ -417,8 +459,7 @@ const AgentPublicProfile = () => {
 
                 <div className="mt-6 flex flex-col gap-3 border-t border-border/80 pt-6 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-muted-foreground">
-                    Showing the latest portfolio highlights currently available
-                    under this agent.
+                    {t("listings.footerDescription")}
                   </p>
                   <CsButton
                     className="bg-background text-foreground hover:bg-accent"
@@ -426,7 +467,7 @@ const AgentPublicProfile = () => {
                     disabled={activeListings.length === 0}
                     icon={<ArrowUpRight className="ml-1 size-4" />}
                   >
-                    View all properties by this agent
+                    {t("listings.viewAll")}
                   </CsButton>
                 </div>
               </div>
@@ -435,10 +476,10 @@ const AgentPublicProfile = () => {
             <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8">
               <div className="mb-6">
                 <p className="text-sm font-semibold text-primary">
-                  Ratings & Reviews
+                  {t("reviews.title")}
                 </p>
                 <h2 className="text-2xl font-semibold tracking-tight">
-                  What clients say about working with {displayName}
+                  {t("reviews.subtitle", { name: displayName })}
                 </h2>
               </div>
 
@@ -453,7 +494,9 @@ const AgentPublicProfile = () => {
                     ))}
                   </div>
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Based on {fallbackAgent.stats.reviews} verified reviews
+                    {t("reviews.basedOn", {
+                      count: fallbackAgent.stats.reviews,
+                    })}
                   </p>
                 </div>
 
@@ -483,7 +526,7 @@ const AgentPublicProfile = () => {
               <div className="mt-8 space-y-4">
                 {reviews.map((review) => (
                   <article
-                    key={`${review.name}-${review.date}`}
+                    key={`${review.name}-${review.date.toISOString()}`}
                     className="rounded-[24px] border border-border bg-background p-5"
                   >
                     <div className="flex items-start gap-4">
@@ -495,7 +538,11 @@ const AgentPublicProfile = () => {
                           <div>
                             <h3 className="font-semibold">{review.name}</h3>
                             <p className="text-sm text-muted-foreground">
-                              {review.date}
+                              {review.date.toLocaleDateString(localeTag, {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
                             </p>
                           </div>
                           <div className="flex items-center gap-1 text-amber-400">
@@ -523,39 +570,40 @@ const AgentPublicProfile = () => {
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
               <p className="text-sm font-semibold text-primary">
-                Contact {displayName}
+                {t("contact.title", { name: displayName })}
               </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight">
-                Start a conversation
+                {t("contact.heading")}
               </h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Leave your details and a short message. Expect a quick callback
-                about matching listings, pricing, or viewing arrangements.
+                {t("contact.description")}
               </p>
 
               <form className="mt-6 space-y-4">
                 <input
                   className="h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
-                  placeholder="Your name"
+                  placeholder={t("contact.namePlaceholder")}
                 />
                 <input
                   className="h-12 w-full rounded-2xl border border-border bg-background px-4 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
-                  placeholder="Phone number"
+                  placeholder={t("contact.phonePlaceholder")}
                 />
                 <textarea
                   className="min-h-32 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
-                  placeholder="Tell the agent what kind of property you are looking for..."
+                  placeholder={t("contact.messagePlaceholder")}
                 />
                 <CsButton className="h-12 w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                  Send Message
+                  {t("contact.send")}
                 </CsButton>
               </form>
             </section>
 
             <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm">
-              <p className="text-sm font-semibold text-primary">Specialties</p>
+              <p className="text-sm font-semibold text-primary">
+                {t("specialties.title")}
+              </p>
               <h2 className="mt-2 text-xl font-semibold tracking-tight">
-                Core service areas
+                {t("specialties.heading")}
               </h2>
               <div className="mt-5 flex flex-wrap gap-2">
                 {displaySpecialties.map((specialty) => (

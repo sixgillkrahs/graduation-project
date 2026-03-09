@@ -35,6 +35,7 @@ import { ListingFormData } from "../../dto/listingformdata.dto";
 import { useUpdateProperty } from "../../services/mutate";
 import PropertyService from "../../services/service";
 import { Icon } from "@/components/ui";
+import { formatPropertyPrice } from "@/lib/property-price";
 
 interface ReviewProps {
   propertyId: string;
@@ -78,15 +79,6 @@ const Review = ({ propertyId }: ReviewProps) => {
   };
 
   // Format helpers
-  const formatPrice = (price: string) => {
-    if (!price) return "Not specified";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(Number(price));
-  };
-
   const formatPropertyType = (type: string) => {
     const types: Record<string, string> = {
       APARTMENT: "Apartment",
@@ -231,7 +223,7 @@ const Review = ({ propertyId }: ReviewProps) => {
               <div>
                 <span className="text-sm text-gray-500 block">Price</span>
                 <span className="text-gray-900 font-semibold">
-                  {formatPrice(data.price)}
+                  {formatPropertyPrice(data.price, data.priceUnit, data.currency)}
                 </span>
               </div>
             </div>
@@ -472,7 +464,11 @@ const Review = ({ propertyId }: ReviewProps) => {
                         {data.title}
                       </h4>
                       <div className="text-2xl font-bold text-primary whitespace-nowrap">
-                        {formatPrice(data.price)}
+                        {formatPropertyPrice(
+                          data.price,
+                          data.priceUnit,
+                          data.currency,
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-gray-500 mt-2 text-sm">

@@ -11,6 +11,8 @@ import { UserService } from "@/services/user.service";
 import { applicationSchema } from "@/validators/agent.validator";
 import { validateIdHeaderSchema } from "@/validators/base.validator";
 import { Router } from "express";
+import { PropertySaleService } from "@/services/property-sale.service";
+import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
 
 const router = Router();
 const propertyService = new PropertyService();
@@ -21,6 +23,8 @@ const emailService = new EmailService();
 const authService = new AuthService();
 const roleService = new RoleService();
 const emailQueue = new EmailQueue();
+const propertySaleService = new PropertySaleService();
+const agentLeaderboardService = new AgentLeaderboardService();
 
 const agentController = new AgentController(
   agentService,
@@ -30,6 +34,8 @@ const agentController = new AgentController(
   roleService,
   emailQueue,
   propertyService,
+  propertySaleService,
+  agentLeaderboardService,
 );
 
 /**

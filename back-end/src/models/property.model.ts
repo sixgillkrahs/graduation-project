@@ -49,6 +49,11 @@ export enum PriceUnitEnum {
   MILLION_PER_M2 = "MILLION_PER_M2",
 }
 
+export enum CurrencyEnum {
+  VND = "VND",
+  USD = "USD",
+}
+
 export enum PropertyStatusEnum {
   DRAFT = "DRAFT",
   PENDING = "PENDING",
@@ -83,6 +88,7 @@ export interface IProperty {
   features: {
     area: number; // m2
     price: number;
+    currency: CurrencyEnum;
     priceUnit: PriceUnitEnum;
     totalPrice?: number; // Calculated normalized price for sorting/filtering
     bedrooms?: number;
@@ -118,8 +124,9 @@ export interface IProperty {
   adminNote?: string;
 
   salesInfo?: {
-    soldPrice?: number;
+    soldPrice?: string;
     soldTo?: string;
+    soldToEmail?: string;
     soldAt?: Date;
   };
 
@@ -162,6 +169,12 @@ const featuresSchema = new mongoose.Schema(
   {
     area: { type: Number, required: true },
     price: { type: Number, required: true },
+    currency: {
+      type: String,
+      enum: CurrencyEnum,
+      required: true,
+      default: CurrencyEnum.VND,
+    },
     priceUnit: { type: String, enum: PriceUnitEnum, required: true },
     totalPrice: { type: Number },
     bedrooms: { type: Number },
@@ -188,8 +201,9 @@ const mediaSchema = new mongoose.Schema(
 
 const salesInfoSchema = new mongoose.Schema(
   {
-    soldPrice: { type: Number },
+    soldPrice: { type: String, trim: true },
     soldTo: { type: String },
+    soldToEmail: { type: String },
     soldAt: { type: Date },
   },
   { _id: false },

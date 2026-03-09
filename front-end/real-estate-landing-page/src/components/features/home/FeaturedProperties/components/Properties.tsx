@@ -97,6 +97,7 @@ const Properties = () => {
               }}
               address={`${prop.location.address}, ${findOptionLabel(prop.location.ward, LIST_WARD)}, ${findOptionLabel(prop.location.province, LIST_PROVINCE)}`}
               price={prop.features.price.toString()}
+              currency={prop.features.currency}
               specs={{
                 beds: prop.features.bedrooms,
                 baths: prop.features.bathrooms,

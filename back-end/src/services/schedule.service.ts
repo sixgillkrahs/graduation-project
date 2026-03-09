@@ -53,7 +53,7 @@ export class ScheduleService {
   async expireConfirmedSchedules(agentId?: string) {
     const now = new Date();
     const filter: Record<string, unknown> = {
-      status: SCHEDULE_STATUS.CONFIRMED,
+      status: SCHEDULE_STATUS.PENDING,
       date: { $lte: now },
     };
 
@@ -75,7 +75,7 @@ export class ScheduleService {
     const result = await ScheduleModel.updateMany(
       {
         _id: { $in: expiredIds },
-        status: SCHEDULE_STATUS.CONFIRMED,
+        status: SCHEDULE_STATUS.PENDING,
       },
       { $set: { status: SCHEDULE_STATUS.EXPIRED } },
     );

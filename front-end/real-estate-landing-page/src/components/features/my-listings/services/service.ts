@@ -131,6 +131,8 @@ export default class PropertyService {
     // Step 3
     area: "",
     price: "",
+    currency: "VND",
+    priceUnit: "MILLION",
     bedrooms: 1,
     bathrooms: 1,
     direction: "",
@@ -156,6 +158,8 @@ export default class PropertyService {
     step3: [
       "area",
       "price",
+      "currency",
+      "priceUnit",
       "bedrooms",
       "bathrooms",
       "direction",
@@ -199,14 +203,15 @@ export default class PropertyService {
   public static readonly updatePropertyStatus = (
     id: string,
     status: string,
-    soldPrice?: number,
+    soldPrice?: string,
     soldTo?: string,
+    soldToEmail?: string,
     soldAt?: string,
   ): Promise<IResp<IPropertyDto>> => {
     return request({
       url: PropertyEndpoint.updatePropertyStatus(id),
       method: AxiosMethod.PATCH,
-      data: { status, soldPrice, soldTo, soldAt },
+      data: { status, soldPrice, soldTo, soldToEmail, soldAt },
     });
   };
 

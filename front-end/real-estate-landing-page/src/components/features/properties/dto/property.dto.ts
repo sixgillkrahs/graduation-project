@@ -48,6 +48,7 @@ export interface Coordinates {
 export interface Features {
   area: number;
   price: number;
+  currency: "VND" | "USD";
   priceUnit: string;
   bedrooms: number;
   bathrooms: number;

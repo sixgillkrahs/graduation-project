@@ -49,6 +49,18 @@ const FeaturesPricing = () => {
     { label: "None", value: "EMPTY" },
   ];
 
+  const currencyOptions = [
+    { label: "VND", value: "VND" },
+    { label: "USD", value: "USD" },
+  ];
+
+  const priceUnitOptions = [
+    { label: "Raw amount", value: "VND" },
+    { label: "Million", value: "MILLION" },
+    { label: "Billion", value: "BILLION" },
+    { label: "Million / m²", value: "MILLION_PER_M2" },
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
@@ -58,7 +70,7 @@ const FeaturesPricing = () => {
 
         <div className="space-y-6">
           {/* Row 1: Area & Price */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-4 gap-6">
             <Controller
               name="area"
               control={control}
@@ -79,11 +91,41 @@ const FeaturesPricing = () => {
               rules={{ required: "Price is required" }}
               render={({ field, fieldState }) => (
                 <Input
-                  label="Price (USD)"
+                  label="Price"
                   type="number"
                   error={fieldState.error?.message}
                   placeholder="e.g. 500000"
                   {...field}
+                />
+              )}
+            />
+            <Controller
+              name="currency"
+              control={control}
+              rules={{ required: "Currency is required" }}
+              render={({ field, fieldState }) => (
+                <CsSelect
+                  label="Currency"
+                  placeholder="Select Currency"
+                  options={currencyOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              name="priceUnit"
+              control={control}
+              rules={{ required: "Price unit is required" }}
+              render={({ field, fieldState }) => (
+                <CsSelect
+                  label="Price Unit"
+                  placeholder="Select Unit"
+                  options={priceUnitOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={fieldState.error?.message}
                 />
               )}
             />

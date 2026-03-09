@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/chart";
 import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { useTranslations } from "next-intl";
 import { useGetAnalytics } from "../services/query";
 
 const chartDataYear = [
@@ -52,6 +53,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 const ChartLine = () => {
+  const t = useTranslations("AgentDashboard.chart");
   const [timeRange, setTimeRange] = useState<"month" | "year">("year");
   const { data: response } = useGetAnalytics(timeRange);
 
@@ -62,12 +64,12 @@ const ChartLine = () => {
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
           <CardTitle className="cs-typography text-xl!">
-            Performance Overview
+            {t("title")}
           </CardTitle>
           <CardDescription className="cs-paragraph-gray text-base!">
             {timeRange === "year"
-              ? "Comparing Views vs Leads (Jan - Dec)"
-              : "Daily Performance (Last 30 Days)"}
+              ? t("descriptionYear")
+              : t("descriptionMonth")}
           </CardDescription>
         </div>
         <div className="flex cs-bg-gray p-1 rounded-lg bg-opacity-10 bg-gray-100">
@@ -79,7 +81,7 @@ const ChartLine = () => {
                 : "text-white hover:text-black"
             }`}
           >
-            Month
+            {t("month")}
           </button>
           <button
             onClick={() => setTimeRange("year")}
@@ -89,7 +91,7 @@ const ChartLine = () => {
                 : "text-white hover:text-black"
             }`}
           >
-            Year
+            {t("year")}
           </button>
         </div>
       </CardHeader>
@@ -156,7 +158,7 @@ const ChartLine = () => {
               fillOpacity={0.4}
               stroke="var(--color-black)"
               strokeWidth={2}
-              name="Contact Leads"
+              name={t("contactLeads")}
             />
             <Area
               dataKey="views"
@@ -165,7 +167,7 @@ const ChartLine = () => {
               fillOpacity={0.4}
               stroke="var(--color-red)"
               strokeWidth={2}
-              name="Page Views"
+              name={t("pageViews")}
             />
           </AreaChart>
         </ChartContainer>

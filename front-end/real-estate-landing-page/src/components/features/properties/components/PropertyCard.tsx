@@ -11,12 +11,14 @@ import { useRouter } from "next/navigation";
 import { PropertyQueryKey } from "../services/config";
 import { useRecordInteraction } from "../services/mutate";
 import { useTranslations } from "next-intl";
+import { formatPropertyPrice } from "@/lib/property-price";
 
 export interface PropertyCardProps {
   id: string;
   image: string;
   title: string;
   price: string;
+  currency?: "VND" | "USD";
   unit?: string;
   address: string;
   specs: {
@@ -42,6 +44,7 @@ const PropertyCard = ({
   image,
   title,
   price,
+  currency = "VND",
   unit = "month",
   address,
   specs,
@@ -57,6 +60,8 @@ const PropertyCard = ({
   const dispatch = useAppDispatch();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const t = useTranslations("PropertiesPage");
+  const displayPrice = formatPropertyPrice(Number(price), unit, currency);
+
   const handleToggleFavorite = async () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
     if (!isLoggedIn) {
@@ -137,13 +142,8 @@ const PropertyCard = ({
         <div>
           <div className="flex items-baseline gap-1 mb-1">
             <span className="text-xl md:text-2xl font-bold main-color-red">
-              {price}
+              {displayPrice}
             </span>
-            {unit && (
-              <span className="text-sm font-medium text-gray-400">
-                /{t("card.month")}
-              </span>
-            )}
           </div>
           <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-red-500 transition-colors">
             {title}

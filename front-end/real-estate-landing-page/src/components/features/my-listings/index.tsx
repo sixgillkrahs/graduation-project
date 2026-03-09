@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IPropertyDto } from "./dto/property.dto";
 import { useGetMyProperties } from "./services/query";
+import { formatPropertyPrice } from "@/lib/property-price";
 
 const MyListings = () => {
   const router = useRouter();
@@ -107,7 +108,11 @@ const MyListings = () => {
       render: (features: any, record) => (
         <div className="flex flex-col gap-1">
           <div className="font-semibold text-gray-900">
-            {features?.price} {features?.priceUnit}
+            {formatPropertyPrice(
+              features?.price,
+              features?.priceUnit,
+              features?.currency,
+            )}
           </div>
           <div className="text-xs text-gray-500">
             {new Date(record.createdAt).toLocaleDateString("en-GB")}

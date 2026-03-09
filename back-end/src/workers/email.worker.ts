@@ -4,6 +4,7 @@ import {
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
   SendVerifyEmailJob,
+  SendDealClosedEmailJob,
 } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
 import { EmailService } from "@/services/email.service";
@@ -47,6 +48,14 @@ export class EmailWorker {
             appointmentDate,
             appointmentTime,
             location,
+          );
+        } else if (job.name === "sendDealClosedEmail") {
+          const { to, customerName, propertyName } =
+            job.data as SendDealClosedEmailJob;
+          await this.emailService.sendDealClosedEmail(
+            to,
+            customerName,
+            propertyName,
           );
         }
       },

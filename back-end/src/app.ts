@@ -16,10 +16,10 @@ import { authLimiter } from "./middleware/rateLimiter";
 import { requestId } from "./middleware/requestId";
 import { setupSecurityHeaders } from "./middleware/securityHeaders";
 import { langMiddleware } from "./middleware/langMiddleware";
+
 import authRoutes from "./routes/auth.routes";
 import permissionRoutes from "./routes/permission.routes";
 import resourcesRoutes from "./routes/resource.routes";
-
 import agentsRegistrationsRoutes from "./routes/agents-registrations.routes";
 import agentRoutes from "./routes/agents.routes";
 import chatRoutes from "./routes/chat.routes";

@@ -53,3 +53,33 @@ export const useGetAnalytics = (period?: string) => {
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
+
+export const useGetRevenueSummary = (currency: "VND" | "USD") => {
+  return useQuery({
+    queryKey: [DashboardQueryKey.revenueSummary, currency],
+    queryFn: () => DashboardService.getRevenueSummary(currency),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
+export const useGetSalesLog = (currency: "VND" | "USD", limit = 5) => {
+  return useQuery({
+    queryKey: [DashboardQueryKey.salesLog, currency, limit],
+    queryFn: () => DashboardService.getSalesLog(currency, limit),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
+export const useGetRevenueLeaderboard = (
+  currency: "VND" | "USD",
+  limit = 10,
+) => {
+  return useQuery({
+    queryKey: [DashboardQueryKey.revenueLeaderboard, currency, limit],
+    queryFn: () => DashboardService.getRevenueLeaderboard(currency, limit),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};

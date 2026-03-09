@@ -1,10 +1,12 @@
 import { validationMessages } from "@/i18n/validationMessages";
 import {
+  CurrencyEnum,
   PropertyDemandTypeEnum,
   PropertyDirectionEnum,
   PropertyFurnitureEnum,
   PropertyLegalStatusEnum,
   PropertyTypeEnum,
+  PriceUnitEnum,
 } from "@/models/property.model";
 import { z } from "zod";
 
@@ -23,6 +25,8 @@ export const createPropertySchema = (lang: keyof typeof validationMessages) => {
       longitude: z.number().optional(),
       area: z.string().or(z.number()),
       price: z.string().or(z.number()),
+      currency: z.enum(CurrencyEnum).optional(),
+      priceUnit: z.enum(PriceUnitEnum).optional(),
       bedrooms: z.number().or(z.string()).optional(),
       bathrooms: z.number().or(z.string()).optional(),
       direction: z.enum(PropertyDirectionEnum).optional().or(z.literal("")),

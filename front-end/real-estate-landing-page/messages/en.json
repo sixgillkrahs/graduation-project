@@ -440,6 +440,142 @@
       "questionsAbout": "Questions About Privacy?",
       "reachOut": "If you have questions about this Privacy Policy, please contact our Data Protection Officer at"
     }
+  },
+  "AgentDashboard": {
+    "header": {
+      "title": "Agent Command Center",
+      "description": "Welcome back, here's what's happening today."
+    },
+    "stats": {
+      "monthlyRevenue": "Monthly Revenue",
+      "revenue": "Revenue",
+      "closedDeals": "Closed Deals",
+      "sales": "Sales",
+      "activeListings": "Active Listings",
+      "listings": "Listings",
+      "totalViews": "Total Views",
+      "performance": "Performance"
+    },
+    "sales": {
+      "loading": "Loading sales log...",
+      "title": "Recent Closed Deals",
+      "deals": "{count} deals",
+      "empty": "No closed deals recorded this month yet.",
+      "customerFallback": "Customer not provided"
+    },
+    "leaderboard": {
+      "title": "Monthly Revenue Race",
+      "description": "Top agents by closed-deal revenue in {currency}",
+      "empty": "No revenue recorded for this month in {currency}.",
+      "agentFallback": "Agent",
+      "unknownAgent": "Unknown Agent",
+      "deals": "{count} closed deals"
+    },
+    "sidebar": {
+      "scheduleTitle": "Today's Schedule",
+      "scheduleEmpty": "No schedules for today.",
+      "opportunitiesTitle": "Sourcing Opportunities",
+      "opportunitiesDescriptionPrefix": "3 new landlords listed properties in",
+      "opportunitiesHighlight": "Cau Giay",
+      "opportunitiesAction": "Review & Claim"
+    },
+    "chart": {
+      "title": "Performance Overview",
+      "descriptionYear": "Comparing Views vs Leads (Jan - Dec)",
+      "descriptionMonth": "Daily Performance (Last 30 Days)",
+      "month": "Month",
+      "year": "Year",
+      "pageViews": "Page Views",
+      "contactLeads": "Contact Leads"
+    }
+  },
+  "AgentPublicProfile": {
+    "fallback": {
+      "name": "Verified Real Estate Agent",
+      "role": "Professional Real Estate Consultant",
+      "location": "Hanoi, Vietnam",
+      "phone": "Phone available on request",
+      "about": "This profile represents a verified real estate professional with active market coverage, client support, and property advisory services. Public details will appear here once the agent profile has been fully completed.",
+      "specialty1": "Residential Sales",
+      "specialty2": "Property Advisory",
+      "specialty3": "Market Guidance"
+    },
+    "auth": {
+      "phoneTitle": "Login to view phone number",
+      "phoneDescription": "Please login to view this agent's contact information.",
+      "messageTitle": "Login to message this agent",
+      "messageDescription": "Please login to start a conversation with this agent."
+    },
+    "hero": {
+      "verified": "Verified Agent",
+      "topRevenueBadge": "Top #{rank} revenue this month",
+      "pro": "PRO Member"
+    },
+    "stats": {
+      "topThisMonth": "#{rank} This Month",
+      "notRanked": "Not Ranked Yet",
+      "topRevenueDescription": "{revenue} from {deals} deals",
+      "notRankedDescription": "The agent will appear here after closing new deals.",
+      "reviews": "{count} Reviews",
+      "activeListings": "Active Listings",
+      "primaryMarket": "Primary Market"
+    },
+    "actions": {
+      "showPhone": "Show Phone Number",
+      "chat": "Chat / Message"
+    },
+    "about": {
+      "title": "About Me",
+      "generated": "{name} is an approved real estate agent with {years} years of experience, specializing in {specialties}{areas}.",
+      "areaSuffix": " across {areas}"
+    },
+    "listings": {
+      "badge": "Active Listings",
+      "title": "Properties currently represented by {name}",
+      "description": "A curated snapshot of this agent's live sale listings, presented for active buyers and investors.",
+      "liveInventory": "Live inventory",
+      "focusMarket": "Focus market",
+      "emptyTitle": "No active properties for sale",
+      "emptyDescription": "This agent does not have any published sale listings at the moment.",
+      "footerDescription": "Showing the latest portfolio highlights currently available under this agent.",
+      "viewAll": "View all properties by this agent"
+    },
+    "reviews": {
+      "title": "Ratings & Reviews",
+      "subtitle": "What clients say about working with {name}",
+      "basedOn": "Based on {count} verified reviews",
+      "breakdown": {
+        "fiveStar": "5 star",
+        "fourStar": "4 star",
+        "threeStar": "3 star",
+        "twoStar": "2 star",
+        "oneStar": "1 star"
+      },
+      "items": [
+        {
+          "comment": "Very professional and helpful during the entire process. Communication was quick and the property shortlist was exactly what I needed."
+        },
+        {
+          "comment": "Clear advice, strong market knowledge, and no pressure selling. The viewing schedule was handled smoothly from start to finish."
+        },
+        {
+          "comment": "A trustworthy agent with good local expertise. I would have liked more options initially, but the final recommendation was a strong fit."
+        }
+      ]
+    },
+    "contact": {
+      "title": "Contact {name}",
+      "heading": "Start a conversation",
+      "description": "Leave your details and a short message. Expect a quick callback about matching listings, pricing, or viewing arrangements.",
+      "namePlaceholder": "Your name",
+      "phonePlaceholder": "Phone number",
+      "messagePlaceholder": "Tell the agent what kind of property you are looking for...",
+      "send": "Send Message"
+    },
+    "specialties": {
+      "title": "Specialties",
+      "heading": "Core service areas"
+    }
   }
 }
 

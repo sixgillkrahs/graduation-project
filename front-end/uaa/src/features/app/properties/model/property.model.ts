@@ -22,6 +22,7 @@ export interface IProperty {
   features: {
     area: number;
     price: number;
+    currency: "VND" | "USD";
     priceUnit: "VND" | "MILLION" | "BILLION" | "MILLION_PER_M2";
     totalPrice?: number;
     bedrooms?: number;

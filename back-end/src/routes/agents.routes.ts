@@ -4,9 +4,11 @@ import { EmailQueue } from "@/queues/email.queue";
 import { AgentService } from "@/services/agent.service";
 import { AuthService } from "@/services/auth.service";
 import { EmailService } from "@/services/email.service";
+import { PropertySaleService } from "@/services/property-sale.service";
 import { PropertyService } from "@/services/property.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
+import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
 import { Router } from "express";
 
 const router = Router();
@@ -18,6 +20,8 @@ const emailService = new EmailService();
 const authService = new AuthService();
 const roleService = new RoleService();
 const emailQueue = new EmailQueue();
+const propertySaleService = new PropertySaleService();
+const agentLeaderboardService = new AgentLeaderboardService();
 
 const agentController = new AgentController(
   agentService,
@@ -27,6 +31,8 @@ const agentController = new AgentController(
   roleService,
   emailQueue,
   propertyService,
+  propertySaleService,
+  agentLeaderboardService,
 );
 
 /**
@@ -267,5 +273,19 @@ router.get(
  *         description: Chart data
  */
 router.get("/me/analytics", requireAuth, agentController.getAnalytics);
+
+router.get(
+  "/me/revenue-summary",
+  requireAuth,
+  agentController.getRevenueSummary,
+);
+
+router.get("/me/sales-log", requireAuth, agentController.getMySalesLog);
+
+router.get(
+  "/revenue-leaderboard",
+  requireAuth,
+  agentController.getRevenueLeaderboard,
+);
 
 export default router;

@@ -23,8 +23,9 @@ export const useUpdatePropertyStatus = () => {
     mutationFn: (data: {
       id: string;
       status: string;
-      soldPrice?: number;
+      soldPrice?: string;
       soldTo?: string;
+      soldToEmail?: string;
       soldAt?: string;
     }) =>
       PropertyService.updatePropertyStatus(
@@ -32,6 +33,7 @@ export const useUpdatePropertyStatus = () => {
         data.status,
         data.soldPrice,
         data.soldTo,
+        data.soldToEmail,
         data.soldAt,
       ),
   });

@@ -1,3 +1,5 @@
+import { CurrencyEnum } from "@/models/property.model";
+
 export interface EmailJob {
   to: string;
   subject: string;
@@ -41,6 +43,12 @@ export type SendAppointmentConfirmedEmailJob = {
   location: string;
 };
 
+export type SendDealClosedEmailJob = {
+  to: string;
+  customerName: string;
+  propertyName: string;
+};
+
 export type SendNotificationJob = {
   userId: string;
   title: string;
@@ -49,4 +57,10 @@ export type SendNotificationJob = {
   metadata?: Record<string, any>;
   /** Socket event name to emit (e.g. "schedule:new_request") */
   socketEvent?: string;
+};
+
+export type RefreshMonthlyLeaderboardJob = {
+  month: number;
+  year: number;
+  currency: CurrencyEnum;
 };

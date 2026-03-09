@@ -33,6 +33,7 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { useNavigate, useParams } from "react-router-dom";
+import { formatPropertyPrice } from "@/shared/utils/propertyPrice";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -130,11 +131,6 @@ const PropertyDetail = () => {
       default:
         return "default";
     }
-  };
-
-  const formatPrice = (price: number, unit: string) => {
-    // Basic formatting, can be improved based on unit logic
-    return `${price} ${unit}`;
   };
 
   return (
@@ -272,7 +268,11 @@ const PropertyDetail = () => {
               <div className="flex items-center justify-between">
                 <Text type="secondary">{t("properties.price")}</Text>
                 <Title level={4} style={{ margin: 0, color: "#faad14" }}>
-                  {formatPrice(property?.features?.price, property?.features?.priceUnit)}
+                  {formatPropertyPrice(
+                    property?.features?.price,
+                    property?.features?.priceUnit,
+                    property?.features?.currency,
+                  )}
                 </Title>
               </div>
               <Divider className="my-2" />

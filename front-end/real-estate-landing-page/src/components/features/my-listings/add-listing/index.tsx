@@ -51,6 +51,12 @@ const AddListing = () => {
         listingData.features?.area || PropertyService.defaultFormValues.area,
       price:
         listingData.features?.price || PropertyService.defaultFormValues.price,
+      currency:
+        listingData.features?.currency ||
+        PropertyService.defaultFormValues.currency,
+      priceUnit:
+        listingData.features?.priceUnit ||
+        PropertyService.defaultFormValues.priceUnit,
       bedrooms:
         listingData.features?.bedrooms ||
         PropertyService.defaultFormValues.bedrooms,

@@ -6,12 +6,20 @@ import RecentInquiries from "./components/RecentInquiries";
 import SidebarRight from "./components/SidebarRight";
 import {
   useCountPropertiesByAgent,
-  useCountSoldPropertiesByAgent,
   useCountTotalView,
+  useGetRevenueLeaderboard,
+  useGetRevenueSummary,
   useGetSchedulesToday,
+  useGetSalesLog,
 } from "./services/query";
+import { formatPropertyPrice } from "@/lib/property-price";
+import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 const Dashboard = () => {
+  const t = useTranslations("AgentDashboard");
+  const locale = useLocale();
+  const [currency, setCurrency] = useState<"VND" | "USD">("VND");
   const {
     data: countPropertiesByAgent,
     isLoading: isLoadingCountPropertiesByAgent,
@@ -22,47 +30,58 @@ const Dashboard = () => {
 
   const { data: schedulesToday, isLoading: isLoadingSchedulesToday } =
     useGetSchedulesToday();
+  const { data: revenueSummary, isLoading: isLoadingRevenueSummary } =
+    useGetRevenueSummary(currency);
+  const { data: salesLog, isLoading: isLoadingSalesLog } =
+    useGetSalesLog(currency, 5);
+  const { data: revenueLeaderboard, isLoading: isLoadingRevenueLeaderboard } =
+    useGetRevenueLeaderboard(currency, 10);
+
+  const revenueValue = isLoadingRevenueSummary
+    ? "..."
+    : formatPropertyPrice(
+        revenueSummary?.data?.revenue,
+        "VND",
+        revenueSummary?.data?.currency || currency,
+        locale,
+      );
 
   const stats = [
     {
-      title: "Est. Commission",
-      value: "45M VND",
+      title: t("stats.monthlyRevenue"),
+      value: revenueValue,
       icon: <Wallet className="main-color-red" />,
       color: "red",
-      // percentage: 12,
       type: "increase",
-      label: "Revenue",
+      label: t("stats.revenue"),
     },
     {
-      title: "New Leads",
-      value: "28",
+      title: t("stats.closedDeals"),
+      value: revenueSummary?.data?.deals?.toString() || "0",
       icon: <Users className="main-color-black" />,
       color: "black",
-      // percentage: 5,
       type: "increase",
-      label: "Leads",
+      label: t("stats.sales"),
     },
     {
-      title: "Active Listings",
+      title: t("stats.activeListings"),
       value: isLoadingCountPropertiesByAgent
         ? "..."
         : countPropertiesByAgent?.data?.count?.toString() || "0",
       icon: <Home className="main-color-gray" />,
       color: "gray",
-      // percentage: 0,
       type: "static",
-      label: "Listings",
+      label: t("stats.listings"),
     },
     {
-      title: "Total Views",
+      title: t("stats.totalViews"),
       value: isLoadingCountTotalView
         ? "..."
         : countTotalView?.data?.totalViews?.toString() || "1.5k",
       icon: <TrendingUp className="main-color-red" />,
       color: "red",
-      // percentage: 8,
       type: "increase",
-      label: "Performance",
+      label: t("stats.performance"),
     },
   ];
 
@@ -70,18 +89,27 @@ const Dashboard = () => {
     <div className="p-8 bg-white min-h-screen relative font-sans text-slate-900">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="cs-typography font-bold">Agent Command Center</h1>
+          <h1 className="cs-typography font-bold">{t("header.title")}</h1>
           <p className="cs-paragraph-gray mt-1 text-base">
-            Welcome back, here's what's happening today.
+            {t("header.description")}
           </p>
         </div>
-        <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white cs-outline-gray text-slate-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-            Export Report
-          </button>
-          <button className="px-4 py-2 cs-bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
-            Settings
-          </button>
+        <div className="flex gap-3 items-center">
+          <div className="flex rounded-lg border border-gray-200 bg-white p-1">
+            {(["VND", "USD"] as const).map((item) => (
+              <button
+                key={item}
+                onClick={() => setCurrency(item)}
+                className={`px-3 py-1.5 text-sm rounded-md transition ${
+                  currency === item
+                    ? "bg-black text-white"
+                    : "text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -102,7 +130,7 @@ const Dashboard = () => {
                     : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {stat.type === "increase" ? "+12%" : "0%"}
+                {stat.label}
               </span>
             </div>
             <div>
@@ -120,12 +148,22 @@ const Dashboard = () => {
         {/* Main Content (Span 2) */}
         <div className="lg:col-span-2 space-y-8">
           <ChartLine />
-          <RecentInquiries />
+          {isLoadingSalesLog ? (
+            <div className="bg-white p-6 rounded-2xl shadow-sm border cs-outline-gray">
+              {t("sales.loading")}
+            </div>
+          ) : (
+            <RecentInquiries sales={salesLog?.data?.results || []} />
+          )}
         </div>
 
         {/* Sidebar (Span 1) */}
         <div className="lg:col-span-1">
-          <SidebarRight schedules={(schedulesToday as any)?.data || []} />
+          <SidebarRight
+            schedules={(schedulesToday as any)?.data || []}
+            leaderboard={revenueLeaderboard?.data?.results || []}
+            currency={currency}
+          />
         </div>
       </div>
 

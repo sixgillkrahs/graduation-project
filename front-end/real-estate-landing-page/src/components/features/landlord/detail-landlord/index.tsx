@@ -1,33 +1,30 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useLandlordDetail, useLandlordProperties } from "../services/query";
+import { IParamsPagination } from "@/@types/service";
 import { CsButton } from "@/components/custom";
+import { IPropertyDto } from "@/components/features/my-listings/dto/property.dto";
+import { CsTable, TableColumn } from "@/components/ui/table";
+import { formatPropertyPrice } from "@/lib/property-price";
 import {
   ArrowLeft,
-  Mail,
-  Phone,
-  MapPin,
   Building,
-  Calendar,
-  DollarSign,
+  Mail,
+  MapPin,
+  Phone,
 } from "lucide-react";
-import { CsTable, TableColumn } from "@/components/ui/table";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { IParamsPagination } from "@/@types/service";
-import { IPropertyDto } from "@/components/features/my-listings/dto/property.dto";
+import { useLandlordDetail, useLandlordProperties } from "../services/query";
 
 const DetailLandlord = () => {
   const { id } = useParams();
   const router = useRouter();
   const landlordId = (id as string) || "";
 
-  // Landlord Query
   const { data: landlordRes, isLoading: isLoadingLandlord } =
     useLandlordDetail(landlordId);
   const landlord = landlordRes?.data;
 
-  // Properties Query
   const [pagination, setPagination] = useState<IParamsPagination>({
     page: 1,
     limit: 10,
@@ -96,8 +93,12 @@ const DetailLandlord = () => {
         const feat = value as IPropertyDto["features"];
         return (
           <span className="font-semibold text-primary">
-            {feat?.price}{" "}
-            {feat?.priceUnit === "MILLION" ? "Triệu" : feat?.priceUnit}
+            {formatPropertyPrice(
+              feat?.price,
+              feat?.priceUnit,
+              feat?.currency,
+              "vi",
+            )}
           </span>
         );
       },
@@ -162,7 +163,6 @@ const DetailLandlord = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
       <div className="flex items-center gap-4 border-b pb-4">
         <CsButton
           icon={<ArrowLeft size={18} className="text-white!" />}
@@ -177,7 +177,6 @@ const DetailLandlord = () => {
         </div>
       </div>
 
-      {/* Info Card */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-start gap-6">
           <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold shrink-0">
@@ -213,7 +212,6 @@ const DetailLandlord = () => {
         </div>
       </div>
 
-      {/* Properties Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
           <div className="flex items-center gap-2">
