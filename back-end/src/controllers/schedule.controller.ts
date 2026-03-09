@@ -184,6 +184,16 @@ export class ScheduleController extends BaseController {
     });
   };
 
+  getLeads = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
+      const leads = await this.scheduleService.getLeads(
+        currentUser?.userId._id as any,
+      );
+      return leads;
+    });
+  };
+
   deleteSchedule = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;

@@ -5,6 +5,7 @@ import { useConversations } from "../services/query";
 import MessageItem from "./MessageItem";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/const/routes";
+import { useGetMe } from "@/shared/auth/query";
 
 interface ListChatProps {
   onSelectConversation?: (conversation: any) => void;
@@ -12,7 +13,8 @@ interface ListChatProps {
 
 const ListChat = ({ onSelectConversation }: ListChatProps) => {
   const router = useRouter();
-  const { data, isLoading } = useConversations();
+  const { data: me } = useGetMe();
+  const { data, isLoading } = useConversations(!!me?.data?.userId);
 
   if (isLoading) {
     return (

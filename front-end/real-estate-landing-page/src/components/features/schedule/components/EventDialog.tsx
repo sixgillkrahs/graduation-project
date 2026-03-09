@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { memo, useEffect } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
+import { Home } from "lucide-react";
 import {
   CreateScheduleRequest,
   SCHEDULE_STATUS,
@@ -403,6 +404,64 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
               />
             )}
           />
+        </div>
+      ),
+    },
+    {
+      label: "Linked Property",
+      value: "property",
+      content: (
+        <div className="space-y-4 p-4">
+          {scheduleDetail?.data?.listingId &&
+          typeof scheduleDetail.data.listingId === "object" ? (
+            <div
+              className="flex gap-4 p-4 border rounded-xl hover:shadow-md transition-shadow cursor-pointer border-gray-100 bg-gray-50/50"
+              onClick={() =>
+                window.open(
+                  `/properties/${(scheduleDetail.data.listingId as any)._id || (scheduleDetail.data.listingId as any).id}`,
+                  "_blank",
+                )
+              }
+            >
+              <img
+                src={
+                  (scheduleDetail.data.listingId as any).media?.thumbnail ||
+                  (scheduleDetail.data.listingId as any).media?.images?.[0] ||
+                  "https://via.placeholder.com/150"
+                }
+                alt="Property"
+                className="w-28 h-28 shrink-0 rounded-lg object-cover border border-gray-200"
+              />
+              <div className="flex flex-col flex-1 justify-center gap-1.5 overflow-hidden">
+                <h4 className="font-bold text-gray-800 line-clamp-2 leading-tight">
+                  {(scheduleDetail.data.listingId as any).title}
+                </h4>
+                <p className="text-base font-extrabold text-red-600">
+                  {(
+                    scheduleDetail.data.listingId as any
+                  ).features?.price?.toLocaleString() || "Thỏa thuận"}
+                  <span className="text-xs text-gray-500 font-medium ml-1">
+                    VNĐ
+                  </span>
+                </p>
+                {(scheduleDetail.data.listingId as any).location?.address && (
+                  <div className="flex items-start gap-1 text-sm text-gray-500">
+                    <Icon.MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p className="line-clamp-2">
+                      {(scheduleDetail.data.listingId as any).location.address}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="py-12 flex flex-col items-center justify-center text-center">
+              <Icon.ArrowRight className="w-12 h-12 text-gray-200 mb-3" />
+              <p className="text-gray-400 font-medium">
+                Không có ngôi nhà nào được đính kèm lịch hẹn này.
+              </p>
+            </div>
+          )}
         </div>
       ),
     },

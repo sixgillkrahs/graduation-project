@@ -17,6 +17,13 @@ export const useGetSchedulesMe = (params?: IParamsSchedule) => {
   });
 };
 
+export const useGetLeads = () => {
+  return useQuery({
+    queryKey: [ScheduleQueryKey.getLeads],
+    queryFn: () => ScheduleService.getLeads(),
+  });
+};
+
 export const useGetScheduleById = (id: string) => {
   return useQuery({
     queryKey: [ScheduleQueryKey.getScheduleById, id],

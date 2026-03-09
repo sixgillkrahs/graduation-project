@@ -1,7 +1,10 @@
+"use client";
+
+import { CRMFeature } from "@/components/features/crm";
 import React from "react";
 
 const Page = () => {
-  return <div>Page</div>;
+  return <CRMFeature />;
 };
 
 export default Page;

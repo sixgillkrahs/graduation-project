@@ -1,0 +1,14 @@
+venv
+__pycache__
+*.pyc
+*.pyo
+*.log
+colab
+data
+scripts
+sources/Database
+sources/static
+models/hf-moderation
+models/moderation
+models/moderation_daily
+Dockerfile

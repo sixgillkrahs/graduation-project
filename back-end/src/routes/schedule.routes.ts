@@ -252,6 +252,35 @@ router.get("/me", scheduleController.getSchedulesMe);
 
 /**
  * @swagger
+ * /schedules/leads:
+ *   get:
+ *     summary: Get leads (confirmed/completed schedules) for the current user
+ *     tags: [Schedules]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Leads retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/Schedule"
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/leads", scheduleController.getLeads);
+
+/**
+ * @swagger
  * /schedules/{id}:
  *   delete:
  *     summary: Delete a schedule

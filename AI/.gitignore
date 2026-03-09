@@ -5,6 +5,9 @@ sources/static/results
 sources/static/face
 sources/__pycache__/
 venv/
+colab/
+data/
+models/
 
 
 .\venv\Scripts\python.exe run.py

@@ -30,7 +30,7 @@ const MyListings = () => {
       width: "30%",
       render: (_, record) => (
         <div className="flex gap-3">
-          <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+          <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-gray-100">
             {record.media?.thumbnail ? (
               <Image
                 src={record.media.thumbnail}
@@ -45,7 +45,11 @@ const MyListings = () => {
             )}
           </div>
           <div className="flex flex-col justify-center">
-            <h4 className="font-semibold text-gray-900 line-clamp-1">
+            <h4
+              className="font-semibold text-gray-900 line-clamp-1 cursor-pointer hover:text-blue-600 transition"
+              onClick={() => router.push(`/agent/listings/${record.id}`)}
+              title="Click to view details"
+            >
               {record.title ||
                 `${record.propertyType} - ${record.location.province}`}
             </h4>
@@ -165,6 +169,12 @@ const MyListings = () => {
               }
             >
               <div className="py-2">
+                <DropdownItem
+                  icon={<Eye className="w-4 h-4" />}
+                  onClick={() => router.push(`/agent/listings/${record.id}`)}
+                >
+                  Xem chi tiết
+                </DropdownItem>
                 <DropdownItem
                   icon={<Icon.Edit className="w-4 h-4" />}
                   onClick={() =>

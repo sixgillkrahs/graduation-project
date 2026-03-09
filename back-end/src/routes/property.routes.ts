@@ -618,6 +618,41 @@ router.patch("/:id/approve", requireAuth, propertyController.approveProperty);
 
 /**
  * @swagger
+ * /properties/{id}/status:
+ *   patch:
+ *     summary: Update property status (for owner)
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Property ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PUBLISHED, SOLD, EXPIRED]
+ *     responses:
+ *       200:
+ *         description: Property status updated
+ */
+router.patch(
+  "/:id/status",
+  requireAuth,
+  propertyController.updatePropertyStatus,
+);
+
+/**
+ * @swagger
  * /properties/{id}/reject:
  *   patch:
  *     summary: Reject a property

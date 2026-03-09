@@ -648,6 +648,72 @@ export class PropertyController extends BaseController {
     });
   };
 
+  updatePropertyStatus = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const { status, soldPrice, soldTo, soldAt } = req.body;
+      const user = req.user;
+      const lang = req.lang;
+
+      // Check ownership
+      const existingProperty = await this.propertyService.getPropertyById(id);
+      if (!existingProperty) {
+        throw new AppError(
+          lang === "vi" ? "Bất động sản không tồn tại" : "Property not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      if (existingProperty.userId.toString() !== user.userId._id.toString()) {
+        throw new AppError(
+          lang === "vi"
+            ? "Bạn không có quyền sửa tin này"
+            : "Permission denied",
+          403,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+
+      const validStatuses = [
+        PropertyStatusEnum.PUBLISHED,
+        PropertyStatusEnum.SOLD,
+        PropertyStatusEnum.EXPIRED,
+      ];
+
+      if (!validStatuses.includes(status)) {
+        throw new AppError(
+          lang === "vi" ? "Trạng thái không hợp lệ" : "Invalid status",
+          400,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+
+      const updateData: any = { status };
+
+      if (status === PropertyStatusEnum.SOLD) {
+        if (soldPrice !== undefined || soldTo || soldAt) {
+          updateData.salesInfo = {
+            soldPrice: soldPrice !== undefined ? Number(soldPrice) : undefined,
+            soldTo: soldTo || undefined,
+            soldAt: soldAt ? new Date(soldAt) : new Date(),
+          };
+        } else {
+          updateData.salesInfo = {
+            soldAt: new Date(),
+          };
+        }
+      }
+
+      const updatedProperty = await this.propertyService.updateProperty(
+        id,
+        updateData,
+      );
+
+      return updatedProperty;
+    });
+  };
+
   deleteProperty = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { id } = req.params;

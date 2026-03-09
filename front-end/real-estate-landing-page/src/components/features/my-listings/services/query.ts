@@ -1,5 +1,5 @@
 import { IParamsPagination } from "@/@types/service";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { PropertyKey } from "./config";
 import PropertyService from "./service";
 
@@ -15,5 +15,24 @@ export const useGetPropertyDetail = (id: string) => {
     queryKey: [PropertyKey.getPropertyDetail, id],
     queryFn: () => PropertyService.getPropertyDetail(id),
     enabled: !!id,
+  });
+};
+
+export const useUpdatePropertyStatus = () => {
+  return useMutation({
+    mutationFn: (data: {
+      id: string;
+      status: string;
+      soldPrice?: number;
+      soldTo?: string;
+      soldAt?: string;
+    }) =>
+      PropertyService.updatePropertyStatus(
+        data.id,
+        data.status,
+        data.soldPrice,
+        data.soldTo,
+        data.soldAt,
+      ),
   });
 };

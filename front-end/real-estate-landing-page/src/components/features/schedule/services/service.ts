@@ -65,6 +65,13 @@ export default class ScheduleService {
     });
   };
 
+  public static readonly getLeads = (): Promise<IResp<IScheduleDTO[]>> => {
+    return request({
+      url: ScheduleEndpoint.getLeads(),
+      method: AxiosMethod.GET,
+    });
+  };
+
   public static readonly deleteSchedule = (
     id: string,
   ): Promise<IResp<string>> => {

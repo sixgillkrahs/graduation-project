@@ -2,7 +2,7 @@ export interface IScheduleDTO {
   id?: string;
   agentId: string;
   userId: string;
-  listingId: string;
+  listingId: any;
   customerName: string;
   customerPhone: string;
   title: string;

@@ -117,6 +117,12 @@ export interface IProperty {
   rejectReason?: string;
   adminNote?: string;
 
+  salesInfo?: {
+    soldPrice?: number;
+    soldTo?: string;
+    soldAt?: Date;
+  };
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -176,6 +182,15 @@ const mediaSchema = new mongoose.Schema(
     thumbnail: { type: String },
     videoLink: { type: String },
     virtualTourUrls: { type: [String], default: [] },
+  },
+  { _id: false },
+);
+
+const salesInfoSchema = new mongoose.Schema(
+  {
+    soldPrice: { type: Number },
+    soldTo: { type: String },
+    soldAt: { type: Date },
   },
   { _id: false },
 );
@@ -243,6 +258,9 @@ const propertySchema = new mongoose.Schema<
     },
     adminNote: {
       type: String,
+    },
+    salesInfo: {
+      type: salesInfoSchema,
     },
   },
   {

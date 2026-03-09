@@ -8,6 +8,13 @@ aiosqlite
 
 # ===== Utils =====
 pre-commit
+joblib
+scikit-learn==1.5.2
+safetensors>=0.4.5
+sentencepiece>=0.2.0
+transformers==4.41.2
+huggingface_hub==0.23.5
+tokenizers==0.19.1
 
 # ===== AI / OCR (PIN VERSION) =====
 numpy==1.23.5

@@ -25,7 +25,7 @@ const ChatWidget = () => {
   );
   const currentConversationId =
     selectedConversation?.id || selectedConversation?._id;
-  const { data: conversationsData } = useConversations();
+  const { data: conversationsData } = useConversations(!!me?.data?.userId);
   const { data, isLoading } = useConversationDetail(currentConversationId);
   const totalUnreadCount =
     conversationsData?.data?.results?.reduce(

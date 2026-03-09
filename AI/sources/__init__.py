@@ -1,17 +1,20 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
 import sources.Controllers.config as cfg
 
-app = FastAPI()
 
-app.mount("/static", StaticFiles(directory=cfg.UPLOAD_FOLDER), name="static")
+def create_base_app(include_static: bool = False) -> FastAPI:
+    app = FastAPI()
 
-app.add_middleware(CORSMiddleware,
-    allow_origins=["*"],          
-    allow_methods=["*"],      
-    allow_headers=["*"],   
-)
+    if include_static:
+        app.mount("/static", StaticFiles(directory=cfg.UPLOAD_FOLDER), name="static")
 
-from sources.Controllers import main
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    return app

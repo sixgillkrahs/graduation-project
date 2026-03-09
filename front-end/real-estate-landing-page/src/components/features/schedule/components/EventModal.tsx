@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { memo, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
+import { Home } from "lucide-react";
 import {
   CreateScheduleRequest,
   EventClickArgs,
@@ -219,7 +220,16 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
       }
     >
       <div className="flex justify-center mb-6">
-        <Tabs items={[]} current={activeTab} onChange={setActiveTab} />
+        <Tabs
+          items={[
+            { title: "General info" },
+            { title: "Customer" },
+            { title: "Notes" },
+            { title: "Linked Property" },
+          ]}
+          current={activeTab}
+          onChange={setActiveTab}
+        />
       </div>
 
       {isLoadingDetail || !scheduleDetail ? (
@@ -528,6 +538,71 @@ const EventModal = memo(({ open, onClose, selectedEvent }: EventModalProps) => {
                 />
               )}
             />
+          </div>
+
+          <div
+            className={
+              activeTab === 3
+                ? "block space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300"
+                : "hidden"
+            }
+          >
+            {(scheduleDetail as any)?.data?.listingId &&
+            typeof (scheduleDetail as any).data.listingId === "object" ? (
+              <div
+                className="flex gap-4 p-4 border rounded-xl hover:shadow-md transition-shadow cursor-pointer border-gray-100 bg-gray-50/50"
+                onClick={() =>
+                  window.open(
+                    `/properties/${((scheduleDetail as any).data.listingId as any)._id || ((scheduleDetail as any).data.listingId as any).id}`,
+                    "_blank",
+                  )
+                }
+              >
+                <img
+                  src={
+                    ((scheduleDetail as any).data.listingId as any).media
+                      ?.thumbnail ||
+                    ((scheduleDetail as any).data.listingId as any).media
+                      ?.images?.[0] ||
+                    "https://via.placeholder.com/150"
+                  }
+                  alt="Property"
+                  className="w-28 h-28 shrink-0 rounded-lg object-cover border border-gray-200"
+                />
+                <div className="flex flex-col flex-1 justify-center gap-1.5 overflow-hidden">
+                  <h4 className="font-bold text-gray-800 line-clamp-2 leading-tight">
+                    {((scheduleDetail as any).data.listingId as any).title}
+                  </h4>
+                  <p className="text-base font-extrabold text-red-600">
+                    {(
+                      (scheduleDetail as any).data.listingId as any
+                    ).features?.price?.toLocaleString() || "Thỏa thuận"}
+                    <span className="text-xs text-gray-500 font-medium ml-1">
+                      VNĐ
+                    </span>
+                  </p>
+                  {((scheduleDetail as any).data.listingId as any).location
+                    ?.address && (
+                    <div className="flex items-start gap-1 text-sm text-gray-500">
+                      <Icon.MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                      <p className="line-clamp-2">
+                        {
+                          ((scheduleDetail as any).data.listingId as any)
+                            .location.address
+                        }
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <Home className="w-12 h-12 text-gray-200 mb-3" />
+                <p className="text-gray-400 font-medium">
+                  Không có ngôi nhà nào được đính kèm lịch hẹn này.
+                </p>
+              </div>
+            )}
           </div>
         </form>
       )}

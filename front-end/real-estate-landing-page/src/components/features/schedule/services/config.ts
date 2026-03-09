@@ -5,9 +5,11 @@ export const ScheduleEndpoint = {
   updateSchedule: (id: string) => `/schedules/${id}`,
   deleteSchedule: (id: string) => `/schedules/${id}`,
   getScheduleById: (id: string) => `/schedules/${id}`,
+  getLeads: () => "/schedules/leads",
 } as const;
 
 export const ScheduleQueryKey = {
   getSchedules: "getSchedules",
   getScheduleById: "getScheduleById",
+  getLeads: "getLeads",
 } as const;

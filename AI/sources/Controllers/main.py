@@ -5,7 +5,7 @@ import numpy as np
 import uuid
 import shutil
 import yolov5
-from fastapi import File, Request, UploadFile
+from fastapi import APIRouter, File, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse,FileResponse
 from PIL import Image
@@ -13,29 +13,41 @@ from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 
 import sources.Controllers.config as cfg
-from sources import app 
 from sources.Controllers import utils
 
+router = APIRouter()
+
 """ ---- Setup ---- """
-
-CORNER_MODEL = yolov5.load(cfg.CORNER_MODEL_PATH)
-CONTENT_MODEL = yolov5.load(cfg.CONTENT_MODEL_PATH)
-
-CONTENT_MODEL.conf = cfg.CONF_CONTENT_THRESHOLD
-CONTENT_MODEL.iou = cfg.IOU_CONTENT_THRESHOLD
+CORNER_MODEL = None
+CONTENT_MODEL = None
+detector = None
 
 UPLOAD_FOLDER = cfg.UPLOAD_FOLDER
 SAVE_DIR = cfg.SAVE_DIR
 
-""" ---- OCR Setup ---- """
-config = Cfg.load_config_from_name("vgg_seq2seq")
-config["cnn"]["pretrained"] = False
-config["device"] = cfg.DEVICE
-config["predictor"]["beamsearch"] = False
-detector = Predictor(config)
+
+def ensure_ocr_models():
+    global CORNER_MODEL, CONTENT_MODEL, detector
+
+    if CORNER_MODEL is not None and CONTENT_MODEL is not None and detector is not None:
+        return CORNER_MODEL, CONTENT_MODEL, detector
+
+    CORNER_MODEL = yolov5.load(cfg.CORNER_MODEL_PATH)
+    CONTENT_MODEL = yolov5.load(cfg.CONTENT_MODEL_PATH)
+
+    CONTENT_MODEL.conf = cfg.CONF_CONTENT_THRESHOLD
+    CONTENT_MODEL.iou = cfg.IOU_CONTENT_THRESHOLD
+
+    config = Cfg.load_config_from_name("vgg_seq2seq")
+    config["cnn"]["pretrained"] = False
+    config["device"] = cfg.DEVICE
+    config["predictor"]["beamsearch"] = False
+    detector = Predictor(config)
+
+    return CORNER_MODEL, CONTENT_MODEL, detector
 
 
-@app.post("/uploader")
+@router.post("/uploader")
 async def upload(file: UploadFile = File(...)):
     if not file.filename.lower().endswith((".png", ".jpg", ".jpeg")):
         error = "This file is not supported! Only PNG, JPG, JPEG are allowed."
@@ -46,7 +58,7 @@ async def upload(file: UploadFile = File(...)):
 
     return await extract_info(image_input=image)
 
-@app.get("/images/{filename}")
+@router.get("/images/{filename}")
 async def get_image(filename: str):
     file_path = os.path.join(cfg.UPLOAD_FOLDER, filename)
     
@@ -56,7 +68,7 @@ async def get_image(filename: str):
     return JSONResponse(status_code=404, content={"message": "Image not found"})
 
 
-@app.post("/upload-single")
+@router.post("/upload-single")
 async def upload_single_image(file: UploadFile = File(...)):
     if not os.path.isdir(cfg.UPLOAD_FOLDER):
         os.mkdir(cfg.UPLOAD_FOLDER)
@@ -87,6 +99,8 @@ async def upload_single_image(file: UploadFile = File(...)):
 
 async def extract_info(image_input=None):
     """Extract information from the uploaded image."""
+    corner_model, content_model, text_detector = ensure_ocr_models()
+
     if image_input is None:
         error = "No image to process!"
         return JSONResponse(status_code=400, content={"message": error})
@@ -104,7 +118,7 @@ async def extract_info(image_input=None):
         img = image_input
         IMG = image_input
 
-    CORNER = CORNER_MODEL(img)
+    CORNER = corner_model(img)
     predictions = CORNER.pred[0]
     categories = predictions[:, 5].tolist()  
     if len(categories) != 4:
@@ -122,7 +136,7 @@ async def extract_info(image_input=None):
     aligned = utils.four_point_transform(IMG, center_points)
     aligned = Image.fromarray(aligned)
 
-    CONTENT = CONTENT_MODEL(aligned)
+    CONTENT = content_model(aligned)
     predictions = CONTENT.pred[0]
     categories = predictions[:, 5].tolist()  
     if 7 not in categories:
@@ -158,7 +172,7 @@ async def extract_info(image_input=None):
         current_img_path = os.path.join(SAVE_DIR, img_crop)
         if os.path.isfile(current_img_path) and current_img_path.lower().endswith((".png", ".jpg", ".jpeg")):
             img_ = Image.open(current_img_path)
-            s = detector.predict(img_)
+            s = text_detector.predict(img_)
             FIELDS_DETECTED.append(s)
 
     if 7 in categories:

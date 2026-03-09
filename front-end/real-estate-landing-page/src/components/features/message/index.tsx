@@ -4,14 +4,16 @@ import { Spinner } from "@/components/ui/spinner";
 import ChatDetail from "./components/ChatDetail";
 import { useConversationDetail, useConversations } from "./services/query";
 import { useParams } from "next/navigation";
+import { useGetMe } from "@/shared/auth/query";
 
 const Message = () => {
   const params = useParams();
   const conversationId = params.conversationId as string;
+  const { data: me } = useGetMe();
   const { data: messagesData, isLoading: isLoadingMessages } =
     useConversationDetail(conversationId || "");
   const { data: conversationsData, isLoading: isLoadingConversations } =
-    useConversations();
+    useConversations(!!me?.data?.userId);
 
   if (isLoadingMessages || isLoadingConversations) {
     return (

@@ -196,6 +196,20 @@ export default class PropertyService {
     });
   };
 
+  public static readonly updatePropertyStatus = (
+    id: string,
+    status: string,
+    soldPrice?: number,
+    soldTo?: string,
+    soldAt?: string,
+  ): Promise<IResp<IPropertyDto>> => {
+    return request({
+      url: PropertyEndpoint.updatePropertyStatus(id),
+      method: AxiosMethod.PATCH,
+      data: { status, soldPrice, soldTo, soldAt },
+    });
+  };
+
   public static readonly getPropertyDetail = (
     id: string,
   ): Promise<IResp<IPropertyDto>> => {

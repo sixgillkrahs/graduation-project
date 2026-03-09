@@ -61,9 +61,8 @@ export class ScheduleService {
       filter.agentId = agentId;
     }
 
-    const expiredCandidates = await ScheduleModel.find(filter).select(
-      "_id date endTime",
-    );
+    const expiredCandidates =
+      await ScheduleModel.find(filter).select("_id date endTime");
 
     const expiredIds = expiredCandidates
       .filter((schedule) => this.getScheduleEndDate(schedule) < now)
@@ -92,7 +91,18 @@ export class ScheduleService {
     return await ScheduleModel.find({
       agentId: filter.agentId,
       date: { $gte: filter.start, $lte: filter.end },
-    }).sort({ date: 1 });
+    })
+      .sort({ date: 1 })
+      .populate("listingId");
+  }
+
+  async getLeads(agentId: string) {
+    return await ScheduleModel.find({
+      agentId,
+      status: { $in: [SCHEDULE_STATUS.CONFIRMED, SCHEDULE_STATUS.COMPLETED] },
+    })
+      .sort({ date: -1 })
+      .populate("listingId");
   }
 
   async deleteSchedule(id: string) {
@@ -104,6 +114,6 @@ export class ScheduleService {
   }
 
   async getScheduleById(id: string) {
-    return await ScheduleModel.findById(id);
+    return await ScheduleModel.findById(id).populate("listingId");
   }
 }
