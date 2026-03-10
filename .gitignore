@@ -13,3 +13,9 @@ pnpm-debug.log*
 
 # AI Code Review temporary files
 .ai-code-review/
+
+# Temporary files (contain tokens/secrets)
+tmp_*.json
+tmp_*.txt
+tmp_*.js
+tmp*/
