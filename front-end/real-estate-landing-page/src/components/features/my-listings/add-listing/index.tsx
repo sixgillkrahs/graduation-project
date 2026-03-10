@@ -1,11 +1,12 @@
 "use client";
 
-import { CsStep } from "@/components/ui/stepper";
-import { RootState } from "@/store";
-import { setStep } from "@/store/listing.store";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { ListingFormData } from "../dto/listingformdata.dto";
+import { CsStep } from "@/components/ui/stepper";
+import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import type { RootState } from "@/store";
+import { setStep } from "@/store/listing.store";
+import type { ListingFormData } from "../dto/listingformdata.dto";
 import PropertyService from "../services/service";
 import BasicInfo from "./components/BasicInfo";
 import FeaturesPricing from "./components/FeaturesPricing";
@@ -72,6 +73,7 @@ const AddListing = () => {
       furniture:
         listingData.features?.furniture ||
         PropertyService.defaultFormValues.furniture,
+      amenities: (listingData.amenities || []).map(getPropertyAmenityLabel),
       images:
         listingData.media?.images || PropertyService.defaultFormValues.images,
       thumbnail:

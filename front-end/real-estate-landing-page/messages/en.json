@@ -303,6 +303,7 @@
       "reviews": "{rating} ({count} reviews)",
       "viewAllPhotos": "View all photos",
       "similarHomes": "Similar Homes You Might Like",
+      "viewMore": "View more",
       "viewAll": "View All",
       "swimmingPool": "Swimming Pool",
       "gymFitness": "Gym & Fitness",
@@ -578,4 +579,3 @@
     }
   }
 }
-

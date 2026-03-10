@@ -1,27 +1,11 @@
-"use client";
+﻿"use client";
 
-import { CsButton } from "@/components/custom";
-import CsTabs from "@/components/custom/tabs";
-import PropertyCard from "@/components/features/properties/components/PropertyCard";
-import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
-import { Zalo } from "@/components/ui/Icon/Zalo";
-import { Map } from "@/components/ui/Map";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useAppDispatch } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
-import { showAuthDialog } from "@/store/auth-dialog.store";
 import { format, isBefore, startOfDay } from "date-fns";
 import {
-  LIST_PROVINCE,
-  LIST_WARD,
   findOptionLabel,
   formatChatTime,
+  LIST_PROVINCE,
+  LIST_WARD,
 } from "gra-helper";
 import {
   ArrowLeft,
@@ -39,28 +23,46 @@ import {
   Star,
   Video,
 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PhotoSlider } from "react-photo-view";
-import { useGetMe } from "@/shared/auth/query";
-import { useIncreaseView, useRecordInteraction } from "../services/mutate";
-import { useCreateConversation } from "../../message/services/mutate";
-import { openConversation } from "@/store/chat.store";
 import { toast } from "sonner";
-import { usePropertyDetail, useRecommendedProperties } from "../services/query";
-import { useRequestSchedule } from "../../schedule/services/mutation";
+import { CsButton } from "@/components/custom";
+import CsTabs from "@/components/custom/tabs";
+import PropertyCard from "@/components/features/properties/components/PropertyCard";
+import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Zalo } from "@/components/ui/Icon/Zalo";
+import { Map } from "@/components/ui/Map";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ROUTES } from "@/const/routes";
+import { useAppDispatch } from "@/lib/hooks";
+import { getPropertyAmenityDisplay } from "@/lib/property-amenities";
 import {
   formatPropertyPrice,
   formatPropertyPricePerSqm,
 } from "@/lib/property-price";
+import { cn } from "@/lib/utils";
+import { useGetMe } from "@/shared/auth/query";
+import { showAuthDialog } from "@/store/auth-dialog.store";
+import { openConversation } from "@/store/chat.store";
+import { useCreateConversation } from "../../message/services/mutate";
+import { useRequestSchedule } from "../../schedule/services/mutation";
+import { useIncreaseView, useRecordInteraction } from "../services/mutate";
+import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 
 const TourViewer = dynamic(() => import("./TourViewer"), { ssr: false });
 const TOUR_TIME_SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
+const SIMILAR_PROPERTIES_PAGE_SIZE = 3;
 
 const PropertyDetail = () => {
   const params = useParams();
@@ -76,12 +78,14 @@ const PropertyDetail = () => {
   const [show3D, setShow3D] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(
+    SIMILAR_PROPERTIES_PAGE_SIZE,
+  );
   const { data: me } = useGetMe();
   const isClientLoggedIn = Boolean(me?.data?.userId);
   const { mutate: increaseView } = useIncreaseView();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
-  const { mutateAsync: createConversation, isPending: isCreatingChat } =
-    useCreateConversation();
+  const { mutateAsync: createConversation } = useCreateConversation();
   const { mutateAsync: requestBooking, isPending: isRequestingBooking } =
     useRequestSchedule();
   const t = useTranslations("PropertiesPage");
@@ -128,6 +132,10 @@ const PropertyDetail = () => {
     setTimeSlot("");
   }, [date, timeSlot]);
 
+  useEffect(() => {
+    setVisibleRecommendedCount(SIMILAR_PROPERTIES_PAGE_SIZE);
+  }, [id]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -163,15 +171,11 @@ const PropertyDetail = () => {
     prop.features.currency,
     locale,
   );
-
-  const AMENITIES = [
-    { name: t("detail.swimmingPool"), icon: "🏊‍♂️" },
-    { name: t("detail.gymFitness"), icon: "💪" },
-    { name: t("detail.parking"), icon: "🚗" },
-    { name: t("detail.elevator"), icon: "🛗" },
-    { name: t("detail.security"), icon: "🛡️" },
-    { name: t("detail.wifi"), icon: "📶" },
-  ];
+  const amenities = (prop.amenities || []).map(getPropertyAmenityDisplay);
+  const visibleRecommendedProperties =
+    recommendedData?.data?.slice(0, visibleRecommendedCount) || [];
+  const canLoadMoreRecommended =
+    (recommendedData?.data?.length || 0) > visibleRecommendedCount;
 
   const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
     if (!isClientLoggedIn) {
@@ -190,9 +194,9 @@ const PropertyDetail = () => {
     if (!isClientLoggedIn) {
       dispatch(
         showAuthDialog({
-          title: "Đăng nhập để xem Liên hệ",
+          title: "ÄÄƒng nháº­p Ä‘á»ƒ xem LiÃªn há»‡",
           description:
-            "Vui lòng cung cấp tài khoản để có thể xem thông tin số điện thoại của người bán/môi giới.",
+            "Vui lÃ²ng cung cáº¥p tÃ i khoáº£n Ä‘á»ƒ cÃ³ thá»ƒ xem thÃ´ng tin sá»‘ Ä‘iá»‡n thoáº¡i cá»§a ngÆ°á»i bÃ¡n/mÃ´i giá»›i.",
         }),
       );
       return;
@@ -202,7 +206,9 @@ const PropertyDetail = () => {
     const fullPhone = phone ? phone.replace(/^\+84/, "0") : "";
 
     if (!fullPhone) {
-      toast.info("Người bán chưa cập nhật thông tin số điện thoại.");
+      toast.info(
+        "NgÆ°á»i bÃ¡n chÆ°a cáº­p nháº­t thÃ´ng tin sá»‘ Ä‘iá»‡n thoáº¡i.",
+      );
       if (type !== "message") return;
     }
 
@@ -214,14 +220,14 @@ const PropertyDetail = () => {
         window.open(`https://zalo.me/${fullPhone}`, "_blank");
         break;
       case "message":
-        // Tạo hoặc lấy hội thoại hiện tại
+        // Táº¡o hoáº·c láº¥y há»™i thoáº¡i hiá»‡n táº¡i
         try {
           const res = await createConversation([prop.userId._id]);
           if (res.data) {
             dispatch(openConversation(res.data));
           }
         } catch (error) {
-          console.error("Lỗi khi mở chat", error);
+          console.error("Lá»—i khi má»Ÿ chat", error);
         }
         break;
     }
@@ -231,38 +237,38 @@ const PropertyDetail = () => {
     if (!isClientLoggedIn) {
       dispatch(
         showAuthDialog({
-          title: "Đăng nhập để đặt lịch",
+          title: "ÄÄƒng nháº­p Ä‘á»ƒ Ä‘áº·t lá»‹ch",
           description:
-            "Vui lòng đăng nhập để thực hiện đặt lịch hẹn xem bất động sản này.",
+            "Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ thá»±c hiá»‡n Ä‘áº·t lá»‹ch háº¹n xem báº¥t Ä‘á»™ng sáº£n nÃ y.",
         }),
       );
       return;
     }
 
     if (!date) {
-      toast.error("Vui lòng chọn ngày muốn đặt lịch");
+      toast.error("Vui lÃ²ng chá»n ngÃ y muá»‘n Ä‘áº·t lá»‹ch");
       return;
     }
 
     if (isBefore(startOfDay(date), today)) {
-      toast.error("Chỉ có thể đặt lịch từ hôm nay trở đi");
+      toast.error("Chá»‰ cÃ³ thá»ƒ Ä‘áº·t lá»‹ch tá»« hÃ´m nay trá»Ÿ Ä‘i");
       return;
     }
 
     if (!timeSlot) {
-      toast.error("Vui lòng chọn giờ muốn đặt lịch");
+      toast.error("Vui lÃ²ng chá»n giá» muá»‘n Ä‘áº·t lá»‹ch");
       return;
     }
 
     if (isPastTimeSlot(date, timeSlot)) {
-      toast.error("Giờ hẹn phải lớn hơn thời điểm hiện tại");
+      toast.error("Giá» háº¹n pháº£i lá»›n hÆ¡n thá»i Ä‘iá»ƒm hiá»‡n táº¡i");
       return;
     }
 
     try {
       await requestBooking({
         listingId: id,
-        customerName: me?.data?.userId?.fullName || "Khách hàng",
+        customerName: me?.data?.userId?.fullName || "KhÃ¡ch hÃ ng",
         customerPhone: me?.data?.userId?.phone || "",
         customerEmail: me?.data?.userId?.email || "",
         date: date,
@@ -280,14 +286,14 @@ const PropertyDetail = () => {
     if (!isClientLoggedIn) {
       dispatch(
         showAuthDialog({
-          title: "Đăng nhập để gửi tin",
+          title: "ÄÄƒng nháº­p Ä‘á»ƒ gá»­i tin",
           description:
-            "Vui lòng đăng nhập để gửi yêu cầu đến người bán/môi giới.",
+            "Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ gá»­i yÃªu cáº§u Ä‘áº¿n ngÆ°á»i bÃ¡n/mÃ´i giá»›i.",
         }),
       );
       return;
     }
-    toast.info("Tính năng gửi yêu cầu đang được phát triển.");
+    toast.info("TÃ­nh nÄƒng gá»­i yÃªu cáº§u Ä‘ang Ä‘Æ°á»£c phÃ¡t triá»ƒn.");
   };
 
   return (
@@ -539,26 +545,30 @@ const PropertyDetail = () => {
                 <p>{prop.description}</p>
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-gray-400 border-t border-gray-50 pt-3 italic">
-                <span>✨ {t("detail.aiEnhanced")}</span>
+                <span>{t("detail.aiEnhanced")}</span>
               </div>
             </section>
 
             {/* Amenities */}
-            <section>
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
-                {t("detail.amenities")}
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
-                {AMENITIES.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
-                    <span className="text-2xl">{item.icon}</span>
-                    <span className="text-gray-700 font-medium">
-                      {item.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
+            {amenities.length > 0 && (
+              <section>
+                <h3 className="text-xl font-bold text-gray-900 mb-6">
+                  {t("detail.amenities")}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8">
+                  {amenities.map((item) => (
+                    <div key={item.value} className="flex items-center gap-3">
+                      <span className="text-2xl">{item.icon}</span>
+                      <span className="text-gray-700 font-medium">
+                        {item.translationKey
+                          ? t(item.translationKey)
+                          : item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Map Location Placeholder */}
             <section>
@@ -653,7 +663,7 @@ const PropertyDetail = () => {
                         icon={<Zalo className="w-4 h-4 mr-2" />}
                         onClick={() => handleContactAction("zalo")}
                       >
-                        Chát Zalo
+                        Chat Zalo
                       </CsButton>
                     </div>
                   </div>
@@ -827,7 +837,7 @@ const PropertyDetail = () => {
                 ? Array.from({ length: 3 }).map((_, i) => (
                     <PropertyCardSkeleton key={i} />
                   ))
-                : recommendedData?.data?.map((prop) => (
+                : visibleRecommendedProperties.map((prop) => (
                     <PropertyCard
                       key={prop._id}
                       id={prop._id}
@@ -856,6 +866,22 @@ const PropertyDetail = () => {
                     />
                   ))}
             </div>
+            {!isLoadingRecommended && canLoadMoreRecommended && (
+              <div className="mt-8 flex justify-center">
+                <CsButton
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    setVisibleRecommendedCount(
+                      (currentCount) =>
+                        currentCount + SIMILAR_PROPERTIES_PAGE_SIZE,
+                    )
+                  }
+                >
+                  {t("detail.viewMore")}
+                </CsButton>
+              </div>
+            )}
           </section>
         )}
       </main>

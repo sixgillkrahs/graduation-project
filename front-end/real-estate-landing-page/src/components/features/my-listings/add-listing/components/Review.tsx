@@ -1,9 +1,5 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
-import { Map } from "@/components/ui/Map";
-import { Badge } from "@/components/ui/badge";
-import { prevStep, resetListing } from "@/store/listing.store";
 import {
   ArrowLeft,
   Bath,
@@ -24,18 +20,23 @@ import {
 } from "lucide-react";
 import NextImage from "next/image";
 import { useRouter } from "next/navigation";
-import { ROUTES } from "@/const/routes";
 import React, { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import toast from "react-hot-toast";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useDispatch } from "react-redux";
-import { ListingFormData } from "../../dto/listingformdata.dto";
+import { CsButton } from "@/components/custom";
+import { Icon } from "@/components/ui";
+import { Badge } from "@/components/ui/badge";
+import { Map } from "@/components/ui/Map";
+import { ROUTES } from "@/const/routes";
+import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import { formatPropertyPrice } from "@/lib/property-price";
+import { prevStep, resetListing } from "@/store/listing.store";
+import type { ListingFormData } from "../../dto/listingformdata.dto";
 import { useCreateProperty } from "../../services/mutate";
 import PropertyService from "../../services/service";
-import { Icon } from "@/components/ui";
-import { formatPropertyPrice } from "@/lib/property-price";
 
 const Review = () => {
   const dispatch = useDispatch();
@@ -216,7 +217,11 @@ const Review = () => {
               <div>
                 <span className="text-sm text-gray-500 block">Price</span>
                 <span className="text-gray-900 font-semibold">
-                  {formatPropertyPrice(data.price, data.priceUnit, data.currency)}
+                  {formatPropertyPrice(
+                    data.price,
+                    data.priceUnit,
+                    data.currency,
+                  )}
                 </span>
               </div>
             </div>
@@ -279,6 +284,25 @@ const Review = () => {
             </div>
           </div>
         </div>
+
+        {data.amenities?.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Amenities
+            </h3>
+            <div className="bg-gray-50 rounded-xl p-5 flex flex-wrap gap-3">
+              {data.amenities.map((amenity) => (
+                <Badge
+                  key={amenity}
+                  variant="secondary"
+                  className="px-3 py-1.5"
+                >
+                  {getPropertyAmenityLabel(amenity)}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-0">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">

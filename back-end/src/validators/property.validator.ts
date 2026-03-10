@@ -32,6 +32,7 @@ export const createPropertySchema = (lang: keyof typeof validationMessages) => {
       direction: z.enum(PropertyDirectionEnum).optional().or(z.literal("")),
       legalStatus: z.enum(PropertyLegalStatusEnum).optional().or(z.literal("")),
       furniture: z.enum(PropertyFurnitureEnum).optional().or(z.literal("")),
+      amenities: z.array(z.string()).optional(),
       images: z.array(z.string()).optional(),
       thumbnail: z.string().optional(),
       videoLink: z.string().optional(),

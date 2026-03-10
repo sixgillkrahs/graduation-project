@@ -1,17 +1,19 @@
+import { ArrowLeft, ArrowRight, Home } from "lucide-react";
+import { Controller, useFormContext } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { CsButton } from "@/components/custom";
+import AmenitiesField from "@/components/features/my-listings/components/AmenitiesField";
 import { Counter } from "@/components/ui/counter";
 import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
 import { nextStep, prevStep } from "@/store/listing.store";
-import { ArrowLeft, ArrowRight, Home, Sparkles } from "lucide-react";
-import { Controller, useFormContext } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { ListingFormData } from "../../dto/listingformdata.dto";
+import type { ListingFormData } from "../../dto/listingformdata.dto";
 import PropertyService from "../../services/service";
 
 const FeaturesPricing = () => {
   const dispatch = useDispatch();
-  const { control, trigger } = useFormContext<ListingFormData>();
+  const { control, trigger, watch } = useFormContext<ListingFormData>();
+  const demandType = watch("demandType");
 
   const handleContinue = async () => {
     const isValid = await trigger(PropertyService.stepFields.step3);
@@ -54,22 +56,38 @@ const FeaturesPricing = () => {
     { label: "USD", value: "USD" },
   ];
 
-  const priceUnitOptions = [
+  const priceUnitOptionsSale = [
     { label: "Raw amount", value: "VND" },
     { label: "Million", value: "MILLION" },
     { label: "Billion", value: "BILLION" },
-    { label: "Million / m²", value: "MILLION_PER_M2" },
+    { label: "Million / m2", value: "MILLION_PER_M2" },
   ];
+
+  const priceUnitOptionsRent = [
+    { label: "VND / month", value: "VND" },
+    { label: "Million / month", value: "MILLION" },
+  ];
+
+  const priceUnitOptions =
+    demandType === "RENT" ? priceUnitOptionsRent : priceUnitOptionsSale;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
-        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
           <Home className="w-6 h-6" /> Step 3: Features & Pricing
+          {demandType === "RENT" ? (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
+              🏠 Cho Thuê – Giá / Tháng
+            </span>
+          ) : (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
+              🔑 Bán
+            </span>
+          )}
         </h2>
 
         <div className="space-y-6">
-          {/* Row 1: Area & Price */}
           <div className="grid grid-cols-4 gap-6">
             <Controller
               name="area"
@@ -77,7 +95,7 @@ const FeaturesPricing = () => {
               rules={{ required: "Area is required" }}
               render={({ field, fieldState }) => (
                 <Input
-                  label="Area (m²)"
+                  label="Area (m2)"
                   type="number"
                   error={fieldState.error?.message}
                   placeholder="e.g. 120"
@@ -91,10 +109,11 @@ const FeaturesPricing = () => {
               rules={{ required: "Price is required" }}
               render={({ field, fieldState }) => (
                 <Input
-                  label="Price"
+                  label={demandType === "RENT" ? "Price / Month" : "Price"}
                   type="number"
                   error={fieldState.error?.message}
                   placeholder="e.g. 500000"
+                  suffix={demandType === "RENT" ? "/tháng" : undefined}
                   {...field}
                 />
               )}
@@ -160,7 +179,6 @@ const FeaturesPricing = () => {
             />
           </div>
 
-          {/* Row 4: Direction, Legal, Furniture */}
           <div className="grid grid-cols-3 gap-6">
             <Controller
               name="direction"
@@ -208,7 +226,20 @@ const FeaturesPricing = () => {
               )}
             />
           </div>
+
+          <Controller
+            name="amenities"
+            control={control}
+            render={({ field, fieldState }) => (
+              <AmenitiesField
+                value={field.value || []}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
         </div>
+
         <div className="flex justify-between pt-10">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
             Back

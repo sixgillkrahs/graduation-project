@@ -10,15 +10,39 @@ import { useDispatch } from "react-redux";
 import PropertyService from "../../services/service";
 import { ListingFormData } from "../../dto/listingformdata.dto";
 import { CsTextarea } from "@/components/ui/textarea";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { useAIModeration } from "@/hooks/useAIModeration";
 
 const BasicInfo = () => {
   const dispatch = useDispatch();
-  const { control, setValue, watch, trigger } =
-    useFormContext<ListingFormData>();
+  const {
+    control,
+    setValue,
+    watch,
+    trigger,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext<ListingFormData>();
 
   const formData = watch();
+  const description = watch("description");
+
+  // AI Moderation check for description hook
+  useAIModeration({
+    description,
+    setError,
+    clearErrors,
+    errorType: errors.description?.type as string,
+  });
 
   const handleContinue = async () => {
+    if (errors.description?.type === "manual") {
+      toast.error("Vui lòng chỉnh sửa lại mô tả trước khi tiếp tục.");
+      return;
+    }
+
     const isValid = await trigger(PropertyService.stepFields.step1);
     if (isValid) {
       dispatch(nextStep());

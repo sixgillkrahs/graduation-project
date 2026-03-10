@@ -210,8 +210,7 @@ function StepperItem({
   );
 }
 
-interface StepperTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface StepperTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
 }
 
@@ -519,7 +518,10 @@ function CsStep({
           const stepNum = index + 1;
           return (
             <StepperItem key={index} step={stepNum} className="flex-1">
-              <StepperTrigger className="w-full flex flex-col items-center gap-2">
+              <StepperTrigger
+                asChild
+                className="w-full flex flex-col items-center gap-2"
+              >
                 <StepperIndicator className="data-[state=completed]:bg-green-500 data-[state=completed]:text-white data-[state=active]:bg-black data-[state=active]:text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-500 transition-colors duration-300">
                   {step.icon || stepNum}
                 </StepperIndicator>

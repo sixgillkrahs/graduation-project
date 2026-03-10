@@ -1,14 +1,16 @@
 "use client";
 
-import { CsStep } from "@/components/ui/stepper";
-import { RootState } from "@/store";
-import { setStep, updateListingData } from "@/store/listing.store";
 import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { ListingFormData } from "../dto/listingformdata.dto";
+import { CsStep } from "@/components/ui/stepper";
+import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import type { ListingState } from "@/models/listing.model";
+import type { RootState } from "@/store";
+import { setStep, updateListingData } from "@/store/listing.store";
+import type { ListingFormData } from "../dto/listingformdata.dto";
 import { useGetPropertyDetail } from "../services/query";
 import PropertyService from "../services/service";
 import BasicInfo from "./components/BasicInfo";
@@ -60,6 +62,7 @@ const EditListing = () => {
         direction: p.features?.direction || "",
         legalStatus: p.features?.legalStatus || "",
         furniture: p.features?.furniture || "",
+        amenities: (p.amenities || []).map(getPropertyAmenityLabel),
         images: p.media?.images || [],
         thumbnail: p.media?.thumbnail || "",
         videoLink: p.media?.videoLink || "",
@@ -96,13 +99,14 @@ const EditListing = () => {
             legalStatus: hydratedData.legalStatus,
             furniture: hydratedData.furniture,
           },
+          amenities: hydratedData.amenities,
           media: {
             images: hydratedData.images,
             thumbnail: hydratedData.thumbnail,
             videoLink: hydratedData.videoLink,
             virtualTourUrls: hydratedData.virtualTourUrls,
           },
-        } as any),
+        } satisfies Partial<ListingState["data"]>),
       );
 
       dispatch(setStep(0)); // Start from beginning

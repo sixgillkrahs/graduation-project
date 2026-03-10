@@ -24,6 +24,7 @@ export interface ListingFormData {
   direction: string;
   legalStatus: string;
   furniture: string;
+  amenities: string[];
 
   // Step 4: Media
   images: string[];

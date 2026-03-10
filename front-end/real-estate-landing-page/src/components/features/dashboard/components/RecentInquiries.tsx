@@ -19,9 +19,7 @@ const RecentInquiries = ({ sales = [] }: RecentSalesProps) => {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border cs-outline-gray h-full">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-base! cs-typography">
-          {t("title")}
-        </h3>
+        <h3 className="font-semibold text-base! cs-typography">{t("title")}</h3>
         <span className="text-sm main-color-red font-medium">
           {t("deals", { count: sales.length })}
         </span>
@@ -46,7 +44,8 @@ const RecentInquiries = ({ sales = [] }: RecentSalesProps) => {
                     {item.propertySnapshot.title}
                   </p>
                   <p className="text-xs cs-paragraph-gray truncate">
-                    {item.propertySnapshot.address}, {item.propertySnapshot.ward}
+                    {item.propertySnapshot.address},{" "}
+                    {item.propertySnapshot.ward}
                   </p>
                   <div className="flex items-center gap-3 mt-1 text-[11px] text-gray-400">
                     <span className="inline-flex items-center gap-1">

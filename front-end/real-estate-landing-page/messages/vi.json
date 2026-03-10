@@ -303,6 +303,7 @@
       "reviews": "{rating} ({count} đánh giá)",
       "viewAllPhotos": "Xem tất cả ảnh",
       "similarHomes": "Bất động sản tương tự",
+      "viewMore": "Xem thêm",
       "viewAll": "Xem tất cả",
       "swimmingPool": "Hồ bơi",
       "gymFitness": "Phòng Gym",
@@ -578,4 +579,3 @@
     }
   }
 }
-

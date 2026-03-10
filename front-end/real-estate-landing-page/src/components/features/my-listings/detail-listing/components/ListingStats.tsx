@@ -1,9 +1,11 @@
 import { format } from "date-fns";
-import { Bed, Bath, Maximize, Tag, TrendingUp, Eye, Clock } from "lucide-react";
+import { Bath, Bed, Clock, Eye, Maximize, Tag, TrendingUp } from "lucide-react";
 import React from "react";
+import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import type { IPropertyDto } from "../../dto/property.dto";
 
 interface ListingStatsProps {
-  property: any;
+  property: IPropertyDto;
 }
 
 export const ListingStats = React.memo(({ property }: ListingStatsProps) => {
@@ -86,12 +88,12 @@ export const ListingStats = React.memo(({ property }: ListingStatsProps) => {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h3 className="text-lg font-bold text-gray-800 mb-4">Amenities</h3>
           <div className="flex flex-wrap gap-2">
-            {property.amenities.map((amenity: string, idx: number) => (
+            {property.amenities.map((amenity: string) => (
               <span
-                key={idx}
+                key={amenity}
                 className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-md text-sm font-medium border border-blue-100"
               >
-                {amenity}
+                {getPropertyAmenityLabel(amenity)}
               </span>
             ))}
           </div>

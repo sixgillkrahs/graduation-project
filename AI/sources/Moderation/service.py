@@ -6,7 +6,11 @@ from typing import Any
 
 import joblib
 
-from sources.Moderation.hf_service import HFModerationService, _postprocess_scores
+from sources.Moderation.hf_service import (
+    HFModerationService,
+    _normalize_text,
+    _postprocess_scores,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -63,7 +67,7 @@ class ModerationService:
             min(0.7, threshold + 0.15),
         )
 
-        normalized_text = " ".join(text.lower().strip().split())
+        normalized_text = _normalize_text(text)
         probabilities = pipeline.predict_proba([normalized_text])[0]
         scores = {
             label: round(float(score), 4) for label, score in zip(labels, probabilities)

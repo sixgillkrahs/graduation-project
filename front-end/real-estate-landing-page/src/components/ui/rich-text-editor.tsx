@@ -29,7 +29,6 @@ const editorFormats = [
   "underline",
   "blockquote",
   "list",
-  "bullet",
   "color",
   "background",
   "link",

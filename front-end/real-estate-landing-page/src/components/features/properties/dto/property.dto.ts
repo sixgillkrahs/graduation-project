@@ -5,7 +5,7 @@ export interface PropertyDto {
   projectName: string;
   location: Location;
   features: Features;
-  amenities: any[];
+  amenities: string[];
   media: Media;
   title: string;
   description: string;

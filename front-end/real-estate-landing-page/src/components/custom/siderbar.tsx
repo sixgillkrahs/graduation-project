@@ -258,11 +258,11 @@ function CsSidebar({
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset>
-        <div className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-2xs">
+      <SidebarInset className="flex flex-col h-screen overflow-hidden">
+        <div className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 bg-background transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 shadow-2xs border-b border-border/50">
           {header}
         </div>
-        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+        <div className="flex-1 overflow-y-auto p-4">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import json
 import inspect
 import zipfile
@@ -11,6 +12,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_MODEL_DIR = ROOT / "models" / "hf-moderation"
 DEFAULT_ZIP_PATH = ROOT / "models" / "hf_moderation_model.zip"
+
+
+def _normalize_text(text: str) -> str:
+    decoded_text = html.unescape(text or "")
+    return " ".join(decoded_text.lower().strip().split())
 
 
 def _postprocess_scores(
@@ -28,7 +34,7 @@ def _postprocess_scores(
         non_clean_scores[best_non_clean_label] if best_non_clean_label else 0.0
     )
 
-    labels: list[str] = []
+    labels: list[str] = ["clean"]
     if best_non_clean_label and best_non_clean_score >= inappropriate_threshold:
         if best_non_clean_score > clean_score + clean_margin:
             labels = [
@@ -37,16 +43,21 @@ def _postprocess_scores(
                 if score >= max(threshold, best_non_clean_score - 0.05)
             ]
 
-    if not labels and clean_score >= threshold - 0.1:
-        labels = ["clean"]
-    elif not labels and scores:
-        labels = [max(scores, key=scores.get)]
+    requires_review = (
+        best_non_clean_label is not None
+        and best_non_clean_score >= threshold
+        and best_non_clean_score < inappropriate_threshold
+        and best_non_clean_score > clean_score + clean_margin
+    )
 
     return {
         "threshold": threshold,
         "inappropriate_threshold": inappropriate_threshold,
         "clean_margin": clean_margin,
         "labels": labels,
+        "top_label": best_non_clean_label or "clean",
+        "top_score": round(float(best_non_clean_score), 4),
+        "requires_review": requires_review,
         "is_inappropriate": any(label != "clean" for label in labels),
     }
 
@@ -160,7 +171,7 @@ class HFModerationService:
         clean_margin = bundle["clean_margin"]
         max_length = bundle["max_length"]
 
-        normalized_text = " ".join(text.lower().strip().split())
+        normalized_text = _normalize_text(text)
         encoded = tokenizer(
             normalized_text,
             truncation=True,

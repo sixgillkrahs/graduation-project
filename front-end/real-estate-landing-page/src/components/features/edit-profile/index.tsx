@@ -18,6 +18,7 @@ import { Camera, Edit } from "lucide-react";
 import { CsSelect } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
+import { useAIModeration } from "@/hooks/useAIModeration";
 
 const EditProfile = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,6 +35,8 @@ const EditProfile = () => {
     reset,
     watch,
     setValue,
+    setError,
+    clearErrors,
   } = useForm<IEditProfileService.IFormData>({
     defaultValues: {
       avatarUrl: "",
@@ -50,6 +53,15 @@ const EditProfile = () => {
       bankName: "",
     },
     mode: "onChange",
+  });
+
+  const description = watch("description");
+
+  useAIModeration({
+    description,
+    setError,
+    clearErrors,
+    errorType: errors.description?.type as string,
   });
 
   useEffect(() => {
@@ -107,6 +119,10 @@ const EditProfile = () => {
   };
 
   const onSubmit = async (data: IEditProfileService.IFormData) => {
+    if (errors.description?.type === "manual") {
+      toast.error("Mô tả của bạn chứa từ ngữ không phù hợp.");
+      return;
+    }
     await editProfile(data);
     dispatch(fetchProfileItem());
     router.push("/agent/profile");

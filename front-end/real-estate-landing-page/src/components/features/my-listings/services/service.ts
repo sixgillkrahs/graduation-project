@@ -1,9 +1,13 @@
-import { IPaginationResp, IParamsPagination, IResp } from "@/@types/service";
+import type {
+  IPaginationResp,
+  IParamsPagination,
+  IResp,
+} from "@/@types/service";
 import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
+import type { ListingFormData } from "../dto/listingformdata.dto";
+import type { IPropertyDto } from "../dto/property.dto";
 import { PropertyEndpoint } from "./config";
-import { IPropertyDto } from "../dto/property.dto";
-import { ListingFormData } from "../dto/listingformdata.dto";
 
 export default class PropertyService {
   public static readonly Provinces = [
@@ -138,6 +142,7 @@ export default class PropertyService {
     direction: "",
     legalStatus: "",
     furniture: "",
+    amenities: [],
 
     // Step 4
     images: [],
@@ -165,6 +170,7 @@ export default class PropertyService {
       "direction",
       "legalStatus",
       "furniture",
+      "amenities",
     ] as const,
     step4: ["images", "thumbnail", "videoLink", "virtualTourUrls"] as const,
   };
