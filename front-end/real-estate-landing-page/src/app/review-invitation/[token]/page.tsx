@@ -6,9 +6,7 @@ type ReviewInvitationPageProps = {
   }>;
 };
 
-const ReviewInvitationPage = async ({
-  params,
-}: ReviewInvitationPageProps) => {
+const ReviewInvitationPage = async ({ params }: ReviewInvitationPageProps) => {
   const { token } = await params;
 
   return <ReviewInvitation token={token} />;

@@ -38,7 +38,7 @@ const HowItWorks = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
         {/* Hidden connecting line for desktop */}
-        <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-px bg-black/10 -z-10" />
+        <div className="hidden md:block absolute top-0 left-[15%] right-[15%] h-px bg-black/10 -z-10" />
 
         {steps.map((step, index) => (
           <motion.div

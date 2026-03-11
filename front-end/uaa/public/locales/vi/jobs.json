@@ -1,33 +1,65 @@
 {
-  "title": "Công việc ngầm (Jobs)",
+  "title": "Tiến trình hệ thống",
   "columns": {
-    "type": "Loại",
-    "payload": "Dữ liệu (Payload)",
-    "status": "Trạng thái",
-    "attempts": "Số lần thử / Tối đa",
-    "error": "Lỗi",
-    "createdAt": "Ngày tạo"
+    "type": "Công việc hệ thống",
+    "payload": "Nội dung xử lý",
+    "status": "Tiến độ",
+    "attempts": "Số lần hệ thống đã thử",
+    "error": "Tình trạng cần lưu ý",
+    "createdAt": "Thời điểm ghi nhận"
   },
   "status": {
-    "COMPLETED": "Hoàn thành",
-    "FAILED": "Thất bại",
-    "PROCESSING": "Đang xử lý",
-    "PENDING": "Đang chờ"
+    "COMPLETED": "Đã xử lý xong",
+    "FAILED": "Cần admin kiểm tra",
+    "PROCESSING": "Hệ thống đang xử lý",
+    "PENDING": "Đang chờ hệ thống"
   },
   "actions": {
-    "retry": "Thử lại",
+    "retry": "Cho hệ thống thử lại",
     "delete": "Xóa"
   },
   "confirm": {
     "retry": {
-      "title": "Thử lại công việc",
-      "content": "Bạn có chắc chắn muốn thử lại công việc bị lỗi này không?",
+      "title": "Cho hệ thống xử lý lại",
+      "content": "Bạn có muốn cho hệ thống thử xử lý lại mục đang gặp sự cố này không?",
       "okText": "Thử lại"
     },
     "delete": {
-      "title": "Xóa công việc",
-      "content": "Bạn có chắc chắn muốn xóa công việc này không?",
+      "title": "Xóa mục ghi nhận",
+      "content": "Bạn có chắc chắn muốn xóa mục ghi nhận này khỏi danh sách theo dõi không?",
       "okText": "Xóa"
     }
+  },
+  "help": {
+    "title": "Trang này giúp admin theo dõi các tác vụ hệ thống đang xử lý ở hậu trường.",
+    "description": "Nếu một mục hiện 'Cần admin kiểm tra', bạn có thể cho hệ thống thử lại. Các cột dưới đây đã được diễn giải bằng ngôn ngữ dễ hiểu hơn."
+  },
+  "typeLabel": {
+    "PROPERTY_EMBEDDING": "Cập nhật dữ liệu tìm kiếm cho bất động sản"
+  },
+  "typeDescription": {
+    "PROPERTY_EMBEDDING": "Hệ thống đồng bộ nội dung để tính năng tìm kiếm thông minh hoạt động chính xác hơn.",
+    "default": "Tác vụ hệ thống tự động tạo trong quá trình vận hành."
+  },
+  "payload": {
+    "propertyEmbedding": {
+      "primary": "Đang xử lý 1 bất động sản",
+      "secondaryWithId": "Mã bất động sản liên quan: {{propertyId}}",
+      "secondaryFallback": "Hệ thống không có thêm thông tin chi tiết cho mục này."
+    },
+    "default": {
+      "primary": "Hệ thống đang xử lý dữ liệu",
+      "secondary": "Chi tiết kỹ thuật đã được ẩn bớt để dễ theo dõi hơn."
+    }
+  },
+  "attempts": {
+    "summary": "Đã thử {{attempts}} / {{maxAttempts}} lần"
+  },
+  "error": {
+    "none": "Không có vấn đề đang lưu ý",
+    "propertyNotFound": "Không tìm thấy bất động sản liên quan. Dữ liệu gốc có thể đã thay đổi hoặc bị xóa.",
+    "missingPropertyId": "Hệ thống đang thiếu mã bất động sản để tiếp tục xử lý.",
+    "unsupportedType": "Loại công việc này chưa hỗ trợ xử lý lại trên giao diện admin.",
+    "generic": "Hệ thống gặp sự cố trong lúc xử lý. Admin có thể cho thử lại."
   }
 }

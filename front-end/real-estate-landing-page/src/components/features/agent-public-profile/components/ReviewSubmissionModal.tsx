@@ -114,7 +114,9 @@ const ReviewSubmissionModal = ({
         showCloseButton={false}
         className="max-h-[calc(100vh-2rem)] max-w-2xl gap-0 overflow-hidden rounded-xl border border-border bg-background p-0 shadow-2xl sm:max-w-[720px]"
       >
-        <DialogTitle className="sr-only">Submit a review for this agent</DialogTitle>
+        <DialogTitle className="sr-only">
+          Submit a review for this agent
+        </DialogTitle>
         <DialogDescription className="sr-only">
           Share your rating, strengths, and optional comments after the property
           viewing.

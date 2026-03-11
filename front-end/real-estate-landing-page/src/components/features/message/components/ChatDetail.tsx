@@ -33,11 +33,15 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
     prevMessages: IConversationService.ConversationDetailDTO[],
     nextMessage: IConversationService.ConversationDetailDTO,
   ) => {
-    const exists = prevMessages.some((message) => message.id === nextMessage.id);
+    const exists = prevMessages.some(
+      (message) => message.id === nextMessage.id,
+    );
 
     if (exists) {
       return prevMessages.map((message) =>
-        message.id === nextMessage.id ? { ...message, ...nextMessage } : message,
+        message.id === nextMessage.id
+          ? { ...message, ...nextMessage }
+          : message,
       );
     }
 

@@ -32,8 +32,10 @@ const Dashboard = () => {
     useGetSchedulesToday();
   const { data: revenueSummary, isLoading: isLoadingRevenueSummary } =
     useGetRevenueSummary(currency);
-  const { data: salesLog, isLoading: isLoadingSalesLog } =
-    useGetSalesLog(currency, 5);
+  const { data: salesLog, isLoading: isLoadingSalesLog } = useGetSalesLog(
+    currency,
+    5,
+  );
   const { data: revenueLeaderboard, isLoading: isLoadingRevenueLeaderboard } =
     useGetRevenueLeaderboard(currency, 10);
 

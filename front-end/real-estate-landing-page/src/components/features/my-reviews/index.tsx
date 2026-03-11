@@ -258,7 +258,9 @@ const ReviewCard = ({
             <CsButton
               type="button"
               onClick={() => onGenerateAutoReply(review.id)}
-              disabled={isGeneratingAutoReply || autoReplyStatus === "GENERATING"}
+              disabled={
+                isGeneratingAutoReply || autoReplyStatus === "GENERATING"
+              }
               variant="secondary"
             >
               {isGeneratingAutoReply || autoReplyStatus === "GENERATING" ? (
@@ -273,7 +275,9 @@ const ReviewCard = ({
           </div>
 
           {autoReplyStatus === "FAILED" && review.autoReply?.error && (
-            <p className="mt-3 text-sm text-red-600">{review.autoReply.error}</p>
+            <p className="mt-3 text-sm text-red-600">
+              {review.autoReply.error}
+            </p>
           )}
 
           {hasReadyAutoReply && (
@@ -399,7 +403,9 @@ const MyReviews = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<IReviewService.ReviewFilter>("all");
   const [page, setPage] = useState(1);
-  const { data: profileData } = useSelector((state: RootState) => state.profile);
+  const { data: profileData } = useSelector(
+    (state: RootState) => state.profile,
+  );
   const deferredSearch = useDeferredValue(search);
   const queryParams = useMemo(
     () => ({

@@ -82,7 +82,8 @@ const Profile = () => {
     (completedProfileItems / totalProfileItems) * 100,
   );
   const sanitizedDescription = DOMPurify.sanitize(
-    profileData?.description || "<p>No public description has been added yet.</p>",
+    profileData?.description ||
+      "<p>No public description has been added yet.</p>",
   );
 
   return (

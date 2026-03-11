@@ -63,9 +63,7 @@ const ChartLine = () => {
     <Card className="rounded-2xl shadow-sm border cs-outline-gray">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
-          <CardTitle className="cs-typography text-xl!">
-            {t("title")}
-          </CardTitle>
+          <CardTitle className="cs-typography text-xl!">{t("title")}</CardTitle>
           <CardDescription className="cs-paragraph-gray text-base!">
             {timeRange === "year"
               ? t("descriptionYear")

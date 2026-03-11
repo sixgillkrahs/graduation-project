@@ -1,33 +1,65 @@
 {
-  "title": "Background Jobs",
+  "title": "System Tasks",
   "columns": {
-    "type": "Type",
-    "payload": "Payload",
-    "status": "Status",
-    "attempts": "Attempts / Max",
-    "error": "Error",
-    "createdAt": "Created At"
+    "type": "System task",
+    "payload": "What the system is processing",
+    "status": "Progress",
+    "attempts": "System retry count",
+    "error": "Issue to review",
+    "createdAt": "Recorded at"
   },
   "status": {
-    "COMPLETED": "Completed",
-    "FAILED": "Failed",
-    "PROCESSING": "Processing",
-    "PENDING": "Pending"
+    "COMPLETED": "Finished successfully",
+    "FAILED": "Needs admin review",
+    "PROCESSING": "System is processing",
+    "PENDING": "Waiting for system"
   },
   "actions": {
-    "retry": "Retry",
+    "retry": "Let system retry",
     "delete": "Delete"
   },
   "confirm": {
     "retry": {
-      "title": "Retry Job",
-      "content": "Are you sure you want to retry this failed job?",
+      "title": "Let the system try again",
+      "content": "Do you want the system to try processing this item again?",
       "okText": "Retry"
     },
     "delete": {
-      "title": "Delete Job",
-      "content": "Are you sure you want to delete this job?",
+      "title": "Delete record",
+      "content": "Are you sure you want to remove this record from the tracking list?",
       "okText": "Delete"
     }
+  },
+  "help": {
+    "title": "This screen helps admins follow automated system work in plain business language.",
+    "description": "If an item shows 'Needs admin review', you can ask the system to try again. Technical details are simplified here for easier operations."
+  },
+  "typeLabel": {
+    "PROPERTY_EMBEDDING": "Update search data for a property"
+  },
+  "typeDescription": {
+    "PROPERTY_EMBEDDING": "The system is syncing property content so smart search works more accurately.",
+    "default": "An automated system task created during normal operations."
+  },
+  "payload": {
+    "propertyEmbedding": {
+      "primary": "Processing 1 property",
+      "secondaryWithId": "Related property ID: {{propertyId}}",
+      "secondaryFallback": "No additional detail is available for this record."
+    },
+    "default": {
+      "primary": "The system is processing data",
+      "secondary": "Technical details are intentionally simplified here."
+    }
+  },
+  "attempts": {
+    "summary": "Tried {{attempts}} / {{maxAttempts}} times"
+  },
+  "error": {
+    "none": "No issue to review",
+    "propertyNotFound": "The related property could not be found. The source data may have changed or been removed.",
+    "missingPropertyId": "The system is missing the property ID needed to continue.",
+    "unsupportedType": "This task type does not support retry from the admin screen yet.",
+    "generic": "The system hit an issue while processing. The admin can retry it."
   }
 }

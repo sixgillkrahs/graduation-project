@@ -210,7 +210,8 @@ function StepperItem({
   );
 }
 
-interface StepperTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface StepperTriggerProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
 }
 

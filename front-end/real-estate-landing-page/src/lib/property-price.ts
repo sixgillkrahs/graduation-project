@@ -75,7 +75,9 @@ export const formatPropertyPrice = (
 
   return `${new Intl.NumberFormat(localeTag, {
     maximumFractionDigits: 2,
-  }).format(numericPrice)} ${getPropertyPriceUnitLabel(unit, locale)} ${currency}`.trim();
+  }).format(
+    numericPrice,
+  )} ${getPropertyPriceUnitLabel(unit, locale)} ${currency}`.trim();
 };
 
 export const formatPropertyPricePerSqm = (

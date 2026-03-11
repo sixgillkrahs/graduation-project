@@ -1,6 +1,6 @@
 import MainLayout from "@/layouts/MainLayout";
 import { type RouterConfig } from "@shared/types/router";
-import { Settings, LayoutDashboard, UserCog, Building2, Users, ListTodo } from "lucide-react";
+import { Settings, LayoutDashboard, UserCog, Building2, Users, ListTodo, Star } from "lucide-react";
 import { lazy } from "react";
 
 const router: RouterConfig = {
@@ -77,6 +77,18 @@ const router: RouterConfig = {
       ],
     },
     {
+      path: "/reviews",
+      name: "menu.reviews",
+      icon: Star,
+      childRoutes: [
+        {
+          path: "/moderation",
+          component: lazy(() => import("./reviews/review-moderation")),
+          name: "menu.reviewModeration",
+        },
+      ],
+    },
+    {
       path: "/user-manage",
       component: lazy(() => import("./user-manage")),
       name: "menu.user-management",
@@ -85,7 +97,7 @@ const router: RouterConfig = {
     {
       path: "/jobs",
       component: lazy(() => import("./jobs")),
-      name: "Background Jobs",
+      name: "menu.jobs",
       icon: ListTodo,
     },
     {

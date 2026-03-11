@@ -22,14 +22,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/api\/?$/, "") ||
       "http://localhost:8080";
 
-    const socketInstance = io(
-      socketBaseUrl,
-      {
-        transports: ["websocket"],
-        autoConnect: true,
-        path: "/io",
-      },
-    );
+    const socketInstance = io(socketBaseUrl, {
+      transports: ["websocket"],
+      autoConnect: true,
+      path: "/io",
+    });
 
     socketInstance.on("connect", () => {
       console.log("[Socket] Connected:", socketInstance.id);

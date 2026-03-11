@@ -5,13 +5,7 @@ import { CsButton } from "@/components/custom";
 import { IPropertyDto } from "@/components/features/my-listings/dto/property.dto";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import { formatPropertyPrice } from "@/lib/property-price";
-import {
-  ArrowLeft,
-  Building,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { ArrowLeft, Building, Mail, MapPin, Phone } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLandlordDetail, useLandlordProperties } from "../services/query";

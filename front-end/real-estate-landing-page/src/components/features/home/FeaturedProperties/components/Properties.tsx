@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { Icon, Tag } from "@/components/ui";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import PropertyCard from "@/components/features/properties/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
@@ -25,6 +26,7 @@ const categories = [
 const Properties = () => {
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const [page, setPage] = useState(1);
+  const [direction, setDirection] = useState(0);
   const limit = 3; // Show 3 properties per page for top featured
 
   const { data, isLoading } = useOnSale({
@@ -36,11 +38,32 @@ const Properties = () => {
   const totalPages = Math.ceil((data?.data?.totalResults || 0) / limit);
 
   const handlePrev = () => {
-    if (page > 1) setPage(page - 1);
+    if (page > 1) {
+      setDirection(-1);
+      setPage(page - 1);
+    }
   };
 
   const handleNext = () => {
-    if (page < totalPages) setPage(page + 1);
+    if (page < totalPages) {
+      setDirection(1);
+      setPage(page + 1);
+    }
+  };
+
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 50 : -50,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 50 : -50,
+      opacity: 0,
+    }),
   };
 
   return (
@@ -57,6 +80,7 @@ const Properties = () => {
                   : ""
               }`}
               onClick={() => {
+                setDirection(0);
                 setActiveCategory(category);
                 setPage(1); // Reset to first page when changing categories
               }}
@@ -79,48 +103,63 @@ const Properties = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 min-h-[400px]">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <PropertyCardSkeleton key={i} />
-          ))
-        ) : data?.data?.results?.length ? (
-          data.data.results.map((prop) => (
-            <PropertyCard
-              key={prop._id}
-              id={prop._id}
-              image={prop.media.thumbnail}
-              title={prop.title}
-              badges={{
-                aiRecommended: false,
-                tour3D: prop.media.virtualTourUrls?.length > 0,
-              }}
-              address={`${prop.location.address}, ${findOptionLabel(prop.location.ward, LIST_WARD)}, ${findOptionLabel(prop.location.province, LIST_PROVINCE)}`}
-              price={prop.features.price.toString()}
-              currency={prop.features.currency}
-              specs={{
-                beds: prop.features.bedrooms,
-                baths: prop.features.bathrooms,
-                area: prop.features.area,
-              }}
-              unit={prop.features.priceUnit}
-              agent={{
-                name: prop.userId.fullName,
-                avatar: prop.userId.avatarUrl,
-              }}
-              postedAt={formatChatTime(prop.createdAt)}
-              type={prop.demandType === "sale" ? "sale" : "rent"}
-              isFavorite={prop.isFavorite}
-            />
-          ))
-        ) : (
-          <div className="col-span-1 md:col-span-3 py-10 flex flex-col items-center justify-center text-gray-500">
-            <span className="text-lg font-semibold">No properties found</span>
-            <span className="text-sm">
-              Try changing the category to see more results
-            </span>
-          </div>
-        )}
+      <div className="overflow-hidden py-4 -my-4 px-4 -mx-4">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={page + activeCategory.value}
+            custom={direction}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 min-h-[400px]"
+          >
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <PropertyCardSkeleton key={i} />
+              ))
+            ) : data?.data?.results?.length ? (
+              data.data.results.map((prop) => (
+                <PropertyCard
+                  key={prop._id}
+                  id={prop._id}
+                  image={prop.media.thumbnail}
+                  title={prop.title}
+                  badges={{
+                    aiRecommended: false,
+                    tour3D: prop.media.virtualTourUrls?.length > 0,
+                  }}
+                  address={`${prop.location.address}, ${findOptionLabel(prop.location.ward, LIST_WARD)}, ${findOptionLabel(prop.location.province, LIST_PROVINCE)}`}
+                  price={prop.features.price.toString()}
+                  currency={prop.features.currency}
+                  specs={{
+                    beds: prop.features.bedrooms,
+                    baths: prop.features.bathrooms,
+                    area: prop.features.area,
+                  }}
+                  unit={prop.features.priceUnit}
+                  agent={{
+                    name: prop.userId.fullName,
+                    avatar: prop.userId.avatarUrl,
+                  }}
+                  postedAt={formatChatTime(prop.createdAt)}
+                  type={prop.demandType === "sale" ? "sale" : "rent"}
+                  isFavorite={prop.isFavorite}
+                />
+              ))
+            ) : (
+              <div className="col-span-1 md:col-span-3 py-10 flex flex-col items-center justify-center text-gray-500">
+                <span className="text-lg font-semibold">
+                  No properties found
+                </span>
+                <span className="text-sm">
+                  Try changing the category to see more results
+                </span>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {totalPages > 0 && (
@@ -131,7 +170,10 @@ const Properties = () => {
             return (
               <div
                 key={item}
-                onClick={() => setPage(item)}
+                onClick={() => {
+                  setDirection(item > page ? 1 : -1);
+                  setPage(item);
+                }}
                 className={`relative cursor-pointer rounded-full transition-all ${
                   active
                     ? "size-3 bg-black"

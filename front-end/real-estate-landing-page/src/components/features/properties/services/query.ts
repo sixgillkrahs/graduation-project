@@ -38,6 +38,8 @@ export const usePropertyDetail = (id: string) => {
     queryKey: [PropertyQueryKey.detail, id],
     queryFn: () => PropertyService.getById(id),
     enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 15,
   });
 };
 
@@ -46,5 +48,7 @@ export const useRecommendedProperties = (id: string) => {
     queryKey: [PropertyQueryKey.recommended, id],
     queryFn: () => PropertyService.getRecommended(id),
     enabled: !!id,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 20,
   });
 };

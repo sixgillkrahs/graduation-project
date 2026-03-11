@@ -157,7 +157,6 @@ const Resources = () => {
         }}
         onSearch={onSearch}
       />
-      <h1>{t("welcome")}</h1>
     </>
   );
 };

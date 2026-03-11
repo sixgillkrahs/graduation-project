@@ -59,9 +59,10 @@ const ProfileCompletionCard = ({
             </h3>
           </div>
           <p className="cs-paragraph-gray text-[14px]! leading-6">
-            You have completed {completedItems}/{totalItems} profile checkpoints.
-            Fill in the missing information to make your profile look stronger
-            to clients and appear more complete across the platform.
+            You have completed {completedItems}/{totalItems} profile
+            checkpoints. Fill in the missing information to make your profile
+            look stronger to clients and appear more complete across the
+            platform.
           </p>
           <div className="flex flex-wrap gap-2.5">
             <div className="rounded-xl bg-black px-3 py-2.5 text-white">

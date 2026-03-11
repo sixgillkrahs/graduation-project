@@ -29,9 +29,7 @@ const RevenueLeaderboard = ({
     <div className="bg-white p-6 rounded-2xl shadow-sm border cs-outline-gray">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-xl! cs-typography">
-            {t("title")}
-          </h3>
+          <h3 className="font-semibold text-xl! cs-typography">{t("title")}</h3>
           <p className="text-sm cs-paragraph-gray mt-1">
             {t("description", { currency })}
           </p>

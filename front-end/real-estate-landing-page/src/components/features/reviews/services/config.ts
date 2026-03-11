@@ -1,5 +1,6 @@
 export const ReviewsEndpoint = {
-  getPublicByAgent: (agentUserId: string) => `/reviews/agents/${agentUserId}/public`,
+  getPublicByAgent: (agentUserId: string) =>
+    `/reviews/agents/${agentUserId}/public`,
   getMyReviews: () => "/reviews/me",
   generateAutoReply: (reviewId: string) =>
     `/reviews/${reviewId}/auto-reply/generate`,

@@ -33,7 +33,13 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useGetMe } from "@/shared/auth/query";
 
-const ReviewStars = ({ rating, size = 16 }: { rating: number; size?: number }) => {
+const ReviewStars = ({
+  rating,
+  size = 16,
+}: {
+  rating: number;
+  size?: number;
+}) => {
   return (
     <div className="flex items-center gap-1">
       {Array.from({ length: 5 }).map((_, index) => (
@@ -520,7 +526,9 @@ const AgentPublicProfile = () => {
                       </p>
                       <div className="mt-3">
                         <ReviewStars
-                          rating={Math.round(reviewsSummary?.averageRating || 0)}
+                          rating={Math.round(
+                            reviewsSummary?.averageRating || 0,
+                          )}
                           size={18}
                         />
                       </div>
@@ -612,7 +620,8 @@ const AgentPublicProfile = () => {
                         )}
 
                         <p className="mt-4 text-sm leading-7 text-foreground/85">
-                          {review.comment || "Khách hàng không để lại nhận xét chi tiết."}
+                          {review.comment ||
+                            "Khách hàng không để lại nhận xét chi tiết."}
                         </p>
 
                         {review.agentReply && (

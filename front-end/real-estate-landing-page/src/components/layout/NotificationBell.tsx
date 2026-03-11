@@ -53,7 +53,9 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
   }, [data, liveNotices]);
 
   const unreadCount = useMemo(() => {
-    const baseUnread = Number((data?.pages?.[0]?.data as any)?.totalUnread || 0);
+    const baseUnread = Number(
+      (data?.pages?.[0]?.data as any)?.totalUnread || 0,
+    );
     return baseUnread + liveUnread;
   }, [data, liveUnread]);
 
