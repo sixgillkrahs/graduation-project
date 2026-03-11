@@ -1,0 +1,33 @@
+{
+  "title": "Công việc ngầm (Jobs)",
+  "columns": {
+    "type": "Loại",
+    "payload": "Dữ liệu (Payload)",
+    "status": "Trạng thái",
+    "attempts": "Số lần thử / Tối đa",
+    "error": "Lỗi",
+    "createdAt": "Ngày tạo"
+  },
+  "status": {
+    "COMPLETED": "Hoàn thành",
+    "FAILED": "Thất bại",
+    "PROCESSING": "Đang xử lý",
+    "PENDING": "Đang chờ"
+  },
+  "actions": {
+    "retry": "Thử lại",
+    "delete": "Xóa"
+  },
+  "confirm": {
+    "retry": {
+      "title": "Thử lại công việc",
+      "content": "Bạn có chắc chắn muốn thử lại công việc bị lỗi này không?",
+      "okText": "Thử lại"
+    },
+    "delete": {
+      "title": "Xóa công việc",
+      "content": "Bạn có chắc chắn muốn xóa công việc này không?",
+      "okText": "Xóa"
+    }
+  }
+}

@@ -22,6 +22,13 @@ export default class NoticeService {
     });
   };
 
+  public static readonly markAllAsRead = () => {
+    return request({
+      url: NoticeEndpoint.markAllAsRead(),
+      method: AxiosMethod.PATCH,
+    });
+  };
+
   public static readonly deleteAllNotices = () => {
     return request({
       url: NoticeEndpoint.deleteAllNotices(),

@@ -49,6 +49,14 @@ export type SendDealClosedEmailJob = {
   propertyName: string;
 };
 
+export type SendReviewInvitationEmailJob = {
+  to: string;
+  customerName: string;
+  agentName: string;
+  propertyName: string;
+  reviewUrl: string;
+};
+
 export type SendNotificationJob = {
   userId: string;
   title: string;

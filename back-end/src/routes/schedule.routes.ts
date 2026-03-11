@@ -12,6 +12,7 @@ import { EmailQueue } from "@/queues/email.queue";
 import { NotificationQueue } from "@/queues/notification.queue";
 import { Router } from "express";
 import { validateIdHeaderSchema } from "@/validators/base.validator";
+import { ReviewService } from "@/services/review.service";
 
 const router = Router();
 const scheduleService = new ScheduleService();
@@ -23,6 +24,7 @@ const scheduleController = new ScheduleController(
   propertyService,
   new EmailQueue(),
   new NotificationQueue(),
+  new ReviewService(),
 );
 
 router.use(requireAuth);

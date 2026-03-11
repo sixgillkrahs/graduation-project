@@ -33,6 +33,8 @@ import { ScheduleService } from "@/services/schedule.service";
 import { ScheduleExpiryWorker } from "@/workers/schedule-expiry.worker";
 import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
 import { AgentLeaderboardWorker } from "@/workers/agent-leaderboard.worker";
+import { ReviewService } from "@/services/review.service";
+import { ReviewModerationWorker } from "@/workers/review-moderation.worker";
 const noticeService = new NoticeService();
 new NotificationWorker(noticeService);
 
@@ -44,6 +46,10 @@ scheduleExpiryWorker.start();
 const agentLeaderboardService = new AgentLeaderboardService();
 new AgentLeaderboardWorker(agentLeaderboardService);
 
+const reviewService = new ReviewService();
+const reviewModerationWorker = new ReviewModerationWorker(reviewService);
+reviewModerationWorker.start();
+
 // Lắng nghe message từ client
 // wsService.onMessage((ws, msg) => {
 //   if (msg.type === 'ping') {
@@ -54,6 +60,7 @@ new AgentLeaderboardWorker(agentLeaderboardService);
 const shutdown = async () => {
   logger.info("Shutdown signal received");
   scheduleExpiryWorker.stop();
+  reviewModerationWorker.stop();
 
   const wsService = WebSocketService.getInstance();
   // wsService.broadcast({ type: 'shutdown', data: { message: 'Server shutting down' } });

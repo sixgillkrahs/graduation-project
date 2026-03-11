@@ -1,6 +1,7 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
+import MainNotificationBell from "@/components/layout/MainNotificationBell";
 import { ROUTES } from "@/const/routes";
 import { useLogout } from "@/shared/auth/mutate";
 import { useGetMe } from "@/shared/auth/query";
@@ -11,7 +12,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CsButton } from "../custom";
-import { ModeToggle } from "@/components/mode-toggle";
 import { Dropdown, DropdownItem, Icon } from "../ui";
 
 const Header = () => {
@@ -74,8 +74,6 @@ const Header = () => {
 
         {/* Right: Actions & Hamburger */}
         <div className="flex items-center gap-4 shrink-0">
-          <ModeToggle />
-
           {/* Desktop Auth */}
           <div className="hidden lg:flex justify-end min-w-[180px]">
             {isLoading ? (
@@ -85,6 +83,9 @@ const Header = () => {
               </div>
             ) : me?.data?.userId ? (
               <div className="flex items-center gap-2">
+                <MainNotificationBell
+                  isAuthenticated={Boolean(me.data.userId)}
+                />
                 {me.data.roleId.code === "AGENT" && (
                   <Link href={ROUTES.AGENT_DASHBOARD}>
                     <CsButton

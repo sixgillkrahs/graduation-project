@@ -3,34 +3,37 @@ import AgentRegistrationService from "../services/service";
 import FullTable from "@/components/FullTable";
 import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
+import { Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const AgentRegistration = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation("agents");
   const columns: ColumnsType<IAgentRegistrationService.AgentRegistration> = [
     {
-      title: "Tên Đăng Ký",
+      title: t("columns.nameRegister"),
       dataIndex: ["basicInfo", "nameRegister"],
       key: "businessInfo.nameRegister",
     },
     {
-      title: "Email",
+      title: t("columns.email"),
       dataIndex: ["basicInfo", "email"],
       key: "basicInfo.email",
     },
     {
-      title: "Số điện thoại",
+      title: t("columns.phoneNumber"),
       dataIndex: ["basicInfo", "phoneNumber"],
       key: "basicInfo.phoneNumber",
     },
     {
-      title: "Số năm KN",
+      title: t("columns.yearsOfExperience"),
       dataIndex: ["businessInfo", "yearsOfExperience"],
       key: "businessInfo.yearsOfExperience",
     },
     {
-      title: "Khu vực",
+      title: t("columns.workingArea"),
       dataIndex: ["businessInfo", "workingArea"],
       key: "businessInfo.workingArea",
       render: (value: string[]) => {
@@ -54,13 +57,16 @@ const AgentRegistration = () => {
       },
     },
     {
-      title: "Trạng thái",
+      title: t("columns.status"),
       dataIndex: ["status"],
       key: "status",
-      render: (value) => renderConstant(value, AgentRegistrationService.STATUS),
+      render: (value) => {
+        const item = AgentRegistrationService.STATUS.find(i => i.value === value);
+        return <Tag color={item?.color}>{t(`statusValue.${value}`)}</Tag>;
+      },
     },
     {
-      title: "Ngày đăng ký",
+      title: t("columns.createdAt"),
       dataIndex: ["createdAt"],
       key: "createdAt",
       render: (value) => toVietnamTime(value),
@@ -84,23 +90,23 @@ const AgentRegistration = () => {
       filter={[
         {
           type: "input",
-          placeholder: "Tên đăng ký",
+          placeholder: t("filter.nameRegister"),
           name: ["basicInfo", "nameRegister"],
         },
         {
           type: "input",
-          placeholder: "Email",
+          placeholder: t("filter.email"),
           name: ["basicInfo", "email"],
         },
         {
           name: "status",
           type: "select",
           options: AgentRegistrationService.STATUS,
-          placeholder: "Trạng thái",
+          placeholder: t("filter.status"),
         },
         {
           type: "date",
-          placeholder: "Ngày đăng ký",
+          placeholder: t("filter.createdAt"),
           name: ["createdAt"],
         },
       ]}

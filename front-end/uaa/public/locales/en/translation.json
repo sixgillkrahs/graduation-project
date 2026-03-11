@@ -69,8 +69,20 @@
     "notFound": "Property not found"
   },
   "menu": {
+    "dashboard": "Dashboard",
+    "agent": "Agent",
+    "agentRegistration": "Agent Registration",
+    "agentManage": "Agent Management",
+    "properties": "Properties",
+    "propertiesPending": "Properties Pending",
+    "propertiesRejected": "Properties Rejected",
+    "propertiesPublished": "Properties Published",
+    "propertiesDetail": "Property Detail",
     "user-management": "User Management",
-    "setting": "Setting"
+    "jobs": "Background Jobs",
+    "reviews": "Reviews",
+    "reviewModeration": "Review Moderation",
+    "setting": "Settings"
   },
   "pagination": {
     "totalRecords": "Total records",

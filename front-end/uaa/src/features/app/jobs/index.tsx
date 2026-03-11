@@ -8,7 +8,7 @@ import { EllipsisVertical, RotateCcw, Trash } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const Jobs = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation(["jobs", "translation"]);
   const [modal, contextHolder] = Modal.useModal();
 
   const retryMutation = useRetryJob();
@@ -16,38 +16,38 @@ const Jobs = () => {
 
   const handleRetry = (id: string) => {
     modal.confirm({
-      title: "Retry Job",
-      content: "Are you sure you want to retry this failed job?",
+      title: t("jobs:confirm.retry.title"),
+      content: t("jobs:confirm.retry.content"),
       onOk: () => retryMutation.mutateAsync(id),
-      okText: "Retry",
+      okText: t("jobs:confirm.retry.okText"),
     });
   };
 
   const handleDelete = (id: string) => {
     modal.confirm({
-      title: "Delete Job",
-      content: "Are you sure you want to delete this job?",
+      title: t("jobs:confirm.delete.title"),
+      content: t("jobs:confirm.delete.content"),
       okType: "danger",
       onOk: () => deleteMutation.mutate(id),
-      okText: "Delete",
+      okText: t("jobs:confirm.delete.okText"),
     });
   };
 
   const columns: ColumnsType<IJobService.JobDTO> = [
     {
-      title: "Type",
+      title: t("jobs:columns.type"),
       dataIndex: "type",
       key: "type",
     },
     {
-      title: "Payload",
+      title: t("jobs:columns.payload"),
       dataIndex: "payload",
       key: "payload",
       render: (val) => <span className="text-xs text-gray-500">{JSON.stringify(val)}</span>,
       ellipsis: true,
     },
     {
-      title: "Status",
+      title: t("jobs:columns.status"),
       dataIndex: "status",
       key: "status",
       render: (val) => {
@@ -59,22 +59,22 @@ const Jobs = () => {
               : val === "PROCESSING"
                 ? "blue"
                 : "default";
-        return <Tag color={color}>{val}</Tag>;
+        return <Tag color={color}>{t(`jobs:status.${val}`, { defaultValue: val })}</Tag>;
       },
     },
     {
-      title: "Attempts/Max",
+      title: t("jobs:columns.attempts"),
       key: "attempts",
       render: (_, record) => `${record.attempts} / ${record.maxAttempts}`,
     },
     {
-      title: "Error",
+      title: t("jobs:columns.error"),
       dataIndex: "error",
       key: "error",
       ellipsis: true,
     },
     {
-      title: "Created At",
+      title: t("jobs:columns.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
       render: (value) => toVietnamTime(value),
@@ -90,7 +90,7 @@ const Jobs = () => {
             items: [
               {
                 key: "retry",
-                label: "Retry",
+                label: t("jobs:actions.retry"),
                 icon: <RotateCcw className="h-4 w-4" />,
                 disabled: record.status !== "FAILED",
                 onClick: () => handleRetry(record._id || record.id),
@@ -114,7 +114,7 @@ const Jobs = () => {
 
   return (
     <div className="flex w-full flex-col">
-      <div className="mb-4 text-xl font-bold">Background Jobs</div>
+      <div className="mb-4 text-xl font-bold">{t("jobs:title")}</div>
       <FullTable<IJobService.JobDTO>
         columns={columns}
         useGetList={useGetJobs}

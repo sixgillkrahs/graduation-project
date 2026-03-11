@@ -147,6 +147,22 @@ router.patch("/:id/read", requireAuth, noticeController.markAsRead);
 
 /**
  * @swagger
+ * /notices/me/read-all:
+ *   patch:
+ *     summary: Mark all notices as read for the current user
+ *     tags: [Notices]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All notices marked as read successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.patch("/me/read-all", requireAuth, noticeController.markAllAsRead);
+
+/**
+ * @swagger
  * /notices/me/all:
  *   delete:
  *     summary: Delete all notices for the current user

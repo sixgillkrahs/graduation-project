@@ -44,6 +44,13 @@ export class NoticeService {
     return await NoticeModel.deleteMany({ userId }).exec();
   };
 
+  markAllAsRead = async (userId: string) => {
+    return await NoticeModel.updateMany(
+      { userId, isRead: false },
+      { $set: { isRead: true } },
+    ).exec();
+  };
+
   getNotices = async (
     options: {
       page: number;

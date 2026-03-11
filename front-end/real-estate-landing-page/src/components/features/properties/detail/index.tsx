@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { format, isBefore, startOfDay } from "date-fns";
 import {
@@ -78,6 +78,7 @@ const PropertyDetail = () => {
   const [show3D, setShow3D] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [isBookingSuccess, setIsBookingSuccess] = useState(false);
   const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(
     SIMILAR_PROPERTIES_PAGE_SIZE,
   );
@@ -268,7 +269,7 @@ const PropertyDetail = () => {
     try {
       await requestBooking({
         listingId: id,
-        customerName: me?.data?.userId?.fullName || "KhÃ¡ch hÃ ng",
+        customerName: me?.data?.userId?.fullName || "Khách hàng",
         customerPhone: me?.data?.userId?.phone || "",
         customerEmail: me?.data?.userId?.email || "",
         date: date,
@@ -277,6 +278,8 @@ const PropertyDetail = () => {
       });
       // Optionally fire record interaction
       recordInteraction({ id, type: "SCHEDULE_REQUEST" });
+      setIsBookingSuccess(true);
+      toast.success("Gửi yêu cầu thành công!");
     } catch (e) {
       console.error(e);
     }
@@ -676,7 +679,29 @@ const PropertyDetail = () => {
                       {
                         value: "tour",
                         label: t("detail.scheduleTour"),
-                        content: (
+                        content: isBookingSuccess ? (
+                          <div className="pt-8 pb-6 flex flex-col items-center justify-center text-center space-y-4">
+                            <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+                              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                            </div>
+                            <div className="space-y-2">
+                              <p className="font-bold text-foreground text-lg">
+                                Gửi yêu cầu thành công!
+                              </p>
+                              <p className="text-sm text-muted-foreground text-balance">
+                                Chúng tôi đã gửi thông tin. Môi giới sẽ sớm liên
+                                hệ lại với bạn để xác nhận lịch hẹn.
+                              </p>
+                            </div>
+                            <CsButton
+                              className="w-full mt-4"
+                              variant="outline"
+                              onClick={() => setIsBookingSuccess(false)}
+                            >
+                              Đặt thêm lịch hẹn khác
+                            </CsButton>
+                          </div>
+                        ) : (
                           <div className="pt-2 space-y-4">
                             <Popover>
                               <PopoverTrigger asChild>

@@ -1,0 +1,68 @@
+{
+  "manage": {
+    "title": "Agent Management"
+  },
+  "registration": {
+    "title": "Agent Registration"
+  },
+  "columns": {
+    "nameRegister": "Registered Name",
+    "email": "Email",
+    "phoneNumber": "Phone Number",
+    "yearsOfExperience": "Years of Exp",
+    "workingArea": "Working Area",
+    "status": "Status",
+    "createdAt": "Registered At"
+  },
+  "filter": {
+    "nameRegister": "Search registered name",
+    "email": "Search email",
+    "status": "Select status",
+    "createdAt": "Registered At"
+  },
+  "detail": {
+    "title": "Agent Registration Detail",
+    "back": "Back",
+    "accept": "Accept",
+    "reject": "Reject",
+    "info": "Agent Information",
+    "nameRegister": "Name Register",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "rejectReason": "Reject Reason",
+    "rejectDate": "Reject Date",
+    "approveDate": "Approve Date",
+    "note": "Note",
+    "businessInfo": "Business Information",
+    "taxCode": "Tax Code",
+    "specialization": "Specialization",
+    "yearsOfExperience": "Years Of Experience",
+    "years": "years",
+    "certificateNumber": "Certificate Number",
+    "certificate": "Certificate",
+    "identityInfo": "Identity Information",
+    "identityNumber": "Identity Number",
+    "fullName": "Full Name",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "dateOfBirth": "Date of Birth",
+    "placeOfBirth": "Place Of Birth",
+    "nationality": "Nationality",
+    "identityFront": "Identity Front",
+    "identityBack": "Identity Back",
+    "confirmRejectTitle": "Do you want to reject this application?",
+    "rejectReasonPrompt": "Please provide a reason for rejection:",
+    "enterRejectReason": "Enter rejection reason",
+    "cancel": "Cancel",
+    "confirmApproveTitle": "Are you sure you want to accept this application?",
+    "notePrompt": "Note (optional):",
+    "enterNote": "Enter note on acceptance"
+  },
+  "statusValue": {
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected"
+  }
+}

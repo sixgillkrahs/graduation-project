@@ -3,31 +3,33 @@ import { useGetAgents } from "./services/query";
 import FullTable from "@/components/FullTable";
 import { renderConstant } from "@shared/render/const";
 import type { ColumnsType } from "antd/es/table";
+import { useTranslation } from "react-i18next";
 
 const AgentManagement = () => {
+  const { t } = useTranslation("agents");
   const columns: ColumnsType<IAgentService.Agent> = [
     {
-      title: "Tên Đăng Ký",
+      title: t("columns.nameRegister"),
       dataIndex: ["basicInfo", "nameRegister"],
       key: "businessInfo.nameRegister",
     },
     {
-      title: "Email",
+      title: t("columns.email"),
       dataIndex: ["basicInfo", "email"],
       key: "basicInfo.email",
     },
     {
-      title: "Số điện thoại",
+      title: t("columns.phoneNumber"),
       dataIndex: ["basicInfo", "phoneNumber"],
       key: "basicInfo.phoneNumber",
     },
     {
-      title: "Số năm KN",
+      title: t("columns.yearsOfExperience"),
       dataIndex: ["businessInfo", "yearsOfExperience"],
       key: "businessInfo.yearsOfExperience",
     },
     {
-      title: "Khu vực",
+      title: t("columns.workingArea"),
       dataIndex: ["businessInfo", "workingArea"],
       key: "businessInfo.workingArea",
       render: (value: string[]) => {

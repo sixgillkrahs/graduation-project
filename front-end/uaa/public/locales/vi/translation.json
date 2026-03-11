@@ -72,7 +72,19 @@
     "notFound": "Không tìm thấy bất động sản"
   },
   "menu": {
+    "dashboard": "Bảng điều khiển",
+    "agent": "Môi giới",
+    "agentRegistration": "Đăng ký môi giới",
+    "agentManage": "Quản lý môi giới",
+    "properties": "Bất động sản",
+    "propertiesPending": "Bất động sản chờ duyệt",
+    "propertiesRejected": "Bất động sản bị từ chối",
+    "propertiesPublished": "Bất động sản đã duyệt",
+    "propertiesDetail": "Chi tiết bất động sản",
     "user-management": "Quản lý người dùng",
+    "jobs": "Hàng chờ",
+    "reviews": "Đánh giá",
+    "reviewModeration": "Kiểm duyệt công khai",
     "setting": "Cài đặt"
   },
   "pagination": {

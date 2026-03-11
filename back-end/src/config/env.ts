@@ -42,6 +42,20 @@ const envSchema = z.object({
       ? z.string().optional().default("Express Boilerplate")
       : z.string(),
   SERVER_URL: z.url(),
+  AI_SERVICE_URL: z.string().url().optional().default("http://localhost:8081"),
+  REVIEW_MODERATION_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .default(300000),
+  REVIEW_MODERATION_BATCH_SIZE: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .default(25),
   // PROMETHEUS_URL: z.string().url().optional().default('http://localhost:9090'),
   MESSAGE_ENCRYPTION_KEY: z
     .string()
@@ -60,6 +74,10 @@ const envSchema = z.object({
   QDRANT_COLLECTION: z.string(),
   // Gemini API
   GEMINI_API_KEY: z.string(),
+  REVIEW_REPLY_GEMINI_MODEL: z
+    .string()
+    .optional()
+    .default("gemini-2.0-flash"),
   // VNPay
   VNP_TMN_CODE: z.string().optional().default("CGXZLS0Z"),
   VNP_HASH_SECRET: z

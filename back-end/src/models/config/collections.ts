@@ -11,6 +11,8 @@ const collections = {
   conversations: "conversations",
   messages: "messages",
   notices: "notices",
+  reviews: "reviews",
+  reviewInvitations: "reviewInvitations",
   landlords: "landlords",
   schedules: "schedules",
   transactions: "transactions",

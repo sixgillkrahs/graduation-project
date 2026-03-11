@@ -9,69 +9,69 @@ const router: RouterConfig = {
   childRoutes: [
     {
       path: "/dashboard",
-      name: "Dashboard",
+      name: "menu.dashboard",
       icon: LayoutDashboard,
       component: lazy(() => import("./dashboard")),
     },
     {
       path: "/agents",
-      name: "Agent",
+      name: "menu.agent",
       icon: UserCog,
       childRoutes: [
         {
           path: "/registration",
           component: lazy(() => import("./agents/agent-registration/agent-registration")),
-          name: "Agent Registration",
+          name: "menu.agentRegistration",
         },
         {
           path: "/registration/:id",
           component: lazy(() => import("./agents/agent-registration/agent-registration-detail")),
-          name: "Agent Registration Detail",
+          name: "menu.agentRegistrationDetail",
           hideInMenu: true,
         },
         {
           path: "/manage",
           component: lazy(() => import("./agents/agent-manage")),
-          name: "Agent Management",
+          name: "menu.agentManage",
         },
       ],
     },
     {
       path: "/properties",
-      name: "Properties",
+      name: "menu.properties",
       icon: Building2,
       childRoutes: [
         {
           path: "/pending",
           component: lazy(() => import("./properties/properties/properties-pending")),
-          name: "Properties Pending",
+          name: "menu.propertiesPending",
         },
         {
           path: "/pending/:id",
           component: lazy(() => import("./properties/properties/properties-detail")),
-          name: "Properties Detail",
+          name: "menu.propertiesDetail",
           hideInMenu: true,
         },
         {
           path: "/rejected",
           component: lazy(() => import("./properties/properties/properties-rejected")),
-          name: "Properties Rejected",
+          name: "menu.propertiesRejected",
         },
         {
           path: "/rejected/:id",
           component: lazy(() => import("./properties/properties/properties-detail")),
-          name: "Rejected Property Detail",
+          name: "menu.propertiesDetail",
           hideInMenu: true,
         },
         {
           path: "/published",
           component: lazy(() => import("./properties/properties/properties-published")),
-          name: "Properties Published",
+          name: "menu.propertiesPublished",
         },
         {
           path: "/published/:id",
           component: lazy(() => import("./properties/properties/properties-detail")),
-          name: "Published Property Detail",
+          name: "menu.propertiesDetail",
           hideInMenu: true,
         },
       ],

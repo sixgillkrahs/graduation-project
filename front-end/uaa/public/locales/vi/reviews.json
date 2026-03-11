@@ -1,0 +1,58 @@
+{
+  "moderation": {
+    "title": "Hàng đợi kiểm duyệt",
+    "description": "Theo dõi và kiểm duyệt các đánh giá từ khách hàng. Các đánh giá sau khi qua bước lọc AI hoặc bị báo cáo bởi môi giới sẽ xuất hiện tại đây để Admin đưa ra quyết định cuối cùng.",
+    "controlDesk": "Bàn điều khiển kiểm duyệt",
+    "stats": {
+      "total": "Tổng số trong hàng đợi",
+      "awaiting": "Chờ duyệt",
+      "reported": "Bị báo cáo",
+      "avgRating": "Đánh giá TB"
+    },
+    "search": {
+      "title": "Hàng đợi",
+      "description": "Tìm kiếm theo tên khách hàng, tên bất động sản hoặc nội dung đánh giá.",
+      "placeholder": "Tìm kiếm hàng đợi...",
+      "refresh": "Làm mới hàng đợi"
+    },
+    "table": {
+      "customer": "Khách hàng",
+      "property": "Bất động sản",
+      "rating": "Đánh giá",
+      "status": "Trạng thái",
+      "comment": "Bình luận",
+      "actions": "Hành động",
+      "noComment": "Không có bình luận chi tiết",
+      "empty": "Không có đánh giá nào đang chờ kiểm duyệt"
+    },
+    "details": {
+      "title": "Chi tiết đánh giá",
+      "property": "Bất động sản",
+      "quickTags": "Thẻ nhanh",
+      "noTags": "Không có thẻ nhanh nào được chọn",
+      "customerComment": "Bình luận của khách hàng",
+      "agentReply": "Phản hồi của môi giới",
+      "reportReason": "Lý do báo cáo",
+      "previousNote": "Ghi chú của admin trước đó"
+    },
+    "actions": {
+      "view": "Xem chi tiết",
+      "approve": "Duyệt đánh giá",
+      "reject": "Từ chối đánh giá",
+      "cancel": "Hủy",
+      "approveDesc": "Ghi chú tùy chọn cho kiểm toán nội bộ trước khi công khai đánh giá này.",
+      "rejectDesc": "Thêm một ghi chú ngắn giải thích lý do từ chối đánh giá này.",
+      "approvePlaceholder": "Đã được admin kiểm duyệt. An toàn để công khai.",
+      "rejectPlaceholder": "Lý do từ chối đánh giá này...",
+      "approveSuccess": "Đánh giá đã được duyệt và có thể hiển thị công khai.",
+      "rejectSuccess": "Đánh giá đã bị từ chối."
+    },
+    "status": {
+      "AWAITING_ADMIN": "Chờ Admin duyệt",
+      "REPORTED": "Bị báo cáo",
+      "PENDING": "Đang chờ hàng đợi",
+      "PUBLISHED": "Đã công khai",
+      "REJECTED": "Đã từ chối"
+    }
+  }
+}

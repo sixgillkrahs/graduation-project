@@ -1,0 +1,68 @@
+{
+  "manage": {
+    "title": "Quản lý nhân viên"
+  },
+  "registration": {
+    "title": "Đăng ký môi giới"
+  },
+  "columns": {
+    "nameRegister": "Tên Đăng Ký",
+    "email": "Email",
+    "phoneNumber": "Số điện thoại",
+    "yearsOfExperience": "Số năm kinh nghiệm",
+    "workingArea": "Khu vực",
+    "status": "Trạng thái",
+    "createdAt": "Ngày đăng ký"
+  },
+  "filter": {
+    "nameRegister": "Tìm tên đăng ký",
+    "email": "Tìm email",
+    "status": "Chọn trạng thái",
+    "createdAt": "Ngày đăng ký"
+  },
+  "detail": {
+    "title": "Chi tiết đăng ký môi giới",
+    "back": "Quay lại",
+    "accept": "Chấp nhận",
+    "reject": "Từ chối",
+    "info": "Thông tin môi giới",
+    "nameRegister": "Tên đăng ký",
+    "phone": "Số điện thoại",
+    "email": "Email",
+    "status": "Trạng thái",
+    "rejectReason": "Lý do từ chối",
+    "rejectDate": "Ngày từ chối",
+    "approveDate": "Ngày chấp nhận",
+    "note": "Ghi chú",
+    "businessInfo": "Thông tin doanh nghiệp",
+    "taxCode": "Mã số thuế",
+    "specialization": "Chuyên môn",
+    "yearsOfExperience": "Số năm kinh nghiệm",
+    "years": "năm",
+    "certificateNumber": "Số chứng chỉ",
+    "certificate": "Chứng chỉ",
+    "identityInfo": "Thông tin thẻ CCCD/CMND",
+    "identityNumber": "Số CCCD/CMND",
+    "fullName": "Họ và tên",
+    "gender": "Giới tính",
+    "male": "Nam",
+    "female": "Nữ",
+    "dateOfBirth": "Ngày sinh",
+    "placeOfBirth": "Nơi sinh",
+    "nationality": "Quốc tịch",
+    "identityFront": "Mặt trước CCCD",
+    "identityBack": "Mặt sau CCCD",
+    "confirmRejectTitle": "Bạn có chắc chắn muốn từ chối đơn này?",
+    "rejectReasonPrompt": "Vui lòng nhập lý do từ chối:",
+    "enterRejectReason": "Nhập lý do từ chối",
+    "cancel": "Hủy",
+    "confirmApproveTitle": "Bạn có muốn chấp nhận đơn này?",
+    "notePrompt": "Ghi chú (không bắt buộc):",
+    "enterNote": "Nhập ghi chú khi chấp nhận đơn"
+  },
+  "statusValue": {
+    "PENDING": "Chờ duyệt",
+    "APPROVED": "Duyệt",
+    "REJECTED": "Từ chối"
+  }
+}

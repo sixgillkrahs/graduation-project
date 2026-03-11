@@ -35,6 +35,20 @@ export const useReadNotice = (): UseMutationResult<
   });
 };
 
+export const useMarkAllNoticesRead = (): UseMutationResult<
+  any,
+  Error,
+  void,
+  void
+> => {
+  return useMutation({
+    mutationFn: () => NoticeService.markAllAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [NoticeKey.getMyNotices] });
+    },
+  });
+};
+
 export const useDeleteNotice = (): UseMutationResult<
   any,
   Error,

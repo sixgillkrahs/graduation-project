@@ -1,4 +1,6 @@
 import { useGetLeads } from "@/components/features/schedule/services/query";
+import { useUpdateSchedule } from "@/components/features/schedule/services/mutation";
+import { SCHEDULE_STATUS } from "@/components/features/schedule/dto/schedule.dto";
 import { CsTable } from "@/components/ui/table";
 import { format } from "date-fns";
 import {
@@ -16,9 +18,12 @@ import {
 import React, { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@/components/ui";
+import { toast } from "sonner";
 
 export const CRMFeature = () => {
   const { data: leadsResponse, isLoading } = useGetLeads();
+  const { mutateAsync: updateSchedule, isPending: isUpdatingSchedule } =
+    useUpdateSchedule();
   const leads = leadsResponse?.data || [];
 
   const columns: any[] = [
@@ -149,6 +154,43 @@ export const CRMFeature = () => {
       align: "center",
       render: (_: any, record: any) => (
         <div className="flex items-center justify-center gap-2">
+          {record.status !== "COMPLETED" && (
+            <button
+              type="button"
+              disabled={isUpdatingSchedule}
+              onClick={async () => {
+                try {
+                  await updateSchedule({
+                    id: record._id || record.id,
+                    data: {
+                      title: record.title,
+                      date: record.date,
+                      startTime: record.startTime,
+                      endTime: record.endTime,
+                      location: record.location,
+                      type: record.type,
+                      status: SCHEDULE_STATUS.COMPLETED,
+                      customerName: record.customerName,
+                      customerPhone: record.customerPhone,
+                      customerEmail: record.customerEmail,
+                      customerNote: record.customerNote || "",
+                      agentNote: record.agentNote || "",
+                      color: record.color,
+                    },
+                  });
+                  toast.success(
+                    "Đã đánh dấu hoàn thành và gửi lời mời đánh giá.",
+                  );
+                } catch (error) {
+                  toast.error("Không thể cập nhật trạng thái cuộc hẹn.");
+                }
+              }}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+              title="Mark as completed"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+            </button>
+          )}
           <a
             href={`tel:${record.customerPhone}`}
             className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors"

@@ -3,6 +3,7 @@ import {
   SendOTPEmailJob,
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
+  SendReviewInvitationEmailJob,
   SendVerifyEmailJob,
   SendDealClosedEmailJob,
 } from "@/@types/jobTypes";
@@ -78,6 +79,17 @@ export class EmailQueue {
   enqueueDealClosedEmail(data: SendDealClosedEmailJob) {
     const jobId = `deal-closed:${data.to}:${Date.now()}`;
     return this.queue.add("sendDealClosedEmail", data, {
+      jobId,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+  }
+
+  enqueueReviewInvitationEmail(data: SendReviewInvitationEmailJob) {
+    const jobId = `review-invitation:${data.to}:${Date.now()}`;
+    return this.queue.add("sendReviewInvitationEmail", data, {
       jobId,
       attempts: 5,
       backoff: { type: "exponential", delay: 3000 },

@@ -3,6 +3,7 @@ import {
   SendOTPEmailJob,
   SendPasswordResetEmailJob,
   SendRejectEmailJob,
+  SendReviewInvitationEmailJob,
   SendVerifyEmailJob,
   SendDealClosedEmailJob,
 } from "@/@types/jobTypes";
@@ -56,6 +57,16 @@ export class EmailWorker {
             to,
             customerName,
             propertyName,
+          );
+        } else if (job.name === "sendReviewInvitationEmail") {
+          const { to, customerName, agentName, propertyName, reviewUrl } =
+            job.data as SendReviewInvitationEmailJob;
+          await this.emailService.sendReviewInvitationEmail(
+            to,
+            customerName,
+            agentName,
+            propertyName,
+            reviewUrl,
           );
         }
       },

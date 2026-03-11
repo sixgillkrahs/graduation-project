@@ -4,6 +4,7 @@ export interface ListingState {
     demandType: "SALE" | "RENT";
     propertyType: "APARTMENT" | "HOUSE" | "VILLA" | "LAND" | "STREET_HOUSE";
     projectName: string;
+    title?: string;
     location?: {
       province?: string;
       ward?: string;

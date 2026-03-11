@@ -7,6 +7,8 @@ import { AppError } from "@/utils/appError";
 import { PropertyService } from "@/services/property.service";
 import { EmailQueue } from "@/queues/email.queue";
 import { NotificationQueue } from "@/queues/notification.queue";
+import { ReviewService } from "@/services/review.service";
+import { ENV } from "@/config/env";
 
 export class ScheduleController extends BaseController {
   private static readonly DEFAULT_VIEWING_DURATION_MINUTES = 60;
@@ -15,6 +17,7 @@ export class ScheduleController extends BaseController {
   private propertyService: PropertyService;
   private emailQueue: EmailQueue;
   private notificationQueue: NotificationQueue;
+  private reviewService: ReviewService;
 
   constructor(
     scheduleService: ScheduleService,
@@ -22,6 +25,7 @@ export class ScheduleController extends BaseController {
     propertyService: PropertyService,
     emailQueue: EmailQueue,
     notificationQueue: NotificationQueue,
+    reviewService: ReviewService,
   ) {
     super();
     this.scheduleService = scheduleService;
@@ -29,6 +33,7 @@ export class ScheduleController extends BaseController {
     this.propertyService = propertyService;
     this.emailQueue = emailQueue;
     this.notificationQueue = notificationQueue;
+    this.reviewService = reviewService;
   }
 
   createSchedule = (
@@ -278,6 +283,59 @@ export class ScheduleController extends BaseController {
             location: location || schedule.location,
           },
         });
+      }
+
+      if (status === "COMPLETED" && schedule.status !== "COMPLETED") {
+        const agent = await this.userService.getUserById(String(schedule.agentId));
+        const propertyName =
+          ((schedule.listingId as any)?.title as string) ||
+          title ||
+          schedule.location ||
+          "bat dong san";
+        const invitation = await this.reviewService.createOrRefreshInvitation({
+          scheduleId: id,
+          listingId:
+            ((schedule.listingId as any)?._id as string | undefined) ||
+            (typeof schedule.listingId === "string"
+              ? schedule.listingId
+              : undefined),
+          agentUserId: String(schedule.agentId),
+          customerUserId: schedule.userId ? String(schedule.userId) : undefined,
+          customerName: schedule.customerName,
+          customerEmail: schedule.customerEmail,
+          agentName: agent?.fullName || "Nguyen Van A",
+          propertyName,
+        });
+
+        if (invitation) {
+          const actionUrl = `${ENV.FRONTEND_URLLANDINGPAGE}/review-invitation/${invitation.token}`;
+          const notificationTitle = "Moi ban danh gia trai nghiem xem nha";
+          const notificationContent = `Havenly hy vong ban da co trai nghiem xem nha tuyet voi! Hay danh 1 phut danh gia su ho tro cua moi gioi ${agent?.fullName || "Nguyen Van A"} nhe.`;
+
+          this.emailQueue.enqueueReviewInvitationEmail({
+            to: schedule.customerEmail,
+            customerName: schedule.customerName,
+            agentName: agent?.fullName || "Nguyen Van A",
+            propertyName,
+            reviewUrl: actionUrl,
+          });
+
+          if (schedule.userId) {
+            this.notificationQueue.enqueueNotification({
+              userId: String(schedule.userId),
+              title: notificationTitle,
+              content: notificationContent,
+              type: "SCHEDULE",
+              metadata: {
+                scheduleId: id,
+                status: "COMPLETED",
+                actionUrl,
+                propertyName,
+                agentName: agent?.fullName || "Nguyen Van A",
+              },
+            });
+          }
+        }
       }
 
       return "Schedule updated successfully";

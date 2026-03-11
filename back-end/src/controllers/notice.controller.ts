@@ -158,4 +158,17 @@ export class NoticeController extends BaseController {
       return { success: true };
     });
   };
+
+  markAllAsRead = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const user = req.user;
+
+      if (!user || !user.userId._id) {
+        throw new AppError("Unauthorized", 401, ErrorCode.UNAUTHORIZED);
+      }
+
+      await this.noticeService.markAllAsRead(user.userId._id);
+      return { success: true };
+    });
+  };
 }

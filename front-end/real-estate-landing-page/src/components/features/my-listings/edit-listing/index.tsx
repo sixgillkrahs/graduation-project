@@ -72,12 +72,28 @@ const EditListing = () => {
       // Hydrate via RHF reset
       methods.reset(hydratedData as ListingFormData);
 
+      // Narrow propertyType: the API can return "OTHER" but the Redux store
+      // only accepts the four concrete types defined in ListingState.
+      const VALID_PROPERTY_TYPES = [
+        "APARTMENT",
+        "HOUSE",
+        "VILLA",
+        "LAND",
+        "STREET_HOUSE",
+      ] as const;
+      type ValidPropertyType = (typeof VALID_PROPERTY_TYPES)[number];
+      const validPropertyType: ValidPropertyType = (
+        VALID_PROPERTY_TYPES as readonly string[]
+      ).includes(p.propertyType)
+        ? (p.propertyType as ValidPropertyType)
+        : "APARTMENT";
+
       // Sync into Redux
       // Map to Redux structure (which has location/features/media objects)
       dispatch(
         updateListingData({
           demandType: p.demandType,
-          propertyType: p.propertyType,
+          propertyType: validPropertyType,
           projectName: p.projectName,
           title: p.title,
           description: p.description,
@@ -101,7 +117,7 @@ const EditListing = () => {
           },
           amenities: hydratedData.amenities,
           media: {
-            images: hydratedData.images,
+            images: hydratedData.images || [],
             thumbnail: hydratedData.thumbnail,
             videoLink: hydratedData.videoLink,
             virtualTourUrls: hydratedData.virtualTourUrls,

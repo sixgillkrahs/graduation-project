@@ -3,10 +3,10 @@ import { useGetAgentsRegistration } from "../services/query";
 import AgentRegistrationService from "../services/service";
 import { ArrowLeftOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
 import message from "@shared/message";
-import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
 import { Button, Card, Col, Flex, Image, Input, Modal, Row, Space, Tag, Typography } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const { Text } = Typography;
 const { confirm } = Modal;
@@ -17,27 +17,27 @@ interface InfoFieldProps {
   value?: React.ReactNode;
 }
 
-const showRejectConfirm = (onSubmit: (reason: string) => void) => {
+const showRejectConfirm = (onSubmit: (reason: string) => void, t: any) => {
   let reason = "";
 
   confirm({
-    title: "Do you want to reject this application?",
+    title: t("detail.confirmRejectTitle"),
     icon: <ExclamationCircleFilled />,
     content: (
       <div>
-        <p>Please provide a reason for rejection:</p>
+        <p>{t("detail.rejectReasonPrompt")}</p>
         <TextArea
           rows={4}
-          placeholder="Enter rejection reason"
+          placeholder={t("detail.enterRejectReason")}
           onChange={(e) => {
             reason = e.target.value;
           }}
         />
       </div>
     ),
-    okText: "Reject",
+    okText: t("detail.reject"),
     okType: "danger",
-    cancelText: "Cancel",
+    cancelText: t("detail.cancel"),
 
     onOk() {
       onSubmit(reason.trim());
@@ -46,26 +46,26 @@ const showRejectConfirm = (onSubmit: (reason: string) => void) => {
   });
 };
 
-const showApproveConfirm = (onSubmit: (note: string) => void) => {
+const showApproveConfirm = (onSubmit: (note: string) => void, t: any) => {
   let note = "";
 
   confirm({
-    title: "Bạn có chắc chắn muốn chấp nhận đơn này?",
+    title: t("detail.confirmApproveTitle"),
     icon: <CheckCircleFilled style={{ color: "#52c41a" }} />,
     content: (
       <div>
-        <p>Ghi chú (không bắt buộc):</p>
+        <p>{t("detail.notePrompt")}</p>
         <TextArea
           rows={4}
-          placeholder="Nhập ghi chú khi chấp nhận đơn"
+          placeholder={t("detail.enterNote")}
           onChange={(e) => {
             note = e.target.value;
           }}
         />
       </div>
     ),
-    okText: "Chấp nhận",
-    cancelText: "Hủy",
+    okText: t("detail.accept"),
+    cancelText: t("detail.cancel"),
     okButtonProps: {
       type: "primary",
     },
@@ -91,6 +91,7 @@ const InfoField = ({ label, value }: InfoFieldProps) => {
 };
 
 const AgentRegistrationDetail = () => {
+  const { t } = useTranslation("agents");
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: agentRegistrationDetail } = useGetAgentsRegistration(id!);
@@ -109,7 +110,7 @@ const AgentRegistrationDetail = () => {
       } else {
         message.error("Error");
       }
-    });
+    }, t);
   };
 
   const onApprove = () => {
@@ -120,7 +121,7 @@ const AgentRegistrationDetail = () => {
           note: note,
         },
       });
-    });
+    }, t);
   };
 
   const onBack = () => {
@@ -131,20 +132,20 @@ const AgentRegistrationDetail = () => {
     <Card
       actions={[
         <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-          Back
+          {t("detail.back")}
         </Button>,
       ]}
     >
       <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-        <Typography.Title level={3}>Agent Registration Detail</Typography.Title>
+        <Typography.Title level={3}>{t("detail.title")}</Typography.Title>
         <Space>
           {agentRegistrationDetail?.data.status == AgentRegistrationService.STATUS[0].value && (
             <>
               <Button type="primary" onClick={onApprove} loading={approveLoading}>
-                Accept
+                {t("detail.accept")}
               </Button>
               <Button danger onClick={onReject} loading={rejectLoading}>
-                Reject
+                {t("detail.reject")}
               </Button>
             </>
           )}
@@ -153,34 +154,35 @@ const AgentRegistrationDetail = () => {
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12}>
           <Card
-            title={"Agent Information"}
+            title={t("detail.info")}
             style={{
               marginBottom: 16,
             }}
           >
             <InfoField
-              label="Name Register"
+              label={t("detail.nameRegister")}
               value={agentRegistrationDetail?.data.basicInfo.nameRegister}
             />
-            <InfoField label="Phone" value={agentRegistrationDetail?.data.basicInfo.phoneNumber} />
-            <InfoField label="Email" value={agentRegistrationDetail?.data.basicInfo.email} />
+            <InfoField label={t("detail.phone")} value={agentRegistrationDetail?.data.basicInfo.phoneNumber} />
+            <InfoField label={t("detail.email")} value={agentRegistrationDetail?.data.basicInfo.email} />
             {agentRegistrationDetail?.data.status && (
               <InfoField
-                label="Status"
-                value={renderConstant(
-                  agentRegistrationDetail?.data.status,
-                  AgentRegistrationService.STATUS,
-                )}
+                label={t("detail.status")}
+                value={
+                  <Tag color={AgentRegistrationService.STATUS.find(i => i.value === agentRegistrationDetail?.data.status)?.color}>
+                    {t(`statusValue.${agentRegistrationDetail?.data.status}`)}
+                  </Tag>
+                }
               />
             )}
             {agentRegistrationDetail?.data.status == AgentRegistrationService.STATUS[2].value && (
               <>
                 <InfoField
-                  label="Reject Reason"
+                  label={t("detail.rejectReason")}
                   value={agentRegistrationDetail?.data.reasonReject || "-"}
                 />
                 <InfoField
-                  label="Reject Date"
+                  label={t("detail.rejectDate")}
                   value={toVietnamTime(agentRegistrationDetail?.data?.updatedAt)}
                 />
               </>
@@ -188,20 +190,20 @@ const AgentRegistrationDetail = () => {
             {agentRegistrationDetail?.data.status == AgentRegistrationService.STATUS[1].value && (
               <>
                 <InfoField
-                  label="Approve Date"
+                  label={t("detail.approveDate")}
                   value={toVietnamTime(agentRegistrationDetail?.data?.updatedAt)}
                 />
-                <InfoField label="Note" value={agentRegistrationDetail?.data.note || "-"} />
+                <InfoField label={t("detail.note")} value={agentRegistrationDetail?.data.note || "-"} />
               </>
             )}
           </Card>
-          <Card title={"Business Information"}>
+          <Card title={t("detail.businessInfo")}>
             <InfoField
-              label="Tax Code"
+              label={t("detail.taxCode")}
               value={agentRegistrationDetail?.data.businessInfo.taxCode}
             />
             <InfoField
-              label="specialization"
+              label={t("detail.specialization")}
               value={agentRegistrationDetail?.data.businessInfo.specialization.map((item) => {
                 return (
                   <>
@@ -211,15 +213,15 @@ const AgentRegistrationDetail = () => {
               })}
             />
             <InfoField
-              label="Years Of Experience"
-              value={<>{agentRegistrationDetail?.data.businessInfo.yearsOfExperience} years</>}
+              label={t("detail.yearsOfExperience")}
+              value={<>{agentRegistrationDetail?.data.businessInfo.yearsOfExperience} {t("detail.years")}</>}
             />
             <InfoField
-              label="Certificate Number"
+              label={t("detail.certificateNumber")}
               value={agentRegistrationDetail?.data.businessInfo.certificateNumber}
             />
             <InfoField
-              label="Certificate"
+              label={t("detail.certificate")}
               value={
                 agentRegistrationDetail?.data?.imageInfo?.certificateImage ? (
                   <>
@@ -241,37 +243,37 @@ const AgentRegistrationDetail = () => {
           </Card>
         </Col>
         <Col xs={24} sm={12}>
-          <Card title={"Identity Information"}>
+          <Card title={t("detail.identityInfo")}>
             <InfoField
-              label="Identity Number"
+              label={t("detail.identityNumber")}
               value={agentRegistrationDetail?.data.basicInfo.identityInfo.IDNumber}
             />
             <InfoField
-              label="Full Name"
+              label={t("detail.fullName")}
               value={agentRegistrationDetail?.data.basicInfo.identityInfo.fullName}
             />
             <InfoField
-              label="Gender"
+              label={t("detail.gender")}
               value={
                 agentRegistrationDetail?.data.basicInfo.identityInfo.gender === "Nam"
-                  ? "Male"
-                  : "Female"
+                  ? t("detail.male")
+                  : t("detail.female")
               }
             />
             <InfoField
-              label="Date of Birth"
+              label={t("detail.dateOfBirth")}
               value={agentRegistrationDetail?.data.basicInfo.identityInfo.dateOfBirth}
             />
             <InfoField
-              label="Place Of Birth"
+              label={t("detail.placeOfBirth")}
               value={agentRegistrationDetail?.data.basicInfo.identityInfo.placeOfBirth}
             />
             <InfoField
-              label="Nationality"
+              label={t("detail.nationality")}
               value={agentRegistrationDetail?.data.basicInfo.identityInfo.nationality}
             />
             <InfoField
-              label="Identity Front"
+              label={t("detail.identityFront")}
               value={
                 agentRegistrationDetail?.data?.imageInfo?.identityFront ? (
                   <Image
@@ -285,7 +287,7 @@ const AgentRegistrationDetail = () => {
               }
             />
             <InfoField
-              label="Identity Back"
+              label={t("detail.identityBack")}
               value={
                 agentRegistrationDetail?.data?.imageInfo?.identityBack ? (
                   <Image

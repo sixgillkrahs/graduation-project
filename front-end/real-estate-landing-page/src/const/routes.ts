@@ -14,6 +14,7 @@ export const ROUTES = {
   // Profile
   PROFILE: "/profile",
   PROFILE_EDIT: "/profile/edit",
+  REVIEW_INVITATION: (token: string) => `/review-invitation/${token}` as const,
   SETTINGS: "/settings",
 
   // Work
@@ -32,6 +33,7 @@ export const ROUTES = {
   AGENT_SCHEDULE: "/agent/schedule",
   AGENT_CRM: "/agent/crm",
   AGENT_PROFILE: "/agent/profile",
+  AGENT_REVIEWS: "/agent/reviews",
 
   // Misc
   LEADERBOARD: "/leaderboard",

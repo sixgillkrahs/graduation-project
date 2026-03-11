@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ROUTES } from "@/const/routes";
 import { Icon } from "../ui/Icon";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const LocaleSwitcher = () => {
   const router = useRouter();
@@ -151,7 +152,8 @@ const Footer = () => {
           <div className="text-[60px]! sm:text-[100px]! lg:text-[220px]! cs-typography-gray font-semibold! leading-none">
             Havenly
           </div>
-          <div className="pb-2 lg:pb-12">
+          <div className="pb-2 lg:pb-12 flex items-center gap-6">
+            <ModeToggle />
             <LocaleSwitcher />
           </div>
         </div>

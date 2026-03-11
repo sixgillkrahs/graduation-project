@@ -48,10 +48,12 @@ const AddListing = () => {
       longitude:
         listingData.location?.longitude ||
         PropertyService.defaultFormValues.longitude,
-      area:
+      area: String(
         listingData.features?.area || PropertyService.defaultFormValues.area,
-      price:
+      ),
+      price: String(
         listingData.features?.price || PropertyService.defaultFormValues.price,
+      ),
       currency:
         listingData.features?.currency ||
         PropertyService.defaultFormValues.currency,

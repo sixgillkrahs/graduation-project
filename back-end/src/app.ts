@@ -31,6 +31,7 @@ import scheduleRoutes from "./routes/schedule.routes";
 import uploadRoutes from "./routes/upload.routes";
 import paymentRoutes from "./routes/payment.routes";
 import jobRoutes from "./routes/job.route";
+import reviewRoutes from "./routes/review.routes";
 
 const app = express();
 
@@ -98,6 +99,7 @@ app.use("/api/landlords", landlordRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 const swaggerOptions = {
   explorer: true,

@@ -545,24 +545,8 @@
       "title": "Đánh giá và nhận xét",
       "subtitle": "Khách hàng nói gì khi làm việc với {name}",
       "basedOn": "Được tổng hợp từ {count} đánh giá đã xác minh",
-      "breakdown": {
-        "fiveStar": "5 sao",
-        "fourStar": "4 sao",
-        "threeStar": "3 sao",
-        "twoStar": "2 sao",
-        "oneStar": "1 sao"
-      },
-      "items": [
-        {
-          "comment": "Làm việc rất chuyên nghiệp và hỗ trợ xuyên suốt quá trình. Phản hồi nhanh và danh sách bất động sản gợi ý rất sát với nhu cầu của tôi."
-        },
-        {
-          "comment": "Tư vấn rõ ràng, nắm thị trường tốt và không ép khách. Lịch xem nhà được sắp xếp gọn gàng từ đầu đến cuối."
-        },
-        {
-          "comment": "Là một môi giới đáng tin cậy và có hiểu biết tốt về khu vực. Tôi muốn có thêm vài lựa chọn ở giai đoạn đầu, nhưng gợi ý cuối cùng rất phù hợp."
-        }
-      ]
+      "emptyTitle": "Chưa có đánh giá nào",
+      "emptyDescription": "Đánh giá từ khách hàng đã xác minh sẽ xuất hiện tại đây sau khi được gửi."
     },
     "contact": {
       "title": "Liên hệ {name}",

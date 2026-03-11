@@ -1,6 +1,6 @@
 import { Icon } from "@/components/ui/Icon";
 import { MenuItem } from "@/components/custom/siderbar";
-import { Building2, LayoutDashboard, Users } from "lucide-react";
+import { Building2, LayoutDashboard, Star, Users } from "lucide-react";
 import { CalendarSchedule } from "@/components/ui/Icon/CalendarSchedule";
 
 export const sidebarMenu: MenuItem[] = [
@@ -33,6 +33,11 @@ export const sidebarMenu: MenuItem[] = [
     title: "Messages",
     icon: <Icon.Message />,
     url: "/agent/messages",
+  },
+  {
+    title: "Reviews",
+    icon: <Star />,
+    url: "/agent/reviews",
   },
   {
     title: "Profile",

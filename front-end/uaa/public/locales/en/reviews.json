@@ -1,0 +1,58 @@
+{
+  "moderation": {
+    "title": "Admin Moderation Queue",
+    "description": "Monitor and moderate customer reviews. Reviews that pass the AI filter or are reported by agents will appear here for the Admin to make a final decision.",
+    "controlDesk": "Review Control Desk",
+    "stats": {
+      "total": "Total in queue",
+      "awaiting": "Awaiting",
+      "reported": "Reported",
+      "avgRating": "Avg rating"
+    },
+    "search": {
+      "title": "Queue",
+      "description": "Search by customer, property name, or review content.",
+      "placeholder": "Search queue",
+      "refresh": "Refresh queue"
+    },
+    "table": {
+      "customer": "Customer",
+      "property": "Property",
+      "rating": "Rating",
+      "status": "Status",
+      "comment": "Comment",
+      "actions": "Actions",
+      "noComment": "No detailed comment",
+      "empty": "No review waiting for moderation"
+    },
+    "details": {
+      "title": "Review details",
+      "property": "Property",
+      "quickTags": "Quick tags",
+      "noTags": "No quick tags selected",
+      "customerComment": "Customer comment",
+      "agentReply": "Agent reply",
+      "reportReason": "Report reason",
+      "previousNote": "Previous admin note"
+    },
+    "actions": {
+      "view": "View details",
+      "approve": "Approve review",
+      "reject": "Reject review",
+      "cancel": "Cancel",
+      "approveDesc": "Optional note for internal audit before publishing this review.",
+      "rejectDesc": "Add a short note explaining why this review is being rejected.",
+      "approvePlaceholder": "Reviewed by admin. Safe to publish.",
+      "rejectPlaceholder": "Reason for rejecting this review...",
+      "approveSuccess": "Review approved and ready to be published.",
+      "rejectSuccess": "Review rejected."
+    },
+    "status": {
+      "AWAITING_ADMIN": "Awaiting Admin",
+      "REPORTED": "Reported",
+      "PENDING": "Batch Queue",
+      "PUBLISHED": "Published",
+      "REJECTED": "Rejected"
+    }
+  }
+}

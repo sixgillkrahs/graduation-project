@@ -23,6 +23,9 @@ export const useCreateSchedule = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getSchedules],
       });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getLeads],
+      });
     },
   });
 };
@@ -40,6 +43,14 @@ export const useRequestSchedule = (): UseMutationResult<
     meta: {
       ERROR_SOURCE: "notifications.requestScheduleFailed",
       SUCCESS_MESSAGE: "notifications.requestScheduleSuccess",
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getSchedules],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getLeads],
+      });
     },
   });
 };

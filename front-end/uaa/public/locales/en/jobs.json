@@ -1,0 +1,33 @@
+{
+  "title": "Background Jobs",
+  "columns": {
+    "type": "Type",
+    "payload": "Payload",
+    "status": "Status",
+    "attempts": "Attempts / Max",
+    "error": "Error",
+    "createdAt": "Created At"
+  },
+  "status": {
+    "COMPLETED": "Completed",
+    "FAILED": "Failed",
+    "PROCESSING": "Processing",
+    "PENDING": "Pending"
+  },
+  "actions": {
+    "retry": "Retry",
+    "delete": "Delete"
+  },
+  "confirm": {
+    "retry": {
+      "title": "Retry Job",
+      "content": "Are you sure you want to retry this failed job?",
+      "okText": "Retry"
+    },
+    "delete": {
+      "title": "Delete Job",
+      "content": "Are you sure you want to delete this job?",
+      "okText": "Delete"
+    }
+  }
+}
