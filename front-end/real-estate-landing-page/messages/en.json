@@ -58,6 +58,10 @@
     "title": "Hello world!"
   },
   "Header": {
+    "buyProperties": "Buy",
+    "rentProperties": "Rent",
+    "virtualTours": "✨ 3D Tours",
+    "findAgents": "Find Agents",
     "searchProperties": "Search for properties",
     "listForSale": "List for sale",
     "listForRent": "List for rent",
@@ -488,6 +492,54 @@
       "year": "Year",
       "pageViews": "Page Views",
       "contactLeads": "Contact Leads"
+    }
+  },
+  "LeaderboardPage": {
+    "hero": {
+      "eyebrow": "Trusted Directory",
+      "title": "Find Your Trusted Real Estate Expert",
+      "description": "Search a premium directory of active agents, compare trust signals, and shortlist the right expert for your next move.",
+      "searchPlaceholder": "Search by name or location...",
+      "specialtyAll": "All specialties",
+      "searchAction": "Search"
+    },
+    "top": {
+      "eyebrow": "Elite Agents",
+      "title": "Top Performing Agents of the Month",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "proBadge": "PRO Agent",
+      "ratingLine": "{rating} star ({reviews} reviews)",
+      "dealsLine": "{deals} deals closed",
+      "viewProfile": "View Profile",
+      "badges": {
+        "first": "#1 Top Seller",
+        "second": "#2",
+        "third": "#3"
+      }
+    },
+    "directory": {
+      "title": "All Agents",
+      "summary": "{count} agents available for {period}",
+      "sortLabel": "Sort by:",
+      "sort": {
+        "highestRated": "Highest Rated",
+        "topDeals": "Most Deals Closed",
+        "monthlyRevenue": "Highest Revenue",
+        "topRank": "Top Seller Rank"
+      },
+      "ratingLine": "{rating} star ({reviews} reviews)",
+      "fallbackLocation": "Location updating",
+      "profileAction": "Profile",
+      "messageAction": "Message",
+      "authTitle": "Login to message an agent",
+      "authDescription": "Please login to start a conversation with this agent.",
+      "emptyTitle": "No agents matched your search",
+      "emptyDescription": "Try a broader location, a different name, or reset the selected specialty."
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "AgentPublicProfile": {

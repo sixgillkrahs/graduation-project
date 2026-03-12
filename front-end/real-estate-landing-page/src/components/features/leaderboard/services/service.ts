@@ -10,6 +10,14 @@ export interface LeaderboardEntry {
   revenue: number;
   deals: number;
   rank: number;
+  rating: number;
+  reviewCount: number;
+  workingAreas: string[];
+  primaryWorkingArea?: string;
+  specialties: string[];
+  yearsOfExperience?: string;
+  activeSaleListingsCount: number;
+  isPro: boolean;
   latestSoldAt?: string;
 }
 

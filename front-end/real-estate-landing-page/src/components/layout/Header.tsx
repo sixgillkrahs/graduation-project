@@ -56,17 +56,35 @@ const Header = () => {
           {/* Center: Desktop Nav */}
           <nav className="hidden lg:block">
             <ul className="flex items-center gap-4 xl:gap-6">
-              <li className="cs-typography text-[14px] xl:text-[16px]! cursor-pointer flex items-center gap-1 cs-outline-gray p-2 rounded-full px-4 whitespace-nowrap text-foreground">
-                {t("searchProperties")} <Icon.ArrowDown />
+              <li
+                onClick={() =>
+                  router.push(`${ROUTES.PROPERTIES}?demandType=SALE`)
+                }
+                className="cs-paragraph text-[14px] xl:text-[16px]! cursor-pointer p-2 rounded-full px-4 cs-outline-gray whitespace-nowrap text-foreground transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                {t("buyProperties")}
               </li>
-              <li className="cs-paragraph text-[14px] xl:text-[16px]! cursor-pointer p-2 rounded-full px-4 cs-outline-gray whitespace-nowrap text-foreground">
-                {t("listForSale")}
+              <li
+                onClick={() =>
+                  router.push(`${ROUTES.PROPERTIES}?demandType=RENT`)
+                }
+                className="cs-paragraph text-[14px] xl:text-[16px]! cursor-pointer p-2 rounded-full px-4 cs-outline-gray whitespace-nowrap text-foreground transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                {t("rentProperties")}
               </li>
-              <li className="cs-paragraph text-[14px] xl:text-[16px]! cursor-pointer p-2 rounded-full px-4 cs-outline-gray whitespace-nowrap text-foreground">
-                {t("listForRent")}
+              <li
+                onClick={() =>
+                  router.push(`${ROUTES.PROPERTIES}?hasVirtualTour=true`)
+                }
+                className="cs-paragraph text-[14px] xl:text-[16px]! cursor-pointer p-2 rounded-full px-4 cs-outline-gray whitespace-nowrap text-foreground transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                {t("virtualTours")}
               </li>
-              <li className="cs-paragraph text-[16px]! cursor-pointer p-2 rounded-full cs-outline-gray size-[40px] flex justify-center items-center text-foreground">
-                <Icon.ExpandUpDown />
+              <li
+                onClick={() => router.push(ROUTES.LEADERBOARD)}
+                className="cs-paragraph text-[14px] xl:text-[16px]! cursor-pointer p-2 rounded-full px-4 cs-outline-gray whitespace-nowrap text-foreground transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                {t("findAgents")}
               </li>
             </ul>
           </nav>
@@ -190,14 +208,41 @@ const Header = () => {
         <div className="lg:hidden absolute top-full left-0 right-0 bg-background shadow-lg border-t border-border max-h-[80vh] overflow-y-auto">
           <nav className="px-4 py-6">
             <ul className="flex flex-col gap-4">
-              <li className="cs-typography text-[16px]! cursor-pointer flex items-center justify-between cs-outline-gray p-3 rounded-xl px-4">
-                {t("searchProperties")} <Icon.ArrowDown />
+              <li
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push(`${ROUTES.PROPERTIES}?demandType=SALE`);
+                }}
+                className="cs-paragraph text-[16px]! cursor-pointer p-3 rounded-xl px-4 cs-outline-gray text-foreground hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                {t("buyProperties")}
               </li>
-              <li className="cs-paragraph text-[16px]! cursor-pointer p-3 rounded-xl px-4 cs-outline-gray text-foreground">
-                {t("listForSale")}
+              <li
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push(`${ROUTES.PROPERTIES}?demandType=RENT`);
+                }}
+                className="cs-paragraph text-[16px]! cursor-pointer p-3 rounded-xl px-4 cs-outline-gray text-foreground hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                {t("rentProperties")}
               </li>
-              <li className="cs-paragraph text-[16px]! cursor-pointer p-3 rounded-xl px-4 cs-outline-gray text-foreground">
-                {t("listForRent")}
+              <li
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push(`${ROUTES.PROPERTIES}?hasVirtualTour=true`);
+                }}
+                className="cs-paragraph text-[16px]! cursor-pointer p-3 rounded-xl px-4 font-medium text-red-500 bg-red-50/50 hover:bg-red-50 dark:bg-red-900/10 dark:hover:bg-red-900/20 transition-colors"
+              >
+                {t("virtualTours")}
+              </li>
+              <li
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push(ROUTES.LEADERBOARD);
+                }}
+                className="cs-paragraph text-[16px]! cursor-pointer p-3 rounded-xl px-4 cs-outline-gray text-foreground hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                {t("findAgents")}
               </li>
 
               <div className="my-2 border-b border-gray-100"></div>

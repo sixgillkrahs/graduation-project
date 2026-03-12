@@ -12,7 +12,7 @@ import {
 import { Heart, Loader2, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AdvancedSearch, { SearchFilters } from "./components/AdvancedSearch";
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
@@ -20,6 +20,97 @@ import PropertyCardSkeleton from "./components/PropertyCardSkeleton";
 import { useFavoriteProperties, useOnSale } from "./services/query";
 
 type TabType = "all" | "favorites";
+
+const DEFAULT_PARAMS: IParamsPagination = {
+  page: 1,
+  limit: 6,
+};
+
+const buildParamsFromSearchParams = (
+  searchParams: URLSearchParams,
+): IParamsPagination => {
+  const params: IParamsPagination = {
+    page: Number(searchParams.get("page") || DEFAULT_PARAMS.page),
+    limit: Number(searchParams.get("limit") || DEFAULT_PARAMS.limit),
+  };
+
+  const knownKeys = [
+    "query",
+    "demandType",
+    "propertyType",
+    "maxPrice",
+    "hasVirtualTour",
+    "features.bedrooms",
+    "features.bathrooms",
+    "features.direction",
+    "minBedrooms",
+    "minBathrooms",
+    "sortField",
+    "sortOrder",
+  ] as const;
+
+  knownKeys.forEach((key) => {
+    const value = searchParams.get(key);
+    if (!value) {
+      return;
+    }
+
+    if (
+      key === "maxPrice" ||
+      key === "features.bedrooms" ||
+      key === "features.bathrooms" ||
+      key === "minBedrooms" ||
+      key === "minBathrooms"
+    ) {
+      params[key] = Number(value);
+      return;
+    }
+
+    params[key] = value;
+  });
+
+  return params;
+};
+
+const getContextContent = (params: IParamsPagination) => {
+  if (params.hasVirtualTour === "true" || params.hasVirtualTour === true) {
+    return {
+      eyebrow: "Immersive Search",
+      title: "Homes with 3D virtual tours",
+      description:
+        "Browse listings you can inspect remotely before booking an in-person visit.",
+      badge: "3D tours only",
+    };
+  }
+
+  if (params.demandType === "SALE") {
+    return {
+      eyebrow: "Buy With Clarity",
+      title: "Homes for sale",
+      description:
+        "Focus on ownership-ready listings, compare pricing, and shortlist the right neighborhoods faster.",
+      badge: "For sale",
+    };
+  }
+
+  if (params.demandType === "RENT") {
+    return {
+      eyebrow: "Rent Smarter",
+      title: "Rental properties",
+      description:
+        "Explore move-in-ready listings with filters tuned for budget, location and convenience.",
+      badge: "For rent",
+    };
+  }
+
+  return {
+    eyebrow: "Explore Market",
+    title: "All available properties",
+    description:
+      "Search across sale and rental listings, then narrow the shortlist with practical filters.",
+    badge: "All listings",
+  };
+};
 
 const Properties = () => {
   const t = useTranslations("PropertiesPage");
@@ -30,11 +121,11 @@ const Properties = () => {
   const activeTab: TabType =
     searchParams.get("tab") === "favorites" ? "favorites" : "all";
 
-  // Single shared filter state for both tabs
-  const [params, setParams] = useState<IParamsPagination>({
-    page: 1,
-    limit: 6,
-  });
+  const initialParams = useMemo(
+    () => buildParamsFromSearchParams(searchParams),
+    [searchParams],
+  );
+  const [params, setParams] = useState<IParamsPagination>(initialParams);
 
   const { data: onSale, isLoading, isFetching } = useOnSale(params);
   const {
@@ -45,10 +136,25 @@ const Properties = () => {
 
   const gridRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setParams(initialParams);
+  }, [initialParams]);
+
   const isAllTab = activeTab === "all";
   const currentData = isAllTab ? onSale : favorites;
   const currentLoading = isAllTab ? isLoading : isFavLoading;
   const currentFetching = isAllTab ? isFetching : isFavFetching;
+  const contextContent = useMemo(() => getContextContent(params), [params]);
+  const searchSyncKey = useMemo(
+    () =>
+      JSON.stringify({
+        query: initialParams.query || "",
+        demandType: initialParams.demandType || "all",
+        propertyType: initialParams.propertyType || "all",
+        maxPrice: initialParams.maxPrice || 5,
+      }),
+    [initialParams],
+  );
 
   const handlePageChange = (page: number) => {
     setParams((prev) => ({ ...prev, page }));
@@ -58,19 +164,24 @@ const Properties = () => {
   const handleTabChange = (tab: TabType) => {
     // Reset to page 1 when switching tabs, keep filters
     setParams((prev) => ({ ...prev, page: 1 }));
+    const nextUrlParams = new URLSearchParams(searchParams.toString());
+
     if (tab === "favorites") {
-      router.replace("/properties?tab=favorites", { scroll: false });
+      nextUrlParams.set("tab", "favorites");
     } else {
-      router.replace("/properties", { scroll: false });
+      nextUrlParams.delete("tab");
     }
+
+    const nextQuery = nextUrlParams.toString();
+    router.replace(`/properties${nextQuery ? `?${nextQuery}` : ""}`, {
+      scroll: false,
+    });
   };
 
   const handleResetFilters = () => {
     sidebarFiltersRef.current = {};
-    setParams((prev) => {
-      const { limit } = prev;
-      return { page: 1, limit, ...searchFiltersRef.current };
-    });
+    searchFiltersRef.current = {};
+    setParams(initialParams);
   };
 
   // Refs to track current sidebar and search filters separately
@@ -106,7 +217,19 @@ const Properties = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <AdvancedSearch onSearchChange={handleSearchChange} />
+      <AdvancedSearch
+        onSearchChange={handleSearchChange}
+        initialFilters={{
+          query: String(initialParams.query || ""),
+          demandType: String(initialParams.demandType || "all"),
+          propertyType: String(initialParams.propertyType || "all"),
+          maxPrice:
+            typeof initialParams.maxPrice === "number"
+              ? initialParams.maxPrice
+              : undefined,
+        }}
+        syncKey={searchSyncKey}
+      />
 
       <main className="container mx-auto px-4 md:px-20 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -116,6 +239,25 @@ const Properties = () => {
           />
 
           <div className="flex-1" ref={gridRef}>
+            <section className="mb-6 overflow-hidden rounded-[28px] border border-stone-200 bg-[linear-gradient(135deg,#f8f5ef_0%,#ffffff_58%,#efe7dc_100%)] p-6 shadow-sm">
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div className="max-w-2xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
+                    {contextContent.eyebrow}
+                  </p>
+                  <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-900">
+                    {contextContent.title}
+                  </h1>
+                  <p className="mt-3 text-sm leading-6 text-stone-600">
+                    {contextContent.description}
+                  </p>
+                </div>
+                <span className="inline-flex w-fit rounded-full border border-stone-300 bg-white/80 px-4 py-2 text-sm font-medium text-stone-700">
+                  {contextContent.badge}
+                </span>
+              </div>
+            </section>
+
             {/* Tabs */}
             <div className="flex items-center gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
               <button

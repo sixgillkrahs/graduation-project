@@ -200,6 +200,19 @@ export class PropertyController extends BaseController {
       delete parsed.maxPrice;
     }
 
+    if (parsed.hasVirtualTour !== undefined) {
+      const hasVirtualTour =
+        parsed.hasVirtualTour === true ||
+        parsed.hasVirtualTour === "true" ||
+        parsed.hasVirtualTour === "1";
+
+      if (hasVirtualTour) {
+        parsed["media.virtualTourUrls.0"] = { $exists: true };
+      }
+
+      delete parsed.hasVirtualTour;
+    }
+
     // Text search across multiple fields
     if (parsed.query) {
       const searchRegex = { $regex: parsed.query, $options: "i" };
@@ -569,7 +582,7 @@ export class PropertyController extends BaseController {
 
       // Enforce userId filter
       const queryFilters = {
-        ...filters,
+        ...this.parseFilters(filters as Record<string, any>),
         userId: user.userId,
       };
 

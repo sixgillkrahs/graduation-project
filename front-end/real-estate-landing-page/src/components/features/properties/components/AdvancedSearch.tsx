@@ -8,6 +8,7 @@ import {
 import { CsSelect } from "@/components/ui/select";
 import { ChevronDown, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import LocationAutocomplete from "./LocationAutocomplete";
 
@@ -27,6 +28,8 @@ export interface SearchFilters {
 
 interface AdvancedSearchProps {
   onSearchChange?: (filters: SearchFilters) => void;
+  initialFilters?: SearchFilters;
+  syncKey?: string;
 }
 
 const buildSearchFilters = (data: SearchFormValues): SearchFilters => {
@@ -40,7 +43,11 @@ const buildSearchFilters = (data: SearchFormValues): SearchFilters => {
   return filters;
 };
 
-const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
+const AdvancedSearch = ({
+  onSearchChange,
+  initialFilters,
+  syncKey,
+}: AdvancedSearchProps) => {
   const t = useTranslations("PropertiesPage.search");
 
   const DEMAND_TYPES = [
@@ -59,7 +66,7 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
     { value: "OTHER", label: t("typeOther") },
   ];
 
-  const { control, handleSubmit, watch } = useForm<SearchFormValues>({
+  const { control, handleSubmit, watch, reset } = useForm<SearchFormValues>({
     defaultValues: {
       query: "",
       demandType: "all",
@@ -67,6 +74,15 @@ const AdvancedSearch = ({ onSearchChange }: AdvancedSearchProps) => {
       maxPrice: 5,
     },
   });
+
+  useEffect(() => {
+    reset({
+      query: initialFilters?.query || "",
+      demandType: initialFilters?.demandType || "all",
+      propertyType: initialFilters?.propertyType || "all",
+      maxPrice: initialFilters?.maxPrice || 5,
+    });
+  }, [initialFilters, reset, syncKey]);
 
   const maxPrice = watch("maxPrice");
 

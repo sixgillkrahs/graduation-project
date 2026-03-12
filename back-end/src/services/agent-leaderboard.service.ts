@@ -4,8 +4,14 @@ import { AgentStatusEnum } from "@/models/agent.model";
 import PropertySaleModel, {
   PropertySaleRecordStatusEnum,
 } from "@/models/property-sale.model";
-import { CurrencyEnum } from "@/models/property.model";
+import {
+  CurrencyEnum,
+  PropertyDemandTypeEnum,
+  PropertyStatusEnum,
+} from "@/models/property.model";
 import mongoose from "mongoose";
+import collections from "@/models/config/collections";
+import { ReviewStatusEnum } from "@/models/review.model";
 
 @singleton
 export class AgentLeaderboardService {
@@ -136,6 +142,7 @@ export class AgentLeaderboardService {
     const { month, year } = this.getDateRange(options?.month, options?.year);
     const limit = options?.limit || 10;
     const currency = options?.currency || CurrencyEnum.VND;
+    const now = new Date();
 
     const results = await AgentLeaderboardSnapshotModel.aggregate([
       {
@@ -176,9 +183,58 @@ export class AgentLeaderboardService {
                 },
               },
             },
-            { $project: { _id: 0, status: 1 } },
+            {
+              $project: {
+                _id: 0,
+                status: 1,
+                rating: 1,
+                businessInfo: 1,
+                planInfo: 1,
+              },
+            },
           ],
           as: "agent",
+        },
+      },
+      {
+        $lookup: {
+          from: collections.properties,
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$userId", "$$userId"] },
+                    { $eq: ["$demandType", PropertyDemandTypeEnum.SALE] },
+                    { $eq: ["$status", PropertyStatusEnum.PUBLISHED] },
+                  ],
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+          as: "activeSaleListings",
+        },
+      },
+      {
+        $lookup: {
+          from: collections.reviews,
+          let: { userId: "$userId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$agentUserId", "$$userId"] },
+                    { $eq: ["$status", ReviewStatusEnum.PUBLISHED] },
+                  ],
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+          as: "publishedReviews",
         },
       },
       {
@@ -186,6 +242,17 @@ export class AgentLeaderboardService {
           "user.isDeleted": { $ne: true },
           "user.isActive": true,
           "agent.0": { $exists: true },
+        },
+      },
+      {
+        $addFields: {
+          agentProfile: { $arrayElemAt: ["$agent", 0] },
+          activeSaleListingsCount: {
+            $ifNull: [{ $arrayElemAt: ["$activeSaleListings.count", 0] }, 0],
+          },
+          reviewCount: {
+            $ifNull: [{ $arrayElemAt: ["$publishedReviews.count", 0] }, 0],
+          },
         },
       },
       {
@@ -198,6 +265,39 @@ export class AgentLeaderboardService {
           deals: 1,
           latestSoldAt: 1,
           rank: 1,
+          rating: { $ifNull: ["$agentProfile.rating", 0] },
+          workingAreas: {
+            $slice: [
+              { $ifNull: ["$agentProfile.businessInfo.workingArea", []] },
+              3,
+            ],
+          },
+          specialties: {
+            $slice: [
+              { $ifNull: ["$agentProfile.businessInfo.specialization", []] },
+              6,
+            ],
+          },
+          primaryWorkingArea: {
+            $ifNull: [
+              { $arrayElemAt: ["$agentProfile.businessInfo.workingArea", 0] },
+              "",
+            ],
+          },
+          yearsOfExperience: "$agentProfile.businessInfo.yearsOfExperience",
+          activeSaleListingsCount: 1,
+          reviewCount: 1,
+          isPro: {
+            $and: [
+              { $eq: ["$agentProfile.planInfo.plan", "PRO"] },
+              {
+                $or: [
+                  { $eq: ["$agentProfile.planInfo.endDate", null] },
+                  { $gt: ["$agentProfile.planInfo.endDate", now] },
+                ],
+              },
+            ],
+          },
         },
       },
     ]);

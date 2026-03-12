@@ -58,6 +58,10 @@
     "title": "Chào mừng bạn đến với Real Estate Landing Page!"
   },
   "Header": {
+    "buyProperties": "Mua nhà",
+    "rentProperties": "Thuê nhà",
+    "virtualTours": "✨ Trải nghiệm 3D",
+    "findAgents": "Tìm Môi giới",
     "searchProperties": "Tìm kiếm bất động sản",
     "listForSale": "Đăng bán",
     "listForRent": "Cho thuê",
@@ -488,6 +492,98 @@
       "year": "Nam",
       "pageViews": "Lượt xem trang",
       "contactLeads": "Lead liên hệ"
+    }
+  },
+  "LeaderboardPage": {
+    "hero": {
+      "eyebrow": "Tìm Môi Giới",
+      "title": "Chọn môi giới với nhiều cơ sở hơn",
+      "description": "So sánh môi giới theo mức độ hoạt động, đánh giá khách hàng, kho tin đang mở bán và hiệu suất thực tế trong tháng."
+    },
+    "stats": {
+      "totalAgents": "Môi giới hiển thị",
+      "avgRating": "Điểm trung bình",
+      "proAgents": "Môi giới PRO",
+      "activeListings": "Tin đang hoạt động"
+    },
+    "controls": {
+      "title": "Thu hẹp danh sách phù hợp",
+      "description": "Dùng tìm kiếm và bộ lọc nhanh để sàng lọc trước khi xem hồ sơ chi tiết.",
+      "searchPlaceholder": "Tìm theo tên, khu vực hoạt động hoặc kinh nghiệm",
+      "helper": "{count} môi giới phù hợp với bộ lọc hiện tại"
+    },
+    "filters": {
+      "all": "Tất cả",
+      "pro": "Chỉ PRO",
+      "topRated": "Đánh giá cao",
+      "active": "Có tin đang bán"
+    },
+    "sort": {
+      "recommended": "Gợi ý trước",
+      "revenue": "Doanh thu cao nhất",
+      "deals": "Nhiều giao dịch nhất",
+      "rating": "Điểm đánh giá cao"
+    },
+    "period": {
+      "label": "Kỳ hiệu suất",
+      "previous": "Tháng trước",
+      "next": "Tháng sau"
+    },
+    "guide": {
+      "first": {
+        "step": "Bước 1",
+        "title": "Bắt đầu từ khu vực phù hợp",
+        "description": "Ưu tiên môi giới đang hoạt động tốt ngay khu vực bạn quan tâm."
+      },
+      "second": {
+        "step": "Bước 2",
+        "title": "Kiểm tra độ tin cậy",
+        "description": "Điểm đánh giá, tin đang hoạt động và giao dịch đều tay thường cho thấy khả năng theo sát tốt hơn."
+      },
+      "third": {
+        "step": "Bước 3",
+        "title": "Mở hồ sơ để quyết định",
+        "description": "Xem chuyên môn, các tin đang bán và nhận xét từ khách hàng trước khi liên hệ."
+      }
+    },
+    "featured": {
+      "eyebrow": "Danh sách nên xem trước",
+      "title": "Những hồ sơ đáng mở trước",
+      "description": "Những môi giới này cân bằng tốt giữa hiệu suất, độ tin cậy, kho tin đang hoạt động và vị thế trên nền tảng."
+    },
+    "directory": {
+      "eyebrow": "Danh sách mở rộng",
+      "title": "Tiếp tục so sánh các hồ sơ khác",
+      "description": "Duyệt thêm các môi giới đạt chuẩn và mở hồ sơ phù hợp với khu vực hoặc nhu cầu của bạn."
+    },
+    "results": {
+      "liveEyebrow": "Káº¿t quáº£ Ä‘ang cáº­p nháº­t",
+      "liveTitle": "{count} mÃ´i giá»›i phÃ¹ há»£p",
+      "liveDescription": "Káº¿t quáº£ Ä‘Æ°á»£c cáº­p nháº­t ngay khi báº¡n thay Ä‘á»•i tÃ¬m kiáº¿m. Má»Ÿ danh sÃ¡ch dÆ°á»›i Ä‘á»ƒ xem cÃ¡c há»“ sÆ¡ má»›i nháº¥t.",
+      "liveAction": "Xem káº¿t quáº£",
+      "sectionEyebrow": "Danh sÃ¡ch Ä‘Ã£ cáº­p nháº­t",
+      "sectionTitle": "Hiá»‡n cÃ³ {count} mÃ´i giá»›i phÃ¹ há»£p",
+      "sectionDescription": "Danh sÃ¡ch bÃªn dÆ°á»›i Ä‘ang pháº£n Ã¡nh Ä‘Ãºng theo tá»« khÃ³a, bá»™ lá»c, cÃ¡ch sáº¯p xáº¿p vÃ  ká»³ hiá»‡u suáº¥t báº¡n Ä‘ang chá»n.",
+      "backToFilters": "Quay láº¡i bá»™ lá»c",
+      "periodChip": "Ká»³: {period}",
+      "searchChip": "TÃ¬m: {query}",
+      "filterChip": "Lá»c: {filter}",
+      "sortChip": "Sáº¯p xáº¿p: {sort}"
+    },
+    "cards": {
+      "verified": "Đã xác minh",
+      "pro": "PRO",
+      "rankBadge": "Hạng #{rank}",
+      "fallbackArea": "Đang cập nhật khu vực",
+      "viewProfile": "Hồ sơ",
+      "revenue": "Doanh thu",
+      "closedDeals": "Giao dịch chốt",
+      "activeListings": "Tin đang bán",
+      "experience": "Kinh nghiệm"
+    },
+    "empty": {
+      "title": "Không có môi giới phù hợp",
+      "description": "Hãy thử nới lỏng bộ lọc hoặc dùng từ khóa khu vực rộng hơn."
     }
   },
   "AgentPublicProfile": {

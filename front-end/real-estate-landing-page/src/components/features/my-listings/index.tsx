@@ -1,16 +1,58 @@
 "use client";
 
+import type { IParamsPagination } from "@/@types/service";
 import { CsButton } from "@/components/custom";
 import { Dropdown, DropdownItem, Icon, Image } from "@/components/ui";
+import { Input } from "@/components/ui/input";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import { ROUTES } from "@/const/routes";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
-import { Building2, Eye, Plus, Send, Trash2 } from "lucide-react";
+import { Building2, Eye, Plus, Search, Send, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IPropertyDto } from "./dto/property.dto";
 import { useGetMyProperties } from "./services/query";
 import { formatPropertyPrice } from "@/lib/property-price";
+
+type ListingFilters = {
+  query: string;
+  status: string;
+  propertyType: string;
+  demandType: string;
+};
+
+const defaultFilters: ListingFilters = {
+  query: "",
+  status: "",
+  propertyType: "",
+  demandType: "",
+};
+
+const statusOptions = [
+  { label: "All statuses", value: "" },
+  { label: "Published", value: "PUBLISHED" },
+  { label: "Pending", value: "PENDING" },
+  { label: "Rejected", value: "REJECTED" },
+  { label: "Sold", value: "SOLD" },
+  { label: "Expired", value: "EXPIRED" },
+  { label: "Draft", value: "DRAFT" },
+];
+
+const propertyTypeOptions = [
+  { label: "All property types", value: "" },
+  { label: "Apartment", value: "APARTMENT" },
+  { label: "House", value: "HOUSE" },
+  { label: "Street House", value: "STREET_HOUSE" },
+  { label: "Villa", value: "VILLA" },
+  { label: "Land", value: "LAND" },
+  { label: "Other", value: "OTHER" },
+];
+
+const demandTypeOptions = [
+  { label: "All demands", value: "" },
+  { label: "Sale", value: "SALE" },
+  { label: "Rent", value: "RENT" },
+];
 
 const MyListings = () => {
   const router = useRouter();
@@ -18,11 +60,55 @@ const MyListings = () => {
     current: 1,
     pageSize: 10,
   });
+  const [draftFilters, setDraftFilters] = useState<ListingFilters>(defaultFilters);
+  const [filters, setFilters] = useState<ListingFilters>(defaultFilters);
 
-  const { data, isLoading } = useGetMyProperties({
-    page: pagination.current,
-    limit: pagination.pageSize,
-  });
+  const params = useMemo<IParamsPagination>(() => {
+    const nextParams: IParamsPagination = {
+      page: pagination.current,
+      limit: pagination.pageSize,
+    };
+
+    for (const [key, value] of Object.entries(filters)) {
+      const normalizedValue = value.trim();
+      if (normalizedValue) {
+        nextParams[key] = normalizedValue;
+      }
+    }
+
+    return nextParams;
+  }, [filters, pagination.current, pagination.pageSize]);
+
+  const { data, isLoading } = useGetMyProperties(params);
+
+  const handleDraftFilterChange = (
+    key: keyof ListingFilters,
+    value: string,
+  ) => {
+    setDraftFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+    }));
+    setFilters(draftFilters);
+  };
+
+  const handleResetFilters = () => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+    }));
+    setDraftFilters(defaultFilters);
+    setFilters(defaultFilters);
+  };
+
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
   const columns: TableColumn<IPropertyDto>[] = [
     {
@@ -215,7 +301,7 @@ const MyListings = () => {
             Manage your active and past listings
           </div>
         </div>
-        <div>
+      <div>
           <CsButton
             icon={<Plus />}
             className="cs-bg-black text-white px-4"
@@ -223,6 +309,94 @@ const MyListings = () => {
           >
             Create New Listing
           </CsButton>
+        </div>
+      </div>
+      <div className="rounded-3xl bg-white p-4 shadow-sm">
+        <form
+          className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto_auto] lg:items-end"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleApplyFilters();
+          }}
+        >
+          <Input
+            label="Search"
+            placeholder="Title, address, province..."
+            preIcon={<Search className="h-4 w-4" />}
+            value={draftFilters.query}
+            onChange={(event) =>
+              handleDraftFilterChange("query", event.target.value)
+            }
+          />
+
+          <label className="grid gap-2 text-sm font-medium text-gray-700">
+            <span>Status</span>
+            <select
+              className="h-11 rounded-xl border border-gray-200 bg-transparent px-3 text-sm outline-none transition focus:border-black"
+              value={draftFilters.status}
+              onChange={(event) =>
+                handleDraftFilterChange("status", event.target.value)
+              }
+            >
+              {statusOptions.map((option) => (
+                <option key={option.value || "all-status"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2 text-sm font-medium text-gray-700">
+            <span>Demand</span>
+            <select
+              className="h-11 rounded-xl border border-gray-200 bg-transparent px-3 text-sm outline-none transition focus:border-black"
+              value={draftFilters.demandType}
+              onChange={(event) =>
+                handleDraftFilterChange("demandType", event.target.value)
+              }
+            >
+              {demandTypeOptions.map((option) => (
+                <option key={option.value || "all-demand"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2 text-sm font-medium text-gray-700">
+            <span>Property Type</span>
+            <select
+              className="h-11 rounded-xl border border-gray-200 bg-transparent px-3 text-sm outline-none transition focus:border-black"
+              value={draftFilters.propertyType}
+              onChange={(event) =>
+                handleDraftFilterChange("propertyType", event.target.value)
+              }
+            >
+              {propertyTypeOptions.map((option) => (
+                <option key={option.value || "all-type"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <CsButton type="submit" className="h-11 px-5 cs-bg-black text-white">
+            Apply
+          </CsButton>
+
+          <CsButton
+            type="button"
+            className="h-11 px-5"
+            onClick={handleResetFilters}
+          >
+            Reset
+          </CsButton>
+        </form>
+
+        <div className="mt-3 text-sm text-gray-500">
+          {activeFilterCount > 0
+            ? `${activeFilterCount} active filter${activeFilterCount > 1 ? "s" : ""}`
+            : "No filters applied"}
         </div>
       </div>
       <CsTable
