@@ -18,9 +18,14 @@ const Header = () => {
   const { data: me, isLoading, isError, isSuccess } = useGetMe();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { mutateAsync: logout } = useLogout();
   const t = useTranslations("Header");
   const locale = useLocale();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isSuccess && me?.data) {
@@ -94,7 +99,7 @@ const Header = () => {
         <div className="flex items-center gap-4 shrink-0">
           {/* Desktop Auth */}
           <div className="hidden lg:flex justify-end min-w-[180px]">
-            {isLoading ? (
+            {!isMounted || isLoading ? (
               <div className="inline-flex items-center gap-2 rounded-full px-3 py-1 cs-outline-gray animate-pulse">
                 <div className="h-4 w-24 rounded bg-muted" />
                 <div className="w-8 h-8 rounded-full bg-muted-foreground/20" />
@@ -254,7 +259,7 @@ const Header = () => {
               <div className="my-2 border-b border-gray-100"></div>
 
               {/* Mobile Auth Actions */}
-              {isLoading ? (
+              {!isMounted || isLoading ? (
                 <div className="flex animate-pulse items-center justify-center p-4">
                   <div className="h-4 w-24 rounded bg-gray-200" />
                 </div>
