@@ -5,6 +5,7 @@
   "main": "worker.js",
   "scripts": {
     "dev": "npx nodemon",
+    "test": "node -r ts-node/register/transpile-only -r tsconfig-paths/register --test src/tests/main-flows.test.ts",
     "worker:email": "tsx src/bootstrap/email-worker.bootstrap.ts",
     "backfill:property-sales": "tsx src/scripts/backfill-property-sales.ts",
     "refresh:agent-leaderboards": "tsx src/scripts/refresh-agent-leaderboards.ts",

@@ -1,17 +1,14 @@
 "use client";
 
-import {
-  findOptionLabel,
-  formatChatTime,
-  LIST_PROVINCE,
-  LIST_WARD,
-} from "gra-helper";
+import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import { AlertCircle, House } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CsButton } from "@/components/custom";
+import { mapPropertyToCompareItem } from "@/components/features/properties/compare/compare.utils";
 import PropertyCard from "@/components/features/properties/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
 import StateSurface from "@/components/ui/state-surface";
+import { formatPropertyPostedDate } from "@/lib/property-date";
 import type { PropertyDto } from "../dto/property.dto";
 
 interface RecommendedPropertiesSectionProps {
@@ -32,6 +29,7 @@ const RecommendedPropertiesSection = ({
   onRetry,
 }: RecommendedPropertiesSectionProps) => {
   const t = useTranslations("PropertiesPage");
+  const locale = useLocale();
 
   return (
     <section className="mt-20 border-t border-border pt-10">
@@ -96,9 +94,10 @@ const RecommendedPropertiesSection = ({
                 name: property.userId?.fullName,
                 avatar: property.userId?.avatarUrl,
               }}
-              postedAt={formatChatTime(property.createdAt)}
+              postedAt={formatPropertyPostedDate(property.createdAt, locale)}
               type={property.demandType === "sale" ? "sale" : "rent"}
               isFavorite={property.isFavorite}
+              compareItem={mapPropertyToCompareItem(property)}
             />
           ))}
         </div>

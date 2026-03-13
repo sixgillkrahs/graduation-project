@@ -1,21 +1,6 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
-import { useAgentPublicProfile } from "@/components/features/agent-public-profile/services/query";
-import { useCreateConversation } from "@/components/features/message/services/mutate";
-import PropertyCard from "@/components/features/properties/components/PropertyCard";
-import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
-import { useAgentOnSaleProperties } from "@/components/features/properties/services/query";
-import { useGetPublicAgentReviews } from "@/components/features/reviews/services/query";
-import { Avatar } from "@/components/ui/avatar";
-import bgImage from "@/assets/images/bg.jpg";
-import { ROUTES } from "@/const/routes";
-import { useAppDispatch } from "@/lib/hooks";
-import { formatPropertyPrice } from "@/lib/property-price";
-import { openConversation } from "@/store/chat.store";
-import { showAuthDialog } from "@/store/auth-dialog.store";
 import DOMPurify from "dompurify";
-import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowUpRight,
   BadgeCheck,
@@ -30,8 +15,25 @@ import {
   Trophy,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
+import bgImage from "@/assets/images/bg.jpg";
+import { CsButton } from "@/components/custom";
+import { useAgentPublicProfile } from "@/components/features/agent-public-profile/services/query";
+import { useCreateConversation } from "@/components/features/message/services/mutate";
+import { mapPropertyToCompareItem } from "@/components/features/properties/compare/compare.utils";
+import PropertyCard from "@/components/features/properties/components/PropertyCard";
+import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
+import { useAgentOnSaleProperties } from "@/components/features/properties/services/query";
+import { useGetPublicAgentReviews } from "@/components/features/reviews/services/query";
+import { Avatar } from "@/components/ui/avatar";
+import { ROUTES } from "@/const/routes";
+import { useAppDispatch } from "@/lib/hooks";
+import { formatPropertyPostedDate } from "@/lib/property-date";
+import { formatPropertyPrice } from "@/lib/property-price";
 import { useGetMe } from "@/shared/auth/query";
+import { showAuthDialog } from "@/store/auth-dialog.store";
+import { openConversation } from "@/store/chat.store";
 
 const ReviewStars = ({
   rating,
@@ -62,11 +64,7 @@ const formatReviewDate = (value?: string | Date) => {
     return "--";
   }
 
-  return new Date(value).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return formatPropertyPostedDate(value, "vi-VN");
 };
 
 const AgentPublicProfile = () => {
@@ -444,15 +442,13 @@ const AgentPublicProfile = () => {
                             name: listing.userId?.fullName || displayName,
                             avatar: listing.userId?.avatarUrl,
                           }}
-                          postedAt={new Date(
+                          postedAt={formatPropertyPostedDate(
                             listing.createdAt,
-                          ).toLocaleDateString(localeTag, {
-                            month: "short",
-                            day: "2-digit",
-                            year: "numeric",
-                          })}
+                            localeTag,
+                          )}
                           type="sale"
                           isFavorite={listing.isFavorite}
+                          compareItem={mapPropertyToCompareItem(listing)}
                         />
                       ))}
                   </div>

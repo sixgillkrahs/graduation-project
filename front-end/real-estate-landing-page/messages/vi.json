@@ -322,6 +322,50 @@
       "elevator": "Thang máy",
       "security": "An ninh 24/7",
       "wifi": "Wifi & Internet"
+    },
+    "compare": {
+      "add": "So sánh",
+      "selected": "Đã chọn",
+      "added": "Đã thêm vào so sánh ({count}/4)",
+      "removed": "Đã bỏ khỏi so sánh",
+      "maxReached": "Bạn chỉ có thể so sánh tối đa 4 bất động sản.",
+      "clear": "Xóa tất cả",
+      "remove": "Xóa",
+      "cta": "Xem bảng so sánh",
+      "continueBrowsing": "Xem thêm listing",
+      "viewDetail": "Xem chi tiết",
+      "yes": "Có",
+      "no": "Không",
+      "tray": {
+        "eyebrow": "So sánh bất động sản",
+        "count": "Đã chọn {count} / 4 listing"
+      },
+      "hero": {
+        "eyebrow": "Bàn quyết định",
+        "title": "So sánh shortlist trên cùng một bảng",
+        "description": "Xem giá, diện tích, pháp lý, tiện ích và vị trí trong cùng một bảng để chốt listing phù hợp nhanh hơn."
+      },
+      "table": {
+        "featureColumn": "Hạng mục"
+      },
+      "rows": {
+        "price": "Giá",
+        "pricePerSqm": "Giá / m²",
+        "area": "Diện tích",
+        "bedrooms": "Phòng ngủ",
+        "bathrooms": "Phòng tắm",
+        "legal": "Pháp lý",
+        "furniture": "Nội thất",
+        "amenities": "Tiện ích",
+        "location": "Vị trí",
+        "virtualTour": "Tour ảo"
+      },
+      "empty": {
+        "eyebrow": "So sánh bất động sản",
+        "title": "Hãy chọn ít nhất 2 listing để so sánh",
+        "description": "Thêm từ 2 đến 4 bất động sản từ trang danh sách hoặc chi tiết, sau đó quay lại đây để xem cạnh nhau.",
+        "cta": "Khám phá bất động sản"
+      }
     }
   },
   "TopCities": {

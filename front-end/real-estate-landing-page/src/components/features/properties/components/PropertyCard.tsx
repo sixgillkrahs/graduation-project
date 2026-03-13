@@ -1,17 +1,19 @@
 "use client";
 
-import { useAppDispatch } from "@/lib/hooks";
-import { queryClient } from "@/lib/react-query/queryClient";
-import { cn } from "@/lib/utils";
-import { ROUTES } from "@/const/routes";
-import { showAuthDialog } from "@/store/auth-dialog.store";
 import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import type { PropertyCompareItem } from "@/components/features/properties/compare/compare.types";
+import PropertyCompareToggleButton from "@/components/features/properties/compare/PropertyCompareToggleButton";
+import { ROUTES } from "@/const/routes";
+import { useAppDispatch } from "@/lib/hooks";
+import { formatPropertyPrice } from "@/lib/property-price";
+import { queryClient } from "@/lib/react-query/queryClient";
+import { cn } from "@/lib/utils";
+import { showAuthDialog } from "@/store/auth-dialog.store";
 import { PropertyQueryKey } from "../services/config";
 import { useRecordInteraction } from "../services/mutate";
-import { useTranslations } from "next-intl";
-import { formatPropertyPrice } from "@/lib/property-price";
 
 export interface PropertyCardProps {
   id: string;
@@ -38,6 +40,7 @@ export interface PropertyCardProps {
   className?: string;
   type: "rent" | "sale";
   isFavorite: boolean;
+  compareItem: PropertyCompareItem;
 }
 
 const PropertyCard = ({
@@ -55,8 +58,8 @@ const PropertyCard = ({
   type,
   id,
   isFavorite,
+  compareItem,
 }: PropertyCardProps) => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const t = useTranslations("PropertiesPage");
@@ -73,136 +76,137 @@ const PropertyCard = ({
       );
       return;
     }
-    let metadata = {
+
+    const metadata = {
       action: isFavorite ? "UNSAVE" : "SAVE",
     };
+
     await recordInteraction({ id, type: "FAVORITE", metadata });
     queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.onSale] });
     queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.favorites] });
   };
 
   return (
-    <div
+    <article
       className={cn(
-        "group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full relative",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl",
         className,
       )}
-      onClick={() => router.push(ROUTES.PROPERTY_DETAIL(id))}
     >
-      {/* Image Container */}
-      <div className="relative h-64 w-full overflow-hidden bg-gray-100">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
-        />
-
-        {/* Top Overlay: Badges & Heart */}
-        <div className="absolute top-3 left-3 flex gap-2 z-10">
-          {badges?.aiRecommended && (
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg flex items-center gap-1 backdrop-blur-md">
-              ✨ {t("card.aiPick")}
-            </span>
+      <button
+        type="button"
+        onClick={handleToggleFavorite}
+        className="absolute right-3 top-3 z-20 rounded-full bg-white/80 p-2 text-gray-500 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:text-red-500"
+      >
+        <Heart
+          className={cn(
+            "h-5 w-5 transition-transform active:scale-90",
+            isFavorite && "fill-current text-red-500",
           )}
-          <span className="bg-white/90 backdrop-blur-md text-gray-800 text-[10px] font-bold px-2 py-1 rounded-lg">
-            {type === "rent" ? t("card.forRent") : t("card.forSale")}
-          </span>
-        </div>
+        />
+      </button>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleToggleFavorite();
-          }}
-          className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white text-gray-500 hover:text-red-500 transition-all shadow-sm z-10"
-        >
-          <Heart
-            className={cn(
-              "w-5 h-5 transition-transform active:scale-90",
-              isFavorite && "fill-current text-red-500",
-            )}
+      <Link href={ROUTES.PROPERTY_DETAIL(id)} className="flex h-full flex-col">
+        <div className="relative h-64 w-full overflow-hidden bg-gray-100">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
           />
-        </button>
 
-        {/* Bottom Overlay: 3D Tour Badge */}
-        {badges?.tour3D && (
-          <div className="absolute bottom-3 left-3">
-            <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded-lg flex items-center gap-1.5 border border-white/10 hover:bg-black/80 transition-colors">
-              <Video className="w-3 h-3" />
-              3D Tour
+          <div className="absolute left-3 top-3 z-10 flex gap-2">
+            {badges?.aiRecommended && (
+              <span className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-2 py-1 text-[10px] font-bold text-white shadow-lg backdrop-blur-md">
+                âœ¨ {t("card.aiPick")}
+              </span>
+            )}
+            <span className="rounded-lg bg-white/90 px-2 py-1 text-[10px] font-bold text-gray-800 backdrop-blur-md">
+              {type === "rent" ? t("card.forRent") : t("card.forSale")}
             </span>
           </div>
-        )}
-      </div>
 
-      {/* Content Body */}
-      <div className="p-4 flex flex-col flex-1 gap-3">
-        {/* Price & Title */}
-        <div>
-          <div className="flex items-baseline gap-1 mb-1">
-            <span className="text-xl md:text-2xl font-bold main-color-red">
-              {displayPrice}
-            </span>
-          </div>
-          <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-red-500 transition-colors">
-            {title}
-          </h3>
-          <div className="flex items-center gap-1.5 text-gray-500 text-sm mt-1">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
-            <span className="truncate">{address}</span>
-          </div>
-        </div>
-
-        {/* Specs Row */}
-        <div className="flex items-center justify-between flex-nowrap py-3 border-t border-b border-gray-50">
-          <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
-            <Bed className="w-4 h-4 shrink-0 main-color-red" />
-            <span className="font-medium">
-              {specs.beds} {t("beds")}
-            </span>
-          </div>
-          <div className="w-px h-4 shrink-0 bg-gray-200"></div>
-          <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
-            <Bath className="w-4 h-4 shrink-0 main-color-red" />
-            <span className="font-medium">
-              {specs.baths} {t("baths")}
-            </span>
-          </div>
-          <div className="w-px h-4 shrink-0 bg-gray-200"></div>
-          <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
-            <Maximize className="w-4 h-4 shrink-0 main-color-red" />
-            <span className="font-medium">{specs.area} m²</span>
-          </div>
-        </div>
-
-        {/* Footer: Agent & Date */}
-        <div className="flex items-center justify-between mt-auto pt-1">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 border border-gray-100">
-              {agent.avatar ? (
-                <Image
-                  src={agent.avatar}
-                  alt={agent.name}
-                  width={24}
-                  height={24}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-emerald-100 text-emerald-700 text-[10px] font-bold">
-                  {agent?.name?.charAt(0)}
-                </div>
-              )}
+          {badges?.tour3D && (
+            <div className="absolute bottom-3 left-3">
+              <span className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/60 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-md transition-colors hover:bg-black/80">
+                <Video className="h-3 w-3" />
+                3D Tour
+              </span>
             </div>
-            <span className="text-xs font-medium text-gray-600">
-              {agent?.name}
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <div>
+            <div className="mb-1 flex items-baseline gap-1">
+              <span className="main-color-red text-xl font-bold md:text-2xl">
+                {displayPrice}
+              </span>
+            </div>
+            <h3 className="line-clamp-1 font-semibold text-gray-900 transition-colors group-hover:text-red-500">
+              {title}
+            </h3>
+            <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
+              <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
+              <span className="truncate">{address}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-nowrap items-center justify-between border-y border-gray-50 py-3">
+            <div className="flex items-center gap-1.5 whitespace-nowrap text-sm text-gray-600">
+              <Bed className="main-color-red h-4 w-4 shrink-0" />
+              <span className="font-medium">
+                {specs.beds} {t("beds")}
+              </span>
+            </div>
+            <div className="h-4 w-px shrink-0 bg-gray-200"></div>
+            <div className="flex items-center gap-1.5 whitespace-nowrap text-sm text-gray-600">
+              <Bath className="main-color-red h-4 w-4 shrink-0" />
+              <span className="font-medium">
+                {specs.baths} {t("baths")}
+              </span>
+            </div>
+            <div className="h-4 w-px shrink-0 bg-gray-200"></div>
+            <div className="flex items-center gap-1.5 whitespace-nowrap text-sm text-gray-600">
+              <Maximize className="main-color-red h-4 w-4 shrink-0" />
+              <span className="font-medium">{specs.area} mÂ²</span>
+            </div>
+          </div>
+
+          <div className="mt-auto flex items-center justify-between pt-1">
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 overflow-hidden rounded-full border border-gray-100 bg-gray-200">
+                {agent.avatar ? (
+                  <Image
+                    src={agent.avatar}
+                    alt={agent.name}
+                    width={24}
+                    height={24}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                    {agent?.name?.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <span className="text-xs font-medium text-gray-600">
+                {agent?.name}
+              </span>
+            </div>
+            <span className="text-xs font-medium text-gray-400">
+              {t("detail.posted", { date: postedAt })}
             </span>
           </div>
-          <span className="text-xs text-gray-400 font-medium">
-            {t("detail.posted", { date: postedAt })}
-          </span>
         </div>
+      </Link>
+
+      <div className="px-4 pb-4">
+        <PropertyCompareToggleButton
+          item={compareItem}
+          className="w-full justify-center"
+        />
       </div>
-    </div>
+    </article>
   );
 };
 

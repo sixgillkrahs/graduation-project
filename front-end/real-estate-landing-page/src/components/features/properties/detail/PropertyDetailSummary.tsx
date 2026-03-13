@@ -1,8 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
+import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import {
   Bath,
   Bed,
@@ -11,15 +9,24 @@ import {
   Map as MapIcon,
   Maximize,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { PropertyDto } from "../dto/property.dto";
+import { useLocale, useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
+import { formatPropertyPostedDate } from "@/lib/property-date";
+import type { PropertyCompareItem } from "../compare/compare.types";
+import PropertyCompareToggleButton from "../compare/PropertyCompareToggleButton";
+import type { PropertyDto } from "../dto/property.dto";
 
 interface PropertyDetailSummaryProps {
   property: PropertyDto & { isFavorite: boolean };
+  compareItem: PropertyCompareItem;
 }
 
-const PropertyDetailSummary = ({ property }: PropertyDetailSummaryProps) => {
+const PropertyDetailSummary = ({
+  property,
+  compareItem,
+}: PropertyDetailSummaryProps) => {
   const t = useTranslations("PropertiesPage");
+  const locale = useLocale();
 
   return (
     <>
@@ -60,7 +67,7 @@ const PropertyDetailSummary = ({ property }: PropertyDetailSummaryProps) => {
             <CalendarIcon className="h-4 w-4" />
             <span>
               {t("detail.posted", {
-                date: format(new Date(property.createdAt), "MMM dd, yyyy"),
+                date: formatPropertyPostedDate(property.createdAt, locale),
               })}
             </span>
           </div>
@@ -85,6 +92,7 @@ const PropertyDetailSummary = ({ property }: PropertyDetailSummaryProps) => {
           >
             {property.features.furniture}
           </Badge>
+          <PropertyCompareToggleButton item={compareItem} />
         </div>
       </div>
 

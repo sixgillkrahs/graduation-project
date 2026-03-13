@@ -6,7 +6,7 @@ import { AlertCircle, ArrowLeft, House } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import StateSurface from "@/components/ui/state-surface";
 import { ROUTES } from "@/const/routes";
@@ -28,6 +28,7 @@ import {
 } from "../../leads/services/type";
 import { useCreateConversation } from "../../message/services/mutate";
 import { useRequestSchedule } from "../../schedule/services/mutation";
+import { mapPropertyToCompareItem } from "../compare/compare.utils";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
 import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 import PropertyDetailGallery from "./PropertyDetailGallery";
@@ -89,7 +90,7 @@ const PropertyDetail = () => {
   const { mutateAsync: requestBooking, isPending: isRequestingBooking } =
     useRequestSchedule();
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState("10:00");
   const [customerNote, setCustomerNote] = useState("");
   const [show3D, setShow3D] = useState(false);
@@ -116,24 +117,33 @@ const PropertyDetail = () => {
 
   const t = useTranslations("PropertiesPage");
   const locale = useLocale();
-  const today = startOfDay(new Date());
+  const [today, setToday] = useState<Date | null>(null);
   const isClientLoggedIn = Boolean(me?.data?.userId);
   const prop = property?.data;
 
-  const isPastTimeSlot = (selectedDate: Date | undefined, slot: string) => {
-    if (!selectedDate) return false;
+  const isPastTimeSlot = useCallback(
+    (selectedDate: Date | undefined, slot: string) => {
+      if (!selectedDate || !today) return false;
 
-    const normalizedSelectedDate = startOfDay(selectedDate);
-    if (normalizedSelectedDate.getTime() !== today.getTime()) {
-      return false;
-    }
+      const normalizedSelectedDate = startOfDay(selectedDate);
+      if (normalizedSelectedDate.getTime() !== today.getTime()) {
+        return false;
+      }
 
-    const [hours, minutes] = slot.split(":").map(Number);
-    const slotDate = new Date(selectedDate);
-    slotDate.setHours(hours, minutes, 0, 0);
+      const [hours, minutes] = slot.split(":").map(Number);
+      const slotDate = new Date(selectedDate);
+      slotDate.setHours(hours, minutes, 0, 0);
 
-    return slotDate <= new Date();
-  };
+      return slotDate <= new Date();
+    },
+    [today],
+  );
+
+  useEffect(() => {
+    const currentDay = startOfDay(new Date());
+    setToday(currentDay);
+    setDate((prev) => prev || currentDay);
+  }, []);
 
   useEffect(() => {
     if (!id) {
@@ -148,7 +158,7 @@ const PropertyDetail = () => {
   }, [id, increaseView]);
 
   useEffect(() => {
-    if (!date || !isPastTimeSlot(date, timeSlot)) {
+    if (!today || !date || !isPastTimeSlot(date, timeSlot)) {
       return;
     }
 
@@ -157,9 +167,13 @@ const PropertyDetail = () => {
     );
 
     setTimeSlot(nextAvailableTimeSlot || "");
-  }, [date, timeSlot]);
+  }, [date, isPastTimeSlot, timeSlot, today]);
 
   useEffect(() => {
+    if (!id) {
+      return;
+    }
+
     setVisibleRecommendedCount(SIMILAR_PROPERTIES_PAGE_SIZE);
   }, [id]);
 
@@ -316,6 +330,8 @@ const PropertyDetail = () => {
       </div>
     );
   }
+
+  const compareItem = mapPropertyToCompareItem(prop);
 
   const handleSaveProperty = async (metadata?: Record<string, unknown>) => {
     if (!isClientLoggedIn) {
@@ -477,7 +493,7 @@ const PropertyDetail = () => {
       return;
     }
 
-    if (!date) {
+    if (!date || !today) {
       toast.error("Vui long chon ngay muon dat lich");
       return;
     }
@@ -633,7 +649,7 @@ const PropertyDetail = () => {
       <main className="container mx-auto px-4 md:px-20">
         <div className="flex flex-col gap-12 lg:flex-row">
           <div className="w-full space-y-10 lg:w-[65%]">
-            <PropertyDetailSummary property={prop} />
+            <PropertyDetailSummary property={prop} compareItem={compareItem} />
             <PropertyDetailOverview
               property={prop}
               amenities={amenities}
@@ -644,6 +660,7 @@ const PropertyDetail = () => {
 
           <PropertyDetailSidebar
             property={prop}
+            compareItem={compareItem}
             displayPrice={displayPrice}
             pricePerSqm={pricePerSqm}
             isClientLoggedIn={isClientLoggedIn}
@@ -652,7 +669,7 @@ const PropertyDetail = () => {
             date={date}
             timeSlot={timeSlot}
             customerNote={customerNote}
-            today={today}
+            today={today || new Date(0)}
             tourTimeSlots={TOUR_TIME_SLOTS}
             onDateChange={setDate}
             onTimeSlotChange={setTimeSlot}

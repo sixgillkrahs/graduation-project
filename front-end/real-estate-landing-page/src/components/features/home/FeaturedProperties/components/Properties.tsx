@@ -1,18 +1,16 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
-import { Icon, Tag } from "@/components/ui";
 import { AnimatePresence, motion } from "framer-motion";
+import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
+import { useLocale } from "next-intl";
 import { useState } from "react";
+import { CsButton } from "@/components/custom";
+import { mapPropertyToCompareItem } from "@/components/features/properties/compare/compare.utils";
 import PropertyCard from "@/components/features/properties/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
 import { useOnSale } from "@/components/features/properties/services/query";
-import {
-  LIST_PROVINCE,
-  LIST_WARD,
-  findOptionLabel,
-  formatChatTime,
-} from "gra-helper";
+import { Icon, Tag } from "@/components/ui";
+import { formatPropertyPostedDate } from "@/lib/property-date";
 
 const categories = [
   { name: "All", value: "" },
@@ -24,6 +22,7 @@ const categories = [
 ];
 
 const Properties = () => {
+  const locale = useLocale();
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const [page, setPage] = useState(1);
   const [direction, setDirection] = useState(0);
@@ -143,9 +142,10 @@ const Properties = () => {
                     name: prop.userId.fullName,
                     avatar: prop.userId.avatarUrl,
                   }}
-                  postedAt={formatChatTime(prop.createdAt)}
+                  postedAt={formatPropertyPostedDate(prop.createdAt, locale)}
                   type={prop.demandType === "sale" ? "sale" : "rent"}
                   isFavorite={prop.isFavorite}
+                  compareItem={mapPropertyToCompareItem(prop)}
                 />
               ))
             ) : (

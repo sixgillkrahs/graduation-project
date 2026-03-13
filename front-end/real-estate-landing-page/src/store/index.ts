@@ -1,12 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import formReducer from "./store";
-import verifyOTPReducer from "./verify.store";
-import menuReducer from "./menu.store";
-import listingReducer from "./listing.store";
 import authReducer from "./auth.store";
 import authDialogReducer from "./auth-dialog.store";
-import profileReducer from "./profile.store";
 import chatReducer from "./chat.store";
+import listingReducer from "./listing.store";
+import menuReducer from "./menu.store";
+import profileReducer from "./profile.store";
+import propertyCompareReducer from "./property-compare.store";
+import formReducer from "./store";
+import verifyOTPReducer from "./verify.store";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     authDialog: authDialogReducer,
     profile: profileReducer,
     chat: chatReducer,
+    propertyCompare: propertyCompareReducer,
   },
 });
 

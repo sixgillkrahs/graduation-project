@@ -322,6 +322,50 @@
       "elevator": "Elevator",
       "security": "24/7 Security",
       "wifi": "Wifi & Internet"
+    },
+    "compare": {
+      "add": "Compare",
+      "selected": "Selected",
+      "added": "Added to compare ({count}/4)",
+      "removed": "Removed from compare",
+      "maxReached": "You can compare up to 4 properties at a time.",
+      "clear": "Clear all",
+      "remove": "Remove",
+      "cta": "Open comparison",
+      "continueBrowsing": "Browse more",
+      "viewDetail": "View details",
+      "yes": "Yes",
+      "no": "No",
+      "tray": {
+        "eyebrow": "Property Compare",
+        "count": "{count} of 4 listings selected"
+      },
+      "hero": {
+        "eyebrow": "Decision Desk",
+        "title": "Compare your shortlist side by side",
+        "description": "Review price, area, legal status, amenities, and location in one table so you can narrow the best listing faster."
+      },
+      "table": {
+        "featureColumn": "Criteria"
+      },
+      "rows": {
+        "price": "Price",
+        "pricePerSqm": "Price / m²",
+        "area": "Area",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "legal": "Legal status",
+        "furniture": "Furniture",
+        "amenities": "Amenities",
+        "location": "Location",
+        "virtualTour": "Virtual tour"
+      },
+      "empty": {
+        "eyebrow": "Property Compare",
+        "title": "Pick at least 2 listings to compare",
+        "description": "Add 2 to 4 properties from the listing feed or detail page, then return here to review them side by side.",
+        "cta": "Browse properties"
+      }
     }
   },
   "TopCities": {

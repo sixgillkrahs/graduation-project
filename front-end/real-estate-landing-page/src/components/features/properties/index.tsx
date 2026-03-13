@@ -1,19 +1,24 @@
 "use client";
 
+import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import {
-  findOptionLabel,
-  formatChatTime,
-  LIST_PROVINCE,
-  LIST_WARD,
-} from "gra-helper";
-import { AlertCircle, Heart, House, Loader2, Search } from "lucide-react";
+  AlertCircle,
+  Heart,
+  House,
+  Loader2,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IParamsPagination } from "@/@types/service";
 import { CsPagination } from "@/components/custom";
+import { CsDialog } from "@/components/custom/dialog";
 import { CsSelect } from "@/components/ui/select";
 import StateSurface from "@/components/ui/state-surface";
+import { formatPropertyPostedDate } from "@/lib/property-date";
+import { mapPropertyToCompareItem } from "./compare/compare.utils";
 import AdvancedSearch, {
   type SearchFilters,
 } from "./components/AdvancedSearch";
@@ -37,6 +42,13 @@ const PROPERTY_SKELETON_KEYS = [
   "property-skeleton-5",
   "property-skeleton-6",
 ] as const;
+
+const getSortValue = (params: IParamsPagination) =>
+  params.sortField === "features.price"
+    ? params.sortOrder === "asc"
+      ? "price_asc"
+      : "price_desc"
+    : "newest";
 
 const buildParamsFromSearchParams = (
   searchParams: URLSearchParams,
@@ -126,6 +138,7 @@ const getContextContent = (params: IParamsPagination) => {
 
 const Properties = () => {
   const t = useTranslations("PropertiesPage");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -178,6 +191,18 @@ const Properties = () => {
         maxPrice: initialParams.maxPrice || 5,
       }),
     [initialParams],
+  );
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const activeFilterCount = useMemo(
+    () =>
+      [
+        params["features.bedrooms"],
+        params["features.bathrooms"],
+        params["features.direction"],
+        params.minBedrooms,
+        params.minBathrooms,
+      ].filter(Boolean).length,
+    [params],
   );
 
   const handlePageChange = (page: number) => {
@@ -233,6 +258,35 @@ const Properties = () => {
     });
   };
 
+  const handleSortChange = (val: string) => {
+    switch (val) {
+      case "price_asc":
+        setParams((prev) => ({
+          ...prev,
+          page: 1,
+          sortField: "features.price",
+          sortOrder: "asc",
+        }));
+        break;
+      case "price_desc":
+        setParams((prev) => ({
+          ...prev,
+          page: 1,
+          sortField: "features.price",
+          sortOrder: "desc",
+        }));
+        break;
+      default:
+        setParams((prev) => {
+          const nextParams = { ...prev, page: 1 };
+          delete nextParams.sortField;
+          delete nextParams.sortOrder;
+          return nextParams;
+        });
+        break;
+    }
+  };
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -258,6 +312,7 @@ const Properties = () => {
       <main className="container mx-auto px-4 md:px-20 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           <FilterSidebar
+            className="hidden lg:block lg:w-1/4"
             onReset={handleResetFilters}
             onFilterChange={handleFilterChange}
           />
@@ -283,41 +338,77 @@ const Properties = () => {
             </section>
 
             {/* Tabs */}
-            <div className="flex items-center gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
-              <button
-                type="button"
-                onClick={() => handleTabChange("all")}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                  isAllTab
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <Search className="w-4 h-4" />
-                {t("tabs.allProperties")}
-              </button>
-              {isLoggedIn && (
+            <div className="mb-6 overflow-x-auto">
+              <div className="inline-flex min-w-max items-center gap-1 rounded-xl bg-gray-100 p-1">
                 <button
                   type="button"
-                  onClick={() => handleTabChange("favorites")}
+                  onClick={() => handleTabChange("all")}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    !isAllTab
-                      ? "bg-white text-red-600 shadow-sm"
+                    isAllTab
+                      ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <Heart
-                    className={`w-4 h-4 ${!isAllTab ? "fill-current" : ""}`}
-                  />
-                  {t("tabs.myFavorites")}
-                  {favorites?.data?.totalResults !== undefined &&
-                    favorites.data.totalResults > 0 && (
-                      <span className="bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                        {favorites.data.totalResults}
-                      </span>
-                    )}
+                  <Search className="w-4 h-4" />
+                  {t("tabs.allProperties")}
                 </button>
-              )}
+                {isLoggedIn && (
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange("favorites")}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      !isAllTab
+                        ? "bg-white text-red-600 shadow-sm"
+                        : "text-gray-500 hover:text-gray-700"
+                    }`}
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${!isAllTab ? "fill-current" : ""}`}
+                    />
+                    {t("tabs.myFavorites")}
+                    {favorites?.data?.totalResults !== undefined &&
+                      favorites.data.totalResults > 0 && (
+                        <span className="bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                          {favorites.data.totalResults}
+                        </span>
+                      )}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-6 grid grid-cols-1 gap-3 lg:hidden">
+              <button
+                type="button"
+                onClick={() => setIsMobileFiltersOpen(true)}
+                className="flex h-11 items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50/40"
+              >
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4 text-red-500" />
+                  {t("filter.title")}
+                </span>
+                {activeFilterCount > 0 ? (
+                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
+                    {activeFilterCount}
+                  </span>
+                ) : (
+                  <span className="text-xs font-medium text-gray-500">
+                    Open
+                  </span>
+                )}
+              </button>
+
+              <CsSelect
+                placeholder={t("sort.placeholder")}
+                value={getSortValue(params)}
+                onChange={handleSortChange}
+                options={[
+                  { value: "newest", label: t("sort.newest") },
+                  { value: "price_asc", label: t("sort.priceLowHigh") },
+                  { value: "price_desc", label: t("sort.priceHighLow") },
+                ]}
+                className="h-11 border-gray-200 bg-white"
+              />
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -337,48 +428,15 @@ const Properties = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="hidden items-center gap-3 lg:flex">
                 <span className="text-gray-500 text-sm font-medium">
                   {t("sort.label")}
                 </span>
                 <div className="w-48">
                   <CsSelect
                     placeholder={t("sort.placeholder")}
-                    value={
-                      params.sortField === "features.price"
-                        ? params.sortOrder === "asc"
-                          ? "price_asc"
-                          : "price_desc"
-                        : "newest"
-                    }
-                    onChange={(val: string) => {
-                      switch (val) {
-                        case "price_asc":
-                          setParams((prev) => ({
-                            ...prev,
-                            page: 1,
-                            sortField: "features.price",
-                            sortOrder: "asc",
-                          }));
-                          break;
-                        case "price_desc":
-                          setParams((prev) => ({
-                            ...prev,
-                            page: 1,
-                            sortField: "features.price",
-                            sortOrder: "desc",
-                          }));
-                          break;
-                        default:
-                          setParams((prev) => {
-                            const nextParams = { ...prev, page: 1 };
-                            delete nextParams.sortField;
-                            delete nextParams.sortOrder;
-                            return nextParams;
-                          });
-                          break;
-                      }
-                    }}
+                    value={getSortValue(params)}
+                    onChange={handleSortChange}
                     options={[
                       { value: "newest", label: t("sort.newest") },
                       { value: "price_asc", label: t("sort.priceLowHigh") },
@@ -436,9 +494,13 @@ const Properties = () => {
                             name: prop.userId.fullName,
                             avatar: prop.userId.avatarUrl,
                           }}
-                          postedAt={formatChatTime(prop.createdAt)}
+                          postedAt={formatPropertyPostedDate(
+                            prop.createdAt,
+                            locale,
+                          )}
                           type={prop.demandType === "sale" ? "sale" : "rent"}
                           isFavorite={prop.isFavorite}
+                          compareItem={mapPropertyToCompareItem(prop)}
                         />
                       ))
                     : null}
@@ -545,6 +607,28 @@ const Properties = () => {
           </div>
         </div>
       </main>
+
+      <CsDialog
+        open={isMobileFiltersOpen}
+        onOpenChange={setIsMobileFiltersOpen}
+        title={t("filter.title")}
+        from="bottom"
+        footer={null}
+        className="w-full max-w-none rounded-t-[28px] sm:max-w-lg"
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-gray-500">
+            Refine bedrooms, bathrooms, and orientation without losing your
+            place in the results.
+          </p>
+          <FilterSidebar
+            sticky={false}
+            className="border-none p-0"
+            onReset={handleResetFilters}
+            onFilterChange={handleFilterChange}
+          />
+        </div>
+      </CsDialog>
     </div>
   );
 };

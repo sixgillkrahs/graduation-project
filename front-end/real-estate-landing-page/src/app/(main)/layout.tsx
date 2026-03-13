@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ChatWidget from "@/components/features/message/ChatWidget";
+import PropertyCompareFloatingBar from "@/components/features/properties/compare/PropertyCompareFloatingBar";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 
@@ -18,6 +19,7 @@ export default function MainLayout({
       <Header />
       {children}
       <Footer />
+      <PropertyCompareFloatingBar />
       <ChatWidget />
     </div>
   );

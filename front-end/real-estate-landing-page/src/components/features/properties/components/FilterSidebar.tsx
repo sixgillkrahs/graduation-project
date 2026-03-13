@@ -3,6 +3,7 @@
 import { CsCheckbox } from "@/components/custom";
 import CsToggleGroup from "@/components/custom/toggle-group";
 import { CsSelect } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { FilterX } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -19,6 +20,8 @@ export interface FilterValues {
 interface FilterSidebarProps {
   onReset?: () => void;
   onFilterChange?: (filters: FilterValues) => void;
+  className?: string;
+  sticky?: boolean;
 }
 
 const DIRECTION_MAP: Record<string, string> = {
@@ -69,7 +72,12 @@ const buildFilters = (
   return filters;
 };
 
-const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
+const FilterSidebar = ({
+  onReset,
+  onFilterChange,
+  className,
+  sticky = true,
+}: FilterSidebarProps) => {
   const [bedrooms, setBedrooms] = useState(INITIAL_STATE.bedrooms);
   const [bathrooms, setBathrooms] = useState(INITIAL_STATE.bathrooms);
   const [direction, setDirection] = useState(INITIAL_STATE.direction);
@@ -123,7 +131,14 @@ const FilterSidebar = ({ onReset, onFilterChange }: FilterSidebarProps) => {
   const t = useTranslations("PropertiesPage.filter");
 
   return (
-    <aside className="w-full lg:w-1/4 min-w-[280px] bg-white rounded-xl border border-gray-100 p-6 sticky top-32 h-fit shadow-sm">
+    <aside
+      className={cn(
+        "w-full min-w-[280px] rounded-xl border border-gray-100 bg-white p-6 shadow-sm",
+        sticky && "lg:sticky lg:top-32 h-fit",
+        !sticky && "min-w-0 shadow-none",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
           <FilterX className="w-5 h-5 main-color-red" />
