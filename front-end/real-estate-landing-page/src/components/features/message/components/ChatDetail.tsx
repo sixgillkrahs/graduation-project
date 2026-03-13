@@ -1,13 +1,14 @@
+import { formatChatTime } from "gra-helper";
+import { MessageSquareMore, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CsButton } from "@/components/custom";
 import { Avatar } from "@/components/ui/avatar";
+import StateSurface from "@/components/ui/state-surface";
 import { queryClient } from "@/lib/react-query/queryClient";
 import { cn } from "@/lib/utils";
-import { Send } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useSocket } from "../services/socket-context";
-import { CsButton } from "@/components/custom";
 import { useGetMe } from "@/shared/auth/query";
-import { formatChatTime } from "gra-helper";
 import { ConversationsQueryKey } from "../services/config";
+import { useSocket } from "../services/socket-context";
 
 interface ChatDetailProps {
   messages: IConversationService.ConversationDetailDTO[];
@@ -304,56 +305,69 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {localMessages?.map((msg) => {
-          // Use backend-provided isMine, or fall back to ID comparison if missing (e.g. realtime before refresh)
-          const isSenderMe =
-            msg.isMine !== undefined
-              ? msg.isMine
-              : (typeof msg.senderId === "string"
-                  ? msg.senderId
-                  : msg.senderId.id) === myId;
+        {localMessages.length === 0 ? (
+          <div className="flex h-full min-h-64 items-center justify-center">
+            <StateSurface
+              size="compact"
+              tone="brand"
+              eyebrow="Conversation"
+              icon={<MessageSquareMore className="h-5 w-5" />}
+              title="No messages yet"
+              description={`Start the conversation with ${otherParticipant.fullName || "this contact"} from the composer below.`}
+            />
+          </div>
+        ) : (
+          localMessages?.map((msg) => {
+            // Use backend-provided isMine, or fall back to ID comparison if missing (e.g. realtime before refresh)
+            const isSenderMe =
+              msg.isMine !== undefined
+                ? msg.isMine
+                : (typeof msg.senderId === "string"
+                    ? msg.senderId
+                    : msg.senderId.id) === myId;
 
-          return (
-            <div
-              key={msg.id}
-              className={cn(
-                "flex w-full items-end gap-2 group mb-4",
-                isSenderMe ? "justify-end" : "justify-start",
-              )}
-            >
-              {!isSenderMe && (
-                <Avatar
-                  src={otherParticipant?.avatar}
-                  alt={otherParticipant?.fullName}
-                  className="w-8 h-8 shrink-0 mb-1"
-                />
-              )}
-
-              {isSenderMe && (
-                <span className="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mb-2 order-1">
-                  {formatChatTime(msg.createdAt)}
-                </span>
-              )}
-
+            return (
               <div
+                key={msg.id}
                 className={cn(
-                  "max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm relative order-2",
-                  isSenderMe
-                    ? "cs-bg-red text-white rounded-br-none"
-                    : "bg-white text-gray-900 rounded-bl-none border border-gray-100",
+                  "group mb-4 flex w-full items-end gap-2",
+                  isSenderMe ? "justify-end" : "justify-start",
                 )}
               >
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-              </div>
+                {!isSenderMe && (
+                  <Avatar
+                    src={otherParticipant?.avatar}
+                    alt={otherParticipant?.fullName}
+                    className="mb-1 h-8 w-8 shrink-0"
+                  />
+                )}
 
-              {!isSenderMe && (
-                <span className="text-[10px] text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity mb-2 order-3">
-                  {formatChatTime(msg.createdAt)}
-                </span>
-              )}
-            </div>
-          );
-        })}
+                {isSenderMe && (
+                  <span className="order-1 mb-2 text-[10px] text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
+                    {formatChatTime(msg.createdAt)}
+                  </span>
+                )}
+
+                <div
+                  className={cn(
+                    "relative order-2 max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm",
+                    isSenderMe
+                      ? "cs-bg-red rounded-br-none text-white"
+                      : "rounded-bl-none border border-gray-100 bg-white text-gray-900",
+                  )}
+                >
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                </div>
+
+                {!isSenderMe && (
+                  <span className="order-3 mb-2 text-[10px] text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">
+                    {formatChatTime(msg.createdAt)}
+                  </span>
+                )}
+              </div>
+            );
+          })
+        )}
         {isTyping && (
           <div className="flex w-full items-end gap-2 mb-4 justify-start">
             <Avatar
@@ -379,6 +393,7 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
         />
         <CsButton
           onClick={handleSendMessage}
+          disabled={!inputValue.trim()}
           className="h-9 w-9 cs-bg-red rounded-full flex items-center justify-center text-white shadow-md hover:opacity-90 transition-opacity"
           icon={<Send className="w-4 h-4 mr-0.5" />}
         />

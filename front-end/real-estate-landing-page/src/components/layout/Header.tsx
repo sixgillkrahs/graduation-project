@@ -5,7 +5,7 @@ import MainNotificationBell from "@/components/layout/MainNotificationBell";
 import { ROUTES } from "@/const/routes";
 import { useLogout } from "@/shared/auth/mutate";
 import { useGetMe } from "@/shared/auth/query";
-import { Heart, Menu, X } from "lucide-react";
+import { CalendarClock, Heart, Menu, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -144,6 +144,12 @@ const Header = () => {
                     icon={<Heart className="w-4 h-4" />}
                   >
                     {t("myFavorites")}
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() => router.push(ROUTES.PROFILE_APPOINTMENTS)}
+                    icon={<CalendarClock className="w-4 h-4" />}
+                  >
+                    {t("myAppointments")}
                   </DropdownItem>
                   <DropdownItem
                     onClick={() => router.push(ROUTES.SETTINGS)}
@@ -294,6 +300,16 @@ const Header = () => {
                   >
                     <Heart className="w-5 h-5 text-muted-foreground" />
                     <span>{t("myFavorites")}</span>
+                  </li>
+                  <li
+                    className="flex items-center gap-3 p-3 cs-outline-gray rounded-xl cursor-pointer text-foreground"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      router.push(ROUTES.PROFILE_APPOINTMENTS);
+                    }}
+                  >
+                    <CalendarClock className="w-5 h-5 text-muted-foreground" />
+                    <span>{t("myAppointments")}</span>
                   </li>
                   <li
                     className="flex items-center gap-3 p-3 cs-outline-gray rounded-xl cursor-pointer text-foreground"

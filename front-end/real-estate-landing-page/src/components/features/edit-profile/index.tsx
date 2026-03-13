@@ -19,6 +19,7 @@ import { CsSelect } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { useAIModeration } from "@/hooks/useAIModeration";
+import BuyerEditProfile from "./BuyerEditProfile";
 
 const EditProfile = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -37,7 +38,7 @@ const EditProfile = () => {
     setValue,
     setError,
     clearErrors,
-  } = useForm<IEditProfileService.IFormData>({
+  } = useForm<IEditProfileService.IAgentFormData>({
     defaultValues: {
       avatarUrl: "",
       nameRegister: "",
@@ -57,6 +58,10 @@ const EditProfile = () => {
 
   const description = watch("description");
 
+  if (profile?.data?.roleId === "USER") {
+    return <BuyerEditProfile />;
+  }
+
   useAIModeration({
     description,
     setError,
@@ -65,7 +70,7 @@ const EditProfile = () => {
   });
 
   useEffect(() => {
-    if (profile?.data) {
+    if (profile?.data?.roleId === "AGENT") {
       reset({
         avatarUrl: profile.data.avatarUrl || "",
         nameRegister: profile.data.basicInfo.nameRegister || "",
@@ -118,7 +123,7 @@ const EditProfile = () => {
     }
   };
 
-  const onSubmit = async (data: IEditProfileService.IFormData) => {
+  const onSubmit = async (data: IEditProfileService.IAgentFormData) => {
     if (errors.description?.type === "manual") {
       toast.error("Mô tả của bạn chứa từ ngữ không phù hợp.");
       return;

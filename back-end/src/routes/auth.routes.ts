@@ -328,4 +328,7 @@ router.post("/login-passkey", authController.loginPasskey);
  */
 router.post("/verify-login-passkey", authController.verifyLoginPasskey);
 
+router.get("/google", authController.googleAuth);
+router.get("/google/callback", authController.googleAuthCallback);
+
 export default router;

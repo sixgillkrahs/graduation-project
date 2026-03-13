@@ -2,7 +2,6 @@
 
 import { Checkbox } from "@/components/animate-ui/components/radix/checkbox";
 import { CsButton } from "@/components/custom";
-import { Facebook } from "@/components/ui/Icon/Facebook";
 import { Google } from "@/components/ui/Icon/Google";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +13,15 @@ import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useSignUp } from "./services/mutate";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const SignUp = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || ROUTES.HOME;
+  const authError = searchParams.get("authError");
   const t = useTranslations("SignUp");
   const { mutateAsync: signUpMutate, isPending } = useSignUp();
   const {
@@ -48,6 +52,30 @@ const SignUp = () => {
     });
     router.push(ROUTES.SIGN_IN);
   };
+
+  const handleGoogleSignUp = () => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!apiBaseUrl) {
+      toast.error(t("googleAuthUnavailable"));
+      return;
+    }
+
+    const normalizedBaseUrl = apiBaseUrl.endsWith("/")
+      ? apiBaseUrl.slice(0, -1)
+      : apiBaseUrl;
+    const googleAuthUrl = new URL(
+      `${normalizedBaseUrl}/auth/google`,
+    );
+    googleAuthUrl.searchParams.set("callbackUrl", callbackUrl);
+    googleAuthUrl.searchParams.set("mode", "sign-up");
+    window.location.assign(googleAuthUrl.toString());
+  };
+
+  useEffect(() => {
+    if (authError === "google_auth_failed") {
+      toast.error(t("googleAuthFailed"));
+    }
+  }, [authError, t]);
 
   return (
     <>
@@ -210,10 +238,14 @@ const SignUp = () => {
       <div className="mt-4 text-center">
         <Separator className="my-4" />
         <div className="grid gap-4">
-          <div className="flex justify-center items-center gap-4">
-            <CsButton icon={<Google className="w-5 h-5" />}></CsButton>
-            <CsButton icon={<Facebook className="w-5 h-5" />}></CsButton>
-          </div>
+          <CsButton
+            type="button"
+            className="w-full"
+            icon={<Google className="w-5 h-5" />}
+            onClick={handleGoogleSignUp}
+          >
+            {t("continueWithGoogle")}
+          </CsButton>
           <span className="cs-typography-gray text-sm!">
             {t("alreadyHaveAccount")}{" "}
             <Link href={ROUTES.SIGN_IN} className="text-red-500">

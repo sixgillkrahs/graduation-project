@@ -1,30 +1,42 @@
 "use client";
 
-import { IParamsPagination } from "@/@types/service";
-import { CsPagination } from "@/components/custom";
-import { CsSelect } from "@/components/ui/select";
 import {
-  LIST_PROVINCE,
-  LIST_WARD,
   findOptionLabel,
   formatChatTime,
+  LIST_PROVINCE,
+  LIST_WARD,
 } from "gra-helper";
-import { Heart, Loader2, Search } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { AlertCircle, Heart, House, Loader2, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import AdvancedSearch, { SearchFilters } from "./components/AdvancedSearch";
+import type { IParamsPagination } from "@/@types/service";
+import { CsPagination } from "@/components/custom";
+import { CsSelect } from "@/components/ui/select";
+import StateSurface from "@/components/ui/state-surface";
+import AdvancedSearch, {
+  type SearchFilters,
+} from "./components/AdvancedSearch";
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
 import PropertyCardSkeleton from "./components/PropertyCardSkeleton";
 import { useFavoriteProperties, useOnSale } from "./services/query";
 
 type TabType = "all" | "favorites";
+type PropertyFilters = Partial<IParamsPagination>;
 
 const DEFAULT_PARAMS: IParamsPagination = {
   page: 1,
   limit: 6,
 };
+const PROPERTY_SKELETON_KEYS = [
+  "property-skeleton-1",
+  "property-skeleton-2",
+  "property-skeleton-3",
+  "property-skeleton-4",
+  "property-skeleton-5",
+  "property-skeleton-6",
+] as const;
 
 const buildParamsFromSearchParams = (
   searchParams: URLSearchParams,
@@ -127,11 +139,19 @@ const Properties = () => {
   );
   const [params, setParams] = useState<IParamsPagination>(initialParams);
 
-  const { data: onSale, isLoading, isFetching } = useOnSale(params);
+  const {
+    data: onSale,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useOnSale(params);
   const {
     data: favorites,
     isLoading: isFavLoading,
     isFetching: isFavFetching,
+    isError: isFavError,
+    refetch: refetchFavorites,
   } = useFavoriteProperties(params);
 
   const gridRef = useRef<HTMLDivElement>(null);
@@ -144,6 +164,10 @@ const Properties = () => {
   const currentData = isAllTab ? onSale : favorites;
   const currentLoading = isAllTab ? isLoading : isFavLoading;
   const currentFetching = isAllTab ? isFetching : isFavFetching;
+  const currentError = isAllTab ? isError : isFavError;
+  const currentRefetch = isAllTab ? refetch : refetchFavorites;
+  const currentResults = currentData?.data?.results || [];
+  const hasCurrentResults = currentResults.length > 0;
   const contextContent = useMemo(() => getContextContent(params), [params]);
   const searchSyncKey = useMemo(
     () =>
@@ -185,10 +209,10 @@ const Properties = () => {
   };
 
   // Refs to track current sidebar and search filters separately
-  const sidebarFiltersRef = useRef<Record<string, any>>({});
-  const searchFiltersRef = useRef<Record<string, any>>({});
+  const sidebarFiltersRef = useRef<PropertyFilters>({});
+  const searchFiltersRef = useRef<PropertyFilters>({});
 
-  const handleFilterChange = (filters: Record<string, any>) => {
+  const handleFilterChange = (filters: PropertyFilters) => {
     sidebarFiltersRef.current = filters;
     setParams((prev) => {
       const { limit } = prev;
@@ -197,7 +221,7 @@ const Properties = () => {
   };
 
   const handleSearchChange = (filters: SearchFilters) => {
-    const searchParams: Record<string, any> = {};
+    const searchParams: PropertyFilters = {};
     if (filters.demandType) searchParams.demandType = filters.demandType;
     if (filters.propertyType) searchParams.propertyType = filters.propertyType;
     if (filters.maxPrice) searchParams.maxPrice = filters.maxPrice;
@@ -261,6 +285,7 @@ const Properties = () => {
             {/* Tabs */}
             <div className="flex items-center gap-1 mb-6 bg-gray-100 rounded-xl p-1 w-fit">
               <button
+                type="button"
                 onClick={() => handleTabChange("all")}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   isAllTab
@@ -273,6 +298,7 @@ const Properties = () => {
               </button>
               {isLoggedIn && (
                 <button
+                  type="button"
                   onClick={() => handleTabChange("favorites")}
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                     !isAllTab
@@ -303,12 +329,10 @@ const Properties = () => {
                   {currentLoading ? (
                     <span className="inline-block h-4 w-40 bg-gray-200 rounded animate-pulse" />
                   ) : (
-                    <>
-                      {t("heading.showing", {
-                        count: currentData?.data?.results?.length || 0,
-                        total: currentData?.data?.totalResults || 0,
-                      })}
-                    </>
+                    t("heading.showing", {
+                      count: currentResults.length,
+                      total: currentData?.data?.totalResults || 0,
+                    })
                   )}
                 </p>
               </div>
@@ -347,8 +371,10 @@ const Properties = () => {
                           break;
                         default:
                           setParams((prev) => {
-                            const { sortField, sortOrder, ...rest } = prev;
-                            return { ...rest, page: 1 };
+                            const nextParams = { ...prev, page: 1 };
+                            delete nextParams.sortField;
+                            delete nextParams.sortOrder;
+                            return nextParams;
                           });
                           break;
                       }
@@ -383,12 +409,11 @@ const Properties = () => {
                 }`}
               >
                 {currentLoading
-                  ? Array.from({ length: 6 }).map((_, i) => (
-                      <PropertyCardSkeleton key={`skeleton-${i}`} />
+                  ? PROPERTY_SKELETON_KEYS.map((key) => (
+                      <PropertyCardSkeleton key={key} />
                     ))
-                  : currentData?.data?.results?.length === 0 && !isAllTab
-                    ? null
-                    : currentData?.data?.results?.map((prop) => (
+                  : hasCurrentResults
+                    ? currentResults.map((prop) => (
                         <PropertyCard
                           key={prop._id}
                           id={prop._id}
@@ -415,44 +440,108 @@ const Properties = () => {
                           type={prop.demandType === "sale" ? "sale" : "rent"}
                           isFavorite={prop.isFavorite}
                         />
-                      ))}
+                      ))
+                    : null}
               </div>
 
-              {/* Empty state for favorites */}
-              {!currentLoading &&
-                !isAllTab &&
-                currentData?.data?.results?.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                      <Heart className="w-10 h-10 text-red-300" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      {t("empty.noFavorites")}
-                    </h3>
-                    <p className="text-gray-500 text-sm max-w-sm">
-                      {t("empty.noFavoritesDesc")}
-                    </p>
-                    <button
-                      onClick={() => handleTabChange("all")}
-                      className="mt-6 px-6 py-2.5 bg-gray-900 text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
-                    >
-                      {t("tabs.allProperties")}
-                    </button>
-                  </div>
-                )}
+              {!currentLoading && currentError && !hasCurrentResults ? (
+                <StateSurface
+                  className="mt-2"
+                  tone="danger"
+                  eyebrow={isAllTab ? "Properties" : "Favorites"}
+                  icon={<AlertCircle className="h-6 w-6" />}
+                  title={
+                    isAllTab
+                      ? "Could not load properties"
+                      : "Could not load your favorites"
+                  }
+                  description={
+                    isAllTab
+                      ? "The listing feed is temporarily unavailable. Try again or clear the current filters."
+                      : "Your saved properties could not be loaded right now. Try again in a moment."
+                  }
+                  primaryAction={{
+                    label: "Try again",
+                    onClick: () => {
+                      void currentRefetch();
+                    },
+                  }}
+                  secondaryAction={{
+                    label: isAllTab ? "Clear filters" : t("tabs.allProperties"),
+                    onClick: () => {
+                      if (isAllTab) {
+                        handleResetFilters();
+                        return;
+                      }
+
+                      handleTabChange("all");
+                    },
+                    variant: "outline",
+                  }}
+                />
+              ) : null}
+
+              {!currentLoading && !currentError && !hasCurrentResults ? (
+                <StateSurface
+                  className="mt-2"
+                  tone="brand"
+                  eyebrow={isAllTab ? "Properties" : "Favorites"}
+                  icon={
+                    isAllTab ? (
+                      <House className="h-6 w-6" />
+                    ) : (
+                      <Heart className="h-6 w-6" />
+                    )
+                  }
+                  title={
+                    isAllTab
+                      ? "No properties match these filters"
+                      : t("empty.noFavorites")
+                  }
+                  description={
+                    isAllTab
+                      ? "Try widening your budget, changing the property type, or resetting the search to see more listings."
+                      : t("empty.noFavoritesDesc")
+                  }
+                  primaryAction={{
+                    label: isAllTab ? "Reset filters" : t("tabs.allProperties"),
+                    onClick: () => {
+                      if (isAllTab) {
+                        handleResetFilters();
+                        return;
+                      }
+
+                      handleTabChange("all");
+                    },
+                  }}
+                  secondaryAction={
+                    isAllTab
+                      ? {
+                          label: "Refresh results",
+                          onClick: () => {
+                            void currentRefetch();
+                          },
+                          variant: "outline" as const,
+                        }
+                      : undefined
+                  }
+                />
+              ) : null}
             </div>
 
-            {!currentLoading && (currentData?.data?.totalResults || 0) > 0 && (
-              <div className="mt-6 flex justify-center w-full">
-                <CsPagination
-                  total={currentData?.data?.totalResults || 0}
-                  current={currentData?.data?.page || 1}
-                  pageSize={currentData?.data?.limit || 6}
-                  onChange={handlePageChange}
-                  disabled={currentFetching}
-                />
-              </div>
-            )}
+            {!currentLoading &&
+              !currentError &&
+              (currentData?.data?.totalResults || 0) > 0 && (
+                <div className="mt-6 flex justify-center w-full">
+                  <CsPagination
+                    total={currentData?.data?.totalResults || 0}
+                    current={currentData?.data?.page || 1}
+                    pageSize={currentData?.data?.limit || 6}
+                    onChange={handlePageChange}
+                    disabled={currentFetching}
+                  />
+                </div>
+              )}
           </div>
         </div>
       </main>

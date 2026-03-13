@@ -1,51 +1,402 @@
-import { useGetLeads } from "@/components/features/schedule/services/query";
+"use client";
+
+import {
+  useGetAgentLeads,
+} from "@/components/features/leads/services/query";
+import { useUpdateLeadStatus } from "@/components/features/leads/services/mutate";
+import { LeadStatus, type ILeadDto } from "@/components/features/leads/services/type";
 import { useUpdateSchedule } from "@/components/features/schedule/services/mutation";
+import { useGetLeads } from "@/components/features/schedule/services/query";
 import { SCHEDULE_STATUS } from "@/components/features/schedule/dto/schedule.dto";
+import { Input } from "@/components/ui/input";
 import { CsTable } from "@/components/ui/table";
 import { format } from "date-fns";
 import {
-  MapPin,
-  Mail,
-  Phone,
   Calendar,
-  Search,
-  Users,
-  Home as HomeIcon,
   CheckCircle2,
   Download,
+  Mail,
+  MapPin,
   MessageCircle,
+  Phone,
+  Search,
+  UserRoundPlus,
+  Users,
 } from "lucide-react";
-import React, { useState, useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import { Icon } from "@/components/ui";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+const leadStatusMeta: Record<
+  LeadStatus,
+  { label: string; className: string }
+> = {
+  NEW: {
+    label: "New",
+    className: "bg-amber-100 text-amber-700",
+  },
+  CONTACTED: {
+    label: "Contacted",
+    className: "bg-blue-100 text-blue-700",
+  },
+  QUALIFIED: {
+    label: "Qualified",
+    className: "bg-violet-100 text-violet-700",
+  },
+  SCHEDULED: {
+    label: "Scheduled",
+    className: "bg-emerald-100 text-emerald-700",
+  },
+  WON: {
+    label: "Won",
+    className: "bg-green-100 text-green-700",
+  },
+  LOST: {
+    label: "Lost",
+    className: "bg-rose-100 text-rose-700",
+  },
+};
+
+const topicLabels: Record<string, string> = {
+  PRICE: "Price",
+  LEGAL: "Legal",
+  LOCATION: "Location",
+  NEGOTIATION: "Negotiation",
+  VIEWING: "Viewing",
+  FURNITURE: "Furniture",
+  PAYMENT: "Payment",
+};
+
+const intentLabels: Record<string, string> = {
+  BUY_TO_LIVE: "Buy to live",
+  INVEST: "Investment",
+  RENT: "Rent",
+  CONSULTATION: "Consultation",
+};
+
+const contactTimeLabels: Record<string, string> = {
+  ASAP: "ASAP",
+  TODAY: "Today",
+  NEXT_24_HOURS: "Within 24h",
+  THIS_WEEKEND: "This weekend",
+};
+
+const contactChannelLabels: Record<string, string> = {
+  PHONE: "Phone",
+  CHAT: "Chat",
+  ZALO: "Zalo",
+  EMAIL: "Email",
+};
+
+const leadSourceMeta: Record<string, { label: string; className: string }> = {
+  PROPERTY_CALL: {
+    label: "Call",
+    className: "bg-emerald-50 text-emerald-700",
+  },
+  PROPERTY_CHAT: {
+    label: "Chat",
+    className: "bg-blue-50 text-blue-700",
+  },
+  PROPERTY_REQUEST: {
+    label: "Request",
+    className: "bg-amber-50 text-amber-700",
+  },
+};
+
 export const CRMFeature = () => {
-  const { data: leadsResponse, isLoading } = useGetLeads();
+  const { data: scheduleLeadsResponse, isLoading: isLoadingSchedules } =
+    useGetLeads();
+  const { data: inquiryLeadsResponse, isLoading: isLoadingInquiryLeads } =
+    useGetAgentLeads();
   const { mutateAsync: updateSchedule, isPending: isUpdatingSchedule } =
     useUpdateSchedule();
-  const leads = leadsResponse?.data || [];
+  const { mutateAsync: updateLeadStatus, isPending: isUpdatingLeadStatus } =
+    useUpdateLeadStatus();
 
-  const columns: any[] = [
+  const leads = scheduleLeadsResponse?.data || [];
+  const inquiryLeads = inquiryLeadsResponse?.data || [];
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredInquiryLeads = useMemo(() => {
+    if (!searchTerm) {
+      return inquiryLeads;
+    }
+
+    const keyword = searchTerm.toLowerCase();
+
+    return inquiryLeads.filter(
+      (lead) =>
+        lead.customerName?.toLowerCase().includes(keyword) ||
+        lead.customerEmail?.toLowerCase().includes(keyword) ||
+        lead.customerPhone?.includes(searchTerm) ||
+        lead.listingId?.title?.toLowerCase().includes(keyword),
+    );
+  }, [inquiryLeads, searchTerm]);
+
+  const filteredLeads = useMemo(() => {
+    if (!searchTerm) {
+      return leads;
+    }
+
+    const keyword = searchTerm.toLowerCase();
+
+    return leads.filter(
+      (lead: any) =>
+        lead.customerName?.toLowerCase().includes(keyword) ||
+        lead.customerEmail?.toLowerCase().includes(keyword) ||
+        lead.customerPhone?.includes(searchTerm) ||
+        lead.listingId?.title?.toLowerCase().includes(keyword),
+    );
+  }, [leads, searchTerm]);
+
+  const completedCount = leads.filter(
+    (lead: any) => lead.status === "COMPLETED",
+  ).length;
+  const confirmedCount = leads.length - completedCount;
+  const newInquiryCount = inquiryLeads.filter(
+    (lead) => lead.status === LeadStatus.NEW,
+  ).length;
+
+  const inquiryColumns: any[] = [
     {
-      title: "Customer Info",
-      dataIndex: "customerInfo",
-      key: "customerInfo",
-      render: (_: any, record: any) => (
+      title: "Customer",
+      dataIndex: "customer",
+      key: "customer",
+      render: (_: unknown, record: ILeadDto) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700">
             {record.customerName?.charAt(0)?.toUpperCase()}
           </div>
           <div className="flex flex-col">
             <span className="font-semibold text-gray-900">
               {record.customerName}
             </span>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-              <Phone className="w-3.5 h-3.5" />
+            <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+              <Phone className="h-3.5 w-3.5" />
+              <span>{record.customerPhone}</span>
+            </div>
+            {record.customerEmail && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Mail className="h-3.5 w-3.5" />
+                <span>{record.customerEmail}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Property",
+      dataIndex: "property",
+      key: "property",
+      render: (_: unknown, record: ILeadDto) =>
+        record.listingId ? (
+          <div
+            className="flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50"
+            onClick={() =>
+              window.open(
+                `/agent/listings/${record.listingId._id || record.listingId.id}`,
+                "_blank",
+              )
+            }
+          >
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gray-200">
+              <img
+                src={
+                  record.listingId.media?.thumbnail ||
+                  record.listingId.media?.images?.[0] ||
+                  "https://via.placeholder.com/150"
+                }
+                alt={record.listingId.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="line-clamp-1 max-w-[220px] font-medium text-gray-900">
+                {record.listingId.title}
+              </span>
+              <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                <MapPin className="h-3 w-3 shrink-0" />
+                <span className="line-clamp-1">
+                  {record.listingId.location?.address}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <span className="italic text-gray-400">No property linked</span>
+        ),
+    },
+    {
+      title: "Source",
+      dataIndex: "source",
+      key: "source",
+      render: (_: unknown, record: ILeadDto) => {
+        const sourceMeta = leadSourceMeta[record.source] || {
+          label: record.source,
+          className: "bg-gray-100 text-gray-700",
+        };
+
+        return (
+          <div className="space-y-2">
+            <span
+              className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${sourceMeta.className}`}
+            >
+              {sourceMeta.label}
+            </span>
+            <p className="text-xs text-gray-500">Tracked from property detail</p>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Inquiry",
+      dataIndex: "inquiry",
+      key: "inquiry",
+      render: (_: unknown, record: ILeadDto) => (
+        <div className="max-w-[280px] space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            <span className="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
+              {intentLabels[record.intent] || record.intent}
+            </span>
+            {record.interestTopics.map((topic) => (
+              <span
+                key={`${record._id}-${topic}`}
+                className="inline-flex rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
+              >
+                {topicLabels[topic] || topic}
+              </span>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500">
+            Budget: <span className="font-medium text-gray-700">{record.budgetRange}</span>
+          </p>
+          {record.message && (
+            <p className="line-clamp-2 text-xs text-gray-600">{record.message}</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Follow-up",
+      dataIndex: "followUp",
+      key: "followUp",
+      render: (_: unknown, record: ILeadDto) => (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-gray-800">
+            {contactTimeLabels[record.preferredContactTime] ||
+              record.preferredContactTime}
+          </p>
+          <span className="inline-flex rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">
+            {contactChannelLabels[record.preferredContactChannel] ||
+              record.preferredContactChannel}
+          </span>
+          <p className="text-xs text-gray-500">
+            {format(new Date(record.createdAt), "dd MMM, yyyy HH:mm")}
+          </p>
+          {record.submissionCount > 1 && (
+            <p className="text-xs text-amber-600">
+              Re-submitted {record.submissionCount} times
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (_: unknown, record: ILeadDto) => (
+        <div className="space-y-2">
+          <span
+            className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+              leadStatusMeta[record.status].className
+            }`}
+          >
+            {leadStatusMeta[record.status].label}
+          </span>
+          <select
+            className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-sm outline-none"
+            value={record.status}
+            onChange={async (event) => {
+              try {
+                await updateLeadStatus({
+                  id: record._id,
+                  status: event.target.value as LeadStatus,
+                });
+                toast.success("Lead status updated.");
+              } catch (error) {
+                toast.error("Could not update lead status.");
+              }
+            }}
+            disabled={isUpdatingLeadStatus}
+          >
+            {Object.values(LeadStatus).map((status) => (
+              <option key={status} value={status}>
+                {leadStatusMeta[status].label}
+              </option>
+            ))}
+          </select>
+        </div>
+      ),
+    },
+    {
+      title: "Actions",
+      dataIndex: "actions",
+      key: "actions",
+      align: "center",
+      render: (_: unknown, record: ILeadDto) => (
+        <div className="flex items-center justify-center gap-2">
+          <a
+            href={`tel:${record.customerPhone}`}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100"
+            title="Call customer"
+          >
+            <Phone className="h-4 w-4" />
+          </a>
+          <a
+            href={`https://zalo.me/${record.customerPhone}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition-colors hover:bg-indigo-100"
+            title="Message via Zalo"
+          >
+            <MessageCircle className="h-4 w-4" />
+          </a>
+          {record.customerEmail && (
+            <a
+              href={`mailto:${record.customerEmail}`}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100"
+              title="Send email"
+            >
+              <Mail className="h-4 w-4" />
+            </a>
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  const appointmentColumns: any[] = [
+    {
+      title: "Customer Info",
+      dataIndex: "customerInfo",
+      key: "customerInfo",
+      render: (_: any, record: any) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-600">
+            {record.customerName?.charAt(0)?.toUpperCase()}
+          </div>
+          <div className="flex flex-col">
+            <span className="font-semibold text-gray-900">
+              {record.customerName}
+            </span>
+            <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+              <Phone className="h-3.5 w-3.5" />
               <span>{record.customerPhone}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Mail className="w-3.5 h-3.5" />
+              <Mail className="h-3.5 w-3.5" />
               <span>{record.customerEmail}</span>
             </div>
           </div>
@@ -59,7 +410,7 @@ export const CRMFeature = () => {
       render: (_: any, record: any) =>
         record.listingId ? (
           <div
-            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            className="flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors hover:bg-gray-50"
             onClick={() =>
               window.open(
                 `/agent/listings/${record.listingId._id || record.listingId.id}`,
@@ -67,7 +418,7 @@ export const CRMFeature = () => {
               )
             }
           >
-            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-200">
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gray-200">
               <img
                 src={
                   record.listingId.media?.thumbnail ||
@@ -75,15 +426,15 @@ export const CRMFeature = () => {
                   "https://via.placeholder.com/150"
                 }
                 alt={record.listingId.title}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-medium text-gray-900 line-clamp-1 max-w-[200px]">
+              <span className="line-clamp-1 max-w-[200px] font-medium text-gray-900">
                 {record.listingId.title}
               </span>
-              <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                <MapPin className="w-3 h-3 shrink-0" />
+              <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                <MapPin className="h-3 w-3 shrink-0" />
                 <span className="line-clamp-1">
                   {record.listingId.location?.address}
                 </span>
@@ -91,7 +442,7 @@ export const CRMFeature = () => {
             </div>
           </div>
         ) : (
-          <span className="text-gray-400 italic">No property linked</span>
+          <span className="italic text-gray-400">No property linked</span>
         ),
     },
     {
@@ -101,22 +452,22 @@ export const CRMFeature = () => {
       render: (_: any, record: any) => (
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-            <Calendar className="w-4 h-4 text-blue-500" />
+            <Calendar className="h-4 w-4 text-blue-500" />
             <span>{format(new Date(record.date), "dd MMM, yyyy")}</span>
-            <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-md">
+            <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs">
               {record.startTime} - {record.endTime}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-            <MapPin className="w-3 h-3 shrink-0" />
+          <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <MapPin className="h-3 w-3 shrink-0" />
             <span className="line-clamp-1">{record.location}</span>
           </div>
           {record.status === "COMPLETED" ? (
-            <span className="inline-flex items-center px-2 py-1 mt-1 rounded-full text-xs font-medium bg-green-100 text-green-700 w-max">
+            <span className="mt-1 inline-flex w-max items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
               Completed
             </span>
           ) : (
-            <span className="inline-flex items-center px-2 py-1 mt-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 w-max">
+            <span className="mt-1 inline-flex w-max items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
               Confirmed
             </span>
           )}
@@ -128,21 +479,21 @@ export const CRMFeature = () => {
       dataIndex: "notes",
       key: "notes",
       render: (_: any, record: any) => (
-        <div className="flex flex-col gap-1 max-w-[250px]">
+        <div className="max-w-[250px] space-y-1">
           {record.customerNote && (
-            <p className="text-xs text-gray-600 line-clamp-2">
+            <p className="line-clamp-2 text-xs text-gray-600">
               <span className="font-medium text-gray-800">Cust:</span>{" "}
               {record.customerNote}
             </p>
           )}
           {record.agentNote && (
-            <p className="text-xs text-blue-600 line-clamp-2 mt-1">
+            <p className="mt-1 line-clamp-2 text-xs text-blue-600">
               <span className="font-medium text-blue-800">You:</span>{" "}
               {record.agentNote}
             </p>
           )}
           {!record.customerNote && !record.agentNote && (
-            <span className="text-gray-400 italic text-sm">No notes</span>
+            <span className="text-sm italic text-gray-400">No notes</span>
           )}
         </div>
       ),
@@ -178,11 +529,9 @@ export const CRMFeature = () => {
                       color: record.color,
                     },
                   });
-                  toast.success(
-                    "Đã đánh dấu hoàn thành và gửi lời mời đánh giá.",
-                  );
+                  toast.success("Appointment marked as completed.");
                 } catch (error) {
-                  toast.error("Không thể cập nhật trạng thái cuộc hẹn.");
+                  toast.error("Could not update appointment status.");
                 }
               }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
@@ -193,134 +542,153 @@ export const CRMFeature = () => {
           )}
           <a
             href={`tel:${record.customerPhone}`}
-            className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100"
             title="Call customer"
           >
-            <Phone className="w-4 h-4" />
+            <Phone className="h-4 w-4" />
           </a>
           <a
             href={`https://zalo.me/${record.customerPhone}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 hover:bg-indigo-100 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition-colors hover:bg-indigo-100"
             title="Message via Zalo"
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="h-4 w-4" />
           </a>
           <a
             href={`mailto:${record.customerEmail}`}
-            className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 hover:bg-emerald-100 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100"
             title="Send Email"
           >
-            <Mail className="w-4 h-4" />
+            <Mail className="h-4 w-4" />
           </a>
         </div>
       ),
     },
   ];
 
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredLeads = useMemo(() => {
-    if (!searchTerm) return leads;
-    return leads.filter(
-      (lead: any) =>
-        lead.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead.customerPhone?.includes(searchTerm) ||
-        lead.listingId?.title?.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-  }, [leads, searchTerm]);
-
-  // Derived metrics
-  const completedCount = leads.filter(
-    (l: any) => l.status === "COMPLETED",
-  ).length;
-  const confirmedCount = leads.length - completedCount;
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="mx-auto max-w-7xl space-y-8 p-6 animate-in fade-in zoom-in-95 duration-500">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
             Leads & CRM
           </h1>
-          <p className="text-gray-500 text-sm md:text-base max-w-2xl">
-            Manage your prospective clients, track property viewings, and close
-            deals effortlessly.
+          <p className="max-w-2xl text-sm text-gray-500 md:text-base">
+            Capture fresh inquiries from listing detail pages, follow up fast,
+            and convert qualified prospects into appointments.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm text-sm flex items-center gap-2">
-            <Download className="w-4 h-4" />
+          <button className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900">
+            <Download className="h-4 w-4" />
             Export CSV
           </button>
         </div>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-          <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-            <Users className="w-6 h-6 text-blue-600" />
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+        <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50">
+            <Users className="h-6 w-6 text-blue-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Total Leads</p>
-            <h3 className="text-2xl font-bold text-gray-900">{leads.length}</h3>
+            <h3 className="text-2xl font-bold text-gray-900">
+              {leads.length + inquiryLeads.length}
+            </h3>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-          <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+        <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-50">
+            <UserRoundPlus className="h-6 w-6 text-amber-600" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">New Inquiries</p>
+            <h3 className="text-2xl font-bold text-gray-900">{newInquiryCount}</h3>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50">
+            <CheckCircle2 className="h-6 w-6 text-emerald-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">
               Completed Viewings
             </p>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {completedCount}
-            </h3>
+            <h3 className="text-2xl font-bold text-gray-900">{completedCount}</h3>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-            <Calendar className="w-6 h-6 text-amber-600" />
+        <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50">
+            <Calendar className="h-6 w-6 text-indigo-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">
               Upcoming Appointments
             </p>
-            <h3 className="text-2xl font-bold text-gray-900">
-              {confirmedCount}
-            </h3>
+            <h3 className="text-2xl font-bold text-gray-900">{confirmedCount}</h3>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50/50">
-          <h3 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
-            <Users className="w-5 h-5 text-gray-400" />
-            Customer Contact List
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="flex flex-col items-center justify-between gap-4 border-b border-gray-100 bg-gray-50/50 p-5 sm:flex-row">
+          <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+            <Users className="h-5 w-5 text-gray-400" />
+            Search across inquiries and appointments
           </h3>
-          <div className="w-full sm:w-72 relative">
+          <div className="relative w-full sm:w-72">
             <Input
               placeholder="Search customers, emails or properties..."
-              className="pl-10 pr-4 py-2 w-full bg-white border-gray-200 focus:border-blue-500 rounded-xl"
+              className="w-full rounded-xl border-gray-200 bg-white py-2 pl-10 pr-4 focus:border-blue-500"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="border-b border-gray-100 bg-gray-50/50 p-5">
+          <h3 className="text-lg font-semibold text-gray-800">New inquiries</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Leads tracked from the property detail Call, Chat, and Send request
+            actions.
+          </p>
         </div>
         <div className="p-1">
           <CsTable
-            columns={columns}
+            columns={inquiryColumns}
+            dataSource={filteredInquiryLeads}
+            loading={isLoadingInquiryLeads}
+            rowKey={(record: ILeadDto) => record._id}
+            pagination={false}
+            emptyText="No inquiries yet. New request-info submissions will appear here."
+          />
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="border-b border-gray-100 bg-gray-50/50 p-5">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Qualified leads from appointments
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Confirmed or completed viewing requests that have already moved
+            deeper into the funnel.
+          </p>
+        </div>
+        <div className="p-1">
+          <CsTable
+            columns={appointmentColumns}
             dataSource={filteredLeads}
-            loading={isLoading}
+            loading={isLoadingSchedules}
             rowKey={(record: any) => record._id}
             pagination={false}
-            emptyText="No leads yet. When a customer's appointment gets confirmed, they will appear here."
+            emptyText="No appointment leads yet. Confirmed viewing requests will appear here."
           />
         </div>
       </div>

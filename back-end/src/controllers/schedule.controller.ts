@@ -1,14 +1,15 @@
 import { IScheduleDTO } from "./../dto/schedule.dto";
-import { ScheduleService } from "@/services/schedule.service";
-import { NextFunction, Request, Response } from "express";
-import { BaseController } from "./base.controller";
-import { UserService } from "@/services/user.service";
-import { AppError } from "@/utils/appError";
-import { PropertyService } from "@/services/property.service";
+import { ENV } from "@/config/env";
 import { EmailQueue } from "@/queues/email.queue";
 import { NotificationQueue } from "@/queues/notification.queue";
+import { SCHEDULE_STATUS } from "@/models/schedule.model";
+import { PropertyService } from "@/services/property.service";
 import { ReviewService } from "@/services/review.service";
-import { ENV } from "@/config/env";
+import { ScheduleService } from "@/services/schedule.service";
+import { UserService } from "@/services/user.service";
+import { AppError } from "@/utils/appError";
+import { NextFunction, Request, Response } from "express";
+import { BaseController } from "./base.controller";
 
 export class ScheduleController extends BaseController {
   private static readonly DEFAULT_VIEWING_DURATION_MINUTES = 60;
@@ -34,6 +35,28 @@ export class ScheduleController extends BaseController {
     this.emailQueue = emailQueue;
     this.notificationQueue = notificationQueue;
     this.reviewService = reviewService;
+  }
+
+  private isAgent(currentUser?: Request["user"]) {
+    return currentUser?.roleId?.code === "AGENT";
+  }
+
+  private hasScheduleAccess(schedule: any, currentUser?: Request["user"]) {
+    if (!schedule || !currentUser?.userId?._id) {
+      return false;
+    }
+
+    const currentUserId = String(currentUser.userId._id);
+    const agentId = String(schedule.agentId?._id || schedule.agentId || "");
+    const customerId = String(schedule.userId?._id || schedule.userId || "");
+
+    return currentUserId === agentId || currentUserId === customerId;
+  }
+
+  private assertScheduleAccess(schedule: any, currentUser?: Request["user"]) {
+    if (!this.hasScheduleAccess(schedule, currentUser)) {
+      throw new AppError("Forbidden - You do not have access to this schedule", 403);
+    }
   }
 
   createSchedule = (
@@ -62,6 +85,7 @@ export class ScheduleController extends BaseController {
       } = req.body;
       let user = null;
       let property = null;
+
       if (userId) {
         user = await this.userService.getUserById(userId);
         if (!user) {
@@ -129,13 +153,12 @@ export class ScheduleController extends BaseController {
         customerName,
         customerPhone,
         customerEmail,
-        title: "Yêu cầu đặt lịch xem nhà",
+        title: "Yeu cau dat lich xem nha",
         date,
         startTime,
         endTime: computedEndTime,
         location:
-          (property as any).location?.address ||
-          "Liên hệ để biết thêm chi tiết",
+          (property as any).location?.address || "Lien he de biet them chi tiet",
         type: "VIEWING" as any,
         status: "PENDING" as any,
         customerNote,
@@ -143,14 +166,13 @@ export class ScheduleController extends BaseController {
         color: "#10b981",
       });
 
-      // Notify the agent about the new booking request
       const agentId = String(
         (property as any).userId?._id || (property as any).userId,
       );
       this.notificationQueue.enqueueNotification({
         userId: agentId,
-        title: "Yêu cầu đặt lịch mới",
-        content: `${customerName} muốn đặt lịch xem nhà tại ${(property as any).title || (property as any).location?.address || "bất động sản"}`,
+        title: "Yeu cau dat lich moi",
+        content: `${customerName} muon dat lich xem nha tai ${(property as any).title || (property as any).location?.address || "bat dong san"}`,
         type: "SCHEDULE",
         socketEvent: "schedule:new_request",
         metadata: {
@@ -180,7 +202,12 @@ export class ScheduleController extends BaseController {
       }
 
       const schedules = await this.scheduleService.getSchedules({
-        agentId: currentUser?.userId._id as any,
+        agentId: this.isAgent(currentUser)
+          ? (currentUser?.userId._id as any)
+          : undefined,
+        userId: this.isAgent(currentUser)
+          ? undefined
+          : (currentUser?.userId._id as any),
         start: new Date(start as string),
         end: new Date(end as string),
       });
@@ -201,7 +228,16 @@ export class ScheduleController extends BaseController {
 
   deleteSchedule = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
       const { id } = req.params;
+      const schedule = await this.scheduleService.getScheduleById(id);
+
+      if (!schedule) {
+        throw new AppError("Schedule not found", 404);
+      }
+
+      this.assertScheduleAccess(schedule, currentUser);
+
       await this.scheduleService.deleteSchedule(id);
       return "Schedule deleted successfully";
     });
@@ -209,6 +245,7 @@ export class ScheduleController extends BaseController {
 
   updateSchedule = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
       const { id } = req.params;
       const {
         title,
@@ -228,68 +265,166 @@ export class ScheduleController extends BaseController {
         throw new AppError("Schedule not found", 404);
       }
 
-      await this.scheduleService.updateSchedule(id, {
-        title,
-        date,
-        startTime,
-        endTime,
-        location,
-        type,
-        status,
-        customerNote,
-        agentNote,
-        color,
-      });
+      this.assertScheduleAccess(schedule, currentUser);
 
-      // Enqueue email job if status changes to CONFIRMED
-      if (status === "CONFIRMED" && schedule.status !== "CONFIRMED") {
-        const appointmentDate =
-          date instanceof Date
-            ? date.toLocaleDateString("vi-VN")
-            : new Date(date).toLocaleDateString("vi-VN");
-        const appointmentTime = `${startTime} - ${endTime}`;
+      const isAgentActor = this.isAgent(currentUser);
+      const isCustomerActor =
+        !isAgentActor &&
+        String((schedule.userId as any)?._id || schedule.userId || "") ===
+          String(currentUser?.userId._id || "");
+
+      if (
+        isCustomerActor &&
+        [SCHEDULE_STATUS.COMPLETED, SCHEDULE_STATUS.EXPIRED].includes(
+          schedule.status as SCHEDULE_STATUS,
+        )
+      ) {
+        throw new AppError("This schedule can no longer be updated", 400);
+      }
+
+      const currentDateValue = new Date(schedule.date);
+      const nextDateValue = date ? new Date(date) : currentDateValue;
+      const nextStartTime = startTime || schedule.startTime;
+      const nextEndTime = endTime || schedule.endTime;
+      const nextCustomerNote = customerNote ?? schedule.customerNote ?? "";
+      const hasCustomerChange =
+        nextDateValue.getTime() !== currentDateValue.getTime() ||
+        nextStartTime !== schedule.startTime ||
+        nextEndTime !== schedule.endTime ||
+        nextCustomerNote !== (schedule.customerNote || "");
+
+      let nextStatus = (status || schedule.status) as SCHEDULE_STATUS;
+
+      if (isCustomerActor) {
+        const isAllowedCustomerStatus =
+          nextStatus === SCHEDULE_STATUS.PENDING ||
+          nextStatus === SCHEDULE_STATUS.CANCELLED ||
+          nextStatus === schedule.status;
+
+        if (!isAllowedCustomerStatus) {
+          throw new AppError(
+            "Customers can only request a new time or cancel their appointment",
+            403,
+          );
+        }
+
+        if (nextStatus !== SCHEDULE_STATUS.CANCELLED) {
+          nextStatus = hasCustomerChange
+            ? SCHEDULE_STATUS.PENDING
+            : (schedule.status as SCHEDULE_STATUS);
+        }
+      }
+
+      const payload = {
+        title: title || schedule.title,
+        date: nextDateValue,
+        startTime: nextStartTime,
+        endTime: nextEndTime,
+        location: location || schedule.location,
+        type: type || schedule.type,
+        status: nextStatus,
+        customerNote: nextCustomerNote,
+        agentNote: isCustomerActor
+          ? schedule.agentNote || ""
+          : (agentNote ?? schedule.agentNote ?? ""),
+        color: color || schedule.color,
+      };
+
+      await this.scheduleService.updateSchedule(id, payload);
+
+      if (isCustomerActor) {
+        const agentId = String((schedule.agentId as any)?._id || schedule.agentId);
+
+        if (
+          nextStatus === SCHEDULE_STATUS.CANCELLED &&
+          schedule.status !== SCHEDULE_STATUS.CANCELLED
+        ) {
+          this.notificationQueue.enqueueNotification({
+            userId: agentId,
+            title: "Khach hang da huy lich hen",
+            content: `${schedule.customerName} da huy lich hen tai ${schedule.location}.`,
+            type: "SCHEDULE",
+            socketEvent: "schedule:status_update",
+            metadata: {
+              scheduleId: id,
+              status: SCHEDULE_STATUS.CANCELLED,
+            },
+          });
+        }
+
+        if (hasCustomerChange) {
+          this.notificationQueue.enqueueNotification({
+            userId: agentId,
+            title: "Khach hang yeu cau doi lich hen",
+            content: `${schedule.customerName} muon doi lich hen sang ${nextStartTime} ngay ${nextDateValue.toLocaleDateString("vi-VN")}.`,
+            type: "SCHEDULE",
+            socketEvent: "schedule:new_request",
+            metadata: {
+              scheduleId: id,
+              status: nextStatus,
+              date: nextDateValue,
+              startTime: nextStartTime,
+              endTime: nextEndTime,
+              customerNote: nextCustomerNote,
+            },
+          });
+        }
+      }
+
+      if (
+        nextStatus === SCHEDULE_STATUS.CONFIRMED &&
+        schedule.status !== SCHEDULE_STATUS.CONFIRMED
+      ) {
+        const appointmentDate = nextDateValue.toLocaleDateString("vi-VN");
+        const appointmentTime = `${nextStartTime} - ${nextEndTime}`;
 
         this.emailQueue.enqueueAppointmentConfirmedEmail({
           to: schedule.customerEmail,
           customerName: schedule.customerName,
           appointmentDate,
           appointmentTime,
-          location: location || schedule.location,
+          location: payload.location || schedule.location,
         });
       }
 
-      // Notify the customer about status change
       if (
         schedule.userId &&
-        (status === "CONFIRMED" || status === "CANCELLED") &&
-        schedule.status !== status
+        !isCustomerActor &&
+        (nextStatus === SCHEDULE_STATUS.CONFIRMED ||
+          nextStatus === SCHEDULE_STATUS.CANCELLED) &&
+        schedule.status !== nextStatus
       ) {
-        const statusLabel = status === "CONFIRMED" ? "chấp nhận" : "từ chối";
+        const statusLabel =
+          nextStatus === SCHEDULE_STATUS.CONFIRMED ? "chap nhan" : "tu choi";
+
         this.notificationQueue.enqueueNotification({
           userId: String(schedule.userId),
-          title: `Lịch hẹn đã được ${statusLabel}`,
+          title: `Lich hen da duoc ${statusLabel}`,
           content:
-            status === "CONFIRMED"
-              ? `Yêu cầu xem nhà tại ${location || schedule.location} đã được môi giới chấp nhận. Kiểm tra email để biết chi tiết.`
-              : `Yêu cầu xem nhà tại ${location || schedule.location} đã bị từ chối.`,
+            nextStatus === SCHEDULE_STATUS.CONFIRMED
+              ? `Yeu cau xem nha tai ${payload.location || schedule.location} da duoc moi gioi chap nhan. Kiem tra email de biet chi tiet.`
+              : `Yeu cau xem nha tai ${payload.location || schedule.location} da bi tu choi.`,
           type: "SCHEDULE",
           socketEvent: "schedule:status_update",
           metadata: {
             scheduleId: id,
-            status,
-            date,
-            startTime,
-            endTime,
-            location: location || schedule.location,
+            status: nextStatus,
+            date: nextDateValue,
+            startTime: nextStartTime,
+            endTime: nextEndTime,
+            location: payload.location || schedule.location,
           },
         });
       }
 
-      if (status === "COMPLETED" && schedule.status !== "COMPLETED") {
+      if (
+        nextStatus === SCHEDULE_STATUS.COMPLETED &&
+        schedule.status !== SCHEDULE_STATUS.COMPLETED
+      ) {
         const agent = await this.userService.getUserById(String(schedule.agentId));
         const propertyName =
           ((schedule.listingId as any)?.title as string) ||
-          title ||
+          payload.title ||
           schedule.location ||
           "bat dong san";
         const invitation = await this.reviewService.createOrRefreshInvitation({
@@ -344,8 +479,16 @@ export class ScheduleController extends BaseController {
 
   getScheduleById = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
+      const currentUser = req.user;
       const { id } = req.params;
       const schedule = await this.scheduleService.getScheduleById(id);
+
+      if (!schedule) {
+        throw new AppError("Schedule not found", 404);
+      }
+
+      this.assertScheduleAccess(schedule, currentUser);
+
       return schedule;
     });
   };

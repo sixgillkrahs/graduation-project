@@ -15,11 +15,17 @@ export interface CsTabsProps {
     content: React.ReactNode;
   }[];
   defaultValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
-const CsTabs = ({ item, defaultValue }: CsTabsProps) => {
+const CsTabs = ({ item, defaultValue, value, onValueChange }: CsTabsProps) => {
   return (
-    <Tabs defaultValue={defaultValue || item[0].value}>
+    <Tabs
+      defaultValue={defaultValue || item[0].value}
+      value={value}
+      onValueChange={onValueChange}
+    >
       <TabsList className="w-full h-12">
         {item.map((item) => {
           return (

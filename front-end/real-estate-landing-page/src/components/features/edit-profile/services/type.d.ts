@@ -1,5 +1,5 @@
 namespace IEditProfileService {
-  export interface IFormData {
+  export interface IAgentFormData {
     avatarUrl?: string;
     nameRegister: string;
     phone: string;
@@ -13,6 +13,15 @@ namespace IEditProfileService {
     bankAccountNumber: string;
     bankName: string;
   }
+
+  export interface IBuyerFormData {
+    avatarUrl?: string;
+    fullName: string;
+    email: string;
+    phone: string;
+  }
+
+  export type IFormData = IAgentFormData | IBuyerFormData;
 
   export interface IRequestPayload {
     avatarUrl?: string;

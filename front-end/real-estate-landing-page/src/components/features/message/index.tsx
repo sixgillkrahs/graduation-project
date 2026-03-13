@@ -1,24 +1,63 @@
 "use client";
 
+import { AlertCircle, MessageSquareMore } from "lucide-react";
+import { useParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import StateSurface from "@/components/ui/state-surface";
+import { useGetMe } from "@/shared/auth/query";
 import ChatDetail from "./components/ChatDetail";
 import { useConversationDetail, useConversations } from "./services/query";
-import { useParams } from "next/navigation";
-import { useGetMe } from "@/shared/auth/query";
 
 const Message = () => {
   const params = useParams();
   const conversationId = params.conversationId as string;
   const { data: me } = useGetMe();
-  const { data: messagesData, isLoading: isLoadingMessages } =
-    useConversationDetail(conversationId || "");
-  const { data: conversationsData, isLoading: isLoadingConversations } =
-    useConversations(!!me?.data?.userId);
+  const {
+    data: messagesData,
+    isLoading: isLoadingMessages,
+    isError: isMessagesError,
+    refetch: refetchMessages,
+  } = useConversationDetail(conversationId || "");
+  const {
+    data: conversationsData,
+    isLoading: isLoadingConversations,
+    isError: isConversationsError,
+    refetch: refetchConversations,
+  } = useConversations(!!me?.data?.userId);
 
   if (isLoadingMessages || isLoadingConversations) {
     return (
-      <div className="flex items-center justify-center h-full w-full">
-        <Spinner className="w-10 h-10" />
+      <div className="flex h-full w-full items-center justify-center">
+        <StateSurface
+          size="compact"
+          tone="brand"
+          eyebrow="Conversation"
+          icon={<Spinner className="h-5 w-5" />}
+          title="Loading conversation"
+          description="Fetching message history and participant details."
+        />
+      </div>
+    );
+  }
+
+  if (isMessagesError || isConversationsError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <StateSurface
+          size="compact"
+          tone="danger"
+          eyebrow="Conversation"
+          icon={<AlertCircle className="h-5 w-5" />}
+          title="Could not load this conversation"
+          description="The chat service is temporarily unavailable. Retry to restore the thread."
+          primaryAction={{
+            label: "Try again",
+            onClick: () => {
+              void refetchMessages();
+              void refetchConversations();
+            },
+          }}
+        />
       </div>
     );
   }
@@ -29,8 +68,15 @@ const Message = () => {
 
   if (!conversation) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
-        Conversation not found
+      <div className="flex h-full w-full items-center justify-center">
+        <StateSurface
+          size="compact"
+          tone="brand"
+          eyebrow="Conversation"
+          icon={<MessageSquareMore className="h-5 w-5" />}
+          title="Conversation not found"
+          description="This thread may have been removed or you may no longer have access to it."
+        />
       </div>
     );
   }

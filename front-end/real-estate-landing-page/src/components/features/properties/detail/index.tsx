@@ -1,6 +1,15 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
+import type { AxiosError } from "axios";
+import { isBefore, startOfDay } from "date-fns";
+import { AlertCircle, ArrowLeft, House } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useParams, useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import StateSurface from "@/components/ui/state-surface";
+import { ROUTES } from "@/const/routes";
 import { useAppDispatch } from "@/lib/hooks";
 import { getPropertyAmenityDisplay } from "@/lib/property-amenities";
 import {
@@ -10,13 +19,13 @@ import {
 import { useGetMe } from "@/shared/auth/query";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import { openConversation } from "@/store/chat.store";
-import { isBefore, startOfDay } from "date-fns";
-import { ArrowLeft } from "lucide-react";
-import dynamic from "next/dynamic";
-import { useLocale, useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { useCreateLead } from "../../leads/services/mutate";
+import {
+  LeadContactChannel,
+  LeadContactTime,
+  LeadIntent,
+  LeadSource,
+} from "../../leads/services/type";
 import { useCreateConversation } from "../../message/services/mutate";
 import { useRequestSchedule } from "../../schedule/services/mutation";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
@@ -57,14 +66,26 @@ const PropertyDetail = () => {
   const dispatch = useAppDispatch();
   const id = params?.id as string;
 
-  const { data: property, isLoading } = usePropertyDetail(id);
-  const { data: recommendedData, isLoading: isLoadingRecommended } =
-    useRecommendedProperties(id);
+  const {
+    data: property,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = usePropertyDetail(id);
+  const {
+    data: recommendedData,
+    isLoading: isLoadingRecommended,
+    isError: isRecommendedError,
+    refetch: refetchRecommended,
+  } = useRecommendedProperties(id);
   const { data: me } = useGetMe();
 
   const { mutate: increaseView } = useIncreaseView();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const { mutateAsync: createConversation } = useCreateConversation();
+  const { mutateAsync: createLead, isPending: isSubmittingLead } =
+    useCreateLead();
   const { mutateAsync: requestBooking, isPending: isRequestingBooking } =
     useRequestSchedule();
 
@@ -75,9 +96,23 @@ const PropertyDetail = () => {
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [isBookingSuccess, setIsBookingSuccess] = useState(false);
+  const [isInquirySuccess, setIsInquirySuccess] = useState(false);
+  const [activeSidebarTab, setActiveSidebarTab] = useState("tour");
   const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(
     SIMILAR_PROPERTIES_PAGE_SIZE,
   );
+  const [inquiryForm, setInquiryForm] = useState({
+    customerName: "",
+    customerPhone: "",
+    customerEmail: "",
+    intent: LeadIntent.BUY_TO_LIVE,
+    interestTopics: ["PRICE"],
+    budgetRange: "",
+    preferredContactTime: LeadContactTime.ASAP,
+    preferredContactChannel: LeadContactChannel.PHONE,
+    message: "",
+    website: "",
+  });
 
   const t = useTranslations("PropertiesPage");
   const locale = useLocale();
@@ -127,6 +162,19 @@ const PropertyDetail = () => {
   useEffect(() => {
     setVisibleRecommendedCount(SIMILAR_PROPERTIES_PAGE_SIZE);
   }, [id]);
+
+  useEffect(() => {
+    if (!me?.data?.userId) {
+      return;
+    }
+
+    setInquiryForm((prev) => ({
+      ...prev,
+      customerName: prev.customerName || me.data.userId.fullName || "",
+      customerPhone: prev.customerPhone || me.data.userId.phone || "",
+      customerEmail: prev.customerEmail || me.data.userId.email || "",
+    }));
+  }, [me?.data?.userId]);
 
   const displayPrice = useMemo(
     () =>
@@ -179,24 +227,92 @@ const PropertyDetail = () => {
     () => (recommendedData?.data?.length || 0) > visibleRecommendedCount,
     [recommendedData?.data?.length, visibleRecommendedCount],
   );
+  const propertyStatusCode = (error as AxiosError | null)?.response?.status;
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-emerald-600" />
+      <div className="min-h-screen bg-background pb-20 pt-8">
+        <div className="container mx-auto px-4 md:px-20">
+          <StateSurface
+            tone="brand"
+            eyebrow="Property"
+            icon={<ArrowLeft className="h-6 w-6 animate-pulse" />}
+            title="Loading property details"
+            description="Preparing media, pricing, amenities, and contact options for this listing."
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background pb-20 pt-8">
+        <div className="container mx-auto px-4 md:px-20">
+          <StateSurface
+            tone={propertyStatusCode === 404 ? "brand" : "danger"}
+            eyebrow="Property"
+            icon={
+              propertyStatusCode === 404 ? (
+                <House className="h-6 w-6" />
+              ) : (
+                <AlertCircle className="h-6 w-6" />
+              )
+            }
+            title={
+              propertyStatusCode === 404
+                ? t("detail.notFound")
+                : "Could not load this property"
+            }
+            description={
+              propertyStatusCode === 404
+                ? "This listing may have been removed, unpublished, or its link is no longer valid."
+                : "The property detail service is temporarily unavailable. Try again or return to the listing feed."
+            }
+            primaryAction={{
+              label:
+                propertyStatusCode === 404 ? "Browse properties" : "Try again",
+              onClick: () => {
+                if (propertyStatusCode === 404) {
+                  router.push(ROUTES.PROPERTIES);
+                  return;
+                }
+
+                void refetch();
+              },
+            }}
+            secondaryAction={{
+              label: t("detail.goBack"),
+              onClick: () => router.back(),
+              variant: "outline",
+            }}
+          />
+        </div>
       </div>
     );
   }
 
   if (!prop) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">
-          {t("detail.notFound")}
-        </h2>
-        <CsButton onClick={() => window.history.back()}>
-          {t("detail.goBack")}
-        </CsButton>
+      <div className="min-h-screen bg-background pb-20 pt-8">
+        <div className="container mx-auto px-4 md:px-20">
+          <StateSurface
+            tone="brand"
+            eyebrow="Property"
+            icon={<House className="h-6 w-6" />}
+            title={t("detail.notFound")}
+            description="This listing is no longer available. Return to the property feed to keep browsing."
+            primaryAction={{
+              label: "Browse properties",
+              onClick: () => router.push(ROUTES.PROPERTIES),
+            }}
+            secondaryAction={{
+              label: t("detail.goBack"),
+              onClick: () => router.back(),
+              variant: "outline",
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -215,7 +331,25 @@ const PropertyDetail = () => {
     await recordInteraction({ id, type: "FAVORITE", metadata });
   };
 
-  const handleContactAction = async (type: "call" | "message" | "zalo") => {
+  const redirectToBuyerProfile = (message: string) => {
+    toast.info(message);
+    router.push(ROUTES.PROFILE_EDIT);
+  };
+
+  const getBuyerProfileSnapshot = () => {
+    const customerName = me?.data?.userId?.fullName?.trim() || "";
+    const customerPhone = me?.data?.userId?.phone?.trim() || "";
+    const customerEmail = me?.data?.userId?.email?.trim() || "";
+
+    return {
+      customerName,
+      customerPhone,
+      customerEmail,
+      isComplete: Boolean(customerName && customerPhone && customerEmail),
+    };
+  };
+
+  const requireTrackedContactProfile = (message: string) => {
     if (!isClientLoggedIn) {
       dispatch(
         showAuthDialog({
@@ -224,6 +358,67 @@ const PropertyDetail = () => {
             "Vui long dang nhap de xem thong tin so dien thoai cua nguoi ban hoac moi gioi.",
         }),
       );
+      return null;
+    }
+
+    const { customerName, customerPhone, customerEmail, isComplete } =
+      getBuyerProfileSnapshot();
+
+    if (!isComplete) {
+      setActiveSidebarTab("request");
+      redirectToBuyerProfile(message);
+      return null;
+    }
+
+    return {
+      customerName,
+      customerPhone,
+      customerEmail,
+    };
+  };
+
+  const createTrackedContactLead = async (
+    source: LeadSource,
+    preferredContactChannel: LeadContactChannel,
+    message: string,
+  ) => {
+    if (!prop) {
+      return false;
+    }
+
+    const contactProfile = requireTrackedContactProfile(
+      "Complete your buyer profile with display name, phone number, and email before contacting the agent.",
+    );
+    if (!contactProfile) {
+      return false;
+    }
+
+    try {
+      await createLead({
+        listingId: id,
+        customerName: contactProfile.customerName,
+        customerPhone: contactProfile.customerPhone,
+        customerEmail: contactProfile.customerEmail,
+        intent: LeadIntent.CONSULTATION,
+        interestTopics: ["VIEWING"],
+        budgetRange: "FLEXIBLE",
+        preferredContactTime: LeadContactTime.ASAP,
+        preferredContactChannel,
+        source,
+        message,
+        website: "",
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to track contact action", error);
+      toast.error("Khong the ghi nhan yeu cau lien he luc nay.");
+      return false;
+    }
+  };
+
+  const handleContactAction = async (type: "call" | "chat" | "request") => {
+    if (type === "request") {
+      setActiveSidebarTab("request");
       return;
     }
 
@@ -233,18 +428,30 @@ const PropertyDetail = () => {
 
     if (!fullPhone) {
       toast.info("Nguoi ban chua cap nhat thong tin so dien thoai.");
-      if (type !== "message") {
+      if (type !== "chat") {
         return;
       }
     }
 
     if (type === "call") {
+      const tracked = await createTrackedContactLead(
+        LeadSource.PROPERTY_CALL,
+        LeadContactChannel.PHONE,
+        `Customer tapped Call on property detail for ${prop.title}.`,
+      );
+      if (!tracked) {
+        return;
+      }
       window.location.href = `tel:${fullPhone}`;
       return;
     }
 
-    if (type === "zalo") {
-      window.open(`https://zalo.me/${fullPhone}`, "_blank");
+    const tracked = await createTrackedContactLead(
+      LeadSource.PROPERTY_CHAT,
+      LeadContactChannel.CHAT,
+      `Customer started chat on property detail for ${prop.title}.`,
+    );
+    if (!tracked) {
       return;
     }
 
@@ -290,12 +497,19 @@ const PropertyDetail = () => {
       return;
     }
 
+    const buyerProfile = requireTrackedContactProfile(
+      "Complete your buyer profile with display name, phone number, and email before booking an appointment.",
+    );
+    if (!buyerProfile) {
+      return;
+    }
+
     try {
       await requestBooking({
         listingId: id,
-        customerName: me?.data?.userId?.fullName || "Khach hang",
-        customerPhone: me?.data?.userId?.phone || "",
-        customerEmail: me?.data?.userId?.email || "",
+        customerName: buyerProfile.customerName,
+        customerPhone: buyerProfile.customerPhone,
+        customerEmail: buyerProfile.customerEmail,
         date,
         startTime: timeSlot,
         customerNote,
@@ -308,25 +522,98 @@ const PropertyDetail = () => {
     }
   };
 
-  const handleSendMessage = () => {
-    if (!isClientLoggedIn) {
-      dispatch(
-        showAuthDialog({
-          title: "Dang nhap de gui tin",
-          description:
-            "Vui long dang nhap de gui yeu cau den nguoi ban hoac moi gioi.",
-        }),
-      );
+  const handleInquiryFieldChange = (
+    field: keyof typeof inquiryForm,
+    value: string,
+  ) => {
+    setInquiryForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleInquiryTopicToggle = (topic: string) => {
+    setInquiryForm((prev) => {
+      const exists = prev.interestTopics.includes(topic);
+      if (exists && prev.interestTopics.length === 1) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        interestTopics: exists
+          ? prev.interestTopics.filter((item) => item !== topic)
+          : [...prev.interestTopics, topic],
+      };
+    });
+  };
+
+  const handleSendMessage = async () => {
+    if (!prop) {
       return;
     }
 
-    toast.info("Tinh nang gui yeu cau dang duoc phat trien.");
+    const buyerProfile = isClientLoggedIn
+      ? requireTrackedContactProfile(
+          "Complete your buyer profile with display name, phone number, and email before sending an inquiry.",
+        )
+      : null;
+
+    if (isClientLoggedIn && !buyerProfile) {
+      return;
+    }
+
+    const customerName =
+      buyerProfile?.customerName || inquiryForm.customerName.trim();
+    const customerPhone =
+      buyerProfile?.customerPhone || inquiryForm.customerPhone.trim();
+    const customerEmail =
+      buyerProfile?.customerEmail || inquiryForm.customerEmail.trim();
+
+    if (!customerName) {
+      toast.error("Vui long nhap ho ten.");
+      return;
+    }
+
+    if (!customerPhone) {
+      toast.error("Vui long nhap so dien thoai.");
+      return;
+    }
+
+    if (!inquiryForm.budgetRange.trim()) {
+      toast.error("Vui long chon ngan sach.");
+      return;
+    }
+
+    try {
+      await createLead({
+        listingId: id,
+        customerName,
+        customerPhone,
+        customerEmail,
+        intent: inquiryForm.intent,
+        interestTopics: inquiryForm.interestTopics,
+        budgetRange: inquiryForm.budgetRange,
+        preferredContactTime: inquiryForm.preferredContactTime,
+        preferredContactChannel: inquiryForm.preferredContactChannel,
+        source: LeadSource.PROPERTY_REQUEST,
+        message: inquiryForm.message.trim(),
+        website: inquiryForm.website,
+      });
+      setActiveSidebarTab("request");
+      setIsInquirySuccess(true);
+      toast.success("Da gui yeu cau tu van thanh cong.");
+    } catch (error) {
+      console.error(error);
+      toast.error("Khong the gui yeu cau tu van luc nay.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-background pb-20 transition-colors duration-300">
       <div className="container mx-auto px-4 pb-8 pt-6 md:px-20">
         <button
+          type="button"
           onClick={() => router.back()}
           className="mb-4 flex items-center gap-2 font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
@@ -374,7 +661,18 @@ const PropertyDetail = () => {
             onRequestBooking={handleRequestBooking}
             onSendMessage={handleSendMessage}
             onSaveProperty={handleSaveProperty}
+            activeTab={activeSidebarTab}
+            onTabChange={setActiveSidebarTab}
+            isBuyerProfileManaged={isClientLoggedIn}
+            isBuyerProfileComplete={getBuyerProfileSnapshot().isComplete}
+            onEditBuyerProfile={() => router.push(ROUTES.PROFILE_EDIT)}
             onResetBookingSuccess={() => setIsBookingSuccess(false)}
+            isInquirySuccess={isInquirySuccess}
+            isSubmittingInquiry={isSubmittingLead}
+            inquiryForm={inquiryForm}
+            onInquiryFieldChange={handleInquiryFieldChange}
+            onInquiryTopicToggle={handleInquiryTopicToggle}
+            onResetInquirySuccess={() => setIsInquirySuccess(false)}
             isPastTimeSlot={isPastTimeSlot}
           />
         </div>
@@ -382,12 +680,16 @@ const PropertyDetail = () => {
         <RecommendedPropertiesSection
           properties={visibleRecommendedProperties}
           isLoading={isLoadingRecommended}
+          isError={isRecommendedError}
           canLoadMore={canLoadMoreRecommended}
           onLoadMore={() =>
             setVisibleRecommendedCount(
               (currentCount) => currentCount + SIMILAR_PROPERTIES_PAGE_SIZE,
             )
           }
+          onRetry={() => {
+            void refetchRecommended();
+          }}
         />
       </main>
 

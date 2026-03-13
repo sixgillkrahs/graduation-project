@@ -132,6 +132,8 @@ export class UserController extends BaseController {
       const currentUser = req.user;
       const {
         avatarUrl,
+        fullName,
+        email,
         nameRegister,
         phone,
         description,
@@ -144,6 +146,69 @@ export class UserController extends BaseController {
         bankAccountNumber,
         bankName,
       } = req.body;
+      if (currentUser.roleId.code === "USER") {
+        const buyerProfile = await this.userService.getUserById(currentUser.userId._id);
+        if (!buyerProfile) {
+          throw new AppError(
+            validationMessages[lang].userNotFound || "User not found",
+            401,
+            ErrorCode.USER_NOT_FOUND,
+          );
+        }
+
+        const normalizedFullName = fullName?.trim();
+        const normalizedEmail = email?.trim().toLowerCase();
+        const normalizedPhone = phone?.trim();
+
+        if (!normalizedFullName || !normalizedEmail || !normalizedPhone) {
+          throw new AppError(
+            "Full name, email, and phone are required",
+            400,
+            ErrorCode.INVALID_INPUT,
+          );
+        }
+
+        if (normalizedEmail !== buyerProfile.email) {
+          const emailExists = await this.userService.getUserByEmail(normalizedEmail);
+          if (emailExists && String(emailExists._id) !== String(currentUser.userId._id)) {
+            throw new AppError(
+              validationMessages[lang].emailExist || "Email already exists",
+              400,
+              ErrorCode.INVALID_INPUT,
+            );
+          }
+
+          const authExists = await this.authService.getAuthByUsername(normalizedEmail);
+          if (authExists && String((authExists as any).userId) !== String(currentUser.userId._id)) {
+            throw new AppError(
+              validationMessages[lang].usernameExist || "Username already exists",
+              400,
+              ErrorCode.INVALID_INPUT,
+            );
+          }
+        }
+
+        await this.userService.updateUser(currentUser.userId._id, {
+          fullName: normalizedFullName,
+          email: normalizedEmail,
+          phone: normalizedPhone,
+          avatarUrl: avatarUrl ?? currentUser.userId.avatarUrl,
+        });
+
+        if (normalizedEmail !== currentUser.userId.email) {
+          const currentAuth = await this.authService.getAuthByUserId<{ _id: string }>(
+            currentUser.userId._id,
+          );
+          if (currentAuth?._id) {
+            await this.authService.updateAuth(currentAuth._id, {
+              username: normalizedEmail,
+            });
+          }
+        }
+
+        return true;
+      }
+
       const resp = await this.agentService.getAgentByUserId(
         currentUser.userId._id,
       );

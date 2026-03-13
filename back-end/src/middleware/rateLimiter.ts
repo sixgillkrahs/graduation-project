@@ -1,35 +1,47 @@
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-import { Request, Response } from 'express'
+import { Request, Response } from "express";
 
 export const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // Reduced from 100 to 50 attempts per window
-    message: {
-        success: false,
-        message: "Too many login attempts, please try again later",
-    },
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    keyGenerator: (req: Request, res: Response) => ipKeyGenerator(req?.ip!),
-    skipSuccessfulRequests: true // Only count failed attempts
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Reduced from 100 to 50 attempts per window
+  message: {
+    success: false,
+    message: "Too many login attempts, please try again later",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req: Request) => ipKeyGenerator(req?.ip || ""),
+  skipSuccessfulRequests: true, // Only count failed attempts
 });
 
 export const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 50, // Reduced from 100 to 50 requests per 15 minutes
-    message: {
-        success: false,
-        message: "Too many requests, please try again later",
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: (req: Request, res: Response) => ipKeyGenerator(req?.ip!),
-    skip: (req) => {
-        return Boolean(
-            req.path.startsWith('/monitoring') || // TODO: Skip all monitoring endpoints for now
-            req.headers['user-agent']?.includes('Prometheus')
-        );
-    }
+  windowMs: 15 * 60 * 1000,
+  max: 50, // Reduced from 100 to 50 requests per 15 minutes
+  message: {
+    success: false,
+    message: "Too many requests, please try again later",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => ipKeyGenerator(req?.ip || ""),
+  skip: (req) => {
+    return Boolean(
+      req.path.startsWith("/monitoring") || // TODO: Skip all monitoring endpoints for now
+        req.headers["user-agent"]?.includes("Prometheus"),
+    );
+  },
+});
+
+export const leadLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 3,
+  message: {
+    success: false,
+    message: "Too many inquiry requests, please try again later",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => ipKeyGenerator(req?.ip || ""),
 });
 
 // export const verificationLimiter = rateLimit({

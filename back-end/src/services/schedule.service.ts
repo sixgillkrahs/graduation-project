@@ -87,9 +87,15 @@ export class ScheduleService {
     return await ScheduleModel.create(data);
   }
 
-  async getSchedules(filter: { agentId: string; start: Date; end: Date }) {
+  async getSchedules(filter: {
+    agentId?: string;
+    userId?: string;
+    start: Date;
+    end: Date;
+  }) {
     return await ScheduleModel.find({
-      agentId: filter.agentId,
+      ...(filter.agentId ? { agentId: filter.agentId } : {}),
+      ...(filter.userId ? { userId: filter.userId } : {}),
       date: { $gte: filter.start, $lte: filter.end },
     })
       .sort({ date: 1 })

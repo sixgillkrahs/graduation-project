@@ -1,21 +1,21 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
-import { ArrowLeft, MessageCircle, X } from "lucide-react";
+import { AlertCircle, ArrowLeft, MessageCircle, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { CsButton } from "@/components/custom";
+import { Spinner } from "@/components/ui/spinner";
+import StateSurface from "@/components/ui/state-surface";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useGetMe } from "@/shared/auth/query";
 import {
   closeChatWidget,
   openChatWidget,
   openConversation,
 } from "@/store/chat.store";
+import ChatDetail from "./components/ChatDetail";
 import ListChat from "./components/ListChat";
 import { useConversationDetail, useConversations } from "./services/query";
-import { Spinner } from "@/components/ui/spinner";
-import ChatDetail from "./components/ChatDetail";
 import { SocketProvider } from "./services/socket-context";
-import { useGetMe } from "@/shared/auth/query";
 
 const ChatWidget = () => {
   const { data: me } = useGetMe();
@@ -26,7 +26,9 @@ const ChatWidget = () => {
   const currentConversationId =
     selectedConversation?.id || selectedConversation?._id;
   const { data: conversationsData } = useConversations(!!me?.data?.userId);
-  const { data, isLoading } = useConversationDetail(currentConversationId);
+  const { data, isLoading, isError, refetch } = useConversationDetail(
+    currentConversationId,
+  );
   const totalUnreadCount =
     conversationsData?.data?.results?.reduce(
       (sum: number, conversation: IConversationService.ConversationDTO) =>
@@ -75,6 +77,7 @@ const ChatWidget = () => {
               <div className="font-semibold text-lg flex items-center gap-2">
                 {selectedConversation ? (
                   <button
+                    type="button"
                     onClick={() => dispatch(openConversation(null))}
                     className="hover:bg-white/20 rounded-full p-1 -ml-2 mr-1 transition-colors"
                   >
@@ -95,6 +98,7 @@ const ChatWidget = () => {
                 </span>
               </div>
               <button
+                type="button"
                 onClick={() => dispatch(closeChatWidget())}
                 className="hover:bg-white/20 rounded-full p-1 transition-colors"
               >
@@ -114,8 +118,32 @@ const ChatWidget = () => {
                     className="absolute inset-0 bg-white flex flex-col"
                   >
                     {isLoading ? (
-                      <div className="p-4 flex-1 overflow-y-auto justify-center items-center h-full w-full">
-                        <Spinner />
+                      <div className="flex h-full w-full items-center justify-center p-4">
+                        <StateSurface
+                          size="compact"
+                          tone="brand"
+                          eyebrow="Conversation"
+                          icon={<Spinner className="h-5 w-5" />}
+                          title="Loading conversation"
+                          description="Pulling the latest messages into the widget."
+                        />
+                      </div>
+                    ) : isError ? (
+                      <div className="flex h-full w-full items-center justify-center p-4">
+                        <StateSurface
+                          size="compact"
+                          tone="danger"
+                          eyebrow="Conversation"
+                          icon={<AlertCircle className="h-5 w-5" />}
+                          title="Could not load this conversation"
+                          description="Retry to reconnect this chat without leaving the page."
+                          primaryAction={{
+                            label: "Try again",
+                            onClick: () => {
+                              void refetch();
+                            },
+                          }}
+                        />
                       </div>
                     ) : (
                       <ChatDetail

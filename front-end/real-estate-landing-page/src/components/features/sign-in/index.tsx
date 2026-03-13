@@ -7,8 +7,10 @@ import { ROUTES } from "@/const/routes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Password } from "@/components/ui/password";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -23,18 +25,16 @@ const SignIn = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || ROUTES.HOME;
+  const authError = searchParams.get("authError");
   const t = useTranslations("SignIn");
   const { mutateAsync: signIn, isPending } = useSignIn();
-  const { mutateAsync: signInPasskey, isPending: isPendingPasskey } =
-    useSignInPasskey();
+  const { mutateAsync: signInPasskey } = useSignInPasskey();
 
-  const { mutateAsync: verifySignInPasskey, isPending: isPendingVerify } =
-    useVerifySignInPasskey();
+  const { mutateAsync: verifySignInPasskey } = useVerifySignInPasskey();
 
   const {
     handleSubmit,
     control,
-    watch,
     formState: { errors },
   } = useForm<{
     email: string;
@@ -80,6 +80,30 @@ const SignIn = () => {
       }
     }
   };
+
+  const handleGoogleSignIn = () => {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!apiBaseUrl) {
+      toast.error(t("googleAuthUnavailable"));
+      return;
+    }
+
+    const normalizedBaseUrl = apiBaseUrl.endsWith("/")
+      ? apiBaseUrl.slice(0, -1)
+      : apiBaseUrl;
+    const googleAuthUrl = new URL(
+      `${normalizedBaseUrl}/auth/google`,
+    );
+    googleAuthUrl.searchParams.set("callbackUrl", callbackUrl);
+    googleAuthUrl.searchParams.set("mode", "sign-in");
+    window.location.assign(googleAuthUrl.toString());
+  };
+
+  useEffect(() => {
+    if (authError === "google_auth_failed") {
+      toast.error(t("googleAuthFailed"));
+    }
+  }, [authError, t]);
 
   return (
     <>
@@ -151,6 +175,17 @@ const SignIn = () => {
         >
           {t("signInBtn")}
         </CsButton>
+        <div className="space-y-4">
+          <Separator />
+          <CsButton
+            type="button"
+            className="w-full"
+            icon={<Icon.Google className="w-5 h-5" />}
+            onClick={handleGoogleSignIn}
+          >
+            {t("continueWithGoogle")}
+          </CsButton>
+        </div>
         <CsButton
           type="button"
           className="w-full"

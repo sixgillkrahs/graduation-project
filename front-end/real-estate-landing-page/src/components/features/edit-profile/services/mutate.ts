@@ -22,6 +22,9 @@ export const useEditProfile = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [ProfileQueryKey.profile],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["me"],
+      });
     },
   });
 };

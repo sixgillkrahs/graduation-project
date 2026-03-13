@@ -10,6 +10,7 @@ import { CsButton } from "@/components/custom";
 import RenderField from "./components/RenderField";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { CalendarClock, ArrowRight } from "lucide-react";
 
 const Profile = () => {
   const router = useRouter();
@@ -19,6 +20,11 @@ const Profile = () => {
   const { mutateAsync: verifyPasskey } = useVerifyPasskey();
 
   const profileData = profile?.data;
+  const hasMinimalBuyerProfile = Boolean(
+    profileData?.fullName?.trim() &&
+      profileData?.email?.trim() &&
+      profileData?.phone?.trim(),
+  );
 
   const handleOpenModal = () => {
     show();
@@ -100,6 +106,27 @@ const Profile = () => {
         </div>
         <div className="grid grid-cols-3 gap-6">
           <div className="grid grid-cols-1 gap-6">
+            <div className="rounded-[18px] bg-white">
+              <div className="border-b border-b-black/10 px-8 py-4 text-[16px] font-bold">
+                Buyer Profile Status
+              </div>
+              <div className="grid gap-3 px-8 py-5">
+                <Badge>{hasMinimalBuyerProfile ? "Ready" : "Needs update"}</Badge>
+                <p className="text-sm text-black/60">
+                  {hasMinimalBuyerProfile
+                    ? "Your display name, email, and phone are ready for bookings and property inquiries."
+                    : "Complete your display name, email, and phone so appointments and inquiries always include full buyer details."}
+                </p>
+                {!hasMinimalBuyerProfile && (
+                  <CsButton
+                    className="cs-bg-black text-white"
+                    onClick={handleToEdit}
+                  >
+                    Complete Buyer Profile
+                  </CsButton>
+                )}
+              </div>
+            </div>
             <div className="bg-white rounded-[18px]">
               <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
                 <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
@@ -131,6 +158,30 @@ const Profile = () => {
                   }
                 />
               </div>
+            </div>
+          </div>
+          <div className="col-span-2 rounded-[18px] bg-white p-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-[16px] font-bold">
+                  <div className="size-5 flex items-center justify-center rounded-lg bg-black/10 p-2 box-content">
+                    <CalendarClock className="size-5" />
+                  </div>
+                  My Appointments
+                </div>
+                <p className="mt-3 max-w-xl text-sm text-black/60">
+                  Review the property tours you requested, cancel plans that no
+                  longer fit, or send a new time request to the agent.
+                </p>
+              </div>
+
+              <CsButton
+                className="cs-bg-black text-white"
+                icon={<ArrowRight className="size-4" />}
+                onClick={() => router.push(ROUTES.PROFILE_APPOINTMENTS)}
+              >
+                Open Appointments
+              </CsButton>
             </div>
           </div>
         </div>

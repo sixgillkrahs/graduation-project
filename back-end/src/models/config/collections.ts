@@ -13,6 +13,7 @@ const collections = {
   notices: "notices",
   reviews: "reviews",
   reviewInvitations: "reviewInvitations",
+  leads: "leads",
   landlords: "landlords",
   schedules: "schedules",
   transactions: "transactions",

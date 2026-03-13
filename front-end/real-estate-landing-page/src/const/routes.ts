@@ -14,6 +14,7 @@ export const ROUTES = {
   // Profile
   PROFILE: "/profile",
   PROFILE_EDIT: "/profile/edit",
+  PROFILE_APPOINTMENTS: "/profile/appointments",
   REVIEW_INVITATION: (token: string) => `/review-invitation/${token}` as const,
   SETTINGS: "/settings",
 
