@@ -2,16 +2,19 @@ global:
   resolve_timeout: 5m
 
 route:
-  group_by: ["alertname"]
+  receiver: "web.hook"
+  group_by:
+    - alertname
+    - job
+    - instance
   group_wait: 10s
   group_interval: 10s
   repeat_interval: 1h
-  receiver: "web.hook"
 
 receivers:
   - name: "web.hook"
     webhook_configs:
-      - url: "http://api:4300/monitoring/alerts"
+      - url: "http://api:8080/monitoring/alerts"
         send_resolved: true
 
 inhibit_rules:
@@ -19,4 +22,7 @@ inhibit_rules:
       severity: "critical"
     target_match:
       severity: "warning"
-    equal: ["alertname"]
+    equal:
+      - alertname
+      - job
+      - instance

@@ -2,7 +2,7 @@ groups:
   - name: cpu_alerts
     rules:
       - alert: HighCPUUsage
-        expr: rate(process_cpu_user_seconds_total[1m]) * 100 > 80
+        expr: (rate(node_process_cpu_user_seconds_total{service="express-api"}[5m]) + rate(node_process_cpu_system_seconds_total{service="express-api"}[5m])) * 100 > 80
         for: 5m
         labels:
           severity: warning
@@ -13,7 +13,7 @@ groups:
   - name: memory_alerts
     rules:
       - alert: HighMemoryUsage
-        expr: (nodejs_heap_size_used_bytes / nodejs_heap_size_total_bytes) * 100 > 85
+        expr: (node_nodejs_heap_size_used_bytes{service="express-api"} / node_nodejs_heap_size_total_bytes{service="express-api"}) * 100 > 85
         for: 5m
         labels:
           severity: warning
@@ -24,7 +24,7 @@ groups:
   - name: error_alerts
     rules:
       - alert: HighErrorRate
-        expr: rate(http_requests_total{status=~"5.*"}[5m]) > 1
+        expr: sum(rate(http_requests_total{status_code=~"5.."}[5m])) > 1
         for: 2m
         labels:
           severity: critical
@@ -35,7 +35,7 @@ groups:
   - name: express_alerts
     rules:
       - alert: HighRequestLatency
-        expr: http_request_duration_seconds > 1
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
         for: 1m
         labels:
           severity: warning
