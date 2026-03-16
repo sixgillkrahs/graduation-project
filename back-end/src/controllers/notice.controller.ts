@@ -46,7 +46,7 @@ export class NoticeController extends BaseController {
 
       // use promise all
       const [totalUnread, notices] = await Promise.all([
-        this.noticeService.countUnreadNotices(user.userId),
+        this.noticeService.countUnreadNotices(user.userId, filters),
         this.noticeService.getNotices(options, queryFilters),
       ]);
       return { totalUnread, ...notices };

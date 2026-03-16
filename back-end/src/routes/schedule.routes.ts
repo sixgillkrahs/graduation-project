@@ -4,6 +4,7 @@ import { validateRequest } from "@/middleware/validateRequest";
 import { ScheduleService } from "@/services/schedule.service";
 import { UserService } from "@/services/user.service";
 import {
+  validateAvailabilityQuerySchema,
   validateBodyScheduleSchema,
   validateRequestScheduleSchema,
 } from "@/validators/schedule.validator";
@@ -25,6 +26,36 @@ const scheduleController = new ScheduleController(
   new EmailQueue(),
   new NotificationQueue(),
   new ReviewService(),
+);
+
+/**
+ * @swagger
+ * /schedules/availability:
+ *   get:
+ *     summary: Get public viewing slot availability for a listing on a specific date
+ *     tags: [Schedules]
+ *     parameters:
+ *       - in: query
+ *         name: listingId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: date
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Availability retrieved successfully
+ *       404:
+ *         description: Property not found
+ */
+router.get(
+  "/availability",
+  validateRequest((lang) => validateAvailabilityQuerySchema(lang)),
+  scheduleController.getPublicAvailability,
 );
 
 router.use(requireAuth);
@@ -256,13 +287,13 @@ router.get("/me", scheduleController.getSchedulesMe);
  * @swagger
  * /schedules/leads:
  *   get:
- *     summary: Get leads (confirmed/completed schedules) for the current user
+ *     summary: Get CRM schedule contacts for the current user
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Leads retrieved successfully
+ *         description: CRM schedule contacts retrieved successfully
  *         content:
  *           application/json:
  *             schema:

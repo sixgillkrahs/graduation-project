@@ -25,6 +25,7 @@ import { mapPropertyToCompareItem } from "@/components/features/properties/compa
 import PropertyCard from "@/components/features/properties/components/PropertyCard";
 import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
 import { useAgentOnSaleProperties } from "@/components/features/properties/services/query";
+import ReportEntityButton from "@/components/features/reports/components/ReportEntityButton";
 import { useGetPublicAgentReviews } from "@/components/features/reviews/services/query";
 import { Avatar } from "@/components/ui/avatar";
 import { ROUTES } from "@/const/routes";
@@ -334,6 +335,13 @@ const AgentPublicProfile = () => {
                   >
                     {t("actions.chat")}
                   </CsButton>
+                  <ReportEntityButton
+                    targetType="AGENT"
+                    targetId={agentId}
+                    isLoggedIn={isClientLoggedIn}
+                    redirectUrl={ROUTES.AGENT_PUBLIC_PROFILE(agentId)}
+                    className="border-border bg-background text-foreground hover:bg-accent"
+                  />
                 </div>
               </div>
             </div>

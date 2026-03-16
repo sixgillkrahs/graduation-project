@@ -27,7 +27,10 @@ export const getAbsoluteUrl = (path = "/") => {
 };
 
 const stripHtml = (value?: string) =>
-  (value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  (value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const truncate = (value: string, maxLength: number) => {
   if (value.length <= maxLength) {

@@ -54,5 +54,47 @@
       "PUBLISHED": "Đã công khai",
       "REJECTED": "Đã từ chối"
     }
+  },
+  "reportInbox": {
+    "title": "Hộp thư báo cáo cho Admin",
+    "description": "Theo dõi các báo cáo người dùng gửi về listing và môi giới. Hàng đợi này giúp admin nhìn nhanh các trường hợp dữ liệu sai, spam và giá ảo.",
+    "controlDesk": "Bàn điều khiển thông báo báo cáo",
+    "stats": {
+      "total": "Tổng số báo cáo",
+      "unread": "Thông báo chưa đọc",
+      "listing": "Báo cáo listing",
+      "agent": "Báo cáo môi giới"
+    },
+    "listTitle": "Danh sách thông báo báo cáo",
+    "listDescription": "Mỗi dòng bên dưới là một thông báo moderation được tạo khi người dùng báo cáo listing hoặc môi giới.",
+    "searchPlaceholder": "Tìm trên trang hiện tại",
+    "refresh": "Làm mới hộp thư",
+    "empty": "Chưa có thông báo báo cáo nào",
+    "table": {
+      "time": "Thời gian tạo",
+      "title": "Thông báo",
+      "target": "Đối tượng",
+      "reason": "Lý do",
+      "details": "Chi tiết người báo cáo",
+      "noDetails": "Không có chi tiết bổ sung"
+    },
+    "target": {
+      "LISTING": "Listing",
+      "AGENT": "Môi giới"
+    },
+    "reason": {
+      "WRONG_DATA": "Dữ liệu sai",
+      "SPAM": "Spam",
+      "FAKE_PRICE": "Giá ảo",
+      "OTHER": "Khác"
+    },
+    "status": {
+      "read": "Đã đọc",
+      "unread": "Chưa đọc"
+    },
+    "actions": {
+      "markRead": "Đánh dấu đã đọc",
+      "readSuccess": "Đã đánh dấu thông báo báo cáo là đã đọc."
+    }
   }
 }

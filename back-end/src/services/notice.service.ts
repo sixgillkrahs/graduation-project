@@ -64,7 +64,14 @@ export class NoticeService {
     return await NoticeModel.paginate?.(options, filter, select);
   };
 
-  countUnreadNotices = async (userId: string) => {
-    return await NoticeModel.countDocuments({ userId, isRead: false }).exec();
+  countUnreadNotices = async (
+    userId: string,
+    filter: Record<string, any> = {},
+  ) => {
+    return await NoticeModel.countDocuments({
+      ...filter,
+      userId,
+      isRead: false,
+    }).exec();
   };
 }

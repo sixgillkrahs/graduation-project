@@ -1,12 +1,13 @@
 "use client";
 
+import { FilterX } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { CsCheckbox } from "@/components/custom";
 import CsToggleGroup from "@/components/custom/toggle-group";
 import { CsSelect } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { FilterX } from "lucide-react";
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { FILTER_DIRECTION_MAP, REVERSE_DIRECTION_MAP } from "../search-state";
 
 const AMENITY_KEYS = ["pool", "gym", "parking", "security"] as const;
 
@@ -14,7 +15,9 @@ export interface FilterValues {
   "features.bedrooms"?: number;
   "features.bathrooms"?: number;
   "features.direction"?: string;
-  [key: string]: any;
+  minBedrooms?: number;
+  minBathrooms?: number;
+  [key: string]: unknown;
 }
 
 interface FilterSidebarProps {
@@ -22,18 +25,8 @@ interface FilterSidebarProps {
   onFilterChange?: (filters: FilterValues) => void;
   className?: string;
   sticky?: boolean;
+  initialFilters?: FilterValues;
 }
-
-const DIRECTION_MAP: Record<string, string> = {
-  north: "NORTH",
-  south: "SOUTH",
-  east: "EAST",
-  west: "WEST",
-  northeast: "NORTH_EAST",
-  northwest: "NORTH_WEST",
-  southeast: "SOUTH_EAST",
-  southwest: "SOUTH_WEST",
-};
 
 const INITIAL_STATE = {
   bedrooms: "any",
@@ -51,7 +44,7 @@ const buildFilters = (
 
   if (bedrooms && bedrooms !== "any") {
     if (bedrooms === "4+") {
-      filters["minBedrooms"] = 4;
+      filters.minBedrooms = 4;
     } else {
       filters["features.bedrooms"] = Number(bedrooms);
     }
@@ -59,14 +52,14 @@ const buildFilters = (
 
   if (bathrooms && bathrooms !== "any") {
     if (bathrooms === "3+") {
-      filters["minBathrooms"] = 3;
+      filters.minBathrooms = 3;
     } else {
       filters["features.bathrooms"] = Number(bathrooms);
     }
   }
 
-  if (direction && DIRECTION_MAP[direction]) {
-    filters["features.direction"] = DIRECTION_MAP[direction];
+  if (direction && FILTER_DIRECTION_MAP[direction]) {
+    filters["features.direction"] = FILTER_DIRECTION_MAP[direction];
   }
 
   return filters;
@@ -77,6 +70,7 @@ const FilterSidebar = ({
   onFilterChange,
   className,
   sticky = true,
+  initialFilters,
 }: FilterSidebarProps) => {
   const [bedrooms, setBedrooms] = useState(INITIAL_STATE.bedrooms);
   const [bathrooms, setBathrooms] = useState(INITIAL_STATE.bathrooms);
@@ -86,6 +80,31 @@ const FilterSidebar = ({
   );
   // Radix Select can't clear value to undefined, so we force remount with a key
   const [resetKey, setResetKey] = useState(0);
+
+  useEffect(() => {
+    const nextBedrooms =
+      typeof initialFilters?.minBedrooms === "number"
+        ? "4+"
+        : initialFilters?.["features.bedrooms"]
+          ? String(initialFilters["features.bedrooms"])
+          : INITIAL_STATE.bedrooms;
+    const nextBathrooms =
+      typeof initialFilters?.minBathrooms === "number"
+        ? "3+"
+        : initialFilters?.["features.bathrooms"]
+          ? String(initialFilters["features.bathrooms"])
+          : INITIAL_STATE.bathrooms;
+    const nextDirection =
+      typeof initialFilters?.["features.direction"] === "string"
+        ? REVERSE_DIRECTION_MAP[initialFilters["features.direction"]] || ""
+        : INITIAL_STATE.direction;
+
+    setBedrooms(nextBedrooms);
+    setBathrooms(nextBathrooms);
+    setDirection(nextDirection);
+    setSelectedAmenities(INITIAL_STATE.amenities);
+    setResetKey((prev) => prev + 1);
+  }, [initialFilters]);
 
   const emitFilterChange = (
     newBedrooms: string,
@@ -145,6 +164,7 @@ const FilterSidebar = ({
           {t("title")}
         </h2>
         <button
+          type="button"
           onClick={handleResetAll}
           className="text-sm font-medium text-red-500 hover:text-red-600 hover:underline transition-colors"
         >

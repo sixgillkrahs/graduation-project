@@ -86,6 +86,11 @@ const router: RouterConfig = {
           component: lazy(() => import("./reviews/review-moderation")),
           name: "menu.reviewModeration",
         },
+        {
+          path: "/reports",
+          component: lazy(() => import("./reviews/report-inbox")),
+          name: "menu.reportInbox",
+        },
       ],
     },
     {

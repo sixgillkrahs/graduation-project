@@ -40,10 +40,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import {
-  IScheduleDTO,
-  SCHEDULE_STATUS,
-} from "../schedule/dto/schedule.dto";
+import { IScheduleDTO, SCHEDULE_STATUS } from "../schedule/dto/schedule.dto";
 import { useUpdateSchedule } from "../schedule/services/mutation";
 import { useGetSchedulesMe } from "../schedule/services/query";
 
@@ -221,7 +218,8 @@ const MyAppointments = () => {
   const router = useRouter();
   const { data: me } = useGetMe();
   const now = new Date();
-  const [activeFilter, setActiveFilter] = useState<AppointmentFilter>("upcoming");
+  const [activeFilter, setActiveFilter] =
+    useState<AppointmentFilter>("upcoming");
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentItem | null>(null);
   const [draftDate, setDraftDate] = useState("");
@@ -240,7 +238,9 @@ const MyAppointments = () => {
   const appointments = getRawAppointments(data)
     .map((item) => {
       const listing =
-        item.listingId && typeof item.listingId === "object" ? item.listingId : null;
+        item.listingId && typeof item.listingId === "object"
+          ? item.listingId
+          : null;
       const displayDate = new Date(item.date);
       const startDate = buildDateTime(item.date, item.startTime);
       const endDate = buildDateTime(item.date, item.endTime);
@@ -253,12 +253,16 @@ const MyAppointments = () => {
         startDate,
         endDate,
         listingTitle: listing?.title || item.title || "Property appointment",
-        listingHref: listingId ? ROUTES.PROPERTY_DETAIL(String(listingId)) : undefined,
+        listingHref: listingId
+          ? ROUTES.PROPERTY_DETAIL(String(listingId))
+          : undefined,
         listingAddress: listing?.location?.address || item.location,
       } satisfies AppointmentItem;
     })
     .filter((item) => Boolean(item.id))
-    .sort((left, right) => left.startDate.getTime() - right.startDate.getTime());
+    .sort(
+      (left, right) => left.startDate.getTime() - right.startDate.getTime(),
+    );
 
   const upcomingAppointments = appointments.filter(
     (item) =>
@@ -431,8 +435,8 @@ const MyAppointments = () => {
             This page is for buyers and customers.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-            Your account is an agent account, so appointment management is handled
-            in Agent Space.
+            Your account is an agent account, so appointment management is
+            handled in Agent Space.
           </p>
           <div className="mt-6">
             <Link href={ROUTES.AGENT_SCHEDULE}>
@@ -458,8 +462,8 @@ const MyAppointments = () => {
               My Appointments
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-              Review every viewing request you placed, cancel what no longer fits,
-              or ask the agent for a new time slot.
+              Review every viewing request you placed, cancel what no longer
+              fits, or ask the agent for a new time slot.
             </p>
           </div>
 
@@ -518,9 +522,10 @@ const MyAppointments = () => {
           <div className="flex items-start gap-3">
             <CircleAlert className="mt-0.5 size-4 shrink-0" />
             <p>
-              Rescheduling sends the appointment back to <strong>Pending</strong>{" "}
-              so the agent can confirm the new time. Each appointment below also
-              explains clearly what its current status means.
+              Rescheduling sends the appointment back to{" "}
+              <strong>Pending</strong> so the agent can confirm the new time.
+              Each appointment below also explains clearly what its current
+              status means.
             </p>
           </div>
         </div>
@@ -560,7 +565,8 @@ const MyAppointments = () => {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Showing {filteredAppointments.length} of {appointments.length} appointments
+            Showing {filteredAppointments.length} of {appointments.length}{" "}
+            appointments
           </p>
         </div>
 
@@ -667,7 +673,10 @@ const MyAppointments = () => {
                         <div className="flex items-center gap-2">
                           <CalendarDays className="size-4 text-muted-foreground" />
                           <span>
-                            {format(appointment.displayDate, "EEEE, dd MMM yyyy")}
+                            {format(
+                              appointment.displayDate,
+                              "EEEE, dd MMM yyyy",
+                            )}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -679,7 +688,9 @@ const MyAppointments = () => {
                         </div>
                         <div className="flex items-center gap-2 sm:col-span-2">
                           <MapPin className="size-4 text-muted-foreground" />
-                          <span>{appointment.listingAddress || appointment.location}</span>
+                          <span>
+                            {appointment.listingAddress || appointment.location}
+                          </span>
                         </div>
                       </div>
 
@@ -777,8 +788,8 @@ const MyAppointments = () => {
           <DialogHeader>
             <DialogTitle>Request a new appointment time</DialogTitle>
             <DialogDescription>
-              Choose a new slot. The agent will receive a fresh request and needs
-              to confirm it again.
+              Choose a new slot. The agent will receive a fresh request and
+              needs to confirm it again.
             </DialogDescription>
           </DialogHeader>
 
@@ -838,9 +849,3 @@ const MyAppointments = () => {
 };
 
 export default MyAppointments;
-
-
-
-
-
-

@@ -33,6 +33,7 @@ import paymentRoutes from "./routes/payment.routes";
 import jobRoutes from "./routes/job.route";
 import reviewRoutes from "./routes/review.routes";
 import leadRoutes from "./routes/lead.routes";
+import reportRoutes from "./routes/report.routes";
 
 const app = express();
 
@@ -102,6 +103,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/leads", leadRoutes);
+app.use("/api/reports", reportRoutes);
 
 const swaggerOptions = {
   explorer: true,

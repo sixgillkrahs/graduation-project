@@ -31,7 +31,7 @@ const noticeController = new NoticeController(noticeService);
  *                 type: string
  *               type:
  *                 type: string
- *                 enum: [SYSTEM, PROPERTY, ACCOUNT]
+ *                 enum: [SYSTEM, PROPERTY, ACCOUNT, SCHEDULE, REPORT]
  *               metadata:
  *                 type: object
  *     responses:
@@ -65,7 +65,7 @@ router.post("/", requireAuth, noticeController.createNotice);
  *         name: type
  *         schema:
  *           type: string
- *           enum: [SYSTEM, PROPERTY, ACCOUNT]
+ *           enum: [SYSTEM, PROPERTY, ACCOUNT, SCHEDULE, REPORT]
  *     responses:
  *       200:
  *         description: List of user's notices

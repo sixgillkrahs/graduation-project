@@ -68,3 +68,16 @@ export const validateRequestScheduleSchema = (
     }),
   });
 };
+
+export const validateAvailabilityQuerySchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    query: z.object({
+      listingId: createObjectIdSchema(lang),
+      date: z.coerce.date({ message: t.required("date") }),
+    }),
+  });
+};

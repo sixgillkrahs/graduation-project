@@ -8,6 +8,7 @@ export enum NoticeTypeEnum {
   PROPERTY = "PROPERTY",
   ACCOUNT = "ACCOUNT",
   SCHEDULE = "SCHEDULE",
+  REPORT = "REPORT",
 }
 
 export interface INotice {
