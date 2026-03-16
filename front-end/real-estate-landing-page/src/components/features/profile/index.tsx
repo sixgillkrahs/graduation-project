@@ -111,7 +111,9 @@ const Profile = () => {
                 Buyer Profile Status
               </div>
               <div className="grid gap-3 px-8 py-5">
-                <Badge>{hasMinimalBuyerProfile ? "Ready" : "Needs update"}</Badge>
+                <Badge>
+                  {hasMinimalBuyerProfile ? "Ready" : "Needs update"}
+                </Badge>
                 <p className="text-sm text-black/60">
                   {hasMinimalBuyerProfile
                     ? "Your display name, email, and phone are ready for bookings and property inquiries."

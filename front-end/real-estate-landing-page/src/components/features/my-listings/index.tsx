@@ -60,7 +60,8 @@ const MyListings = () => {
     current: 1,
     pageSize: 10,
   });
-  const [draftFilters, setDraftFilters] = useState<ListingFilters>(defaultFilters);
+  const [draftFilters, setDraftFilters] =
+    useState<ListingFilters>(defaultFilters);
   const [filters, setFilters] = useState<ListingFilters>(defaultFilters);
 
   const params = useMemo<IParamsPagination>(() => {
@@ -301,7 +302,7 @@ const MyListings = () => {
             Manage your active and past listings
           </div>
         </div>
-      <div>
+        <div>
           <CsButton
             icon={<Plus />}
             className="cs-bg-black text-white px-4"

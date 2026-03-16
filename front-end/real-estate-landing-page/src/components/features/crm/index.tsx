@@ -157,10 +157,11 @@ type CRMContactHistoryRow = {
 };
 
 type CRMListing = ILeadDto["listingId"] | IScheduleDTO["listingId"];
+type CRMListingValue = CRMListing | null | undefined;
 
 const normalizePhone = (value?: string) => (value || "").replace(/[^\d+]/g, "");
 
-const getListingId = (listing: CRMListing) => {
+const getListingId = (listing: CRMListingValue) => {
   if (!listing || typeof listing === "string") {
     return listing || "";
   }
@@ -168,7 +169,7 @@ const getListingId = (listing: CRMListing) => {
   return listing._id || listing.id || "";
 };
 
-const getListingTitle = (listing: CRMListing) => {
+const getListingTitle = (listing: CRMListingValue) => {
   if (!listing || typeof listing === "string") {
     return "";
   }
@@ -176,7 +177,7 @@ const getListingTitle = (listing: CRMListing) => {
   return listing.title || "";
 };
 
-const getListingAddress = (listing: CRMListing) => {
+const getListingAddress = (listing: CRMListingValue) => {
   if (!listing || typeof listing === "string") {
     return "";
   }
@@ -549,7 +550,7 @@ export const CRMFeature = () => {
     },
     {
       title: "Actions",
-      dataIndex: "actions",
+      dataIndex: "id",
       key: "actions",
       align: "center",
       render: (_: unknown, record: CRMContactHistoryRow) => (

@@ -16,7 +16,8 @@ export interface IAvailabilityParams {
 export const useGetScheduleAvailability = (params?: IAvailabilityParams) => {
   return useQuery({
     queryKey: [ScheduleQueryKey.getAvailability, params],
-    queryFn: () => ScheduleService.getAvailability(params as IAvailabilityParams),
+    queryFn: () =>
+      ScheduleService.getAvailability(params as IAvailabilityParams),
     enabled: Boolean(params?.listingId && params?.date),
   });
 };

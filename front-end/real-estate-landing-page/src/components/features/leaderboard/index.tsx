@@ -79,8 +79,7 @@ const COPY = {
       profileAction: "Profile",
       messageAction: "Message",
       authTitle: "Login to message an agent",
-      authDescription:
-        "Please login to start a conversation with this agent.",
+      authDescription: "Please login to start a conversation with this agent.",
       emptyTitle: "No agents matched your search",
       emptyDescription:
         "Try a broader location, a different name, or reset the selected specialty.",
@@ -237,7 +236,10 @@ const AgentDirectory = () => {
   }, [leaderboard]);
 
   const topAgents = useMemo(
-    () => [...leaderboard].sort((left, right) => left.rank - right.rank).slice(0, 3),
+    () =>
+      [...leaderboard]
+        .sort((left, right) => left.rank - right.rank)
+        .slice(0, 3),
     [leaderboard],
   );
 
@@ -258,7 +260,8 @@ const AgentDirectory = () => {
       const matchesSpecialty =
         appliedSpecialty === "all" ||
         (agent.specialties || []).some(
-          (specialty) => specialty.toLowerCase() === appliedSpecialty.toLowerCase(),
+          (specialty) =>
+            specialty.toLowerCase() === appliedSpecialty.toLowerCase(),
         );
 
       const matchesArea =
@@ -268,8 +271,7 @@ const AgentDirectory = () => {
         );
 
       const matchesRating =
-        appliedMinRating === "all" ||
-        agent.rating >= Number(appliedMinRating);
+        appliedMinRating === "all" || agent.rating >= Number(appliedMinRating);
 
       const numericExperience = Number(agent.yearsOfExperience || 0);
       const matchesExperience =
@@ -371,7 +373,10 @@ const AgentDirectory = () => {
     setAppliedExperience(draftExperience);
     setAppliedProOnly(draftProOnly);
     setCurrentPage(1);
-    directoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    directoryRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const handleResetFilters = () => {
@@ -571,9 +576,7 @@ const AgentDirectory = () => {
               <article
                 key={agent.agentUserId}
                 className={`relative overflow-hidden rounded-[32px] border bg-card p-6 shadow-sm ${
-                  isChampion
-                    ? "lg:-mt-4 lg:scale-[1.02]"
-                    : ""
+                  isChampion ? "lg:-mt-4 lg:scale-[1.02]" : ""
                 }`}
                 style={{
                   borderColor: "#f2d37a",
@@ -601,7 +604,11 @@ const AgentDirectory = () => {
                     {agent.fullName}
                   </h3>
                   <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-black px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white">
-                    {isChampion ? <Crown className="size-3.5" /> : <Award className="size-3.5" />}
+                    {isChampion ? (
+                      <Crown className="size-3.5" />
+                    ) : (
+                      <Award className="size-3.5" />
+                    )}
                     {copy.top.proBadge}
                   </div>
 
@@ -630,7 +637,10 @@ const AgentDirectory = () => {
         </div>
       </section>
 
-      <section ref={directoryRef} className="container mx-auto px-4 py-14 md:px-20 md:py-16">
+      <section
+        ref={directoryRef}
+        className="container mx-auto px-4 py-14 md:px-20 md:py-16"
+      >
         <div className="flex flex-col gap-4 border-b border-border pb-6 md:flex-row md:items-end md:justify-between">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight text-foreground">
@@ -644,7 +654,9 @@ const AgentDirectory = () => {
           </div>
 
           <label className="flex items-center gap-3 self-start rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">{copy.directory.sortLabel}</span>
+            <span className="font-medium text-foreground">
+              {copy.directory.sortLabel}
+            </span>
             <select
               value={sortOption}
               onChange={(event) => {
@@ -653,9 +665,13 @@ const AgentDirectory = () => {
               }}
               className="bg-transparent font-medium text-foreground outline-none"
             >
-              <option value="highestRated">{copy.directory.sort.highestRated}</option>
+              <option value="highestRated">
+                {copy.directory.sort.highestRated}
+              </option>
               <option value="topDeals">{copy.directory.sort.topDeals}</option>
-              <option value="monthlyRevenue">{copy.directory.sort.monthlyRevenue}</option>
+              <option value="monthlyRevenue">
+                {copy.directory.sort.monthlyRevenue}
+              </option>
               <option value="topRank">{copy.directory.sort.topRank}</option>
             </select>
           </label>
@@ -710,7 +726,8 @@ const AgentDirectory = () => {
 
                     <p className="mt-2 inline-flex items-center gap-2 text-sm text-muted-foreground">
                       <MapPin className="size-4 text-[var(--color-red)]" />
-                      {agent.primaryWorkingArea || copy.directory.fallbackLocation}
+                      {agent.primaryWorkingArea ||
+                        copy.directory.fallbackLocation}
                     </p>
 
                     <p className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-foreground">

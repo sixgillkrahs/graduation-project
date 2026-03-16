@@ -373,7 +373,7 @@ const Properties = () => {
     switch (val) {
       case "price_asc":
         setParams((prev) => {
-          const nextParams = {
+          const nextParams: IParamsPagination = {
             ...prev,
             page: 1,
             sortField: "features.price",
@@ -385,7 +385,7 @@ const Properties = () => {
         break;
       case "price_desc":
         setParams((prev) => {
-          const nextParams = {
+          const nextParams: IParamsPagination = {
             ...prev,
             page: 1,
             sortField: "features.price",
@@ -397,7 +397,7 @@ const Properties = () => {
         break;
       default:
         setParams((prev) => {
-          const nextParams = { ...prev, page: 1 };
+          const nextParams: IParamsPagination = { ...prev, page: 1 };
           delete nextParams.sortField;
           delete nextParams.sortOrder;
           replacePropertiesRoute(nextParams);

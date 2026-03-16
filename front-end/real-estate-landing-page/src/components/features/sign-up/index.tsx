@@ -63,9 +63,7 @@ const SignUp = () => {
     const normalizedBaseUrl = apiBaseUrl.endsWith("/")
       ? apiBaseUrl.slice(0, -1)
       : apiBaseUrl;
-    const googleAuthUrl = new URL(
-      `${normalizedBaseUrl}/auth/google`,
-    );
+    const googleAuthUrl = new URL(`${normalizedBaseUrl}/auth/google`);
     googleAuthUrl.searchParams.set("callbackUrl", callbackUrl);
     googleAuthUrl.searchParams.set("mode", "sign-up");
     window.location.assign(googleAuthUrl.toString());
