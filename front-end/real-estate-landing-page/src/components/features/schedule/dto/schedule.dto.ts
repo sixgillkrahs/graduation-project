@@ -1,8 +1,22 @@
+export interface IScheduleListing {
+  _id?: string;
+  id?: string;
+  title?: string;
+  media?: {
+    thumbnail?: string;
+    images?: string[];
+  };
+  location?: {
+    address?: string;
+  };
+}
+
 export interface IScheduleDTO {
   id?: string;
+  _id?: string;
   agentId: string;
   userId: string;
-  listingId: any;
+  listingId: IScheduleListing | string | null;
   customerName: string;
   customerPhone: string;
   title: string;
@@ -60,6 +74,21 @@ export interface RequestScheduleDto {
   date: Date;
   startTime: string;
   customerNote?: string;
+}
+
+export interface ScheduleAvailabilitySlotDto {
+  slot: string;
+  endTime: string;
+  isAvailable: boolean;
+  conflictCount: number;
+}
+
+export interface ScheduleAvailabilityDto {
+  listingId: string;
+  date: string;
+  totalSlots: number;
+  availableCount: number;
+  slots: ScheduleAvailabilitySlotDto[];
 }
 
 export interface ScheduleEvent {

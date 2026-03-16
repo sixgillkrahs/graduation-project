@@ -1,9 +1,12 @@
-import { IResp } from "@/@types/service";
-import { useMutation, UseMutationResult } from "@tanstack/react-query";
-import { CreateScheduleRequest, RequestScheduleDto } from "../dto/schedule.dto";
-import ScheduleService from "./service";
+import { type UseMutationResult, useMutation } from "@tanstack/react-query";
+import type { IResp } from "@/@types/service";
 import { queryClient } from "@/lib/react-query/queryClient";
+import type {
+  CreateScheduleRequest,
+  RequestScheduleDto,
+} from "../dto/schedule.dto";
 import { ScheduleQueryKey } from "./config";
+import ScheduleService from "./service";
 
 export const useCreateSchedule = (): UseMutationResult<
   IResp<string>,
@@ -25,6 +28,9 @@ export const useCreateSchedule = (): UseMutationResult<
       });
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getLeads],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getAvailability],
       });
     },
   });
@@ -51,6 +57,9 @@ export const useRequestSchedule = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getLeads],
       });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getAvailability],
+      });
     },
   });
 };
@@ -73,6 +82,9 @@ export const useDeleteSchedule = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getSchedules],
       });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getAvailability],
+      });
     },
   });
 };
@@ -94,6 +106,9 @@ export const useUpdateSchedule = (): UseMutationResult<
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getSchedules],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getAvailability],
       });
     },
   });

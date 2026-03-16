@@ -9,7 +9,6 @@ import {
   LoaderCircle,
   MessageSquare,
   Phone,
-  Share2,
   Star,
 } from "lucide-react";
 import Image from "next/image";
@@ -31,10 +30,13 @@ import {
   LeadContactTime,
   LeadIntent,
 } from "../../leads/services/type";
+import ReportEntityButton from "../../reports/components/ReportEntityButton";
 import { useGetPublicAgentReviews } from "../../reviews/services/query";
+import type { ScheduleAvailabilitySlotDto } from "../../schedule/dto/schedule.dto";
 import type { PropertyCompareItem } from "../compare/compare.types";
 import PropertyCompareToggleButton from "../compare/PropertyCompareToggleButton";
 import type { PropertyDto } from "../dto/property.dto";
+import ShareListingButton from "./ShareListingButton";
 
 interface PropertyDetailSidebarProps {
   property: PropertyDto & { isFavorite: boolean };
@@ -48,7 +50,14 @@ interface PropertyDetailSidebarProps {
   timeSlot: string;
   customerNote: string;
   today: Date;
-  tourTimeSlots: string[];
+  availabilitySlots: Array<
+    Pick<ScheduleAvailabilitySlotDto, "slot" | "endTime" | "conflictCount"> & {
+      isAvailableFromApi: boolean;
+    }
+  >;
+  availableSlotCount: number;
+  totalSlotCount: number;
+  isLoadingAvailability: boolean;
   activeTab: string;
   isBuyerProfileManaged: boolean;
   isBuyerProfileComplete: boolean;
@@ -106,7 +115,10 @@ const PropertyDetailSidebar = ({
   timeSlot,
   customerNote,
   today,
-  tourTimeSlots,
+  availabilitySlots,
+  availableSlotCount,
+  totalSlotCount,
+  isLoadingAvailability,
   activeTab,
   isBuyerProfileManaged,
   isBuyerProfileComplete,
@@ -353,27 +365,71 @@ const PropertyDetailSidebar = ({
                       </PopoverContent>
                     </Popover>
 
-                    <select
-                      className="h-11 w-full cursor-pointer rounded-lg border border-input bg-background px-4 py-2 text-foreground outline-none transition-all hover:bg-accent/50"
-                      value={timeSlot}
-                      onChange={(event) => onTimeSlotChange(event.target.value)}
-                    >
-                      <option value="" disabled>
-                        Chon gio hen
-                      </option>
-                      {tourTimeSlots.map((slot) => (
-                        <option
-                          key={slot}
-                          value={slot}
-                          disabled={isPastTimeSlot(date, slot)}
-                        >
-                          {slot}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="rounded-2xl border border-border bg-muted/30 p-4">
+                      <p className="text-sm font-medium text-foreground">
+                        {isLoadingAvailability
+                          ? t("detail.availabilityLoading")
+                          : availableSlotCount > 0
+                            ? t("detail.availabilitySummary", {
+                                available: availableSlotCount,
+                                total: totalSlotCount,
+                              })
+                            : t("detail.availabilityEmpty")}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("detail.slotHint")}
+                      </p>
+                    </div>
 
-                    <p className="-mt-2 text-xs text-muted-foreground">
-                      Moi lich xem nha mac dinh keo dai 60 phut.
+                    <div className="grid grid-cols-2 gap-2">
+                      {availabilitySlots.map((slotOption) => {
+                        const isPast = isPastTimeSlot(date, slotOption.slot);
+                        const isBooked = !slotOption.isAvailableFromApi;
+                        const isBlocked = isPast || isBooked;
+                        const isSelected = timeSlot === slotOption.slot;
+
+                        return (
+                          <button
+                            key={slotOption.slot}
+                            type="button"
+                            disabled={isBlocked}
+                            onClick={() => onTimeSlotChange(slotOption.slot)}
+                            className={cn(
+                              "rounded-2xl border px-4 py-3 text-left transition-all",
+                              isSelected &&
+                                !isBlocked &&
+                                "border-emerald-600 bg-emerald-50 shadow-sm",
+                              !isSelected &&
+                                !isBlocked &&
+                                "border-border bg-background hover:border-emerald-300 hover:bg-emerald-50/50",
+                              isBlocked &&
+                                "cursor-not-allowed border-border/70 bg-muted/40 text-muted-foreground opacity-70",
+                            )}
+                          >
+                            <p className="text-sm font-semibold">
+                              {slotOption.slot}
+                              {slotOption.endTime
+                                ? ` - ${slotOption.endTime}`
+                                : ""}
+                            </p>
+                            <p className="mt-1 text-xs font-medium">
+                              {isPast
+                                ? t("detail.slotPast")
+                                : isBooked
+                                  ? t("detail.slotBooked")
+                                  : t("detail.slotAvailable")}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <p className="-mt-1 text-xs text-muted-foreground">
+                      {timeSlot
+                        ? t("detail.slotSelectedHint", { slot: timeSlot })
+                        : availableSlotCount > 0
+                          ? t("detail.slotChooseHint")
+                          : t("detail.availabilityEmpty")}
                     </p>
 
                     {isClientLoggedIn && (
@@ -664,12 +720,16 @@ const PropertyDetailSidebar = ({
           <div className="h-4 w-px bg-border" />
           <PropertyCompareToggleButton item={compareItem} variant="text" />
           <div className="h-4 w-px bg-border" />
-          <button
-            type="button"
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            <Share2 className="h-4 w-4" /> {t("detail.shareListings")}
-          </button>
+          <ShareListingButton property={property} displayPrice={displayPrice} />
+        </div>
+        <div className="mt-3 flex justify-center">
+          <ReportEntityButton
+            targetType="LISTING"
+            targetId={property._id}
+            isLoggedIn={isClientLoggedIn}
+            redirectUrl={ROUTES.PROPERTY_DETAIL(property._id)}
+            className="h-10 rounded-full border-amber-200 bg-amber-50 px-4 text-amber-900 hover:bg-amber-100"
+          />
         </div>
       </div>
 

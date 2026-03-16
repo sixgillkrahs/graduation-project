@@ -12,6 +12,7 @@ const collections = {
   messages: "messages",
   notices: "notices",
   reviews: "reviews",
+  reports: "reports",
   reviewInvitations: "reviewInvitations",
   leads: "leads",
   landlords: "landlords",

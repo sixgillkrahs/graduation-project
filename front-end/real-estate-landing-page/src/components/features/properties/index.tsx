@@ -3,6 +3,7 @@
 import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import {
   AlertCircle,
+  BookmarkPlus,
   Heart,
   House,
   Loader2,
@@ -15,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { IParamsPagination } from "@/@types/service";
 import { CsPagination } from "@/components/custom";
 import { CsDialog } from "@/components/custom/dialog";
+import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
 import StateSurface from "@/components/ui/state-surface";
 import { formatPropertyPostedDate } from "@/lib/property-date";
@@ -25,15 +27,29 @@ import AdvancedSearch, {
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
 import PropertyCardSkeleton from "./components/PropertyCardSkeleton";
+import RecentlyViewedSection from "./components/RecentlyViewedSection";
+import SavedSearchesPanel from "./components/SavedSearchesPanel";
+import { useRecentlyViewedProperties } from "./recently-viewed/useRecentlyViewedProperties";
+import {
+  PROPERTY_SAVED_SEARCHES_STORAGE_KEY,
+  type PropertySavedSearch,
+} from "./saved-search/saved-search.types";
+import {
+  normalizeSavedSearches,
+  upsertSavedSearch,
+} from "./saved-search/saved-search.utils";
+import {
+  buildParamsFromSearchParams,
+  buildPropertyQueryString,
+  DEFAULT_PROPERTY_PARAMS,
+  extractSearchFiltersFromParams,
+  extractSidebarFiltersFromParams,
+  type PropertyTabType,
+} from "./search-state";
 import { useFavoriteProperties, useOnSale } from "./services/query";
 
-type TabType = "all" | "favorites";
 type PropertyFilters = Partial<IParamsPagination>;
 
-const DEFAULT_PARAMS: IParamsPagination = {
-  page: 1,
-  limit: 6,
-};
 const PROPERTY_SKELETON_KEYS = [
   "property-skeleton-1",
   "property-skeleton-2",
@@ -49,52 +65,6 @@ const getSortValue = (params: IParamsPagination) =>
       ? "price_asc"
       : "price_desc"
     : "newest";
-
-const buildParamsFromSearchParams = (
-  searchParams: URLSearchParams,
-): IParamsPagination => {
-  const params: IParamsPagination = {
-    page: Number(searchParams.get("page") || DEFAULT_PARAMS.page),
-    limit: Number(searchParams.get("limit") || DEFAULT_PARAMS.limit),
-  };
-
-  const knownKeys = [
-    "query",
-    "demandType",
-    "propertyType",
-    "maxPrice",
-    "hasVirtualTour",
-    "features.bedrooms",
-    "features.bathrooms",
-    "features.direction",
-    "minBedrooms",
-    "minBathrooms",
-    "sortField",
-    "sortOrder",
-  ] as const;
-
-  knownKeys.forEach((key) => {
-    const value = searchParams.get(key);
-    if (!value) {
-      return;
-    }
-
-    if (
-      key === "maxPrice" ||
-      key === "features.bedrooms" ||
-      key === "features.bathrooms" ||
-      key === "minBedrooms" ||
-      key === "minBathrooms"
-    ) {
-      params[key] = Number(value);
-      return;
-    }
-
-    params[key] = value;
-  });
-
-  return params;
-};
 
 const getContextContent = (params: IParamsPagination) => {
   if (params.hasVirtualTour === "true" || params.hasVirtualTour === true) {
@@ -138,19 +108,43 @@ const getContextContent = (params: IParamsPagination) => {
 
 const Properties = () => {
   const t = useTranslations("PropertiesPage");
+  const savedSearchesT = useTranslations("PropertiesPage.savedSearches");
   const locale = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // URL is the single source of truth for the active tab
-  const activeTab: TabType =
+  const activeTab: PropertyTabType =
     searchParams.get("tab") === "favorites" ? "favorites" : "all";
 
   const initialParams = useMemo(
     () => buildParamsFromSearchParams(searchParams),
     [searchParams],
   );
+  const initialSearchFilters = useMemo(
+    () => extractSearchFiltersFromParams(initialParams),
+    [initialParams],
+  );
+  const initialSidebarFilters = useMemo(
+    () => extractSidebarFiltersFromParams(initialParams),
+    [initialParams],
+  );
+
   const [params, setParams] = useState<IParamsPagination>(initialParams);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [savedSearches, setSavedSearches] = useState<PropertySavedSearch[]>([]);
+  const [savedSearchesHydrated, setSavedSearchesHydrated] = useState(false);
+  const [isSaveSearchDialogOpen, setIsSaveSearchDialogOpen] = useState(false);
+  const [savedSearchName, setSavedSearchName] = useState("");
+  const {
+    items: recentlyViewedItems,
+    clearAll: clearRecentlyViewed,
+    hydrated: recentlyViewedHydrated,
+  } = useRecentlyViewedProperties();
+
+  const gridRef = useRef<HTMLDivElement>(null);
+  const sidebarFiltersRef = useRef<PropertyFilters>({});
+  const searchFiltersRef = useRef<PropertyFilters>({});
 
   const {
     data: onSale,
@@ -167,11 +161,40 @@ const Properties = () => {
     refetch: refetchFavorites,
   } = useFavoriteProperties(params);
 
-  const gridRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     setParams(initialParams);
-  }, [initialParams]);
+    sidebarFiltersRef.current = initialSidebarFilters;
+    searchFiltersRef.current = initialSearchFilters;
+  }, [initialParams, initialSearchFilters, initialSidebarFilters]);
+
+  useEffect(() => {
+    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(
+        PROPERTY_SAVED_SEARCHES_STORAGE_KEY,
+      );
+      const parsed = raw ? JSON.parse(raw) : [];
+      setSavedSearches(normalizeSavedSearches(parsed));
+    } catch {
+      setSavedSearches([]);
+    } finally {
+      setSavedSearchesHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!savedSearchesHydrated) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      PROPERTY_SAVED_SEARCHES_STORAGE_KEY,
+      JSON.stringify(savedSearches),
+    );
+  }, [savedSearches, savedSearchesHydrated]);
 
   const isAllTab = activeTab === "all";
   const currentData = isAllTab ? onSale : favorites;
@@ -182,17 +205,17 @@ const Properties = () => {
   const currentResults = currentData?.data?.results || [];
   const hasCurrentResults = currentResults.length > 0;
   const contextContent = useMemo(() => getContextContent(params), [params]);
+
   const searchSyncKey = useMemo(
     () =>
       JSON.stringify({
-        query: initialParams.query || "",
-        demandType: initialParams.demandType || "all",
-        propertyType: initialParams.propertyType || "all",
-        maxPrice: initialParams.maxPrice || 5,
+        query: initialSearchFilters.query || "",
+        demandType: initialSearchFilters.demandType || "all",
+        propertyType: initialSearchFilters.propertyType || "all",
+        maxPrice: initialSearchFilters.maxPrice ?? 5,
       }),
-    [initialParams],
+    [initialSearchFilters],
   );
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const activeFilterCount = useMemo(
     () =>
       [
@@ -201,120 +224,256 @@ const Properties = () => {
         params["features.direction"],
         params.minBedrooms,
         params.minBathrooms,
+        params.query,
+        params.demandType,
+        params.propertyType,
+        params.maxPrice,
       ].filter(Boolean).length,
     [params],
   );
 
-  const handlePageChange = (page: number) => {
-    setParams((prev) => ({ ...prev, page }));
-    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  const savedSearchQueryString = useMemo(
+    () =>
+      buildPropertyQueryString({
+        params,
+        includePage: false,
+        includeLimit: false,
+      }),
+    [params],
+  );
+  const canSaveCurrentSearch = savedSearchQueryString.length > 0;
 
-  const handleTabChange = (tab: TabType) => {
-    // Reset to page 1 when switching tabs, keep filters
-    setParams((prev) => ({ ...prev, page: 1 }));
-    const nextUrlParams = new URLSearchParams(searchParams.toString());
+  const replacePropertiesRoute = (
+    nextParams: IParamsPagination,
+    nextTab: PropertyTabType = activeTab,
+  ) => {
+    const nextQuery = buildPropertyQueryString({
+      params: nextParams,
+      tab: nextTab,
+    });
 
-    if (tab === "favorites") {
-      nextUrlParams.set("tab", "favorites");
-    } else {
-      nextUrlParams.delete("tab");
-    }
-
-    const nextQuery = nextUrlParams.toString();
     router.replace(`/properties${nextQuery ? `?${nextQuery}` : ""}`, {
       scroll: false,
     });
   };
 
+  const buildSavedSearchName = () => {
+    const parts: string[] = [];
+
+    if (typeof params.query === "string" && params.query.trim()) {
+      parts.push(params.query.trim());
+    }
+
+    if (params.demandType === "SALE") {
+      parts.push(t("search.demandSale"));
+    } else if (params.demandType === "RENT") {
+      parts.push(t("search.demandRent"));
+    }
+
+    const propertyTypeLabels: Record<string, string> = {
+      APARTMENT: t("search.typeApartment"),
+      HOUSE: t("search.typeHouse"),
+      STREET_HOUSE: t("search.typeStreetHouse"),
+      VILLA: t("search.typeVilla"),
+      LAND: t("search.typeLand"),
+      OTHER: t("search.typeOther"),
+    };
+
+    if (
+      typeof params.propertyType === "string" &&
+      propertyTypeLabels[params.propertyType]
+    ) {
+      parts.push(propertyTypeLabels[params.propertyType]);
+    }
+
+    if (typeof params.maxPrice === "number") {
+      parts.push(
+        savedSearchesT("priceCap", {
+          price: params.maxPrice,
+        }),
+      );
+    }
+
+    if (parts.length === 0) {
+      parts.push(savedSearchesT("fallbackName"));
+    }
+
+    return parts.slice(0, 3).join(" | ");
+  };
+
+  const handlePageChange = (page: number) => {
+    setParams((prev) => {
+      const nextParams = { ...prev, page };
+      replacePropertiesRoute(nextParams);
+      return nextParams;
+    });
+    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleTabChange = (tab: PropertyTabType) => {
+    const nextParams = { ...params, page: 1 };
+    setParams(nextParams);
+    replacePropertiesRoute(nextParams, tab);
+  };
+
   const handleResetFilters = () => {
     sidebarFiltersRef.current = {};
     searchFiltersRef.current = {};
-    setParams(initialParams);
+    setParams((prev) => {
+      const nextParams = {
+        page: DEFAULT_PROPERTY_PARAMS.page,
+        limit: prev.limit || DEFAULT_PROPERTY_PARAMS.limit,
+      };
+      replacePropertiesRoute(nextParams);
+      return nextParams;
+    });
   };
-
-  // Refs to track current sidebar and search filters separately
-  const sidebarFiltersRef = useRef<PropertyFilters>({});
-  const searchFiltersRef = useRef<PropertyFilters>({});
 
   const handleFilterChange = (filters: PropertyFilters) => {
     sidebarFiltersRef.current = filters;
     setParams((prev) => {
       const { limit } = prev;
-      return { page: 1, limit, ...searchFiltersRef.current, ...filters };
+      const nextParams = {
+        page: 1,
+        limit,
+        ...searchFiltersRef.current,
+        ...filters,
+      };
+      replacePropertiesRoute(nextParams);
+      return nextParams;
     });
   };
 
   const handleSearchChange = (filters: SearchFilters) => {
-    const searchParams: PropertyFilters = {};
-    if (filters.demandType) searchParams.demandType = filters.demandType;
-    if (filters.propertyType) searchParams.propertyType = filters.propertyType;
-    if (filters.maxPrice) searchParams.maxPrice = filters.maxPrice;
-    if (filters.query) searchParams.query = filters.query;
-    searchFiltersRef.current = searchParams;
+    const nextSearchParams: PropertyFilters = {};
+
+    if (filters.demandType) nextSearchParams.demandType = filters.demandType;
+    if (filters.propertyType)
+      nextSearchParams.propertyType = filters.propertyType;
+    if (typeof filters.maxPrice === "number") {
+      nextSearchParams.maxPrice = filters.maxPrice;
+    }
+    if (filters.query) nextSearchParams.query = filters.query;
+
+    searchFiltersRef.current = nextSearchParams;
     setParams((prev) => {
       const { limit } = prev;
-      return { page: 1, limit, ...sidebarFiltersRef.current, ...searchParams };
+      const nextParams = {
+        page: 1,
+        limit,
+        ...sidebarFiltersRef.current,
+        ...nextSearchParams,
+      };
+      replacePropertiesRoute(nextParams);
+      return nextParams;
     });
   };
 
   const handleSortChange = (val: string) => {
     switch (val) {
       case "price_asc":
-        setParams((prev) => ({
-          ...prev,
-          page: 1,
-          sortField: "features.price",
-          sortOrder: "asc",
-        }));
+        setParams((prev) => {
+          const nextParams = {
+            ...prev,
+            page: 1,
+            sortField: "features.price",
+            sortOrder: "asc",
+          };
+          replacePropertiesRoute(nextParams);
+          return nextParams;
+        });
         break;
       case "price_desc":
-        setParams((prev) => ({
-          ...prev,
-          page: 1,
-          sortField: "features.price",
-          sortOrder: "desc",
-        }));
+        setParams((prev) => {
+          const nextParams = {
+            ...prev,
+            page: 1,
+            sortField: "features.price",
+            sortOrder: "desc",
+          };
+          replacePropertiesRoute(nextParams);
+          return nextParams;
+        });
         break;
       default:
         setParams((prev) => {
           const nextParams = { ...prev, page: 1 };
           delete nextParams.sortField;
           delete nextParams.sortOrder;
+          replacePropertiesRoute(nextParams);
           return nextParams;
         });
         break;
     }
   };
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const handleOpenSaveSearchDialog = () => {
+    const existingSearch = savedSearches.find(
+      (item) => item.queryString === savedSearchQueryString,
+    );
+    setSavedSearchName(existingSearch?.name || buildSavedSearchName());
+    setIsSaveSearchDialogOpen(true);
+  };
 
-  useEffect(() => {
-    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
-  }, []);
+  const handleSaveCurrentSearch = () => {
+    const trimmedName = savedSearchName.trim();
+
+    if (!trimmedName || !canSaveCurrentSearch) {
+      return;
+    }
+
+    const existingSearch = savedSearches.find(
+      (item) => item.queryString === savedSearchQueryString,
+    );
+
+    setSavedSearches((prev) =>
+      upsertSavedSearch({
+        items: prev,
+        name: trimmedName,
+        queryString: savedSearchQueryString,
+        existingId: existingSearch?.id,
+      }),
+    );
+    setIsSaveSearchDialogOpen(false);
+  };
+
+  const handleApplySavedSearch = (queryString: string) => {
+    const nextSearchParams = new URLSearchParams(queryString);
+    const nextParams = buildParamsFromSearchParams(nextSearchParams);
+
+    sidebarFiltersRef.current = extractSidebarFiltersFromParams(nextParams);
+    searchFiltersRef.current = extractSearchFiltersFromParams(nextParams);
+    setParams(nextParams);
+
+    router.replace(`/properties${queryString ? `?${queryString}` : ""}`, {
+      scroll: false,
+    });
+  };
+
+  const handleDeleteSavedSearch = (id: string) => {
+    setSavedSearches((prev) => prev.filter((item) => item.id !== id));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <AdvancedSearch
         onSearchChange={handleSearchChange}
         initialFilters={{
-          query: String(initialParams.query || ""),
-          demandType: String(initialParams.demandType || "all"),
-          propertyType: String(initialParams.propertyType || "all"),
-          maxPrice:
-            typeof initialParams.maxPrice === "number"
-              ? initialParams.maxPrice
-              : undefined,
+          query: initialSearchFilters.query || "",
+          demandType: initialSearchFilters.demandType || "all",
+          propertyType: initialSearchFilters.propertyType || "all",
+          maxPrice: initialSearchFilters.maxPrice,
         }}
         syncKey={searchSyncKey}
       />
 
-      <main className="container mx-auto px-4 md:px-20 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <main className="container mx-auto px-4 py-8 md:px-20">
+        <div className="flex flex-col gap-8 lg:flex-row">
           <FilterSidebar
             className="hidden lg:block lg:w-1/4"
             onReset={handleResetFilters}
             onFilterChange={handleFilterChange}
+            initialFilters={initialSidebarFilters}
           />
 
           <div className="flex-1" ref={gridRef}>
@@ -337,45 +496,67 @@ const Properties = () => {
               </div>
             </section>
 
-            {/* Tabs */}
             <div className="mb-6 overflow-x-auto">
               <div className="inline-flex min-w-max items-center gap-1 rounded-xl bg-gray-100 p-1">
                 <button
                   type="button"
                   onClick={() => handleTabChange("all")}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
                     isAllTab
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <Search className="w-4 h-4" />
+                  <Search className="h-4 w-4" />
                   {t("tabs.allProperties")}
                 </button>
-                {isLoggedIn && (
+                {isLoggedIn ? (
                   <button
                     type="button"
                     onClick={() => handleTabChange("favorites")}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
                       !isAllTab
                         ? "bg-white text-red-600 shadow-sm"
                         : "text-gray-500 hover:text-gray-700"
                     }`}
                   >
                     <Heart
-                      className={`w-4 h-4 ${!isAllTab ? "fill-current" : ""}`}
+                      className={`h-4 w-4 ${!isAllTab ? "fill-current" : ""}`}
                     />
                     {t("tabs.myFavorites")}
                     {favorites?.data?.totalResults !== undefined &&
-                      favorites.data.totalResults > 0 && (
-                        <span className="bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                          {favorites.data.totalResults}
-                        </span>
-                      )}
+                    favorites.data.totalResults > 0 ? (
+                      <span className="min-w-[20px] rounded-full bg-red-100 px-1.5 py-0.5 text-center text-xs font-bold text-red-600">
+                        {favorites.data.totalResults}
+                      </span>
+                    ) : null}
                   </button>
-                )}
+                ) : null}
               </div>
             </div>
+
+            {isAllTab ? (
+              <>
+                {recentlyViewedHydrated ? (
+                  <div className="mb-6">
+                    <RecentlyViewedSection
+                      items={recentlyViewedItems}
+                      maxItems={3}
+                      onClear={clearRecentlyViewed}
+                    />
+                  </div>
+                ) : null}
+
+                <SavedSearchesPanel
+                  items={savedSearches}
+                  activeQueryString={savedSearchQueryString}
+                  canSaveCurrentSearch={canSaveCurrentSearch}
+                  onOpenSaveDialog={handleOpenSaveSearchDialog}
+                  onApply={handleApplySavedSearch}
+                  onDelete={handleDeleteSavedSearch}
+                />
+              </>
+            ) : null}
 
             <div className="mb-6 grid grid-cols-1 gap-3 lg:hidden">
               <button
@@ -411,14 +592,14 @@ const Properties = () => {
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
                   {isAllTab ? t("heading.allTitle") : t("heading.favTitle")}
                 </h1>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="mt-1 text-sm text-gray-500">
                   {currentLoading ? (
-                    <span className="inline-block h-4 w-40 bg-gray-200 rounded animate-pulse" />
+                    <span className="inline-block h-4 w-40 animate-pulse rounded bg-gray-200" />
                   ) : (
                     t("heading.showing", {
                       count: currentResults.length,
@@ -429,7 +610,7 @@ const Properties = () => {
               </div>
 
               <div className="hidden items-center gap-3 lg:flex">
-                <span className="text-gray-500 text-sm font-medium">
+                <span className="text-sm font-medium text-gray-500">
                   {t("sort.label")}
                 </span>
                 <div className="w-48">
@@ -442,25 +623,23 @@ const Properties = () => {
                       { value: "price_asc", label: t("sort.priceLowHigh") },
                       { value: "price_desc", label: t("sort.priceHighLow") },
                     ]}
-                    className="border-gray-200 h-10 bg-white"
+                    className="h-10 border-gray-200 bg-white"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Grid with transition */}
             <div className="relative">
-              {/* Fetching overlay — spinner on top of stale data */}
-              {currentFetching && !currentLoading && (
-                <div className="absolute inset-0 z-10 flex items-start justify-center pt-32 pointer-events-none">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                    <Loader2 className="w-6 h-6 text-red-600 animate-spin" />
+              {currentFetching && !currentLoading ? (
+                <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-32">
+                  <div className="rounded-full bg-white/80 p-3 shadow-lg backdrop-blur-sm">
+                    <Loader2 className="h-6 w-6 animate-spin text-red-600" />
                   </div>
                 </div>
-              )}
+              ) : null}
 
               <div
-                className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300 ${
+                className={`grid grid-cols-1 gap-6 transition-opacity duration-300 md:grid-cols-2 xl:grid-cols-3 ${
                   currentFetching && !currentLoading
                     ? "opacity-50"
                     : "opacity-100"
@@ -592,18 +771,18 @@ const Properties = () => {
             </div>
 
             {!currentLoading &&
-              !currentError &&
-              (currentData?.data?.totalResults || 0) > 0 && (
-                <div className="mt-6 flex justify-center w-full">
-                  <CsPagination
-                    total={currentData?.data?.totalResults || 0}
-                    current={currentData?.data?.page || 1}
-                    pageSize={currentData?.data?.limit || 6}
-                    onChange={handlePageChange}
-                    disabled={currentFetching}
-                  />
-                </div>
-              )}
+            !currentError &&
+            (currentData?.data?.totalResults || 0) > 0 ? (
+              <div className="mt-6 flex w-full justify-center">
+                <CsPagination
+                  total={currentData?.data?.totalResults || 0}
+                  current={currentData?.data?.page || 1}
+                  pageSize={currentData?.data?.limit || 6}
+                  onChange={handlePageChange}
+                  disabled={currentFetching}
+                />
+              </div>
+            ) : null}
           </div>
         </div>
       </main>
@@ -626,6 +805,30 @@ const Properties = () => {
             className="border-none p-0"
             onReset={handleResetFilters}
             onFilterChange={handleFilterChange}
+            initialFilters={initialSidebarFilters}
+          />
+        </div>
+      </CsDialog>
+
+      <CsDialog
+        open={isSaveSearchDialogOpen}
+        onOpenChange={setIsSaveSearchDialogOpen}
+        title={savedSearchesT("dialogTitle")}
+        okText={savedSearchesT("saveAction")}
+        cancelText={savedSearchesT("cancelAction")}
+        onOk={handleSaveCurrentSearch}
+        onCancel={() => setIsSaveSearchDialogOpen(false)}
+      >
+        <div className="space-y-4">
+          <p className="text-sm leading-6 text-stone-600">
+            {savedSearchesT("dialogDescription")}
+          </p>
+          <Input
+            value={savedSearchName}
+            onChange={(event) => setSavedSearchName(event.target.value)}
+            placeholder={savedSearchesT("namePlaceholder")}
+            maxLength={80}
+            preIcon={<BookmarkPlus className="h-4 w-4" />}
           />
         </div>
       </CsDialog>

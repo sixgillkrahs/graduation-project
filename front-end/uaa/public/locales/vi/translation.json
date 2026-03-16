@@ -1,134 +1,134 @@
 {
-  "welcome": "Chào mừng bạn đến với React + Vite + i18n!",
-  "resource": {
-    "placeholder": "Tìm kiếm theo tên hoặc đường dẫn",
-    "title": "Tài nguyên",
-    "name": "Tên",
-    "path": "Đường dẫn",
-    "createdAt": "Ngày tạo",
-    "updatedAt": "Ngày cập nhật"
-  },
-  "permission": {
-    "column": {
-      "name": "Tên",
-      "resource": "Tài nguyên",
-      "operation": "Hành động",
-      "active": "Kích hoạt",
-      "createdAt": "Ngày tạo",
-      "updatedAt": "Ngày cập nhật",
-      "activate": "Kích hoạt",
-      "inactivate": "Vô hiệu hóa",
-      "description": "Mô tả"
-    },
-    "placeholder": {
-      "name": "Tìm kiếm theo tên quyền",
-      "operation": "Tìm kiếm theo phương thức",
-      "activeStatus": "Tìm kiếm theo trạng thái kích hoạt",
-      "enterPermissionName": "Nhập tên quyền",
-      "enterDescription": "Nhập mô tả",
-      "resource": "Chọn tài nguyên",
-      "enterOperation": "Chọn phương thức"
-      
-    },
-    "validate": {
-      "name": "Tên quyền không được để trống",
-      "operation": "Vui lòng nhập phương thức",
-      "resource": "Vui lòng chọn tài nguyên"
-    }
-  },
-  "tabs": {
-    "roles": "Vai trò",
-    "permissions": "Quyền",
-    "resources": "Tài nguyên",
-    "users":"Người dùng"
-  },
-  "columns": {
-     "action": "Hành động",
-     "stt": "STT"
-  },
-  "button": {
-    "add": "Thêm mới",
-    "save": "Lưu",
-    "cancel": "Hủy",
-    "edit": "Chỉnh sửa",
-    "delete": "Xóa",
-    "view": "Xem chi tiết",
-    "export": "Xuất tệp",
-    "close": "Đóng",
-    "confirm": "Xác nhận",
-    "update": "Cập nhật",
-    "reject": "Từ chối",
-    "approve": "Phê duyệt"
-  },
-  "confirm": {
-    "delete": {
-      "title": "Xác nhận xóa",
-      "content": "Bạn có chắc chắn muốn xóa không?"
-    }
-  },
-  "message": {
-    "updateSuccess": "Cập nhật thành công",
-    "updateError": "Cập nhật thất bại",
-    "notFound": "Không tìm thấy bất động sản"
-  },
-  "menu": {
-    "dashboard": "Bảng điều khiển",
-    "agent": "Môi giới",
-    "agentRegistration": "Đăng ký môi giới",
-    "agentManage": "Quản lý môi giới",
-    "properties": "Bất động sản",
-    "propertiesPending": "Bất động sản chờ duyệt",
-    "propertiesRejected": "Bất động sản bị từ chối",
-    "propertiesPublished": "Bất động sản đã duyệt",
-    "propertiesDetail": "Chi tiết bất động sản",
-    "user-management": "Quản lý người dùng",
-    "jobs": "Tiến trình hệ thống",
-    "reviews": "Đánh giá",
-    "reviewModeration": "Kiểm duyệt công khai",
-    "setting": "Cài đặt"
-  },
-  "pagination": {
-    "totalRecords": "Tổng số bản ghi",
-    "records": "bản ghi"
-  },
-  "roles": {
-    "title": "vai trò",
-    "name": "Tên vai trò",
-    "code": "Mã vai trò",
-    "active": "Kích hoạt",
-    "default": "Mặc định",
-    "createdAt": "Ngày tạo",
-    "updatedAt": "Ngày cập nhật"
-  },
-  "users": {
-    "username": "Tài khoản",
-    "fullName": "Tên người dùng",
-    "phone": "Số điện thoại",
-    "active": "Trạng thái",
-    "createdAt": "Ngày tạo",
-    "role":"Vai trò"
-  },
-  "properties": {
-    "propertyType": "Loại",
-    "demandType": "Nhu cầu",
-    "area": "Diện tích (m²)",
-    "price": "Giá",
-    "location": "Vị Trí",
-    "poster": "Người đăng",
-    "phone": "SĐT",
-    "status": "Trạng thái",
-    "createdAt": "Ngày tạo",
-    "propertyDetail": "Chi tiết bất động sản",
-    "description": "Mô tả",
-    "features": "Đặc điểm",
-    "bedrooms": "Phòng ngủ",
-    "bathrooms": "Phòng tắm",
-    "direction": "Hướng",
-    "furniture": "Nội thất",
-    "legalStatus": "Pháp lý"
-  },
-  "common": {
-    "sale": "Bán",
-    "rent": "Thuê"
-  }
+    "welcome":  "Chào mừng bạn đến với React + Vite + i18n!",
+    "resource":  {
+                     "placeholder":  "Tìm kiếm theo tên hoặc đường dẫn",
+                     "title":  "Tài nguyên",
+                     "name":  "Tên",
+                     "path":  "Đường dẫn",
+                     "createdAt":  "Ngày tạo",
+                     "updatedAt":  "Ngày cập nhật"
+                 },
+    "permission":  {
+                       "column":  {
+                                      "name":  "Tên",
+                                      "resource":  "Tài nguyên",
+                                      "operation":  "Hành động",
+                                      "active":  "Kích hoạt",
+                                      "createdAt":  "Ngày tạo",
+                                      "updatedAt":  "Ngày cập nhật",
+                                      "activate":  "Kích hoạt",
+                                      "inactivate":  "Vô hiệu hóa",
+                                      "description":  "Mô tả"
+                                  },
+                       "placeholder":  {
+                                           "name":  "Tìm kiếm theo tên quyền",
+                                           "operation":  "Tìm kiếm theo phương thức",
+                                           "activeStatus":  "Tìm kiếm theo trạng thái kích hoạt",
+                                           "enterPermissionName":  "Nhập tên quyền",
+                                           "enterDescription":  "Nhập mô tả",
+                                           "resource":  "Chọn tài nguyên",
+                                           "enterOperation":  "Chọn phương thức"
+                                       },
+                       "validate":  {
+                                        "name":  "Tên quyền không được để trống",
+                                        "operation":  "Vui lòng nhập phương thức",
+                                        "resource":  "Vui lòng chọn tài nguyên"
+                                    }
+                   },
+    "tabs":  {
+                 "roles":  "Vai trò",
+                 "permissions":  "Quyền",
+                 "resources":  "Tài nguyên",
+                 "users":  "Người dùng"
+             },
+    "columns":  {
+                    "action":  "Hành động",
+                    "stt":  "STT"
+                },
+    "button":  {
+                   "add":  "Thêm mới",
+                   "save":  "Lưu",
+                   "cancel":  "Hủy",
+                   "edit":  "Chỉnh sửa",
+                   "delete":  "Xóa",
+                   "view":  "Xem chi tiết",
+                   "export":  "Xuất tệp",
+                   "close":  "Đóng",
+                   "confirm":  "Xác nhận",
+                   "update":  "Cập nhật",
+                   "reject":  "Từ chối",
+                   "approve":  "Phê duyệt"
+               },
+    "confirm":  {
+                    "delete":  {
+                                   "title":  "Xác nhận xóa",
+                                   "content":  "Bạn có chắc chắn muốn xóa không?"
+                               }
+                },
+    "message":  {
+                    "updateSuccess":  "Cập nhật thành công",
+                    "updateError":  "Cập nhật thất bại",
+                    "notFound":  "Không tìm thấy bất động sản"
+                },
+    "menu":  {
+                 "dashboard":  "Bảng điều khiển",
+                 "agent":  "Môi giới",
+                 "agentRegistration":  "Đăng ký môi giới",
+                 "agentManage":  "Quản lý môi giới",
+                 "properties":  "Bất động sản",
+                 "propertiesPending":  "Bất động sản chờ duyệt",
+                 "propertiesRejected":  "Bất động sản bị từ chối",
+                 "propertiesPublished":  "Bất động sản đã duyệt",
+                 "propertiesDetail":  "Chi tiết bất động sản",
+                 "user-management":  "Quản lý người dùng",
+                 "jobs":  "Tiến trình hệ thống",
+                 "reviews":  "Đánh giá",
+                 "reviewModeration":  "Kiểm duyệt công khai",
+                 "setting":  "Cài đặt",
+                 "reportInbox":  "Báo cáo"
+             },
+    "pagination":  {
+                       "totalRecords":  "Tổng số bản ghi",
+                       "records":  "bản ghi"
+                   },
+    "roles":  {
+                  "title":  "vai trò",
+                  "name":  "Tên vai trò",
+                  "code":  "Mã vai trò",
+                  "active":  "Kích hoạt",
+                  "default":  "Mặc định",
+                  "createdAt":  "Ngày tạo",
+                  "updatedAt":  "Ngày cập nhật"
+              },
+    "users":  {
+                  "username":  "Tài khoản",
+                  "fullName":  "Tên người dùng",
+                  "phone":  "Số điện thoại",
+                  "active":  "Trạng thái",
+                  "createdAt":  "Ngày tạo",
+                  "role":  "Vai trò"
+              },
+    "properties":  {
+                       "propertyType":  "Loại",
+                       "demandType":  "Nhu cầu",
+                       "area":  "Diện tích (m²)",
+                       "price":  "Giá",
+                       "location":  "Vị Trí",
+                       "poster":  "Người đăng",
+                       "phone":  "SĐT",
+                       "status":  "Trạng thái",
+                       "createdAt":  "Ngày tạo",
+                       "propertyDetail":  "Chi tiết bất động sản",
+                       "description":  "Mô tả",
+                       "features":  "Đặc điểm",
+                       "bedrooms":  "Phòng ngủ",
+                       "bathrooms":  "Phòng tắm",
+                       "direction":  "Hướng",
+                       "furniture":  "Nội thất",
+                       "legalStatus":  "Pháp lý"
+                   },
+    "common":  {
+                   "sale":  "Bán",
+                   "rent":  "Thuê"
+               }
 }

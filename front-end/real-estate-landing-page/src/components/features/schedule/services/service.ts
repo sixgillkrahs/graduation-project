@@ -5,6 +5,7 @@ import {
   CreateScheduleRequest,
   IScheduleDTO,
   RequestScheduleDto,
+  ScheduleAvailabilityDto,
   SCHEDULE_STATUS,
   SCHEDULE_TYPE,
 } from "../dto/schedule.dto";
@@ -52,6 +53,17 @@ export default class ScheduleService {
       url: ScheduleEndpoint.requestSchedule(),
       method: AxiosMethod.POST,
       data,
+    });
+  };
+
+  public static readonly getAvailability = (params: {
+    listingId: string;
+    date: string;
+  }): Promise<IResp<ScheduleAvailabilityDto>> => {
+    return request({
+      url: ScheduleEndpoint.getAvailability(),
+      method: AxiosMethod.GET,
+      params,
     });
   };
 

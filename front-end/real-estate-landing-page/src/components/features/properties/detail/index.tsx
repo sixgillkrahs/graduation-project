@@ -1,7 +1,7 @@
 "use client";
 
 import type { AxiosError } from "axios";
-import { isBefore, startOfDay } from "date-fns";
+import { format, isBefore, startOfDay } from "date-fns";
 import { AlertCircle, ArrowLeft, House } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
@@ -28,7 +28,11 @@ import {
 } from "../../leads/services/type";
 import { useCreateConversation } from "../../message/services/mutate";
 import { useRequestSchedule } from "../../schedule/services/mutation";
+import { useGetScheduleAvailability } from "../../schedule/services/query";
 import { mapPropertyToCompareItem } from "../compare/compare.utils";
+import RecentlyViewedSection from "../components/RecentlyViewedSection";
+import { mapPropertyToRecentlyViewed } from "../recently-viewed/recently-viewed.utils";
+import { useRecentlyViewedProperties } from "../recently-viewed/useRecentlyViewedProperties";
 import { useIncreaseView, useRecordInteraction } from "../services/mutate";
 import { usePropertyDetail, useRecommendedProperties } from "../services/query";
 import PropertyDetailGallery from "./PropertyDetailGallery";
@@ -120,6 +124,11 @@ const PropertyDetail = () => {
   const [today, setToday] = useState<Date | null>(null);
   const isClientLoggedIn = Boolean(me?.data?.userId);
   const prop = property?.data;
+  const {
+    items: recentlyViewedItems,
+    hydrated: recentlyViewedHydrated,
+    trackProperty,
+  } = useRecentlyViewedProperties(id);
 
   const isPastTimeSlot = useCallback(
     (selectedDate: Date | undefined, slot: string) => {
@@ -158,18 +167,6 @@ const PropertyDetail = () => {
   }, [id, increaseView]);
 
   useEffect(() => {
-    if (!today || !date || !isPastTimeSlot(date, timeSlot)) {
-      return;
-    }
-
-    const nextAvailableTimeSlot = TOUR_TIME_SLOTS.find(
-      (slot) => !isPastTimeSlot(date, slot),
-    );
-
-    setTimeSlot(nextAvailableTimeSlot || "");
-  }, [date, isPastTimeSlot, timeSlot, today]);
-
-  useEffect(() => {
     if (!id) {
       return;
     }
@@ -189,6 +186,14 @@ const PropertyDetail = () => {
       customerEmail: prev.customerEmail || me.data.userId.email || "",
     }));
   }, [me?.data?.userId]);
+
+  useEffect(() => {
+    if (!prop || !recentlyViewedHydrated) {
+      return;
+    }
+
+    trackProperty(mapPropertyToRecentlyViewed(prop));
+  }, [prop, recentlyViewedHydrated, trackProperty]);
 
   const displayPrice = useMemo(
     () =>
@@ -241,6 +246,72 @@ const PropertyDetail = () => {
     () => (recommendedData?.data?.length || 0) > visibleRecommendedCount,
     [recommendedData?.data?.length, visibleRecommendedCount],
   );
+  const availabilityDate = useMemo(
+    () => (date ? format(date, "yyyy-MM-dd") : ""),
+    [date],
+  );
+  const {
+    data: availabilityResponse,
+    isLoading: isLoadingAvailability,
+    refetch: refetchAvailability,
+  } = useGetScheduleAvailability(
+    id && availabilityDate
+      ? { listingId: id, date: availabilityDate }
+      : undefined,
+  );
+  const availability = availabilityResponse?.data;
+  const availabilitySlotLookup = useMemo(
+    () => new Map((availability?.slots || []).map((slot) => [slot.slot, slot])),
+    [availability?.slots],
+  );
+  const availabilitySlots = useMemo(
+    () =>
+      TOUR_TIME_SLOTS.map((slot) => {
+        const availabilitySlot = availabilitySlotLookup.get(slot);
+
+        return {
+          slot,
+          endTime: availabilitySlot?.endTime || "",
+          isAvailableFromApi: availabilitySlot?.isAvailable ?? true,
+          conflictCount: availabilitySlot?.conflictCount || 0,
+        };
+      }),
+    [availabilitySlotLookup],
+  );
+  const availableSlotCount = useMemo(
+    () =>
+      availabilitySlots.filter(
+        ({ slot, isAvailableFromApi }) =>
+          isAvailableFromApi && !isPastTimeSlot(date, slot),
+      ).length,
+    [availabilitySlots, date, isPastTimeSlot],
+  );
+
+  useEffect(() => {
+    if (!today || !date) {
+      return;
+    }
+
+    const nextAvailableTimeSlot =
+      availabilitySlots.find(
+        ({ slot, isAvailableFromApi }) =>
+          isAvailableFromApi && !isPastTimeSlot(date, slot),
+      )?.slot || "";
+    const selectedSlot = availabilitySlots.find(
+      (slot) => slot.slot === timeSlot,
+    );
+    const isCurrentSlotAvailable =
+      Boolean(timeSlot) &&
+      Boolean(selectedSlot?.isAvailableFromApi) &&
+      !isPastTimeSlot(date, timeSlot);
+
+    if (isCurrentSlotAvailable || timeSlot === nextAvailableTimeSlot) {
+      return;
+    }
+
+    setTimeSlot(nextAvailableTimeSlot);
+  }, [availabilitySlots, date, isPastTimeSlot, timeSlot, today]);
+
   const propertyStatusCode = (error as AxiosError | null)?.response?.status;
 
   if (isLoading) {
@@ -513,6 +584,12 @@ const PropertyDetail = () => {
       return;
     }
 
+    const selectedAvailability = availabilitySlotLookup.get(timeSlot);
+    if (selectedAvailability && !selectedAvailability.isAvailable) {
+      toast.error("Khung gio nay vua duoc dat. Vui long chon khung gio khac");
+      return;
+    }
+
     const buyerProfile = requireTrackedContactProfile(
       "Complete your buyer profile with display name, phone number, and email before booking an appointment.",
     );
@@ -530,6 +607,7 @@ const PropertyDetail = () => {
         startTime: timeSlot,
         customerNote,
       });
+      void refetchAvailability();
       void recordInteraction({ id, type: "SCHEDULE_REQUEST" });
       setIsBookingSuccess(true);
       toast.success("Gui yeu cau thanh cong!");
@@ -649,7 +727,11 @@ const PropertyDetail = () => {
       <main className="container mx-auto px-4 md:px-20">
         <div className="flex flex-col gap-12 lg:flex-row">
           <div className="w-full space-y-10 lg:w-[65%]">
-            <PropertyDetailSummary property={prop} compareItem={compareItem} />
+            <PropertyDetailSummary
+              property={prop}
+              compareItem={compareItem}
+              displayPrice={displayPrice}
+            />
             <PropertyDetailOverview
               property={prop}
               amenities={amenities}
@@ -670,7 +752,10 @@ const PropertyDetail = () => {
             timeSlot={timeSlot}
             customerNote={customerNote}
             today={today || new Date(0)}
-            tourTimeSlots={TOUR_TIME_SLOTS}
+            availabilitySlots={availabilitySlots}
+            availableSlotCount={availableSlotCount}
+            totalSlotCount={availability?.totalSlots || TOUR_TIME_SLOTS.length}
+            isLoadingAvailability={isLoadingAvailability}
             onDateChange={setDate}
             onTimeSlotChange={setTimeSlot}
             onCustomerNoteChange={setCustomerNote}
@@ -683,7 +768,10 @@ const PropertyDetail = () => {
             isBuyerProfileManaged={isClientLoggedIn}
             isBuyerProfileComplete={getBuyerProfileSnapshot().isComplete}
             onEditBuyerProfile={() => router.push(ROUTES.PROFILE_EDIT)}
-            onResetBookingSuccess={() => setIsBookingSuccess(false)}
+            onResetBookingSuccess={() => {
+              setIsBookingSuccess(false);
+              void refetchAvailability();
+            }}
             isInquirySuccess={isInquirySuccess}
             isSubmittingInquiry={isSubmittingLead}
             inquiryForm={inquiryForm}
@@ -708,6 +796,14 @@ const PropertyDetail = () => {
             void refetchRecommended();
           }}
         />
+
+        {recentlyViewedItems.length > 0 ? (
+          <RecentlyViewedSection
+            items={recentlyViewedItems}
+            maxItems={3}
+            className="mt-8"
+          />
+        ) : null}
       </main>
 
       <PropertyPhotoLightbox
