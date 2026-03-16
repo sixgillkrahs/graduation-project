@@ -10,7 +10,7 @@
     "backfill:property-sales": "tsx src/scripts/backfill-property-sales.ts",
     "refresh:agent-leaderboards": "tsx src/scripts/refresh-agent-leaderboards.ts",
     "dev:clean": "rimraf dist && tsx watch src/index.ts",
-    "start": "node --expose-gc --trace-gc --trace-gc-ignore-scavenger dist/index.js",
+    "start": "node --expose-gc --trace-gc --trace-gc-ignore-scavenger dist/src/index.js",
     "build": "tsc -p . && tsc-alias",
     "docker:dev": "docker compose -f docker-compose.dev.yml up",
     "docker:dev:build": "docker compose -f docker-compose.dev.yml up --build",
