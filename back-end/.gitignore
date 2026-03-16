@@ -1,5 +1,7 @@
 node_modules
 .env
+.env.vps
+.env.monitoring
 .env.prod
 dist
 logs/
