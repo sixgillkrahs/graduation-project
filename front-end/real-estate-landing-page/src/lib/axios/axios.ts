@@ -1,4 +1,5 @@
 import { ErrorCode } from "@/const/error-code";
+import { getApiBaseUrl } from "@/lib/env-base-url";
 import AuthService from "@/shared/auth/AuthService";
 import axios, {
   AxiosError,
@@ -25,7 +26,7 @@ const processQueue = (error: any) => {
 
 export const client = (() => {
   return axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    baseURL: getApiBaseUrl(),
     headers: {
       Accept: "application/json, text/plain, */*",
     },

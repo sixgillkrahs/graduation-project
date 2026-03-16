@@ -3,10 +3,11 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { getAiBaseUrl } from "@/lib/env-base-url";
 
 export const fetchAI = (() => {
   return axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BASEURLAI!,
+    baseURL: getAiBaseUrl(),
     headers: {
       Accept: "application/json, text/plain, */*",
     },
