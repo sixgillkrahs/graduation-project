@@ -9,10 +9,8 @@ IOU_CONTENT_THRESHOLD = 0.7
 CORNER_MODEL_PATH = "sources/Database/OCR/weights/corner.pt"
 CONTENT_MODEL_PATH = "sources/Database/OCR/weights/content.pt"
 FACE_MODEL_PATH = "sources/Database/OCR/weights/face.pt"
-# OCR_MODEL_PATH = "sources/Database/OCR/weights/seq2seq.pth"
-# OCR_CFG = 'sources/Database/OCR/config/seq2seq_config.yml'
+OCR_MODEL_PATH = "sources/Database/OCR/weights/seq2seq.pth"
+OCR_CFG = "sources/Database/OCR/config/seq2seq_config.yml"
 DEVICE = "cpu"  # or "cuda:0" if using GPU
-# Config directory
-UPLOAD_FOLDER = "sources/Database/uploads"
 SAVE_DIR = "sources/static/results"
 FACE_DIR = "sources/static/face"

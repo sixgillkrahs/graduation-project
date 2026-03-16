@@ -6,8 +6,9 @@ __pycache__
 colab
 data
 scripts
-sources/Database
-sources/static
+sources/Database/uploads
+sources/static/results
+sources/static/face
 models/hf-moderation
 models/moderation
 models/moderation_daily

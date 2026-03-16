@@ -3,8 +3,6 @@ fastapi==0.95.2
 uvicorn==0.17.6
 python-multipart
 jinja2
-databases
-aiosqlite
 
 # ===== Utils =====
 pre-commit

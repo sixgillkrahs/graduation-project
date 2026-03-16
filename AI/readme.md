@@ -19,6 +19,17 @@ docker build -f Dockerfile.moderation -t ai-moderation-service .
 docker run --rm -p 8081:8081 ai-moderation-service
 ```
 
+docker OCR service:
+
+```bash
+docker build -t ai-ocr-service .
+docker run --rm -p 8080:8080 ai-ocr-service
+```
+
+OCR image now includes local YOLO + VietOCR weights and generates a local
+`sources/Database/OCR/config/seq2seq_config.yml` during build, so runtime does
+not need to download OCR config/model files.
+
 text moderation (vi + en) baseline:
 
 .\venv\Scripts\python.exe scripts\train_text_moderation.py

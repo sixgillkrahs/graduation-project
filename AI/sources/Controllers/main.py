@@ -1,13 +1,11 @@
-import os
 import io
+import os
 
 import numpy as np
-import uuid
-import shutil
 import yolov5
-from fastapi import APIRouter, File, Request, UploadFile
+from fastapi import APIRouter, File, UploadFile
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse,FileResponse
+from fastapi.responses import JSONResponse
 from PIL import Image
 from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
@@ -22,8 +20,20 @@ CORNER_MODEL = None
 CONTENT_MODEL = None
 detector = None
 
-UPLOAD_FOLDER = cfg.UPLOAD_FOLDER
 SAVE_DIR = cfg.SAVE_DIR
+
+
+def load_ocr_config():
+    if os.path.isfile(cfg.OCR_CFG):
+        config = Cfg.load_config_from_file(cfg.OCR_CFG)
+    else:
+        config = Cfg.load_config_from_name("vgg_seq2seq")
+
+    config["weights"] = cfg.OCR_MODEL_PATH
+    config["cnn"]["pretrained"] = False
+    config["device"] = cfg.DEVICE
+    config["predictor"]["beamsearch"] = False
+    return config
 
 
 def ensure_ocr_models():
@@ -38,10 +48,7 @@ def ensure_ocr_models():
     CONTENT_MODEL.conf = cfg.CONF_CONTENT_THRESHOLD
     CONTENT_MODEL.iou = cfg.IOU_CONTENT_THRESHOLD
 
-    config = Cfg.load_config_from_name("vgg_seq2seq")
-    config["cnn"]["pretrained"] = False
-    config["device"] = cfg.DEVICE
-    config["predictor"]["beamsearch"] = False
+    config = load_ocr_config()
     detector = Predictor(config)
 
     return CORNER_MODEL, CONTENT_MODEL, detector
@@ -58,44 +65,6 @@ async def upload(file: UploadFile = File(...)):
 
     return await extract_info(image_input=image)
 
-@router.get("/images/{filename}")
-async def get_image(filename: str):
-    file_path = os.path.join(cfg.UPLOAD_FOLDER, filename)
-    
-    if os.path.exists(file_path):
-        return FileResponse(file_path)
-    print(file_path)
-    return JSONResponse(status_code=404, content={"message": "Image not found"})
-
-
-@router.post("/upload-single")
-async def upload_single_image(file: UploadFile = File(...)):
-    if not os.path.isdir(cfg.UPLOAD_FOLDER):
-        os.mkdir(cfg.UPLOAD_FOLDER)
-
-    if not file.filename.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
-        return JSONResponse(status_code=400, content={"message": "Chỉ hỗ trợ file ảnh (png, jpg, jpeg, webp)"})
-
-    try:
-        file_extension = file.filename.split(".")[-1]
-        new_filename = f"{file.filename}-v-{uuid.uuid4()}.{file_extension}"
-        
-        file_location = os.path.join(cfg.UPLOAD_FOLDER, new_filename)
-
-        with open(file_location, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-        image_url = f"/images/{new_filename}"
-
-        return {
-            "success": True,
-            "filename": new_filename,
-            "url": image_url,
-            "message": "Upload thành công"
-        }
-
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"message": f"Lỗi server: {str(e)}"})
 
 async def extract_info(image_input=None):
     """Extract information from the uploaded image."""
@@ -120,12 +89,12 @@ async def extract_info(image_input=None):
 
     CORNER = corner_model(img)
     predictions = CORNER.pred[0]
-    categories = predictions[:, 5].tolist()  
+    categories = predictions[:, 5].tolist()
     if len(categories) != 4:
         error = "Detecting corner failed! Please ensure the image shows a clear ID card."
         return JSONResponse(status_code=401, content={"message": error})
-    boxes = utils.class_Order(predictions[:, :4].tolist(), categories)  
-    
+    boxes = utils.class_Order(predictions[:, :4].tolist(), categories)
+
     center_points = list(map(utils.get_center_point, boxes))
 
     """ Temporary fixing """
@@ -138,7 +107,7 @@ async def extract_info(image_input=None):
 
     CONTENT = content_model(aligned)
     predictions = CONTENT.pred[0]
-    categories = predictions[:, 5].tolist()  
+    categories = predictions[:, 5].tolist()
     if 7 not in categories:
         if len(categories) < 9:
             error = "Missing fields! Detecting content failed! Please ensure the ID card is fully visible."
@@ -152,22 +121,22 @@ async def extract_info(image_input=None):
 
     """ Non Maximum Suppression """
     boxes, categories = utils.non_max_suppression_fast(np.array(boxes), categories, 0.7)
-    boxes = utils.class_Order(boxes, categories) 
-    
+    boxes = utils.class_Order(boxes, categories)
+
     if not os.path.isdir(SAVE_DIR):
         os.mkdir(SAVE_DIR)
     else:
         for f in os.listdir(SAVE_DIR):
-            os.remove(os.path.join(SAVE_DIR, f)) 
+            os.remove(os.path.join(SAVE_DIR, f))
 
     for index, box in enumerate(boxes):
         left, top, right, bottom = box
         if 5 < index < 9:
-            right = right + 100 
+            right = right + 100
         cropped_image = aligned.crop((left, top, right, bottom))
         cropped_image.save(os.path.join(SAVE_DIR, f"{index}.jpg"))
 
-    FIELDS_DETECTED = []  
+    FIELDS_DETECTED = []
     for idx, img_crop in enumerate(sorted(os.listdir(SAVE_DIR))):
         current_img_path = os.path.join(SAVE_DIR, img_crop)
         if os.path.isfile(current_img_path) and current_img_path.lower().endswith((".png", ".jpg", ".jpeg")):
@@ -182,8 +151,8 @@ async def extract_info(image_input=None):
                 + [FIELDS_DETECTED[6] + ", " + FIELDS_DETECTED[7]]
                 + [FIELDS_DETECTED[8]]
             )
-        elif len(FIELDS_DETECTED) == 7 and 7 in categories: 
-            pass 
+        elif len(FIELDS_DETECTED) == 7 and 7 in categories:
+            pass
 
     response = {"data": FIELDS_DETECTED}
 
