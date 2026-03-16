@@ -54,5 +54,47 @@
       "PUBLISHED": "Published",
       "REJECTED": "Rejected"
     }
+  },
+  "reportInbox": {
+    "title": "Admin Report Inbox",
+    "description": "Review listing and agent reports submitted by users. This inbox gives admins a fast view of potentially wrong data, spam, and fake pricing.",
+    "controlDesk": "Report Notification Desk",
+    "stats": {
+      "total": "Total reports",
+      "unread": "Unread notices",
+      "listing": "Listing reports",
+      "agent": "Agent reports"
+    },
+    "listTitle": "Report notifications",
+    "listDescription": "Each item below is a moderation notice generated when a user reports a listing or agent.",
+    "searchPlaceholder": "Search current page",
+    "refresh": "Refresh inbox",
+    "empty": "No report notifications yet",
+    "table": {
+      "time": "Created at",
+      "title": "Notification",
+      "target": "Target",
+      "reason": "Reason",
+      "details": "Reporter details",
+      "noDetails": "No extra details"
+    },
+    "target": {
+      "LISTING": "Listing",
+      "AGENT": "Agent"
+    },
+    "reason": {
+      "WRONG_DATA": "Wrong data",
+      "SPAM": "Spam",
+      "FAKE_PRICE": "Fake price",
+      "OTHER": "Other"
+    },
+    "status": {
+      "read": "Read",
+      "unread": "Unread"
+    },
+    "actions": {
+      "markRead": "Mark as read",
+      "readSuccess": "Report notice marked as read."
+    }
   }
 }

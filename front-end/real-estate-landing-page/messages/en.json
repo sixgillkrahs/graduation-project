@@ -219,6 +219,30 @@
       "noFavorites": "No favorites yet",
       "noFavoritesDesc": "Start exploring properties and tap the heart icon to save your favorites here."
     },
+    "savedSearches": {
+      "title": "Saved search",
+      "description": "Save the filter set you are using now so you can jump back to it quickly from the properties page.",
+      "saveCurrent": "Save current filters",
+      "empty": "No saved searches yet. Apply a few filters and save them for quick return.",
+      "criteria": "{count} criteria",
+      "active": "Active",
+      "remove": "Remove saved search",
+      "dialogTitle": "Save search",
+      "dialogDescription": "Give this filter set a short name so you can return to it quickly from properties.",
+      "saveAction": "Save",
+      "cancelAction": "Cancel",
+      "namePlaceholder": "Example: Hanoi apartments under 5B",
+      "fallbackName": "Saved filters",
+      "priceCap": "Under {price}B"
+    },
+    "recentlyViewed": {
+      "eyebrow": "Keep the shortlist moving",
+      "title": "Recently viewed properties",
+      "description": "Jump back into listings you opened recently without rebuilding the search from scratch.",
+      "clear": "Clear history",
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
     "search": {
       "placeholder": "Search City, District, or Project...",
       "demandType": "Demand Type",
@@ -302,6 +326,15 @@
       "scheduleTour": "Schedule Tour",
       "requestInfo": "Request Info",
       "pickDate": "Pick a date",
+      "availabilityLoading": "Checking live availability...",
+      "availabilitySummary": "{available} of {total} tour slots are still open for this day.",
+      "availabilityEmpty": "This day is fully booked. Try another date.",
+      "slotHint": "Live hints sync from the agent calendar so you can avoid already-booked times.",
+      "slotAvailable": "Available",
+      "slotBooked": "Booked",
+      "slotPast": "Past",
+      "slotChooseHint": "Tap an available slot to continue.",
+      "slotSelectedHint": "Selected slot: {slot}",
       "requestBooking": "Request Booking",
       "notChargedYet": "You won't be charged yet",
       "messagePlaceholder": "Hello, I am interested in this property...",
@@ -311,6 +344,13 @@
       "saved": "Saved",
       "saveHome": "Save this home",
       "shareListings": "Share this listing",
+      "sharePrompt": "Send this public listing through link, Facebook, Zalo, or copy the URL to reach more qualified buyers naturally.",
+      "shareViaLink": "Share link",
+      "shareOnFacebook": "Facebook",
+      "shareOnZalo": "Zalo",
+      "copyLink": "Copy link",
+      "linkCopied": "Listing link copied.",
+      "shareFallbackCopied": "Quick sharing is not supported here. The listing link was copied instead.",
       "reviews": "{rating} ({count} reviews)",
       "viewAllPhotos": "View all photos",
       "similarHomes": "Similar Homes You Might Like",
@@ -664,5 +704,45 @@
       "title": "Specialties",
       "heading": "Core service areas"
     }
+  },
+  "ReportDialog": {
+    "triggers": {
+      "listing": "Report listing",
+      "agent": "Report agent"
+    },
+    "titles": {
+      "listing": "Report this listing",
+      "agent": "Report this agent"
+    },
+    "descriptions": {
+      "listing": "Let us know if this listing contains wrong information, spam, or suspicious pricing.",
+      "agent": "Let us know if this agent profile or activity looks misleading, spammy, or tied to fake pricing."
+    },
+    "fields": {
+      "reason": "Reason",
+      "details": "Details",
+      "detailsPlaceholder": "Add any useful context for the moderation team."
+    },
+    "reasons": {
+      "wrongData": "Wrong data",
+      "spam": "Spam or duplicate content",
+      "fakePrice": "Fake or misleading price",
+      "other": "Other"
+    },
+    "actions": {
+      "submit": "Submit report",
+      "cancel": "Cancel"
+    },
+    "auth": {
+      "listing": {
+        "title": "Login to report this listing",
+        "description": "Please login so we can receive your listing report and prevent abuse."
+      },
+      "agent": {
+        "title": "Login to report this agent",
+        "description": "Please login so we can receive your agent report and prevent abuse."
+      }
+    },
+    "footnote": "Reports are reviewed by the moderation team before any action is taken."
   }
 }

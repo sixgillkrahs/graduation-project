@@ -13,7 +13,7 @@ require.cache[redisModulePath] = {
       set: async () => "OK",
     },
   },
-};
+} as NodeJS.Module;
 
 const { ChatController } = require("../controllers/chat.controller.ts");
 const { ScheduleController } = require("../controllers/schedule.controller.ts");

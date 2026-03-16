@@ -15,15 +15,18 @@ import { formatPropertyPostedDate } from "@/lib/property-date";
 import type { PropertyCompareItem } from "../compare/compare.types";
 import PropertyCompareToggleButton from "../compare/PropertyCompareToggleButton";
 import type { PropertyDto } from "../dto/property.dto";
+import ShareListingButton from "./ShareListingButton";
 
 interface PropertyDetailSummaryProps {
   property: PropertyDto & { isFavorite: boolean };
   compareItem: PropertyCompareItem;
+  displayPrice: string;
 }
 
 const PropertyDetailSummary = ({
   property,
   compareItem,
+  displayPrice,
 }: PropertyDetailSummaryProps) => {
   const t = useTranslations("PropertiesPage");
   const locale = useLocale();
@@ -93,6 +96,12 @@ const PropertyDetailSummary = ({
             {property.features.furniture}
           </Badge>
           <PropertyCompareToggleButton item={compareItem} />
+          <ShareListingButton
+            property={property}
+            displayPrice={displayPrice}
+            align="start"
+            className="rounded-full border border-border bg-background px-3 py-1.5 text-foreground hover:border-primary/30 hover:bg-primary/5"
+          />
         </div>
       </div>
 

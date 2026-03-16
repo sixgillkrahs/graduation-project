@@ -145,10 +145,47 @@ export class ScheduleController extends BaseController {
         startTime,
         ScheduleController.DEFAULT_VIEWING_DURATION_MINUTES,
       );
+      const agentId = String(
+        (property as any).userId?._id || (property as any).userId,
+      );
+      const requesterUserId = String(currentUser?.userId?._id || "");
+
+      const hasConfirmedConflict = await this.scheduleService.hasScheduleConflict(
+        {
+          agentId,
+          date: new Date(date),
+          startTime,
+          endTime: computedEndTime,
+          statuses: [SCHEDULE_STATUS.CONFIRMED],
+        },
+      );
+
+      if (hasConfirmedConflict) {
+        throw new AppError("This time slot has already been booked", 409);
+      }
+
+      if (requesterUserId) {
+        const hasRequesterConflict =
+          await this.scheduleService.hasScheduleConflict({
+            agentId,
+            userId: requesterUserId,
+            date: new Date(date),
+            startTime,
+            endTime: computedEndTime,
+            statuses: [SCHEDULE_STATUS.PENDING, SCHEDULE_STATUS.CONFIRMED],
+          });
+
+        if (hasRequesterConflict) {
+          throw new AppError(
+            "You already have a request for this time slot",
+            409,
+          );
+        }
+      }
 
       await this.scheduleService.createSchedule({
-        agentId: (property as any).userId?._id || (property as any).userId,
-        userId: currentUser?.userId?._id as any,
+        agentId: agentId as any,
+        userId: requesterUserId as any,
         listingId: (property as any)?._id,
         customerName,
         customerPhone,
@@ -166,9 +203,6 @@ export class ScheduleController extends BaseController {
         color: "#10b981",
       });
 
-      const agentId = String(
-        (property as any).userId?._id || (property as any).userId,
-      );
       this.notificationQueue.enqueueNotification({
         userId: agentId,
         title: "Yeu cau dat lich moi",
@@ -189,6 +223,26 @@ export class ScheduleController extends BaseController {
       });
 
       return "Booking requested successfully";
+    });
+  };
+
+  getPublicAvailability = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { listingId, date } = req.query as {
+        listingId: string;
+        date: string;
+      };
+
+      const availability = await this.scheduleService.getPublicAvailability(
+        listingId,
+        new Date(date),
+      );
+
+      if (!availability) {
+        throw new AppError("Property not found", 404);
+      }
+
+      return availability;
     });
   };
 
@@ -286,11 +340,13 @@ export class ScheduleController extends BaseController {
       const nextDateValue = date ? new Date(date) : currentDateValue;
       const nextStartTime = startTime || schedule.startTime;
       const nextEndTime = endTime || schedule.endTime;
-      const nextCustomerNote = customerNote ?? schedule.customerNote ?? "";
-      const hasCustomerChange =
+      const hasTimeWindowChange =
         nextDateValue.getTime() !== currentDateValue.getTime() ||
         nextStartTime !== schedule.startTime ||
-        nextEndTime !== schedule.endTime ||
+        nextEndTime !== schedule.endTime;
+      const nextCustomerNote = customerNote ?? schedule.customerNote ?? "";
+      const hasCustomerChange =
+        hasTimeWindowChange ||
         nextCustomerNote !== (schedule.customerNote || "");
 
       let nextStatus = (status || schedule.status) as SCHEDULE_STATUS;
@@ -312,6 +368,25 @@ export class ScheduleController extends BaseController {
           nextStatus = hasCustomerChange
             ? SCHEDULE_STATUS.PENDING
             : (schedule.status as SCHEDULE_STATUS);
+        }
+      }
+
+      if (
+        nextStatus !== SCHEDULE_STATUS.CANCELLED &&
+        (hasTimeWindowChange || nextStatus === SCHEDULE_STATUS.CONFIRMED)
+      ) {
+        const hasConfirmedConflict =
+          await this.scheduleService.hasScheduleConflict({
+            agentId: String((schedule.agentId as any)?._id || schedule.agentId),
+            date: nextDateValue,
+            startTime: nextStartTime,
+            endTime: nextEndTime,
+            statuses: [SCHEDULE_STATUS.CONFIRMED],
+            excludeScheduleId: id,
+          });
+
+        if (hasConfirmedConflict) {
+          throw new AppError("This time slot has already been booked", 409);
         }
       }
 

@@ -2,12 +2,25 @@ import { useQuery } from "@tanstack/react-query";
 import { ScheduleQueryKey } from "./config";
 import ScheduleService from "./service";
 import { IParamsPagination } from "@/@types/service";
-import { format } from "date-fns";
 
 export interface IParamsSchedule extends Partial<IParamsPagination> {
   start: string;
   end: string;
 }
+
+export interface IAvailabilityParams {
+  listingId: string;
+  date: string;
+}
+
+export const useGetScheduleAvailability = (params?: IAvailabilityParams) => {
+  return useQuery({
+    queryKey: [ScheduleQueryKey.getAvailability, params],
+    queryFn: () =>
+      ScheduleService.getAvailability(params as IAvailabilityParams),
+    enabled: Boolean(params?.listingId && params?.date),
+  });
+};
 
 export const useGetSchedulesMe = (params?: IParamsSchedule) => {
   return useQuery({

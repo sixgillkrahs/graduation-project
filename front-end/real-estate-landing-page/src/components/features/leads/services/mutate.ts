@@ -20,7 +20,8 @@ export const useCreateLead = () => {
 
 export const useUpdateLeadStatus = () => {
   return useMutation({
-    mutationFn: (data: UpdateLeadStatusRequest) => LeadService.updateStatus(data),
+    mutationFn: (data: UpdateLeadStatusRequest) =>
+      LeadService.updateStatus(data),
     meta: {
       ERROR_SOURCE: "Failed to update lead status",
     },

@@ -10,6 +10,7 @@ import { createPropertySchema } from "@/validators/property.validator";
 import { Router } from "express";
 import { EmailQueue } from "@/queues/email.queue";
 import { AgentLeaderboardQueue } from "@/queues/agent-leaderboard.queue";
+import { cache } from "@/middleware/cacheMiddleware";
 
 const router = Router();
 const propertyService = new PropertyService();
@@ -367,7 +368,12 @@ router.get("/favorites", requireAuth, propertyController.getFavoriteProperties);
  *                 totalResults:
  *                   type: integer
  */
-router.get("/on-sale", optionalAuth, propertyController.getOnSaleProperties);
+router.get(
+  "/on-sale",
+  optionalAuth,
+  cache(),
+  propertyController.getOnSaleProperties,
+);
 
 /**
  * @swagger

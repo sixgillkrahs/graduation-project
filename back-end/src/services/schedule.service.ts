@@ -3,10 +3,20 @@ import ScheduleModel, {
   ISchedule,
   SCHEDULE_STATUS,
 } from "@/models/schedule.model";
+import { PropertyService } from "./property.service";
+
+const PUBLIC_VIEWING_SLOTS = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "14:00",
+  "15:00",
+  "16:00",
+] as const;
 
 @singleton
 export class ScheduleService {
-  constructor() {}
+  constructor(private propertyService: PropertyService = new PropertyService()) {}
 
   private parseTime(time: string) {
     const normalizedTime = time.trim().toUpperCase();
@@ -38,6 +48,33 @@ export class ScheduleService {
 
   private formatTime(hours: number, minutes: number) {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  private getMinutesFromTime(time: string) {
+    const { hours, minutes } = this.parseTime(time);
+    return hours * 60 + minutes;
+  }
+
+  private hasTimeOverlap(
+    timeRange: Pick<ISchedule, "startTime" | "endTime">,
+    schedule: Pick<ISchedule, "startTime" | "endTime">,
+  ) {
+    const rangeStart = this.getMinutesFromTime(timeRange.startTime);
+    const rangeEnd = this.getMinutesFromTime(timeRange.endTime);
+    const scheduleStart = this.getMinutesFromTime(schedule.startTime);
+    const scheduleEnd = this.getMinutesFromTime(schedule.endTime);
+
+    return rangeStart < scheduleEnd && scheduleStart < rangeEnd;
+  }
+
+  private getDayRange(date: Date) {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
   }
 
   addMinutesToTime(time: string, minutesToAdd: number) {
@@ -102,12 +139,97 @@ export class ScheduleService {
       .populate("listingId");
   }
 
+  async hasScheduleConflict(filter: {
+    agentId: string;
+    date: Date;
+    startTime: string;
+    endTime: string;
+    statuses: SCHEDULE_STATUS[];
+    userId?: string;
+    excludeScheduleId?: string;
+  }) {
+    const { start, end } = this.getDayRange(filter.date);
+    const schedules = await ScheduleModel.find({
+      agentId: filter.agentId,
+      ...(filter.userId ? { userId: filter.userId } : {}),
+      ...(filter.excludeScheduleId
+        ? { _id: { $ne: filter.excludeScheduleId } }
+        : {}),
+      date: { $gte: start, $lte: end },
+      status: { $in: filter.statuses },
+    })
+      .select("startTime endTime")
+      .lean()
+      .exec();
+
+    return schedules.some((schedule) =>
+      this.hasTimeOverlap(
+        { startTime: filter.startTime, endTime: filter.endTime },
+        schedule,
+      ),
+    );
+  }
+
+  async getPublicAvailability(listingId: string, date: Date) {
+    const property = await this.propertyService.getPropertyById(listingId, "userId");
+    if (!property) {
+      return null;
+    }
+
+    const agentId =
+      (property as any).userId?._id?.toString?.() ||
+      (property as any).userId?.toString?.();
+
+    if (!agentId) {
+      return null;
+    }
+
+    const { start, end } = this.getDayRange(date);
+
+    const schedules = await ScheduleModel.find({
+      agentId,
+      date: { $gte: start, $lte: end },
+      // Pending viewing requests can coexist until the agent accepts one.
+      status: SCHEDULE_STATUS.CONFIRMED,
+    })
+      .select("startTime endTime status type listingId")
+      .lean()
+      .exec();
+
+    const slots = PUBLIC_VIEWING_SLOTS.map((slot) => {
+      const slotEnd = this.addMinutesToTime(slot, 60);
+      const conflictingSchedules = schedules.filter((schedule) => {
+        return this.hasTimeOverlap(
+          { startTime: slot, endTime: slotEnd },
+          schedule,
+        );
+      });
+
+      return {
+        slot,
+        endTime: slotEnd,
+        isAvailable: conflictingSchedules.length === 0,
+        conflictCount: conflictingSchedules.length,
+      };
+    });
+
+    const availableCount = slots.filter((slot) => slot.isAvailable).length;
+
+    return {
+      listingId,
+      date: start.toISOString(),
+      totalSlots: PUBLIC_VIEWING_SLOTS.length,
+      availableCount,
+      slots,
+    };
+  }
+
   async getLeads(agentId: string) {
     return await ScheduleModel.find({
       agentId,
-      status: { $in: [SCHEDULE_STATUS.CONFIRMED, SCHEDULE_STATUS.COMPLETED] },
+      listingId: { $exists: true, $ne: null },
     })
-      .sort({ date: -1 })
+      .sort({ updatedAt: -1, date: -1 })
       .populate("listingId");
   }
 

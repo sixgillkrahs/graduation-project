@@ -17,10 +17,7 @@ const PropertyDetailGallery = ({
 }: PropertyDetailGalleryProps) => {
   const t = useTranslations("PropertiesPage");
   const galleryCount = property.media.images?.length || 0;
-  const totalPhotos = Math.max(
-    galleryCount,
-    property.media.thumbnail ? 1 : 0,
-  );
+  const totalPhotos = Math.max(galleryCount, property.media.thumbnail ? 1 : 0);
   const hasVirtualTour = property.media.virtualTourUrls?.length > 0;
 
   return (

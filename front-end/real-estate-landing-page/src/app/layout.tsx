@@ -23,7 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={beVietnamPro.variable} suppressHydrationWarning>
-      <body className={`${beVietnamPro.variable} antialiased`} suppressHydrationWarning>
+      <body
+        className={`${beVietnamPro.variable} antialiased`}
+        suppressHydrationWarning
+      >
         <NextIntlClientProvider>
           <Wrapper>{children}</Wrapper>
         </NextIntlClientProvider>
