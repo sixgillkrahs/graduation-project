@@ -10,9 +10,9 @@ import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { useUploadImage } from "../../services/mutation";
+import { useUploadImages } from "@/shared/upload/mutate";
 
-type BusinessInfoFormType = BusinessInfoType & {
+type BusinessInfoFormType = Omit<BusinessInfoType, "certificateImage"> & {
   certificateImage: File[];
 };
 
@@ -27,7 +27,7 @@ const validateBusinessInfo = (values: BusinessInfoFormType) => {
 const BusinessInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [uploading, setUploading] = useState(false);
-  const { mutateAsync: uploadImage } = useUploadImage();
+  const { mutateAsync: uploadImages } = useUploadImages();
   const { businessInfo, isSubmitting } = useSelector(
     (state: RootState) => state.form,
   );
@@ -59,16 +59,15 @@ const BusinessInfo = () => {
     if (!files.length) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", files[0]);
 
     try {
-      const resp = await uploadImage(formData);
+      const response = await uploadImages([files[0]]);
+      const uploadedImageUrl = response.data.files[0]?.url;
 
-      if (resp?.success) {
+      if (uploadedImageUrl) {
         dispatch(
           updateBusinessInfo({
-            certificateImage: [resp.filename],
+            certificateImage: [uploadedImageUrl],
           }),
         );
       } else {

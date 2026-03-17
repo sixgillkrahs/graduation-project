@@ -128,5 +128,36 @@
   "common": {
     "sale": "Sale",
     "rent": "Rent"
+  },
+  "accessControl": {
+    "operations": {
+      "create": "Create",
+      "read": "View",
+      "update": "Update",
+      "delete": "Delete",
+      "approve": "Approve",
+      "export": "Export"
+    },
+    "resources": {
+      "auth": "Authentication",
+      "users": "Users",
+      "roles": "Roles",
+      "permissions": "Permissions",
+      "resources": "Resources",
+      "agentRegistrations": "Agent Registrations",
+      "agents": "Agents",
+      "properties": "Properties",
+      "reviews": "Reviews",
+      "reports": "Reports",
+      "jobs": "Jobs",
+      "leads": "Leads",
+      "landlords": "Landlords",
+      "schedules": "Schedules",
+      "notices": "Notices",
+      "chat": "Chat",
+      "uploads": "Uploads",
+      "payments": "Payments",
+      "monitoring": "Monitoring"
+    }
   }
 }

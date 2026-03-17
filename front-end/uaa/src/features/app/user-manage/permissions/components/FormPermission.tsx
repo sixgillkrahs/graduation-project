@@ -1,5 +1,6 @@
 import { useGetInfiniteResources } from "../../resources/services/query";
 import PermissionService from "../services/service";
+import { getLocalizedOperationLabel, getLocalizedResourceLabel } from "@shared/i18n/accessControl";
 import { Col, Form, Input, Row, Select, Switch } from "antd";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -19,18 +20,28 @@ const FormPermission = () => {
   const resourceOptions = useMemo(() => {
     const pages = data?.pages || [];
     return pages.flatMap((p: any) =>
-      (p?.data?.results || []).map((r: any) => ({ label: r.name, value: r.id })),
+      (p?.data?.results || []).map((r: any) => ({
+        label: getLocalizedResourceLabel(r, t),
+        value: r.id,
+      })),
     );
-  }, [data?.pages]);
+  }, [data?.pages, t]);
 
   return (
     <>
       <Item
-        label={t("permission.column.name")}
-        name="name"
+        label={`${t("permission.column.name")} (EN)`}
+        name={["name", "en"]}
         rules={[{ required: true, message: t("permission.validate.name") }]}
       >
-        <Input placeholder={t("permission.placeholder.enterPermissionName")} />
+        <Input placeholder={`${t("permission.placeholder.enterPermissionName")} (EN)`} />
+      </Item>
+      <Item
+        label={`${t("permission.column.name")} (VI)`}
+        name={["name", "vi"]}
+        rules={[{ required: true, message: t("permission.validate.name") }]}
+      >
+        <Input placeholder={`${t("permission.placeholder.enterPermissionName")} (VI)`} />
       </Item>
       <Row gutter={12}>
         <Col span={12}>
@@ -41,7 +52,10 @@ const FormPermission = () => {
           >
             <Select
               placeholder={t("permission.placeholder.enterOperation")}
-              options={PermissionService.OPERATION.map((o) => ({ label: o.label, value: o.value }))}
+              options={PermissionService.OPERATION.map((o) => ({
+                label: getLocalizedOperationLabel(o.value, t),
+                value: o.value,
+              }))}
             />
           </Item>
         </Col>

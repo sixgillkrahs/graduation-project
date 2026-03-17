@@ -2,6 +2,7 @@ import { useAcceptAgentsRegistration, useRejectAgentsRegistration } from "../ser
 import { useGetAgentsRegistration } from "../services/query";
 import AgentRegistrationService from "../services/service";
 import { ArrowLeftOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
+import { resolveDocumentImageUrl } from "@shared/helper/documentImage";
 import message from "@shared/message";
 import { toVietnamTime } from "@shared/render/time";
 import { Button, Card, Col, Flex, Image, Input, Modal, Row, Space, Tag, Typography } from "antd";
@@ -229,7 +230,7 @@ const AgentRegistrationDetail = () => {
                       return (
                         <Image
                           width={200}
-                          src={`${import.meta.env.VITE_BASEURL_AI}images/${image}`}
+                          src={resolveDocumentImageUrl(image)}
                           alt="Certificate"
                         />
                       );
@@ -278,7 +279,9 @@ const AgentRegistrationDetail = () => {
                 agentRegistrationDetail?.data?.imageInfo?.identityFront ? (
                   <Image
                     width={200}
-                    src={`${import.meta.env.VITE_BASEURL_AI}images/${agentRegistrationDetail.data.imageInfo.identityFront}`}
+                    src={resolveDocumentImageUrl(
+                      agentRegistrationDetail.data.imageInfo.identityFront,
+                    )}
                     alt="Identity Front"
                   />
                 ) : (
@@ -292,7 +295,9 @@ const AgentRegistrationDetail = () => {
                 agentRegistrationDetail?.data?.imageInfo?.identityBack ? (
                   <Image
                     width={200}
-                    src={`${import.meta.env.VITE_BASEURL_AI}images/${agentRegistrationDetail.data.imageInfo.identityBack}`}
+                    src={resolveDocumentImageUrl(
+                      agentRegistrationDetail.data.imageInfo.identityBack,
+                    )}
                     alt="Identity Front"
                   />
                 ) : (

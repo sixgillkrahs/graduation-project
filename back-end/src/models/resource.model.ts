@@ -3,8 +3,26 @@ import toJSON from "./plugins/toJSON.plugin";
 import paginate from "./plugins/paginate.plugin";
 import collections from "./config/collections";
 
+export interface ILocalizedName {
+  en: string;
+  vi: string;
+}
+
+type LegacyLocalizedSearch = {
+  $or: Array<Record<string, RegExp>>;
+};
+
+const buildNameSearchFilter = (searchRegex: RegExp): LegacyLocalizedSearch => ({
+  $or: [
+    { "name.en": searchRegex },
+    { "name.vi": searchRegex },
+    { name: searchRegex },
+    { description: searchRegex },
+  ],
+});
+
 export interface IResource {
-  name: string;
+  name: ILocalizedName;
   path: string;
   description?: string;
   createdAt?: Date;
@@ -54,9 +72,16 @@ const resourceSchema = new mongoose.Schema<
 >(
   {
     name: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      vi: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     path: {
       type: String,
@@ -135,18 +160,11 @@ class ResourceClass {
     const skip = (page - 1) * limit;
 
     const searchRegex = new RegExp(searchTerm, "i");
+    const searchFilter = buildNameSearchFilter(searchRegex);
 
     const [results, totalResults] = await Promise.all([
-      this.find({
-        $or: [{ name: searchRegex }, { description: searchRegex }],
-      })
-        .skip(skip)
-        .limit(limit)
-        .exec(),
-
-      this.countDocuments({
-        $or: [{ name: searchRegex }, { description: searchRegex }],
-      }).exec(),
+      this.find(searchFilter).skip(skip).limit(limit).exec(),
+      this.countDocuments(searchFilter).exec(),
     ]);
 
     const totalPages = Math.ceil(totalResults / limit);

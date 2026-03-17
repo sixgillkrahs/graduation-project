@@ -1,10 +1,12 @@
 import { useGetInfinitePermissions } from "../../permissions/services/query";
 import { useCreateRole, useUpdateRole } from "../services/mutate";
 import { useGetRole } from "../services/query";
+import { getLocalizedPermissionLabel } from "@shared/i18n/accessControl";
 import type { Id } from "@shared/types/service";
 import { Col, Form, Input, Modal, Row, Switch, Transfer } from "antd";
 import type { TransferItem } from "antd/es/transfer";
 import { forwardRef, memo, useEffect, useImperativeHandle, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const { Item } = Form;
 const { TextArea } = Input;
@@ -14,6 +16,7 @@ export type FormRef = {
 };
 
 const FormRole = forwardRef<FormRef>((_, ref) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
   const [id, setId] = useState<Id>("");
@@ -37,9 +40,12 @@ const FormRole = forwardRef<FormRef>((_, ref) => {
   const dataSource = useMemo<TransferItem[]>(() => {
     const pages = data?.pages || [];
     return pages.flatMap((p: any) =>
-      (p?.data?.results || []).map((r: any) => ({ key: r.id, title: r.name, description: r.name })),
+      (p?.data?.results || []).map((r: any) => {
+        const localizedName = getLocalizedPermissionLabel(r, t);
+        return { key: r.id, title: localizedName, description: localizedName };
+      }),
     );
-  }, [data]);
+  }, [data, t]);
 
   const onSubmit = (values: IRoleService.CreateRoleDTO) => {
     if (id) {

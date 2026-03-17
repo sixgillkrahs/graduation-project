@@ -12,8 +12,8 @@ const initialState: FormState = {
     nameRegister: "",
     email: "",
     phoneNumber: "",
-    identityBack: [],
-    identityFront: [],
+    identityBack: "",
+    identityFront: "",
     identityInfo: {
       dateOfBirth: "",
       fullName: "",

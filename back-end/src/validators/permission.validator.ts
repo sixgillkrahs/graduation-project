@@ -19,7 +19,10 @@ export const createPermissionSchema = (
   const t = validationMessages[lang] || validationMessages.vi;
   return z.object({
     body: z.object({
-      name: z.string({ message: t.invalidName }),
+      name: z.object({
+        en: z.string({ message: t.invalidName }).min(1, { message: t.invalidName }),
+        vi: z.string({ message: t.invalidName }).min(1, { message: t.invalidName }),
+      }),
       description: z.string().optional(),
       resourceId: createObjectIdSchema(lang),
       isActive: z.boolean().default(true),
@@ -42,7 +45,10 @@ export const updatePermissionSchema = (
       id: createObjectIdSchema(lang),
     }),
     body: z.object({
-      name: z.string({ message: t.invalidName }),
+      name: z.object({
+        en: z.string({ message: t.invalidName }).min(1, { message: t.invalidName }),
+        vi: z.string({ message: t.invalidName }).min(1, { message: t.invalidName }),
+      }),
       description: z.string({ message: t.invalidDescription }),
       resourceId: createObjectIdSchema(lang),
       operation: z.enum(

@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { Operation } from "@/models/permission.model";
 
 declare global {
   namespace Express {
@@ -19,7 +20,15 @@ declare global {
           _id: string;
           name: string;
           code: string;
-          permissionIds: any[];
+          permissionIds: Array<{
+            _id: string;
+            operation: Operation;
+            isActive?: boolean;
+            resourceId?: {
+              _id: string;
+              path?: string;
+            };
+          }>;
         };
         passwordHistories: {
           password: string;

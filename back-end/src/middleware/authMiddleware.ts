@@ -6,6 +6,7 @@ import { ErrorCode } from "@/utils/errorCodes";
 import { parse } from "cookie";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { Operation } from "@/models/permission.model";
 
 interface Root {
   _id: string;
@@ -31,7 +32,17 @@ interface RoleId {
   _id: string;
   name: string;
   code: string;
-  permissionIds: any[];
+  permissionIds: PermissionScope[];
+}
+
+interface PermissionScope {
+  _id: string;
+  operation: Operation;
+  isActive?: boolean;
+  resourceId?: {
+    _id: string;
+    path?: string;
+  };
 }
 
 interface PasswordHistory {
@@ -56,6 +67,56 @@ declare global {
   }
 }
 
+const AUTH_POPULATE = [
+  {
+    path: "roleId",
+    select: "_id name code permissionIds",
+    populate: {
+      path: "permissionIds",
+      select: "_id operation isActive resourceId",
+      populate: {
+        path: "resourceId",
+        select: "_id path",
+      },
+    },
+  },
+  {
+    path: "userId",
+    select: "_id email fullName isActive phone avatarUrl",
+  },
+];
+
+const normalizePath = (path?: string) => {
+  const trimmedPath = path?.trim();
+
+  if (!trimmedPath) {
+    return "";
+  }
+
+  return trimmedPath.startsWith("/") ? trimmedPath : `/${trimmedPath}`;
+};
+
+const mapMethodToOperation = (method: string): Operation => {
+  switch (method.toUpperCase()) {
+    case "GET":
+      return Operation.Read;
+    case "POST":
+      return Operation.Create;
+    case "PUT":
+    case "PATCH":
+      return Operation.Update;
+    case "DELETE":
+      return Operation.Delete;
+    default:
+      return Operation.Read;
+  }
+};
+
+type AuthorizeOptions = {
+  resourcePath?: string;
+  operation?: Operation;
+};
+
 export const requireAuth = async (
   req: Request,
   res: Response,
@@ -78,16 +139,10 @@ export const requireAuth = async (
     try {
       const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
       const authService = new AuthService();
-      const user = (await authService.getAuthByUserId(decoded.user._id, [
-        {
-          path: "roleId",
-          select: "_id name code permissionIds",
-        },
-        {
-          path: "userId",
-          select: "_id email fullName isActive phone avatarUrl",
-        },
-      ])) as Root;
+      const user = (await authService.getAuthByUserId(
+        decoded.user._id,
+        AUTH_POPULATE,
+      )) as Root;
       if (!user) {
         throw new AppError("User not found", 404, ErrorCode.NOT_FOUND);
       }
@@ -134,6 +189,57 @@ export const requireRole = (roles: string[]) => {
   };
 };
 
+export const authorize = (options: AuthorizeOptions = {}) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    try {
+      if (!req.user?.roleId?._id) {
+        throw new AppError("Unauthorized", 401, ErrorCode.UNAUTHORIZED);
+      }
+
+      const resourcePath = normalizePath(options.resourcePath || req.baseUrl);
+      const operation = options.operation || mapMethodToOperation(req.method);
+      const permissionScopes = Array.isArray(req.user.roleId.permissionIds)
+        ? req.user.roleId.permissionIds
+        : [];
+
+      const hasPermission = permissionScopes.some((permission) => {
+        if (!permission || typeof permission !== "object") {
+          return false;
+        }
+
+        if (permission.isActive === false) {
+          return false;
+        }
+
+        const permissionPath = normalizePath(permission.resourceId?.path);
+
+        return permission.operation === operation && permissionPath === resourcePath;
+      });
+
+      if (!hasPermission) {
+        logger.warn({
+          message: "Insufficient permission scope",
+          context: "AuthMiddleware.authorize",
+          userRole: req.user.roleId.code,
+          userId: req.user.userId._id,
+          resourcePath,
+          operation,
+        });
+
+        throw new AppError(
+          "Forbidden - Insufficient permissions",
+          403,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
 export const optionalAuth = async (
   req: Request,
   res: Response,
@@ -162,16 +268,10 @@ export const optionalAuth = async (
     try {
       const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
       const authService = new AuthService();
-      const user = (await authService.getAuthByUserId(decoded.user._id, [
-        {
-          path: "roleId",
-          select: "_id name code permissionIds",
-        },
-        {
-          path: "userId",
-          select: "_id email fullName isActive phone avatarUrl",
-        },
-      ])) as Root;
+      const user = (await authService.getAuthByUserId(
+        decoded.user._id,
+        AUTH_POPULATE,
+      )) as Root;
 
       if (user) {
         req.user = user;

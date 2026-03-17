@@ -34,7 +34,11 @@ export class PermissionController extends BaseController {
 
         let filter: Record<string, any> = {};
         if (name) {
-          filter.name = { $regex: name, $options: "i" };
+          filter.$or = [
+            { "name.en": { $regex: name, $options: "i" } },
+            { "name.vi": { $regex: name, $options: "i" } },
+            { name: { $regex: name, $options: "i" } },
+          ];
         }
         if (isActive !== undefined) {
           filter.isActive = isActive;
@@ -48,7 +52,7 @@ export class PermissionController extends BaseController {
             page: page ? Number(page) : 1,
             limit: limit ? Number(limit) : 10,
             sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
-            populate: "resourceId:id name",
+            populate: "resourceId:id name path",
           },
           filter,
         );
@@ -85,7 +89,10 @@ export class PermissionController extends BaseController {
       try {
         const { name, description, resourceId, operation, isActive } =
           req.body as {
-            name: string;
+            name: {
+              en: string;
+              vi: string;
+            };
             description: string;
             resourceId: string;
             operation: Operation;
@@ -123,7 +130,10 @@ export class PermissionController extends BaseController {
       try {
         const { id } = req.params;
         const { name, description, resourceId, operation } = req.body as {
-          name: string;
+          name: {
+            en: string;
+            vi: string;
+          };
           description: string;
           resourceId: string;
           operation: Operation;

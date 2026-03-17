@@ -1,52 +1,33 @@
-# Stage 1: Build the Vite (React) app
-FROM node:20-alpine AS builder
+# syntax=docker/dockerfile:1.7
+
+FROM node:20.19-alpine AS base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
 
-# Install libc6-compat if needed by Alpine
-RUN apk add --no-cache libc6-compat
+RUN corepack enable
 
 WORKDIR /app
 
-# Copy lockfile and package.json
-COPY package.json pnpm-lock.yaml ./
+FROM base AS builder
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+ARG BUILD_SCRIPT=build:prod
+ENV NODE_ENV=production
 
-# Copy the rest of the application code
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+RUN --mount=type=cache,id=uaa-pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+
 COPY . .
 
-# Build the application for production
-RUN pnpm run build:prod
+RUN pnpm run ${BUILD_SCRIPT}
 
-# Stage 2: Serve the app with Nginx (Alpine)
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:1.27-alpine AS runner
 
-# Remove default nginx static assets
-RUN rm -rf /usr/share/nginx/html/*
-
-# Copy built assets from builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copy custom Nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder --chown=101:101 /app/dist /usr/share/nginx/html
 
-# Add non-root user (optional but good practice)
-RUN addgroup -S nginxuser && adduser -S nginxuser -G nginxuser && \
-    chown -R nginxuser:nginxuser /usr/share/nginx/html && \
-    chown -R nginxuser:nginxuser /var/cache/nginx && \
-    chown -R nginxuser:nginxuser /var/log/nginx && \
-    chown -R nginxuser:nginxuser /etc/nginx/conf.d && \
-    touch /var/run/nginx.pid && \
-    chown -R nginxuser:nginxuser /var/run/nginx.pid
+EXPOSE 8080
 
-# Switch to non-root user
-USER nginxuser
-
-EXPOSE 80
-
-# Start nginx
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]

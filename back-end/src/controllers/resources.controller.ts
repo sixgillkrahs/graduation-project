@@ -14,6 +14,12 @@ export class ResourcesController extends BaseController {
       const limit = parseInt(req.query.limit as string) || 10;
       const sortField = (req.query.sortField as string) || "createdAt";
       const sortOrder = (req.query.sortOrder as string) === "asc" ? 1 : -1;
+      const query = (req.query.query as string) || "";
+
+      if (query) {
+        return await this.resourcesService.searchResources(query, page, limit);
+      }
+
       return await this.resourcesService.getResourcesPaginated(
         page,
         limit,

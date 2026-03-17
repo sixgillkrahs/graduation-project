@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { PermissionController } from "@/controllers/permission.controller";
 import { PermissionService } from "@/services/permission.service";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import {
   createPermissionSchema,
@@ -21,6 +21,7 @@ const permissionController = new PermissionController(
 );
 
 router.use(requireAuth);
+router.use(authorize());
 
 /**
  * @swagger

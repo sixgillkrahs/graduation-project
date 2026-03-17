@@ -7,9 +7,14 @@ export const createUpdateResourceSchema = (
   const t = validationMessages[lang] || validationMessages.vi;
   return z.object({
     body: z.object({
-      name: z
-        .string({ message: t.invalidName })
-        .min(1, { message: t.invalidName }),
+      name: z.object({
+        en: z
+          .string({ message: t.invalidName })
+          .min(1, { message: t.invalidName }),
+        vi: z
+          .string({ message: t.invalidName })
+          .min(1, { message: t.invalidName }),
+      }),
       path: z
         .string({ message: t.invalidPath })
         .min(1, { message: t.invalidPath }),

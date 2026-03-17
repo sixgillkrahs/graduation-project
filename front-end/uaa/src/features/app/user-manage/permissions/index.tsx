@@ -8,6 +8,11 @@ import {
 import { useGetPermission, useGetPermissions } from "./services/query";
 import PermissionService from "./services/service";
 import FullTable, { type IFilter } from "@/components/FullTable";
+import {
+  getLocalizedOperationLabel,
+  getLocalizedPermissionLabel,
+  getLocalizedResourceLabel,
+} from "@shared/i18n/accessControl";
 import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
 import type { IResp } from "@shared/types/service";
@@ -31,18 +36,23 @@ const Permissions = () => {
       title: t("permission.column.name"),
       dataIndex: "name",
       key: "name",
+      render: (_value, record) => getLocalizedPermissionLabel(record, t),
     },
     {
       title: t("permission.column.resource"),
       dataIndex: "resourceId",
       key: "resourceId",
-      render: (value) => value?.name || "-",
+      render: (value) => getLocalizedResourceLabel(value, t),
     },
     {
       title: t("permission.column.operation"),
       dataIndex: "operation",
       key: "operation",
-      render: (value) => renderConstant(value, PermissionService.OPERATION),
+      render: (value) =>
+        renderConstant(value, PermissionService.OPERATION.map((item) => ({
+          ...item,
+          label: getLocalizedOperationLabel(item.value, t),
+        }))),
     },
     {
       title: t("permission.column.active"),
@@ -83,8 +93,21 @@ const Permissions = () => {
   );
 
   const onEdit = useCallback(
-    (values: IPermissionService.UpdatePermissionDTO): Promise<any> => {
-      return updatePermission(values);
+    (values: IPermissionService.PermissionDTO): Promise<any> => {
+      return updatePermission({
+        ...values,
+        name:
+          typeof values.name === "string"
+            ? {
+                en: values.name,
+                vi: values.name,
+              }
+            : values.name,
+        resourceId:
+          typeof values.resourceId === "string"
+            ? values.resourceId
+            : values.resourceId.id,
+      });
     },
     [updatePermission],
   );
@@ -129,7 +152,7 @@ const Permissions = () => {
       type: "select",
       placeholder: t("permission.placeholder.operation"),
       options: PermissionService.OPERATION.map((item) => ({
-        label: item.label,
+        label: getLocalizedOperationLabel(item.value, t),
         value: item.value,
       })),
     },

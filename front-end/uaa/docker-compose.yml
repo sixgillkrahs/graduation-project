@@ -1,9 +1,12 @@
-version: "3.7"
-
 services:
   frontend:
     build:
       context: .
-    container_name: core-react-vite
+      dockerfile: Dockerfile
+      args:
+        BUILD_SCRIPT: build:prod
+    image: graduation-project/uaa:latest
+    container_name: uaa-frontend
+    restart: unless-stopped
     ports:
-      - "3000:80"
+      - "5793:8080"

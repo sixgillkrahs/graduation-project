@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { UserController } from "@/controllers/user.controller";
 import { UserService } from "@/services/user.service";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { createUserSchema } from "@/validators/user.validator";
 import { AgentService } from "@/services/agent.service";
@@ -59,7 +59,14 @@ router.use(requireAuth);
  *       403:
  *         description: Forbidden - Admin only
  */
-router.post("/", validateRequest(createUserSchema), userController.createUser);
+router.post(
+  "/",
+  authorize({
+    resourcePath: "/api/users",
+  }),
+  validateRequest(createUserSchema),
+  userController.createUser,
+);
 
 /**
  * @swagger
@@ -147,7 +154,13 @@ router.patch("/profile", userController.updateProfile);
  *       403:
  *         description: Forbidden - User role required
  */
-router.get("/", userController.getUsers);
+router.get(
+  "/",
+  authorize({
+    resourcePath: "/api/users",
+  }),
+  userController.getUsers,
+);
 
 /**
  * @swagger
@@ -199,6 +212,12 @@ router.get("/", userController.getUsers);
  *       403:
  *         description: Forbidden
  */
-router.get("/:id", userController.getUser);
+router.get(
+  "/:id",
+  authorize({
+    resourcePath: "/api/users",
+  }),
+  userController.getUser,
+);
 
 export default router;

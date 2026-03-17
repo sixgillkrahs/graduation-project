@@ -1,5 +1,5 @@
 import { ReviewController } from "@/controllers/review.controller";
-import { requireAuth, requireRole } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
 import { ReviewService } from "@/services/review.service";
 import { validateRequest } from "@/middleware/validateRequest";
 import {
@@ -16,6 +16,7 @@ import {
   validateReviewInvitationSchema,
 } from "@/validators/review.validator";
 import { Router } from "express";
+import { Operation } from "@/models/permission.model";
 
 const router = Router();
 const reviewController = new ReviewController(new ReviewService());
@@ -249,7 +250,9 @@ router.get(
 router.get(
   "/admin/queue",
   requireAuth,
-  requireRole(["ADMIN"]),
+  authorize({
+    resourcePath: "/api/reviews",
+  }),
   validateRequest((lang) => validateGetAdminReviewQueueSchema(lang)),
   reviewController.getAdminModerationQueue,
 );
@@ -298,7 +301,10 @@ router.get(
 router.patch(
   "/admin/:reviewId/approve",
   requireAuth,
-  requireRole(["ADMIN"]),
+  authorize({
+    resourcePath: "/api/reviews",
+    operation: Operation.Approve,
+  }),
   validateRequest((lang) => validateAdminReviewDecisionSchema(lang)),
   reviewController.adminApproveReview,
 );
@@ -347,7 +353,10 @@ router.patch(
 router.patch(
   "/admin/:reviewId/reject",
   requireAuth,
-  requireRole(["ADMIN"]),
+  authorize({
+    resourcePath: "/api/reviews",
+    operation: Operation.Approve,
+  }),
   validateRequest((lang) => validateAdminReviewDecisionSchema(lang)),
   reviewController.adminRejectReview,
 );

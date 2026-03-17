@@ -20,6 +20,7 @@ import { CsButton } from "@/components/custom";
 import DOMPurify from "dompurify";
 import { BadgeCheck, FileText } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { resolveDocumentImageUrl } from "@/lib/document-image";
 
 const Profile = () => {
   const router = useRouter();
@@ -345,7 +346,9 @@ const Profile = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo?.identityFront}`}
+                      src={resolveDocumentImageUrl(
+                        profileData?.imageInfo?.identityFront,
+                      )}
                       alt="Identity Front"
                       width={40}
                       height={40}
@@ -353,7 +356,9 @@ const Profile = () => {
                       unoptimized={true}
                     />
                     <Image
-                      src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${profileData?.imageInfo?.identityBack}`}
+                      src={resolveDocumentImageUrl(
+                        profileData?.imageInfo?.identityBack,
+                      )}
                       alt="Identity Back"
                       width={40}
                       height={40}
@@ -370,7 +375,7 @@ const Profile = () => {
                     {profileData?.imageInfo?.certificateImage.map((item) => {
                       return (
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_BASEURLAI}/images/${item}`}
+                          src={resolveDocumentImageUrl(item)}
                           key={item}
                           alt="Business License"
                           width={40}

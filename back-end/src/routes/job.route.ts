@@ -1,5 +1,6 @@
 import { JobController } from "@/controllers/job.controller";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
+import { Operation } from "@/models/permission.model";
 import { JobService } from "@/services/job.service";
 import { Router } from "express";
 
@@ -8,7 +9,6 @@ const jobService = new JobService();
 const jobController = new JobController(jobService);
 
 router.use(requireAuth);
-// router.use(requireRole(["ADMIN"]));
 
 /**
  * @swagger
@@ -52,7 +52,7 @@ router.use(requireAuth);
  *       403:
  *         description: Forbidden - Admin role required
  */
-router.get("/", jobController.getJobs);
+router.get("/", authorize(), jobController.getJobs);
 
 /**
  * @swagger
@@ -79,7 +79,13 @@ router.get("/", jobController.getJobs);
  *       403:
  *         description: Forbidden
  */
-router.post("/:jobId/retry", jobController.retryJob);
+router.post(
+  "/:jobId/retry",
+  authorize({
+    operation: Operation.Update,
+  }),
+  jobController.retryJob,
+);
 
 /**
  * @swagger
@@ -104,6 +110,6 @@ router.post("/:jobId/retry", jobController.retryJob);
  *       403:
  *         description: Forbidden
  */
-router.delete("/:jobId", jobController.deleteJob);
+router.delete("/:jobId", authorize(), jobController.deleteJob);
 
 export default router;

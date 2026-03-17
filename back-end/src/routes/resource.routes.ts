@@ -1,5 +1,5 @@
 import { ResourcesController } from "@/controllers/resources.controller";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { ResourcesService } from "@/services/resources.service";
 import { createUpdateResourceSchema } from "@/validators/resource.validator";
@@ -11,6 +11,7 @@ const resourcesController = new ResourcesController(resourcesService);
 const router = Router();
 
 router.use(requireAuth);
+router.use(authorize());
 
 /**
  * @swagger

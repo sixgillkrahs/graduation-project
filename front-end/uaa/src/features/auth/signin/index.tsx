@@ -2,7 +2,7 @@ import { useSignIn } from "./services/mutation";
 import logo from "@/assets/logo.svg";
 import { Button, Divider, Form, Image, Input, Switch } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const { Item } = Form;
 const { Password } = Input;
@@ -10,12 +10,16 @@ const { Password } = Input;
 const SignIn = () => {
   const { mutateAsync: signIn, isPending } = useSignIn();
   const navigate = useNavigate();
+  const location = useLocation();
   const [form] = useForm<ISignInService.SignInRequest>();
+  const redirectPath =
+    (location.state as { from?: { pathname?: string } } | null)?.from
+      ?.pathname || "/dashboard";
 
   const onSubmit = async (values: ISignInService.SignInRequest) => {
     const resp = await signIn(values);
     if (resp.success) {
-      navigate("/dashboard", { replace: true });
+      navigate(redirectPath, { replace: true });
     }
   };
 

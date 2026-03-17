@@ -2,6 +2,20 @@ import mongoose from "mongoose";
 import collections from "./config/collections";
 import paginate from "./plugins/paginate.plugin";
 import toJSON from "./plugins/toJSON.plugin";
+import type { ILocalizedName } from "./resource.model";
+
+type LegacyLocalizedSearch = {
+  $or: Array<Record<string, RegExp>>;
+};
+
+const buildNameSearchFilter = (searchRegex: RegExp): LegacyLocalizedSearch => ({
+  $or: [
+    { "name.en": searchRegex },
+    { "name.vi": searchRegex },
+    { name: searchRegex },
+    { description: searchRegex },
+  ],
+});
 
 export enum Operation {
   Read = "read",
@@ -14,7 +28,7 @@ export enum Operation {
 
 export interface IPermission {
   _id?: mongoose.Schema.Types.ObjectId;
-  name: string;
+  name: ILocalizedName;
   description: string;
   resourceId: mongoose.Schema.Types.ObjectId;
   operation: Operation;
@@ -63,9 +77,16 @@ const permissionSchema = new mongoose.Schema<
 >(
   {
     name: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      vi: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     description: {
       type: String,
@@ -128,6 +149,7 @@ class PermissionClass {
     searchTerm: string,
   ) {
     const searchRegex = new RegExp(searchTerm, "i");
+    const searchFilter = buildNameSearchFilter(searchRegex);
 
     return await this.paginate?.(
       {
@@ -136,9 +158,7 @@ class PermissionClass {
         sortBy: "createdAt:desc",
         populate: "resource",
       },
-      {
-        $or: [{ name: searchRegex }, { description: searchRegex }],
-      },
+      searchFilter,
     );
   }
 

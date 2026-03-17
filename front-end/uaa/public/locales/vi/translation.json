@@ -130,5 +130,36 @@
     "common":  {
                    "sale":  "Bán",
                    "rent":  "Thuê"
+               },
+    "accessControl":  {
+                          "operations":  {
+                                             "create":  "Tạo",
+                                             "read":  "Xem",
+                                             "update":  "Cập nhật",
+                                             "delete":  "Xóa",
+                                             "approve":  "Phê duyệt",
+                                             "export":  "Xuất"
+                                         },
+                          "resources":  {
+                                            "auth":  "Xác thực",
+                                            "users":  "Người dùng",
+                                            "roles":  "Vai trò",
+                                            "permissions":  "Quyền",
+                                            "resources":  "Tài nguyên",
+                                            "agentRegistrations":  "Đăng ký môi giới",
+                                            "agents":  "Môi giới",
+                                            "properties":  "Bất động sản",
+                                            "reviews":  "Đánh giá",
+                                            "reports":  "Báo cáo",
+                                            "jobs":  "Công việc",
+                                            "leads":  "Khách hàng tiềm năng",
+                                            "landlords":  "Chủ nhà",
+                                            "schedules":  "Lịch hẹn",
+                                            "notices":  "Thông báo",
+                                            "chat":  "Trò chuyện",
+                                            "uploads":  "Tải tệp",
+                                            "payments":  "Thanh toán",
+                                            "monitoring":  "Giám sát"
+                                        }
                }
 }

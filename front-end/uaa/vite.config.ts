@@ -3,127 +3,132 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
-import { visualizer } from 'rollup-plugin-visualizer';
-
-
+import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    react(),
-    visualizer({
-      open: true,
-      gzipSize: true,
-      brotliSize: true,
-    }) as any,
-    tailwindcss(),
-    VitePWA({
-      devOptions: {
-        enabled: true,
-        type: "module",
-      },
-      strategies: "injectManifest",
-      registerType: "autoUpdate",
-      srcDir: "src",
-      filename: "sw.ts",
-      injectManifest: {
-        swDest: "dist/sw.js",
-      },
-      includeAssets: ["favicon.svg", "apple-touch-icon-180x180.png", "assets/*"],
-      manifest: {
-        name: "My React App",
-        short_name: "ReactApp",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#000000",
-        icons: [
-          {
-            src: "pwa-64x64.png",
-            sizes: "64x64",
-            type: "image/png",
-          },
-          {
-            src: "pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "maskable-icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,ttf}"],
-      },
-    }),
-  ],
+export default defineConfig(() => {
+  const shouldAnalyze = process.env.ANALYZE === "true";
 
-  build: {
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("antd") || id.includes("@ant-design") || id.includes("rc-")) {
-              return "antd-vendor";
-            }
-            if (id.includes("framer-motion")) {
-              return "framer-motion-vendor";
-            }
-            if (id.includes("react-hook-form")) {
-              return "form-vendor";
-            }
-            if (id.includes("lucide-react")) {
-              return "icons-vendor";
-            }
-            if (id.includes("lodash") || id.includes("axios") || id.includes("i18next")) {
-              return "utils-vendor";
-            }
-            if (id.includes("@tanstack")) {
-              return "tanstack-vendor";
-            }
-            if (id.includes("react-router") || id.includes("react-dom") || id.includes("react")) {
-              return "react-vendor";
-            }
-            if (id.includes("scheduler")) {
-              return "react-vendor-1";
-            }
-            return "vendor";
-          }
-
-          if (id.includes("/src/shared/")) {
-            return "shared";
-          }
-
-          if (id.includes("/src/store/")) {
-            return "store";
-          }
+  return {
+    plugins: [
+      react(),
+      shouldAnalyze
+        ? (visualizer({
+            filename: "stats.html",
+            open: false,
+            gzipSize: true,
+            brotliSize: true,
+          }) as any)
+        : null,
+      tailwindcss(),
+      VitePWA({
+        devOptions: {
+          enabled: true,
+          type: "module",
         },
-        chunkFileNames: "assets/[name]-[hash].js",
-        entryFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        strategies: "injectManifest",
+        registerType: "autoUpdate",
+        srcDir: "src",
+        filename: "sw.ts",
+        injectManifest: {
+          swDest: "dist/sw.js",
+        },
+        includeAssets: ["favicon.svg", "apple-touch-icon-180x180.png", "assets/*"],
+        manifest: {
+          name: "My React App",
+          short_name: "ReactApp",
+          start_url: "/",
+          display: "standalone",
+          background_color: "#ffffff",
+          theme_color: "#000000",
+          icons: [
+            {
+              src: "pwa-64x64.png",
+              sizes: "64x64",
+              type: "image/png",
+            },
+            {
+              src: "pwa-192x192.png",
+              sizes: "192x192",
+              type: "image/png",
+            },
+            {
+              src: "pwa-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+            },
+            {
+              src: "maskable-icon-512x512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable",
+            },
+          ],
+        },
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest,ttf}"],
+        },
+      }),
+    ].filter(Boolean),
+
+    build: {
+      sourcemap: false,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.includes("antd") || id.includes("@ant-design") || id.includes("rc-")) {
+                return "antd-vendor";
+              }
+              if (id.includes("framer-motion")) {
+                return "framer-motion-vendor";
+              }
+              if (id.includes("react-hook-form")) {
+                return "form-vendor";
+              }
+              if (id.includes("lucide-react")) {
+                return "icons-vendor";
+              }
+              if (id.includes("lodash") || id.includes("axios") || id.includes("i18next")) {
+                return "utils-vendor";
+              }
+              if (id.includes("@tanstack")) {
+                return "tanstack-vendor";
+              }
+              if (id.includes("react-router") || id.includes("react-dom") || id.includes("react")) {
+                return "react-vendor";
+              }
+              if (id.includes("scheduler")) {
+                return "react-vendor-1";
+              }
+              return "vendor";
+            }
+
+            if (id.includes("/src/shared/")) {
+              return "shared";
+            }
+
+            if (id.includes("/src/store/")) {
+              return "store";
+            }
+          },
+          chunkFileNames: "assets/[name]-[hash].js",
+          entryFileNames: "assets/[name]-[hash].js",
+          assetFileNames: "assets/[name]-[hash].[ext]",
+        },
+      },
+      minify: "esbuild",
+      cssCodeSplit: true,
+    },
+
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "src"),
+        "@shared": path.resolve(__dirname, "src/shared"),
+        "@features": path.resolve(__dirname, "src/features"),
+        "@styles": path.resolve(__dirname, "src/styles"),
+        "@assets": path.resolve(__dirname, "src/assets"),
       },
     },
-    minify: "esbuild",
-    cssCodeSplit: true,
-  },
-
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-      "@shared": path.resolve(__dirname, "src/shared"),
-      "@features": path.resolve(__dirname, "src/features"),
-      "@styles": path.resolve(__dirname, "src/styles"),
-      "@assets": path.resolve(__dirname, "src/assets"),
-    },
-  },
+  };
 });

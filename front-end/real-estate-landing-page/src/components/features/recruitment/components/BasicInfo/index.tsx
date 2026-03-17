@@ -6,12 +6,22 @@ import { nextStep, updateBasicInfo } from "@/store/store";
 import { memo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useExtractID, useUploadImage } from "../../services/mutation";
+import { toast } from "sonner";
+import { useUploadImages } from "@/shared/upload/mutate";
+import { useExtractID } from "../../services/mutation";
 import { BasicInfo as BasicInfoType } from "@/models/basicInfo.model";
 import { Input } from "@/components/ui/input";
 import { CsButton } from "@/components/custom";
 
-const validateBasicInfo = (data: BasicInfoType) => {
+type BasicInfoFormValues = Omit<
+  BasicInfoType,
+  "identityFront" | "identityBack"
+> & {
+  identityFront: File[];
+  identityBack: File[];
+};
+
+const validateBasicInfo = (data: BasicInfoFormValues) => {
   const errors: Record<string, string> = {};
   if (!data.nameRegister) {
     errors.nameRegister = "Name register is required";
@@ -33,7 +43,7 @@ const validateBasicInfo = (data: BasicInfoType) => {
 
 const BasicInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { mutateAsync: uploadImage } = useUploadImage();
+  const { mutateAsync: uploadImages } = useUploadImages();
   const { mutateAsync: extractID } = useExtractID();
   const { basicInfo } = useSelector((state: RootState) => state.form);
 
@@ -41,18 +51,16 @@ const BasicInfo = () => {
     handleSubmit,
     formState: { errors },
     control,
-  } = useForm<BasicInfoType & { identityFront: File[]; identityBack: File[] }>({
+  } = useForm<BasicInfoFormValues>({
     defaultValues: {
       ...basicInfo,
-      identityBack: [],
-      identityFront: [],
+      identityBack: undefined,
+      identityFront: undefined,
     },
     mode: "onChange",
   });
 
-  const onSubmit = (
-    data: BasicInfoType & { identityFront: File[]; identityBack: File[] },
-  ) => {
+  const onSubmit = (data: BasicInfoFormValues) => {
     const errorsList = validateBasicInfo(data);
     if (Object.keys(errorsList).length > 0) return;
 
@@ -91,17 +99,25 @@ const BasicInfo = () => {
   };
 
   const handleUploadImage = async (files: File[], name: string) => {
-    const formData = new FormData();
-    if (files.length > 0) {
-      formData.append("file", files[0]);
-      const resp = await uploadImage(formData);
-      if (resp && resp.success) {
-        dispatch(
-          updateBasicInfo({
-            [name]: resp.filename,
-          }),
-        );
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const response = await uploadImages([files[0]]);
+      const uploadedImageUrl = response.data.files[0]?.url;
+
+      if (!uploadedImageUrl) {
+        throw new Error("Upload did not return an image URL");
       }
+
+      dispatch(
+        updateBasicInfo({
+          [name]: uploadedImageUrl,
+        } as Partial<BasicInfoType>),
+      );
+    } catch (error) {
+      toast.error("Document upload failed");
     }
   };
 

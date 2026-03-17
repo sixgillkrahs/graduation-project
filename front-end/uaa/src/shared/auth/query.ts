@@ -5,5 +5,6 @@ export const useGetMe = () => {
   return useQuery({
     queryKey: ["me"],
     queryFn: () => AuthService.getMe(),
+    retry: false,
   });
 };

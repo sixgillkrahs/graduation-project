@@ -3,6 +3,7 @@
 # Ignore node_modules directory to prevent copying unnecessary dependencies
 
 node_modules
+pnpm-store
 
 # Ignore local editor settings
 
@@ -16,6 +17,10 @@ node_modules
 
 dist
 build
+coverage
+stats.html
+uaa-dev.err
+uaa-dev.out
 
 # Ignore ESLint, Prettier, and other configuration files that aren't needed in the final image
 
@@ -23,3 +28,5 @@ build
 .prettier*
 .editorconfig
 .DS_Store
+README.md
+llms.txt

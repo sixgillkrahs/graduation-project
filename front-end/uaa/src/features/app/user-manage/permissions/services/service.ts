@@ -7,14 +7,14 @@ export default class PermissionService {
   public static readonly OPERATION: IPermissionService.IOperation[] = [
     {
       value: "create",
-      label: "Create",
+      label: "create",
       color: "#49cc90",
     },
-    { value: "read", label: "Read", color: "#61affe" },
-    { value: "update", label: "Update", color: "#fca130" },
-    { value: "delete", label: "Delete", color: "#f93e3e" },
-    { value: "approve", label: "Approve", color: "#49cc90" },
-    { value: "export", label: "Export", color: "#61affe" },
+    { value: "read", label: "read", color: "#61affe" },
+    { value: "update", label: "update", color: "#fca130" },
+    { value: "delete", label: "delete", color: "#f93e3e" },
+    { value: "approve", label: "approve", color: "#49cc90" },
+    { value: "export", label: "export", color: "#61affe" },
   ];
 
   public static readonly GetPermissions = (

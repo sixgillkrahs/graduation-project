@@ -1,5 +1,5 @@
 import { AgentController } from "@/controllers/agent.controller";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { EmailQueue } from "@/queues/email.queue";
 import { AgentService } from "@/services/agent.service";
@@ -13,6 +13,7 @@ import { validateIdHeaderSchema } from "@/validators/base.validator";
 import { Router } from "express";
 import { PropertySaleService } from "@/services/property-sale.service";
 import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
+import { Operation } from "@/models/permission.model";
 
 const router = Router();
 const propertyService = new PropertyService();
@@ -360,7 +361,11 @@ router.use(requireAuth);
  *                   updatedAt:
  *                     type: string
  */
-router.get("/", agentController.getAgentRegistrations);
+router.get(
+  "/",
+  authorize(),
+  agentController.getAgentRegistrations,
+);
 
 /**
  * @swagger
@@ -425,6 +430,7 @@ router.get("/", agentController.getAgentRegistrations);
  */
 router.get(
   "/:id",
+  authorize(),
   validateRequest((lang) => validateIdHeaderSchema(lang)),
   agentController.agentRegistrationDetail,
 );
@@ -477,6 +483,9 @@ router.get(
  */
 router.patch(
   "/:id/reject",
+  authorize({
+    operation: Operation.Approve,
+  }),
   validateRequest((lang) => validateIdHeaderSchema(lang)),
   agentController.rejectAgentRegistration,
 );
@@ -527,6 +536,9 @@ router.patch(
  */
 router.patch(
   "/:id/approve",
+  authorize({
+    operation: Operation.Approve,
+  }),
   validateRequest((lang) => validateIdHeaderSchema(lang)),
   agentController.approveAgentRegistration,
 );

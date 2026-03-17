@@ -2,6 +2,7 @@ import FormResource from "./components/FormResource";
 import { useCreateResource, useDeleteResource, useUpdateResource } from "./services/mutation";
 import { useGetResource, useGetResources } from "./services/query";
 import ProTable from "@/components/ProTable";
+import { getLocalizedResourceLabel } from "@shared/i18n/accessControl";
 import { toVietnamTime } from "@shared/render/time";
 import type { IParamsPagination, IResp } from "@shared/types/service";
 import type { ColumnsType } from "antd/es/table";
@@ -21,7 +22,6 @@ const Resources = () => {
     sortOrder: "asc",
     total: 0,
   });
-  console.log(t);
   const { data, isLoading, isFetching, refetch } = useGetResources({
     page: pagination.page,
     limit: pagination.limit,
@@ -35,6 +35,7 @@ const Resources = () => {
       title: t("resource.name"),
       dataIndex: "name",
       key: "name",
+      render: (_value, record) => getLocalizedResourceLabel(record, t),
     },
     {
       title: t("resource.path"),
@@ -139,12 +140,26 @@ const Resources = () => {
         }}
         onSort={onChangeSort}
         onAdd={onAdd}
-        onEdit={onEdit}
+        onEdit={(record) =>
+          onEdit({
+            ...record,
+            name:
+              typeof record.name === "string"
+                ? {
+                    en: record.name,
+                    vi: record.name,
+                  }
+                : record.name,
+          })
+        }
         form={{
           title: t("resource.title"),
           children: <FormResource />,
           initialValues: {
-            name: "",
+            name: {
+              en: "",
+              vi: "",
+            },
             path: "",
           },
           buttonLoading: isCreating || isUpdating,
