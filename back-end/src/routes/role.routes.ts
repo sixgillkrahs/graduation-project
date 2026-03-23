@@ -16,7 +16,7 @@ const roleController = new RoleController(roleService, permissionService);
 const router = Router();
 
 router.use(requireAuth);
-router.use(authorize());
+// router.use(authorize());
 
 /**
  * @swagger

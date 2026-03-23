@@ -3,7 +3,7 @@
 import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { PropertyCompareItem } from "@/components/features/properties/compare/compare.types";
 import PropertyCompareToggleButton from "@/components/features/properties/compare/PropertyCompareToggleButton";
 import { ROUTES } from "@/const/routes";
@@ -63,7 +63,19 @@ const PropertyCard = ({
   const dispatch = useAppDispatch();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
   const t = useTranslations("PropertiesPage");
-  const displayPrice = formatPropertyPrice(Number(price), unit, currency);
+  const locale = useLocale();
+  const isRent = type === "rent";
+  const listingTypeLabel = isRent ? t("card.forRent") : t("card.forSale");
+  const priceLabel = isRent
+    ? t("card.priceRentLabel")
+    : t("card.priceSaleLabel");
+  const priceHint = isRent ? t("card.priceRentHint") : t("card.priceSaleHint");
+  const displayPrice = formatPropertyPrice(
+    Number(price),
+    unit,
+    currency,
+    locale,
+  );
 
   const handleToggleFavorite = async () => {
     const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
@@ -115,14 +127,21 @@ const PropertyCard = ({
             className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
           />
 
-          <div className="absolute left-3 top-3 z-10 flex gap-2">
+          <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-2">
             {badges?.aiRecommended && (
-              <span className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-2 py-1 text-[10px] font-bold text-white shadow-lg backdrop-blur-md">
-                âœ¨ {t("card.aiPick")}
+              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 px-3 py-1.5 text-[10px] font-bold text-white shadow-lg backdrop-blur-md">
+                {t("card.aiPick")}
               </span>
             )}
-            <span className="rounded-lg bg-white/90 px-2 py-1 text-[10px] font-bold text-gray-800 backdrop-blur-md">
-              {type === "rent" ? t("card.forRent") : t("card.forSale")}
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.18em] shadow-lg backdrop-blur-md",
+                isRent
+                  ? "border-sky-200 bg-sky-500/95 text-white"
+                  : "border-amber-200 bg-amber-500/95 text-white",
+              )}
+            >
+              {listingTypeLabel}
             </span>
           </div>
 
@@ -137,12 +156,44 @@ const PropertyCard = ({
         </div>
 
         <div className="flex flex-1 flex-col gap-3 p-4">
-          <div>
-            <div className="mb-1 flex items-baseline gap-1">
-              <span className="main-color-red text-xl font-bold md:text-2xl">
-                {displayPrice}
-              </span>
+          <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,124px)_1fr]">
+              <div
+                className={cn(
+                  "rounded-2xl border px-3 py-3",
+                  isRent
+                    ? "border-sky-100 bg-sky-50/80"
+                    : "border-amber-100 bg-amber-50/80",
+                )}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  {t("card.transactionLabel")}
+                </p>
+                <p className="mt-2 text-sm font-bold text-gray-900">
+                  {listingTypeLabel}
+                </p>
+              </div>
+
+              <div
+                className={cn(
+                  "rounded-2xl border px-4 py-3 shadow-sm",
+                  isRent
+                    ? "border-sky-100 bg-gradient-to-br from-sky-50 via-white to-cyan-50"
+                    : "border-amber-100 bg-gradient-to-br from-amber-50 via-white to-orange-50",
+                )}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  {priceLabel}
+                </p>
+                <p className="mt-1 text-xl font-black text-gray-900 md:text-2xl">
+                  {displayPrice}
+                </p>
+                <p className="mt-1 text-xs font-medium text-gray-500">
+                  {priceHint}
+                </p>
+              </div>
             </div>
+
             <h3 className="line-clamp-1 font-semibold text-gray-900 transition-colors group-hover:text-red-500">
               {title}
             </h3>
@@ -173,8 +224,8 @@ const PropertyCard = ({
             </div>
           </div>
 
-          <div className="mt-auto flex items-center justify-between pt-1">
-            <div className="flex items-center gap-2">
+          <div className="mt-auto flex items-center justify-between gap-3 pt-1">
+            <div className="flex min-w-0 items-center gap-2">
               <div className="h-6 w-6 overflow-hidden rounded-full border border-gray-100 bg-gray-200">
                 {agent.avatar ? (
                   <Image
@@ -189,11 +240,11 @@ const PropertyCard = ({
                   </div>
                 )}
               </div>
-              <span className="text-xs font-medium text-gray-600">
+              <span className="truncate text-xs font-medium text-gray-600">
                 {agent?.name}
               </span>
             </div>
-            <span className="text-xs font-medium text-gray-400">
+            <span className="text-right text-xs font-medium text-gray-400">
               {t("detail.posted", { date: postedAt })}
             </span>
           </div>

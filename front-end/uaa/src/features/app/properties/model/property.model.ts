@@ -1,9 +1,12 @@
 export interface IProperty {
   id: string;
   userId: {
+    id?: string;
+    _id?: string;
     fullName: string;
     phone: string;
     email: string;
+    avatarUrl?: string;
   };
   demandType: "SALE" | "RENT";
   propertyType: "APARTMENT" | "HOUSE" | "STREET_HOUSE" | "VILLA" | "LAND" | "OTHER";

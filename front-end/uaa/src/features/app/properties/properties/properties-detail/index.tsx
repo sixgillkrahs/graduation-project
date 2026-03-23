@@ -1,5 +1,6 @@
 import { useApproveProperty, useRejectProperty } from "../../services/mutate";
 import { useGetPropertyDetail } from "../../services/query";
+import { renderDemandTypeTag, renderPropertyPriceSummary } from "../property-display";
 import ApprovePropertyModal from "./components/ApprovePropertyModal";
 import RejectPropertyModal from "./components/RejectPropertyModal";
 import {
@@ -33,7 +34,6 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { useNavigate, useParams } from "react-router-dom";
-import { formatPropertyPrice } from "@/shared/utils/propertyPrice";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -49,6 +49,9 @@ const PropertyDetail = () => {
   const [isApproveModalVisible, setIsApproveModalVisible] = useState(false);
 
   const property = propertyResp?.data;
+  const saleLabel = t("common.sale");
+  const rentLabel = t("common.rent");
+  const agentUserId = property?.userId?._id || property?.userId?.id;
 
   const handleUpdateStatus = (status: "PUBLISHED" | "REJECTED") => {
     if (!id) return;
@@ -233,11 +236,7 @@ const PropertyDetail = () => {
                 {property.propertyType}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.demandType")}>
-                {property.demandType === "SALE" ? (
-                  <Tag color="green">{t("common.sale")}</Tag>
-                ) : (
-                  <Tag color="orange">{t("common.rent")}</Tag>
-                )}
+                {renderDemandTypeTag(property.demandType, saleLabel, rentLabel)}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.area")}>
                 {property?.features?.area} m²
@@ -265,16 +264,16 @@ const PropertyDetail = () => {
         <Col span={24} lg={8} className="space-y-6!">
           <Card className="mb-6 shadow-sm">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <Text type="secondary">{t("properties.price")}</Text>
-                <Title level={4} style={{ margin: 0, color: "#faad14" }}>
-                  {formatPropertyPrice(
-                    property?.features?.price,
-                    property?.features?.priceUnit,
-                    property?.features?.currency,
-                  )}
-                </Title>
-              </div>
+              {renderPropertyPriceSummary({
+                demandType: property.demandType,
+                saleLabel,
+                rentLabel,
+                price: property?.features?.price,
+                priceUnit: property?.features?.priceUnit,
+                currency: property?.features?.currency,
+                salePriceLabel: t("properties.salePrice"),
+                rentPriceLabel: t("properties.rentPrice"),
+              })}
               <Divider className="my-2" />
               <div className="flex items-center gap-2">
                 <Maximize className="text-gray-400" size={20} />
@@ -306,11 +305,23 @@ const PropertyDetail = () => {
           </Card>
 
           <Card title={t("properties.poster")} className="shadow-sm">
-            <div className="mb-4 flex flex-col items-center">
+            <div
+              className={`mb-4 flex flex-col items-center ${agentUserId ? "cursor-pointer" : ""}`}
+              onClick={() => {
+                if (agentUserId) {
+                  navigate(`/agents/manage/user/${agentUserId}`);
+                }
+              }}
+            >
               <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
                 <User size={32} className="text-blue-500" />
               </div>
               <Title level={5}>{property?.userId?.fullName || "Unknown"}</Title>
+              {agentUserId ? (
+                <Button type="link" className="px-0">
+                  {t("properties.viewAgentDetail")}
+                </Button>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-2">

@@ -21,7 +21,7 @@ const permissionController = new PermissionController(
 );
 
 router.use(requireAuth);
-router.use(authorize());
+// router.use(authorize());
 
 /**
  * @swagger

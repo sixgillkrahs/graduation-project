@@ -27,6 +27,21 @@ export interface PaginateModel<T extends Document> extends Model<T> {
   ): Promise<PaginateResult<T>>;
 }
 
+const addStableSort = (sort: string) => {
+  const sortTokens = sort
+    .split(" ")
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  const hasIdSort = sortTokens.some((token) => token === "_id" || token === "-_id");
+
+  if (!hasIdSort) {
+    sortTokens.push("-_id");
+  }
+
+  return sortTokens.join(" ");
+};
+
 /* =======================
  * Plugin
  * ======================= */
@@ -49,6 +64,8 @@ const paginate = <T extends Document>(schema: Schema<T>) => {
         })
         .join(" ");
     }
+
+    sort = addStableSort(sort);
 
     /* -------- pagination -------- */
     const limit =

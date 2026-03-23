@@ -34,6 +34,18 @@ const router: RouterConfig = {
           component: lazy(() => import("./agents/agent-manage")),
           name: "menu.agentManage",
         },
+        {
+          path: "/manage/user/:userId",
+          component: lazy(() => import("./agents/agent-manage/agent-public-detail")),
+          name: "menu.agentManageDetail",
+          hideInMenu: true,
+        },
+        {
+          path: "/manage/:id",
+          component: lazy(() => import("./agents/agent-manage/agent-manage-detail")),
+          name: "menu.agentManageDetail",
+          hideInMenu: true,
+        },
       ],
     },
     {

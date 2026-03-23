@@ -112,7 +112,7 @@ const BusinessInfo = () => {
             render={({ field }) => (
               <Input
                 label="Tax code"
-                placeholder="8888888888"
+                placeholder="Please enter number"
                 error={errors.taxCode?.message}
                 {...field}
               />
@@ -133,7 +133,7 @@ const BusinessInfo = () => {
             render={({ field }) => (
               <Input
                 label="Years Of Experience"
-                placeholder="8888888888"
+                placeholder="Please enter number"
                 suffix="Year"
                 error={errors.yearsOfExperience?.message}
                 {...field}
@@ -236,4 +236,3 @@ const BusinessInfo = () => {
 };
 
 export default memo(BusinessInfo);
-

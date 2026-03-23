@@ -1,6 +1,25 @@
 {
   "manage": {
-    "title": "Quản lý nhân viên"
+    "title": "Quản lý nhân viên",
+    "detailTitle": "Chi tiết môi giới"
+  },
+  "public": {
+    "verified": "Đã xác minh",
+    "rating": "Đánh giá",
+    "rank": "Hạng #{rank}",
+    "overview": "Tổng quan môi giới",
+    "contact": "Thông tin liên hệ",
+    "stats": "Chỉ số hoạt động",
+    "activeSaleListings": "Tin đang bán",
+    "totalListings": "Tổng tin đăng",
+    "soldListings": "Tin đã chốt",
+    "totalViews": "Lượt xem",
+    "leaderboard": "Thứ hạng doanh thu",
+    "deals": "{count} giao dịch",
+    "revenue": "Doanh thu",
+    "period": "Kỳ {month}/{year}",
+    "latestSoldAt": "Giao dịch gần nhất",
+    "plan": "Gói tài khoản"
   },
   "registration": {
     "title": "Đăng ký môi giới"
@@ -34,6 +53,7 @@
     "rejectDate": "Ngày từ chối",
     "approveDate": "Ngày chấp nhận",
     "note": "Ghi chú",
+    "workingArea": "Khu vực hoạt động",
     "businessInfo": "Thông tin doanh nghiệp",
     "taxCode": "Mã số thuế",
     "specialization": "Chuyên môn",
@@ -58,7 +78,8 @@
     "cancel": "Hủy",
     "confirmApproveTitle": "Bạn có muốn chấp nhận đơn này?",
     "notePrompt": "Ghi chú (không bắt buộc):",
-    "enterNote": "Nhập ghi chú khi chấp nhận đơn"
+    "enterNote": "Nhập ghi chú khi chấp nhận đơn",
+    "notFound": "Không tìm thấy môi giới"
   },
   "statusValue": {
     "PENDING": "Chờ duyệt",

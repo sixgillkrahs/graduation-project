@@ -4,9 +4,11 @@ import FullTable from "@/components/FullTable";
 import { renderConstant } from "@shared/render/const";
 import type { ColumnsType } from "antd/es/table";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const AgentManagement = () => {
   const { t } = useTranslation("agents");
+  const navigate = useNavigate();
   const columns: ColumnsType<IAgentService.Agent> = [
     {
       title: t("columns.nameRegister"),
@@ -53,6 +55,11 @@ const AgentManagement = () => {
       },
     },
   ];
+
+  const handleDetail = (record: IAgentService.Agent) => {
+    navigate(`/agents/manage/${record.id}`);
+  };
+
   return (
     <FullTable<IAgentService.Agent>
       columns={columns}
@@ -62,7 +69,7 @@ const AgentManagement = () => {
       isView={false}
       isEdit={false}
       isDetail={true}
-      // onDetail={handleDetail}
+      onDetail={handleDetail}
     />
   );
 };

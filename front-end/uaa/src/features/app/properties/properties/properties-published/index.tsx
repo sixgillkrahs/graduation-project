@@ -1,12 +1,12 @@
 import type { IProperty } from "../../model/property.model";
 import { useGetPropertiesPublished } from "../../services/query";
+import { renderDemandTypeTag, renderPropertyPriceCell } from "../property-display";
 import FullTable from "@/components/FullTable";
 import { Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { formatPropertyPrice } from "@/shared/utils/propertyPrice";
 
 const PropertiesPublished = () => {
   const { t } = useTranslation();
@@ -19,6 +19,8 @@ const PropertiesPublished = () => {
     { label: t("common.sale"), value: "SALE" },
     { label: t("common.rent"), value: "RENT" },
   ];
+  const saleLabel = t("common.sale");
+  const rentLabel = t("common.rent");
 
   const columns: ColumnsType<any> = [
     {
@@ -31,12 +33,7 @@ const PropertiesPublished = () => {
       title: t("properties.demandType"),
       dataIndex: "demandType",
       key: "demandType",
-      render: (type) =>
-        type === "SALE" ? (
-          <Tag color="green">{t("common.sale")}</Tag>
-        ) : (
-          <Tag color="orange">{t("common.rent")}</Tag>
-        ),
+      render: (type) => renderDemandTypeTag(type, saleLabel, rentLabel),
     },
     {
       title: t("properties.area"),
@@ -47,11 +44,16 @@ const PropertiesPublished = () => {
       title: t("properties.price"),
       key: "price",
       render: (_, record) =>
-        formatPropertyPrice(
-          record.features.price,
-          record.features.priceUnit,
-          record.features.currency,
-        ),
+        renderPropertyPriceCell({
+          demandType: record.demandType,
+          saleLabel,
+          rentLabel,
+          price: record.features.price,
+          priceUnit: record.features.priceUnit,
+          currency: record.features.currency,
+          salePriceLabel: t("properties.salePrice"),
+          rentPriceLabel: t("properties.rentPrice"),
+        }),
     },
     {
       title: t("properties.location"),

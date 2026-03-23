@@ -119,7 +119,7 @@ class ResourceClass {
     sortOrder: SortOrder = 1,
   ) {
     const skip = (page - 1) * limit;
-    const sort = { [sortBy]: sortOrder };
+    const sort = { [sortBy]: sortOrder, _id: sortOrder };
     const [results, totalResults] = await Promise.all([
       this.find().sort(sort).skip(skip).limit(limit).exec(),
       this.countDocuments().exec(),
@@ -161,9 +161,10 @@ class ResourceClass {
 
     const searchRegex = new RegExp(searchTerm, "i");
     const searchFilter = buildNameSearchFilter(searchRegex);
+    const sort = { createdAt: -1, _id: -1 };
 
     const [results, totalResults] = await Promise.all([
-      this.find(searchFilter).skip(skip).limit(limit).exec(),
+      this.find(searchFilter).sort(sort).skip(skip).limit(limit).exec(),
       this.countDocuments(searchFilter).exec(),
     ]);
 

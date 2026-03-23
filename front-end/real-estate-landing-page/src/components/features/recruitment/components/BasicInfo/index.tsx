@@ -1,17 +1,17 @@
 "use client";
 
-import { Icon, Upload } from "@/components/ui";
-import { AppDispatch, RootState } from "@/store";
-import { nextStep, updateBasicInfo } from "@/store/store";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "@/lib/toast";
-import { useUploadImages } from "@/shared/upload/mutate";
-import { useExtractID } from "../../services/mutation";
-import { BasicInfo as BasicInfoType } from "@/models/basicInfo.model";
-import { Input } from "@/components/ui/input";
 import { CsButton } from "@/components/custom";
+import { Icon, Upload } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/lib/toast";
+import type { BasicInfo as BasicInfoType } from "@/models/basicInfo.model";
+import { useUploadImages } from "@/shared/upload/mutate";
+import type { AppDispatch, RootState } from "@/store";
+import { nextStep, updateBasicInfo } from "@/store/store";
+import { useExtractID } from "../../services/mutation";
 
 type BasicInfoFormValues = Omit<
   BasicInfoType,
@@ -43,6 +43,7 @@ const validateBasicInfo = (data: BasicInfoFormValues) => {
 
 const BasicInfo = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [uploadingCount, setUploadingCount] = useState(0);
   const { mutateAsync: uploadImages } = useUploadImages();
   const { mutateAsync: extractID } = useExtractID();
   const { basicInfo } = useSelector((state: RootState) => state.form);
@@ -61,6 +62,11 @@ const BasicInfo = () => {
   });
 
   const onSubmit = (data: BasicInfoFormValues) => {
+    if (uploadingCount > 0) {
+      toast.error("Please wait until all documents finish uploading");
+      return;
+    }
+
     const errorsList = validateBasicInfo(data);
     if (Object.keys(errorsList).length > 0) return;
 
@@ -103,6 +109,8 @@ const BasicInfo = () => {
       return;
     }
 
+    setUploadingCount((prev) => prev + 1);
+
     try {
       const response = await uploadImages([files[0]]);
       const uploadedImageUrl = response.data.files[0]?.url;
@@ -116,8 +124,10 @@ const BasicInfo = () => {
           [name]: uploadedImageUrl,
         } as Partial<BasicInfoType>),
       );
-    } catch (error) {
+    } catch (_error) {
       toast.error("Document upload failed");
+    } finally {
+      setUploadingCount((prev) => Math.max(0, prev - 1));
     }
   };
 
@@ -243,6 +253,8 @@ const BasicInfo = () => {
           <CsButton
             className="cs-bg-black text-white px-6 py-2 rounded-full"
             type="submit"
+            loading={uploadingCount > 0}
+            disabled={uploadingCount > 0}
           >
             Next
           </CsButton>
@@ -253,4 +265,3 @@ const BasicInfo = () => {
 };
 
 export default memo(BasicInfo);
-

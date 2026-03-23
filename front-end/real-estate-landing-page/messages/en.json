@@ -295,6 +295,11 @@
       "forRent": "For Rent",
       "forSale": "For Sale",
       "aiPick": "AI Pick",
+      "transactionLabel": "Listing type",
+      "priceRentLabel": "Rental price",
+      "priceSaleLabel": "Sale price",
+      "priceRentHint": "Current advertised rental price",
+      "priceSaleHint": "Current asking price on this listing",
       "month": "month",
       "loginToSave": "Login to save",
       "loginToSaveDesc": "Please login to save this property to your favorites!"

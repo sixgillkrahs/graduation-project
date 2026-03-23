@@ -37,11 +37,11 @@
     "roles": "Roles",
     "permissions": "Permissions",
     "resources": "Resources",
-    "users":"Người dùng"
+    "users": "Người dùng"
   },
   "columns": {
-     "action": "Action",
-     "stt": "No."
+    "action": "Action",
+    "stt": "No."
   },
   "button": {
     "add": "Add New",
@@ -73,6 +73,7 @@
     "agent": "Agent",
     "agentRegistration": "Agent Registration",
     "agentManage": "Agent Management",
+    "agentManageDetail": "Agent Detail",
     "properties": "Properties",
     "propertiesPending": "Properties Pending",
     "propertiesRejected": "Properties Rejected",
@@ -104,13 +105,15 @@
     "phone": "Phone",
     "active": "Active",
     "createdAt": "Created At",
-    "role":"Role"
+    "role": "Role"
   },
   "properties": {
     "propertyType": "Type",
     "demandType": "Demand",
     "area": "Area (m²)",
     "price": "Price",
+    "salePrice": "Sale price",
+    "rentPrice": "Rental price",
     "location": "Location",
     "poster": "Poster",
     "phone": "Phone",
@@ -119,6 +122,7 @@
     "propertyDetail": "Property Details",
     "description": "Description",
     "features": "Features",
+    "viewAgentDetail": "View agent detail",
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
     "direction": "Direction",

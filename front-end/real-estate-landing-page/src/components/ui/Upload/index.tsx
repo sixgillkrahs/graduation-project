@@ -1,23 +1,22 @@
 "use client";
 
-import {
-  InputHTMLAttributes,
-  useState,
-  useRef,
-  ChangeEvent,
-  useEffect,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
-import { Icon } from "../Icon";
-import { PhotoView } from "react-photo-view";
 import Image from "next/image";
+import {
+  type ChangeEvent,
+  forwardRef,
+  type InputHTMLAttributes,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { PhotoView } from "react-photo-view";
 import { CsButton } from "@/components/custom";
+import { Icon } from "../Icon";
 
-interface FileWithStatus {
+interface UploadFileItem {
   id: string;
   file: File;
-  status: "uploading" | "success" | "error";
   previewUrl: string;
 }
 
@@ -33,6 +32,48 @@ interface UploadProps {
   onBlur?: () => void;
   disabled?: boolean;
 }
+
+const createFileId = () => Math.random().toString(36).substring(7);
+
+const revokePreviewUrls = (items: UploadFileItem[]) => {
+  items.forEach((item) => {
+    URL.revokeObjectURL(item.previewUrl);
+  });
+};
+
+const isAcceptedFileType = (
+  file: File,
+  accept?: InputHTMLAttributes<HTMLInputElement>["accept"],
+) => {
+  if (!accept) {
+    return true;
+  }
+
+  const acceptedTypes = accept
+    .split(",")
+    .map((type) => type.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (acceptedTypes.length === 0) {
+    return true;
+  }
+
+  const fileType = file.type.toLowerCase();
+  const fileExtension = `.${file.name.split(".").pop()?.toLowerCase() || ""}`;
+
+  return acceptedTypes.some((type) => {
+    if (type.startsWith(".")) {
+      return fileExtension === type;
+    }
+
+    if (type.endsWith("/*")) {
+      const baseType = type.slice(0, -1);
+      return fileType.startsWith(baseType);
+    }
+
+    return fileType === type;
+  });
+};
 
 const Upload = forwardRef<HTMLInputElement, UploadProps>(
   (
@@ -50,38 +91,47 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
     },
     ref,
   ) => {
-    const [fileList, setFileList] = useState<FileWithStatus[]>([]);
-    const [internalError, setInternalError] = useState<string>("");
+    const [fileList, setFileList] = useState<UploadFileItem[]>([]);
+    const [internalError, setInternalError] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileListRef = useRef<UploadFileItem[]>([]);
 
     useImperativeHandle(ref, () => fileInputRef.current as HTMLInputElement);
 
     useEffect(() => {
+      fileListRef.current = fileList;
+    }, [fileList]);
+
+    useEffect(() => {
       return () => {
-        fileList.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+        revokePreviewUrls(fileListRef.current);
       };
     }, []);
 
     useEffect(() => {
-      if (!value || value.length === 0) {
-        setFileList([]);
+      const nextFiles = value || [];
+      const currentFiles = fileListRef.current.map((item) => item.file);
+      const isSameValue =
+        nextFiles.length === currentFiles.length &&
+        nextFiles.every((file, index) => file === currentFiles[index]);
+
+      if (isSameValue) {
+        return;
       }
+
+      revokePreviewUrls(fileListRef.current);
+
+      const nextFileList = nextFiles.map((file) => ({
+        id: createFileId(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+      fileListRef.current = nextFileList;
+      setFileList(nextFileList);
     }, [value]);
 
-    const uploadFile = async (fileId: string) => {
-      return new Promise<void>((resolve, reject) => {
-        const time = Math.random() * 2000 + 1000;
-        setTimeout(() => {
-          if (Math.random() < 0.1) {
-            reject(new Error("Upload failed"));
-          } else {
-            resolve();
-          }
-        }, time);
-      });
-    };
-
-    const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
       const selectedFiles = e.target.files;
       setInternalError("");
 
@@ -89,9 +139,8 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
         return;
       }
 
-      const newFilesItems: FileWithStatus[] = [];
+      const newFileItems: UploadFileItem[] = [];
       const errors: string[] = [];
-      const validFiles: File[] = [];
 
       Array.from(selectedFiles).forEach((file) => {
         if (file.size > maxSizeMB * 1024 * 1024) {
@@ -99,29 +148,14 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
           return;
         }
 
-        if (accept && !accept.includes("*")) {
-          const acceptedTypes = accept.split(",").map((type) => type.trim());
-          const fileType = file.type;
-          const fileExtension = file.name.split(".").pop()?.toLowerCase();
-
-          const isAccepted = acceptedTypes.some((type) => {
-            if (type.startsWith(".")) {
-              return fileExtension === type.substring(1);
-            }
-            return fileType.match(type);
-          });
-
-          if (!isAccepted) {
-            errors.push(`${file.name} is not a valid file type`);
-            return;
-          }
+        if (!isAcceptedFileType(file, accept)) {
+          errors.push(`${file.name} is not a valid file type`);
+          return;
         }
 
-        validFiles.push(file);
-        newFilesItems.push({
-          id: Math.random().toString(36).substring(7),
-          file: file,
-          status: "uploading",
+        newFileItems.push({
+          id: createFileId(),
+          file,
           previewUrl: URL.createObjectURL(file),
         });
       });
@@ -130,34 +164,18 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
         setInternalError(errors.join(", "));
       }
 
-      if (newFilesItems.length > 0) {
-        const updatedList = multiple
-          ? [...fileList, ...newFilesItems]
-          : newFilesItems;
-
-        setFileList(updatedList);
-
-        newFilesItems.forEach((item) => {
-          uploadFile(item.id)
-            .then(() => {
-              setFileList((prev) =>
-                prev.map((f) =>
-                  f.id === item.id ? { ...f, status: "success" } : f,
-                ),
-              );
-            })
-            .catch(() => {
-              setFileList((prev) =>
-                prev.map((f) =>
-                  f.id === item.id ? { ...f, status: "error" } : f,
-                ),
-              );
-            });
-        });
-        if (onChange) {
-          const allFiles = updatedList.map((item) => item.file);
-          onChange(allFiles);
+      if (newFileItems.length > 0) {
+        if (!multiple) {
+          revokePreviewUrls(fileListRef.current);
         }
+
+        const updatedList = multiple
+          ? [...fileListRef.current, ...newFileItems]
+          : newFileItems;
+
+        fileListRef.current = updatedList;
+        setFileList(updatedList);
+        onChange?.(updatedList.map((item) => item.file));
       }
 
       if (fileInputRef.current) {
@@ -166,30 +184,29 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
     };
 
     const handleRemoveFile = (id: string) => {
-      const fileToRemove = fileList.find((f) => f.id === id);
-      if (fileToRemove) URL.revokeObjectURL(fileToRemove.previewUrl);
-
-      const updatedList = fileList.filter((item) => item.id !== id);
-      setFileList(updatedList);
-
-      if (onChange) {
-        onChange(updatedList.map((item) => item.file));
+      const fileToRemove = fileListRef.current.find((item) => item.id === id);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.previewUrl);
       }
+
+      const updatedList = fileListRef.current.filter((item) => item.id !== id);
+      fileListRef.current = updatedList;
+      setFileList(updatedList);
+      onChange?.(updatedList.map((item) => item.file));
     };
 
     const handleClearAll = () => {
-      fileList.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      revokePreviewUrls(fileListRef.current);
+      fileListRef.current = [];
       setFileList([]);
       setInternalError("");
-
-      if (onChange) {
-        onChange([]);
-      }
+      onChange?.([]);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
+
       if (
         !disabled &&
         e.dataTransfer.files &&
@@ -198,19 +215,24 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
         const fakeEvent = {
           target: { files: e.dataTransfer.files },
         } as ChangeEvent<HTMLInputElement>;
+
         handleFileChange(fakeEvent);
       }
     };
+
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
     };
-    const formatFileSize = (bytes: number): string => {
+
+    const formatFileSize = (bytes: number) => {
       if (bytes === 0) return "0 Bytes";
+
       const k = 1024;
       const sizes = ["Bytes", "KB", "MB", "GB"];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+
+      return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
     };
 
     const displayError = error || internalError;
@@ -219,7 +241,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       <div className="space-y-3">
         <p className="cs-paragraph text-sm! font-medium! mb-2">{label}</p>
 
-        <div
+        <label
           className={`w-full h-[180px] relative ${
             disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
           }`}
@@ -257,7 +279,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
             disabled={disabled}
             className="w-full h-full cursor-pointer absolute top-0 left-0 opacity-0 disabled:cursor-not-allowed"
           />
-        </div>
+        </label>
 
         {displayError && (
           <div className="text-red-500 text-sm bg-red-50 p-2 rounded-md font-medium">
@@ -285,14 +307,12 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
             )}
 
             <div className="border rounded-lg p-3 bg-gray-50">
-              <p className="font-medium text-gray-700 mb-2">Danh sách file:</p>
+              <p className="font-medium text-gray-700 mb-2">Selected files:</p>
               <ul className="space-y-2">
                 {fileList.map((item) => (
                   <li
                     key={`list-${item.id}`}
-                    className={`flex items-center justify-between p-2 bg-white rounded border ${
-                      item.status === "error" ? "border-red-300 bg-red-50" : ""
-                    }`}
+                    className="flex items-center justify-between p-2 bg-white rounded border"
                   >
                     <div className="flex items-center gap-2">
                       <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0">
@@ -303,45 +323,11 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                               alt={item.file.name}
                               width={40}
                               height={40}
-                              className={`w-full h-full object-cover cursor-pointer ${
-                                item.status === "uploading" ? "opacity-50" : ""
-                              }`}
+                              className="w-full h-full object-cover cursor-pointer"
                             />
                           </PhotoView>
                         ) : (
                           <Icon.FileUpload className="w-5 h-5 text-gray-400 m-auto mt-2" />
-                        )}
-
-                        {item.status === "uploading" && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                            <svg
-                              className="animate-spin h-5 w-5 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                          </div>
-                        )}
-                        {item.status === "error" && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-red-100/80">
-                            <span className="text-red-600 font-bold text-xs">
-                              !
-                            </span>
-                          </div>
                         )}
                       </div>
 
@@ -350,17 +336,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                           {item.file.name}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {item.status === "uploading" && (
-                            <span className="text-blue-500">Uploading...</span>
-                          )}
-                          {item.status === "success" && (
-                            <span className="text-green-500">Done</span>
-                          )}
-                          {item.status === "error" && (
-                            <span className="text-red-500">Failed</span>
-                          )}
-                          {item.status !== "uploading" &&
-                            ` • ${formatFileSize(item.file.size)}`}
+                          {formatFileSize(item.file.size)}
                         </span>
                       </div>
                     </div>
@@ -368,7 +344,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
                     <CsButton
                       type="button"
                       onClick={() => handleRemoveFile(item.id)}
-                      disabled={item.status === "uploading" || disabled}
+                      disabled={disabled}
                       className="text-red-500 hover:text-red-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                       icon={<Icon.DeleteBin />}
                     />

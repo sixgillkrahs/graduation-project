@@ -1,6 +1,25 @@
 {
   "manage": {
-    "title": "Agent Management"
+    "title": "Agent Management",
+    "detailTitle": "Agent Detail"
+  },
+  "public": {
+    "verified": "Verified",
+    "rating": "Rating",
+    "rank": "Rank #{rank}",
+    "overview": "Agent Overview",
+    "contact": "Contact Information",
+    "stats": "Performance Stats",
+    "activeSaleListings": "Active sale listings",
+    "totalListings": "Total listings",
+    "soldListings": "Sold listings",
+    "totalViews": "Total views",
+    "leaderboard": "Revenue leaderboard",
+    "deals": "{count} deals",
+    "revenue": "Revenue",
+    "period": "Period {month}/{year}",
+    "latestSoldAt": "Latest sale",
+    "plan": "Plan"
   },
   "registration": {
     "title": "Agent Registration"
@@ -34,6 +53,7 @@
     "rejectDate": "Reject Date",
     "approveDate": "Approve Date",
     "note": "Note",
+    "workingArea": "Working Area",
     "businessInfo": "Business Information",
     "taxCode": "Tax Code",
     "specialization": "Specialization",
@@ -58,7 +78,8 @@
     "cancel": "Cancel",
     "confirmApproveTitle": "Are you sure you want to accept this application?",
     "notePrompt": "Note (optional):",
-    "enterNote": "Enter note on acceptance"
+    "enterNote": "Enter note on acceptance",
+    "notFound": "Agent not found"
   },
   "statusValue": {
     "PENDING": "Pending",
