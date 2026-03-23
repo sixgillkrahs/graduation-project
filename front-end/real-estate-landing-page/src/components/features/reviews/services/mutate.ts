@@ -22,6 +22,27 @@ export const useReplyReview = () => {
   });
 };
 
+export const useCreateAgentReview = () => {
+  return useMutation({
+    mutationFn: (payload: IReviewService.CreateAgentReviewPayload) =>
+      ReviewsService.createByAgent(payload),
+    meta: {
+      ERROR_SOURCE: "Khong the gui danh gia",
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [ReviewsQueryKey.publicList, variables.agentUserId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ReviewsQueryKey.eligibility, variables.agentUserId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ReviewsQueryKey.myList],
+      });
+    },
+  });
+};
+
 export const useGenerateAutoReply = () => {
   return useMutation({
     mutationFn: (payload: IReviewService.GenerateAutoReplyPayload) =>

@@ -23,6 +23,7 @@ namespace IReviewInvitationService {
       | "PENDING"
       | "AWAITING_ADMIN"
       | "PUBLISHED"
+      | "HIDDEN"
       | "REJECTED"
       | "REPORTED";
   }

@@ -648,7 +648,9 @@
       "phoneTitle": "Login to view phone number",
       "phoneDescription": "Please login to view this agent's contact information.",
       "messageTitle": "Login to message this agent",
-      "messageDescription": "Please login to start a conversation with this agent."
+      "messageDescription": "Please login to start a conversation with this agent.",
+      "reviewTitle": "Login to write a review",
+      "reviewDescription": "You need to login with an account that has completed a transaction or appointment with this agent."
     },
     "hero": {
       "verified": "Verified Agent",
@@ -665,8 +667,15 @@
       "primaryMarket": "Primary Market"
     },
     "actions": {
+      "writeReview": "Write a Review",
+      "reviewUnavailable": "Review Unavailable",
       "showPhone": "Show Phone Number",
       "chat": "Chat / Message"
+    },
+    "reviewFeedback": {
+      "eligibilityRequired": "You need a completed transaction or appointment with this agent before you can submit a review.",
+      "publishedSuccess": "Your review is now visible. The backend will scan it in a later AI moderation batch and may hide it if the content is not appropriate.",
+      "submittedSuccess": "Your review has been received."
     },
     "about": {
       "title": "About Me",

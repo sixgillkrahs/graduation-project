@@ -81,6 +81,59 @@ export class ReviewController extends BaseController {
     });
   };
 
+  getAgentReviewEligibility = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const userId = req.user?.userId?._id?.toString();
+      const { agentUserId } = req.params;
+
+      if (!userId) {
+        throw new AppError("Unauthorized", 401, ErrorCode.UNAUTHORIZED);
+      }
+
+      return this.reviewService.getAgentReviewEligibility(agentUserId, userId);
+    });
+  };
+
+  createAgentReview = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const customerUserId = req.user?.userId?._id?.toString();
+      const { agentUserId } = req.params;
+      const { rating, tags, comment } = req.body;
+
+      if (!customerUserId) {
+        throw new AppError("Unauthorized", 401, ErrorCode.UNAUTHORIZED);
+      }
+
+      const review = await this.reviewService.submitReviewForAgent({
+        agentUserId,
+        customerUserId,
+        rating,
+        tags,
+        comment,
+      });
+
+      if (!review) {
+        throw new AppError(
+          "Review eligibility not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      return {
+        id: (review as any).id || String((review as any)._id || ""),
+        rating: review.rating,
+        tags: review.tags,
+        comment: review.comment,
+        status: review.status,
+      };
+    });
+  };
+
   getPublicReviews = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { agentUserId } = req.params;

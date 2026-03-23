@@ -13,6 +13,18 @@ export const useGetPublicAgentReviews = (
   });
 };
 
+export const useGetAgentReviewEligibility = (
+  agentUserId: string,
+  enabled = true,
+) => {
+  return useQuery({
+    queryKey: [ReviewsQueryKey.eligibility, agentUserId],
+    queryFn: () => ReviewsService.getEligibilityByAgent(agentUserId),
+    enabled: enabled && Boolean(agentUserId),
+    retry: false,
+  });
+};
+
 export const useGetMyReviews = (params?: IReviewService.GetMyParams) => {
   return useQuery({
     queryKey: [ReviewsQueryKey.myList, params],

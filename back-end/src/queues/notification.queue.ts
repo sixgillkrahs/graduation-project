@@ -1,5 +1,6 @@
 import { SendNotificationJob } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
+import { createBullMqJobId } from "@/utils/bullmq";
 import { Queue } from "bullmq";
 
 export class NotificationQueue {
@@ -12,7 +13,7 @@ export class NotificationQueue {
   }
 
   enqueueNotification(data: SendNotificationJob) {
-    const jobId = `notification:${data.userId}:${Date.now()}`;
+    const jobId = createBullMqJobId("notification", data.userId, Date.now());
     return this.queue.add("sendNotification", data, {
       jobId,
       attempts: 3,

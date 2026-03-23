@@ -19,6 +19,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import bgImage from "@/assets/images/bg.jpg";
 import { CsButton } from "@/components/custom";
+import ReviewSubmissionModal from "@/components/features/agent-public-profile/components/ReviewSubmissionModal";
 import { useAgentPublicProfile } from "@/components/features/agent-public-profile/services/query";
 import { useCreateConversation } from "@/components/features/message/services/mutate";
 import { mapPropertyToCompareItem } from "@/components/features/properties/compare/compare.utils";
@@ -26,12 +27,17 @@ import PropertyCard from "@/components/features/properties/components/PropertyCa
 import PropertyCardSkeleton from "@/components/features/properties/components/PropertyCardSkeleton";
 import { useAgentOnSaleProperties } from "@/components/features/properties/services/query";
 import ReportEntityButton from "@/components/features/reports/components/ReportEntityButton";
-import { useGetPublicAgentReviews } from "@/components/features/reviews/services/query";
+import {
+  useGetAgentReviewEligibility,
+  useGetPublicAgentReviews,
+} from "@/components/features/reviews/services/query";
+import { useCreateAgentReview } from "@/components/features/reviews/services/mutate";
 import { Avatar } from "@/components/ui/avatar";
 import { ROUTES } from "@/const/routes";
 import { useAppDispatch } from "@/lib/hooks";
 import { formatPropertyPostedDate } from "@/lib/property-date";
 import { formatPropertyPrice } from "@/lib/property-price";
+import { toast } from "@/lib/toast";
 import { useGetMe } from "@/shared/auth/query";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import { openConversation } from "@/store/chat.store";
@@ -76,6 +82,7 @@ const AgentPublicProfile = () => {
   const agentId = params?.id as string;
   const dispatch = useAppDispatch();
   const [isPhoneVisible, setIsPhoneVisible] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const { data: me } = useGetMe();
   const { data: profileData } = useAgentPublicProfile(agentId);
   const { data: publicReviewsData, isLoading: isLoadingPublicReviews } =
@@ -88,8 +95,14 @@ const AgentPublicProfile = () => {
       page: 1,
       limit: 4,
     });
+  const {
+    data: reviewEligibilityData,
+    isLoading: isLoadingReviewEligibility,
+  } = useGetAgentReviewEligibility(agentId, Boolean(me?.data?.userId));
   const { mutateAsync: createConversation, isPending: isCreatingConversation } =
     useCreateConversation();
+  const { mutateAsync: createAgentReview, isPending: isCreatingAgentReview } =
+    useCreateAgentReview();
 
   const fallbackAgent = {
     name: t("fallback.name"),
@@ -112,6 +125,8 @@ const AgentPublicProfile = () => {
   const activeListings = activeListingsData?.data?.results || [];
   const profile = profileData?.data;
   const isClientLoggedIn = Boolean(me?.data?.userId);
+  const reviewEligibility = reviewEligibilityData?.data;
+  const canReviewAgent = Boolean(reviewEligibility?.eligible);
   const displayName =
     profile?.fullName ||
     activeListings[0]?.userId?.fullName ||
@@ -156,14 +171,21 @@ const AgentPublicProfile = () => {
       : fallbackAgent.about;
   const sanitizedAboutHtml = DOMPurify.sanitize(aboutText);
 
-  const openLoginDialog = (mode: "phone" | "message") => {
+  const openLoginDialog = (mode: "phone" | "message" | "review") => {
     dispatch(
       showAuthDialog({
-        title: mode === "phone" ? t("auth.phoneTitle") : t("auth.messageTitle"),
+        title:
+          mode === "phone"
+            ? t("auth.phoneTitle")
+            : mode === "message"
+              ? t("auth.messageTitle")
+              : t("auth.reviewTitle"),
         description:
           mode === "phone"
             ? t("auth.phoneDescription")
-            : t("auth.messageDescription"),
+            : mode === "message"
+              ? t("auth.messageDescription")
+              : t("auth.reviewDescription"),
         redirectUrl: ROUTES.AGENT_PUBLIC_PROFILE(agentId),
       }),
     );
@@ -195,6 +217,40 @@ const AgentPublicProfile = () => {
     }
   };
 
+  const handleOpenReview = () => {
+    if (!isClientLoggedIn) {
+      openLoginDialog("review");
+      return;
+    }
+
+    if (!canReviewAgent) {
+      toast.info(t("reviewFeedback.eligibilityRequired"));
+      return;
+    }
+
+    setIsReviewModalOpen(true);
+  };
+
+  const handleSubmitReview = async (payload: {
+    rating: number;
+    tags: string[];
+    comment: string;
+  }) => {
+    const response = await createAgentReview({
+      agentUserId: agentId,
+      rating: payload.rating,
+      tags: payload.tags,
+      comment: payload.comment,
+    });
+
+    if (response.data.status === "PUBLISHED") {
+      toast.success(t("reviewFeedback.publishedSuccess"));
+      return;
+    }
+
+    toast.success(t("reviewFeedback.submittedSuccess"));
+  };
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <section className="border-b border-border bg-gradient-to-br from-primary/10 via-background to-primary/5">
@@ -202,125 +258,139 @@ const AgentPublicProfile = () => {
           <div className="relative overflow-hidden rounded-[32px] border border-border/60 bg-card shadow-[0_24px_80px_-40px_rgba(0,0,0,0.25)]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.7),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.75),transparent_55%)]" />
             <div className="absolute inset-0 opacity-50 [background-image:linear-gradient(to_right,color-mix(in_oklab,var(--color-border)_55%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_oklab,var(--color-border)_55%,transparent)_1px,transparent_1px)] [background-size:32px_32px]" />
-            <div className="relative h-36 md:h-44 bg-gradient-to-r from-primary/15 via-transparent to-blue-500/10" />
+            <div className="relative h-32 md:h-40 lg:h-44 bg-gradient-to-r from-primary/15 via-transparent to-blue-500/10" />
 
             <div className="relative px-5 pb-6 md:px-8 md:pb-8">
-              <div className="-mt-16 flex flex-col gap-6 md:-mt-18 lg:flex-row lg:items-end lg:justify-between">
-                <div className="flex flex-col gap-5 md:flex-row md:items-end">
-                  <div className="size-28 shrink-0 rounded-full border-4 border-background shadow-lg md:size-32">
-                    <Avatar
-                      src={displayAvatar}
-                      alt={displayName}
-                      className="size-full rounded-full bg-primary text-3xl font-semibold text-primary-foreground"
-                    />
-                    {!displayAvatar && (
-                      <div className="-mt-full flex size-full items-center justify-center rounded-full bg-primary text-3xl font-semibold text-primary-foreground">
-                        {displayInitials}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {profile?.verified !== false && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
-                            <CheckCircle2 className="size-3.5" />
-                            {t("hero.verified")}
-                          </span>
-                        )}
-                        {profile?.leaderboard && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
-                            <Trophy className="size-3.5" />
-                            {t("hero.topRevenueBadge", {
-                              rank: profile.leaderboard.rank,
-                            })}
-                          </span>
-                        )}
-                        {profile?.isPro && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
-                            <ShieldCheck className="size-3.5" />
-                            {t("hero.pro")}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                          {displayName}
-                        </h1>
-                        <p className="text-sm font-medium text-muted-foreground md:text-base">
-                          {displayRole}
-                        </p>
-                      </div>
+              <div className="-mt-14 grid gap-6 md:-mt-16 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-end">
+                <div className="min-w-0 space-y-5">
+                  <div className="flex flex-col gap-5 md:flex-row md:items-end">
+                    <div className="size-28 shrink-0 rounded-full border-4 border-background shadow-lg md:size-32">
+                      <Avatar
+                        src={displayAvatar}
+                        alt={displayName}
+                        className="size-full rounded-full bg-primary text-3xl font-semibold text-primary-foreground"
+                      />
+                      {!displayAvatar && (
+                        <div className="-mt-full flex size-full items-center justify-center rounded-full bg-primary text-3xl font-semibold text-primary-foreground">
+                          {displayInitials}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                      <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-amber-800">
-                          <Trophy className="size-4" />
-                          {profile?.leaderboard
-                            ? t("stats.topThisMonth", {
+                    <div className="min-w-0 space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {profile?.verified !== false && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-200">
+                              <CheckCircle2 className="size-3.5" />
+                              {t("hero.verified")}
+                            </span>
+                          )}
+                          {profile?.leaderboard && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                              <Trophy className="size-3.5" />
+                              {t("hero.topRevenueBadge", {
                                 rank: profile.leaderboard.rank,
-                              })
-                            : t("stats.notRanked")}
+                              })}
+                            </span>
+                          )}
+                          {profile?.isPro && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm">
+                              <ShieldCheck className="size-3.5" />
+                              {t("hero.pro")}
+                            </span>
+                          )}
                         </div>
-                        <p className="mt-1 text-xs text-amber-700/80">
-                          {profile?.leaderboard
-                            ? t("stats.topRevenueDescription", {
-                                revenue: formatPropertyPrice(
-                                  profile.leaderboard.revenue,
-                                  "VND",
-                                  profile.leaderboard.currency,
-                                  locale,
-                                ),
-                                deals: profile.leaderboard.deals,
-                              })
-                            : t("stats.notRankedDescription")}
-                        </p>
+                        <div className="min-w-0">
+                          <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                            {displayName}
+                          </h1>
+                          <p className="text-sm font-medium text-muted-foreground md:text-base">
+                            {displayRole}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                          <span className="text-lg">{displayRating}/5</span>
-                          <div className="flex items-center gap-1 text-amber-400">
-                            <ReviewStars
-                              rating={Math.round(displayRating)}
-                              size={16}
-                            />
+                      <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-amber-800">
+                            <Trophy className="size-4" />
+                            {profile?.leaderboard
+                              ? t("stats.topThisMonth", {
+                                  rank: profile.leaderboard.rank,
+                                })
+                              : t("stats.notRanked")}
                           </div>
+                          <p className="mt-1 text-xs text-amber-700/80">
+                            {profile?.leaderboard
+                              ? t("stats.topRevenueDescription", {
+                                  revenue: formatPropertyPrice(
+                                    profile.leaderboard.revenue,
+                                    "VND",
+                                    profile.leaderboard.currency,
+                                    locale,
+                                  ),
+                                  deals: profile.leaderboard.deals,
+                                })
+                              : t("stats.notRankedDescription")}
+                          </p>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {t("stats.reviews", {
-                            count: totalPublishedReviews,
-                          })}
-                        </p>
-                      </div>
 
-                      <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
-                        <p className="text-lg font-semibold">
-                          {activeListingsCount}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {t("stats.activeListings")}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
-                        <div className="flex items-center gap-2 text-sm font-semibold">
-                          <MapPin className="size-4 text-primary" />
-                          {displayLocation}
+                        <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
+                            <span className="text-lg">{displayRating}/5</span>
+                            <div className="flex items-center gap-1 text-amber-400">
+                              <ReviewStars
+                                rating={Math.round(displayRating)}
+                                size={16}
+                              />
+                            </div>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t("stats.reviews", {
+                              count: totalPublishedReviews,
+                            })}
+                          </p>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {t("stats.primaryMarket")}
-                        </p>
+
+                        <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
+                          <p className="text-lg font-semibold">
+                            {activeListingsCount}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t("stats.activeListings")}
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 backdrop-blur-sm">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
+                            <MapPin className="size-4 text-primary" />
+                            {displayLocation}
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t("stats.primaryMarket")}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                   <CsButton
-                    className="border-border bg-background text-foreground hover:bg-accent"
+                    className="w-full border-border bg-background text-foreground hover:bg-accent"
+                    variant="outline"
+                    icon={<Star className="mr-2 size-4" />}
+                    onClick={handleOpenReview}
+                    disabled={isClientLoggedIn && !canReviewAgent}
+                    loading={isCreatingAgentReview || isLoadingReviewEligibility}
+                  >
+                    {canReviewAgent
+                      ? t("actions.writeReview")
+                      : t("actions.reviewUnavailable")}
+                  </CsButton>
+                  <CsButton
+                    className="w-full border-border bg-background text-foreground hover:bg-accent"
                     variant="outline"
                     icon={<Phone className="mr-2 size-4" />}
                     onClick={handleRevealPhone}
@@ -328,7 +398,7 @@ const AgentPublicProfile = () => {
                     {isPhoneVisible ? displayPhone : t("actions.showPhone")}
                   </CsButton>
                   <CsButton
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
                     icon={<MessageSquare className="mr-2 size-4" />}
                     onClick={handleOpenConversation}
                     loading={isCreatingConversation}
@@ -340,7 +410,7 @@ const AgentPublicProfile = () => {
                     targetId={agentId}
                     isLoggedIn={isClientLoggedIn}
                     redirectUrl={ROUTES.AGENT_PUBLIC_PROFILE(agentId)}
-                    className="border-border bg-background text-foreground hover:bg-accent"
+                    className="w-full border-border bg-background text-foreground hover:bg-accent"
                   />
                 </div>
               </div>
@@ -698,6 +768,17 @@ const AgentPublicProfile = () => {
           </aside>
         </div>
       </section>
+
+      <ReviewSubmissionModal
+        open={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        agentName={reviewEligibility?.agentName || displayName}
+        agentAvatar={displayAvatar}
+        propertyName={reviewEligibility?.propertyName || displayLocation}
+        quickTags={reviewEligibility?.quickTags}
+        isSubmitting={isCreatingAgentReview}
+        onSubmit={handleSubmitReview}
+      />
     </main>
   );
 };

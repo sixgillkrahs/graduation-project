@@ -88,7 +88,7 @@ const Profile = () => {
   );
 
   return (
-    <section className="p-6 md:p-8 bg-black/10">
+    <section className="bg-black/10 p-6 md:p-8">
       <div className="container mx-auto grid gap-6">
         <ProfileCompletionCard
           completion={profileCompletion}
@@ -96,13 +96,13 @@ const Profile = () => {
           totalItems={totalProfileItems}
         />
         {isBankInfoMissing && (
-          <div className="w-full rounded-[18px] bg-amber-50 border border-amber-200 p-6 flex gap-3 items-start">
+          <div className="flex w-full items-start gap-3 rounded-[18px] border border-amber-200 bg-amber-50 p-6">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 shrink-0">
               <Icon.Alert className="size-4 text-amber-600" />
             </div>
 
             <div className="text-sm">
-              <div className="font-medium text-amber-900 mb-0.5">Warning</div>
+              <div className="mb-0.5 font-medium text-amber-900">Warning</div>
               <div className="text-amber-700 leading-relaxed">
                 Your profile is not complete. Please complete your bank
                 information to continue.
@@ -110,24 +110,24 @@ const Profile = () => {
             </div>
           </div>
         )}
-        <div className="flex justify-between items-center gap-4 p-8 w-full rounded-[18px] bg-white ">
-          <div className="">
-            <div className="flex items-center gap-2">
+        <div className="grid gap-6 rounded-[18px] bg-white p-6 md:p-8 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center">
               <Avatar
                 src={profileData?.avatarUrl}
                 alt={profileData?.basicInfo.nameRegister}
-                className="w-full h-full rounded-full bg-gray-200 size-36 flex items-center justify-center object-cover overflow-hidden"
+                className="size-28 shrink-0 overflow-hidden rounded-full bg-gray-200 object-cover md:size-36"
               />
-              <div className="grid gap-2">
-                <span className="cs-typography text-[30px]! font-bold!">
+              <div className="grid min-w-0 gap-2">
+                <span className="cs-typography break-words text-[30px]! font-bold!">
                   {profileData?.basicInfo.nameRegister}
                 </span>
-                <span className="cs-typography text-[16px]! flex gap-2 items-center">
-                  <Icon.Mail className="size-5" />{" "}
+                <span className="cs-typography flex items-start gap-2 break-all text-[16px]! md:items-center">
+                  <Icon.Mail className="mt-0.5 size-5 shrink-0 md:mt-0" />
                   {profileData?.basicInfo.email}
                 </span>
-                <span className="cs-typography text-[16px]! flex gap-2 items-center">
-                  <Icon.Phone className="size-5" />{" "}
+                <span className="cs-typography flex items-start gap-2 break-all text-[16px]! md:items-center">
+                  <Icon.Phone className="mt-0.5 size-5 shrink-0 md:mt-0" />
                   {profileData?.basicInfo.phoneNumber}
                 </span>
                 <div className="bg-[#F7F7F7] main-color-red w-fit font-bold text-center px-3 py-1 rounded-lg flex items-center gap-2 text-[12px]!">
@@ -136,23 +136,23 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <CsButton
               icon={<Icon.Fingerprint className="size-5" />}
               onClick={handleRegisterPasskey}
-              className="bg-white! border border-black/10! text-black"
+              className="w-full border border-black/10! bg-white! text-black"
             >
               Register Passkey
             </CsButton>
             <CsButton
-              className="bg-white! border border-black/10! text-black"
+              className="w-full border border-black/10! bg-white! text-black"
               icon={<Icon.RotateLock className="size-5" />}
               onClick={handleOpenModal}
             >
               Change Password
             </CsButton>
             <CsButton
-              className="cs-bg-black text-white"
+              className="cs-bg-black w-full text-white sm:col-span-2 xl:col-span-1"
               icon={<Icon.Pencil className="size-5" />}
               onClick={handleToEdit}
             >
@@ -160,7 +160,7 @@ const Profile = () => {
             </CsButton>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.15fr)_minmax(0,0.9fr)]">
           <div className="grid grid-cols-1 gap-6">
             <div className="bg-white rounded-[18px]">
               <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
@@ -220,15 +220,15 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-[18px]">
+          <div className="min-w-0 rounded-[18px] bg-white xl:min-w-0">
             <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2">
               <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
                 <Icon.Briefcase className="size-5" />
               </div>{" "}
               Professional Profile
             </div>
-            <div className="grid gap-4 py-4 px-8 b">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid min-w-0 gap-4 px-8 py-4">
+              <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2">
                 <CardField
                   title="Experience"
                   value={
@@ -282,7 +282,7 @@ const Profile = () => {
                   className="whitespace-pre-wrap leading-7"
                   value={
                     <div
-                      className="[&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-black [&_a]:underline"
+                      className="min-w-0 break-words [overflow-wrap:anywhere] [&_p]:mb-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:break-all [&_a]:text-black [&_a]:underline"
                       dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
                     />
                   }
@@ -344,7 +344,7 @@ const Profile = () => {
                   <div className="cs-paragraph text-[14px]! font-bold! uppercase">
                     Identity Card
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-2 sm:grid-cols-2">
                     <Image
                       src={resolveDocumentImageUrl(
                         profileData?.imageInfo?.identityFront,

@@ -5,8 +5,10 @@ import { validateRequest } from "@/middleware/validateRequest";
 import {
   validateAdminReviewDecisionSchema,
   validateApplyAutoReplySchema,
+  validateCreateAgentReviewSchema,
   validateCreateReviewSchema,
   validateDiscardAutoReplySchema,
+  validateGetAgentReviewEligibilitySchema,
   validateGenerateAutoReplySchema,
   validateGetAdminReviewQueueSchema,
   validateGetMyReviewsSchema,
@@ -108,6 +110,20 @@ router.post(
   "/",
   validateRequest((lang) => validateCreateReviewSchema(lang)),
   reviewController.createReview,
+);
+
+router.get(
+  "/agents/:agentUserId/eligibility",
+  requireAuth,
+  validateRequest((lang) => validateGetAgentReviewEligibilitySchema(lang)),
+  reviewController.getAgentReviewEligibility,
+);
+
+router.post(
+  "/agents/:agentUserId",
+  requireAuth,
+  validateRequest((lang) => validateCreateAgentReviewSchema(lang)),
+  reviewController.createAgentReview,
 );
 
 /**

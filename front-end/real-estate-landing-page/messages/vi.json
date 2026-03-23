@@ -692,7 +692,9 @@
       "phoneTitle": "Đăng nhập để xem số điện thoại",
       "phoneDescription": "Vui lòng đăng nhập để xem thông tin liên hệ của môi giới này.",
       "messageTitle": "Đăng nhập để nhắn tin với môi giới",
-      "messageDescription": "Vui lòng đăng nhập để bắt đầu cuộc trò chuyện với môi giới này."
+      "messageDescription": "Vui lòng đăng nhập để bắt đầu cuộc trò chuyện với môi giới này.",
+      "reviewTitle": "Đăng nhập để viết đánh giá",
+      "reviewDescription": "Bạn cần đăng nhập bằng tài khoản đã từng hoàn tất giao dịch hoặc lịch hẹn với môi giới này."
     },
     "hero": {
       "verified": "Môi giới đã xác minh",
@@ -709,8 +711,15 @@
       "primaryMarket": "Thị trường chính"
     },
     "actions": {
+      "writeReview": "Viết đánh giá",
+      "reviewUnavailable": "Chưa đủ điều kiện review",
       "showPhone": "Hiện số điện thoại",
       "chat": "Chat / Nhắn tin"
+    },
+    "reviewFeedback": {
+      "eligibilityRequired": "Bạn cần có một giao dịch hoặc lịch hẹn hoàn tất với môi giới này mới có thể gửi đánh giá.",
+      "publishedSuccess": "Đánh giá đã hiển thị ngay. Backend sẽ quét batch AI sau đó và có thể ẩn lại nếu nội dung không phù hợp.",
+      "submittedSuccess": "Đánh giá đã được tiếp nhận."
     },
     "about": {
       "title": "Về tôi",
@@ -748,5 +757,45 @@
       "title": "Chuyên môn",
       "heading": "Dịch vụ và khu vực cốt lõi"
     }
+  },
+  "ReportDialog": {
+    "triggers": {
+      "listing": "Báo cáo tin đăng",
+      "agent": "Báo cáo môi giới"
+    },
+    "titles": {
+      "listing": "Báo cáo tin đăng này",
+      "agent": "Báo cáo môi giới này"
+    },
+    "descriptions": {
+      "listing": "Hãy cho chúng tôi biết nếu tin đăng này có thông tin sai, nội dung spam hoặc mức giá đáng ngờ.",
+      "agent": "Hãy cho chúng tôi biết nếu hồ sơ hoặc hoạt động của môi giới này có dấu hiệu gây hiểu nhầm, spam hoặc liên quan đến giá ảo."
+    },
+    "fields": {
+      "reason": "Lý do",
+      "details": "Chi tiết",
+      "detailsPlaceholder": "Bổ sung thông tin hữu ích cho đội kiểm duyệt."
+    },
+    "reasons": {
+      "wrongData": "Thông tin sai",
+      "spam": "Spam hoặc nội dung trùng lặp",
+      "fakePrice": "Giá ảo hoặc gây hiểu nhầm",
+      "other": "Khác"
+    },
+    "actions": {
+      "submit": "Gửi báo cáo",
+      "cancel": "Hủy"
+    },
+    "auth": {
+      "listing": {
+        "title": "Đăng nhập để báo cáo tin đăng này",
+        "description": "Vui lòng đăng nhập để chúng tôi có thể tiếp nhận báo cáo tin đăng của bạn và ngăn chặn lạm dụng."
+      },
+      "agent": {
+        "title": "Đăng nhập để báo cáo môi giới này",
+        "description": "Vui lòng đăng nhập để chúng tôi có thể tiếp nhận báo cáo môi giới của bạn và ngăn chặn lạm dụng."
+      }
+    },
+    "footnote": "Mọi báo cáo sẽ được đội kiểm duyệt xem xét trước khi có bất kỳ hành động nào."
   }
 }

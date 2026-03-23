@@ -44,6 +44,35 @@ export const validateGetPublicReviewsSchema = (
   });
 };
 
+export const validateGetAgentReviewEligibilitySchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    params: z.object({
+      agentUserId: z.string({ message: t.required("agentUserId") }).min(8),
+    }),
+  });
+};
+
+export const validateCreateAgentReviewSchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    params: z.object({
+      agentUserId: z.string({ message: t.required("agentUserId") }).min(8),
+    }),
+    body: z.object({
+      rating: z.coerce.number().min(1).max(5),
+      tags: z.array(z.string()).max(10).default([]),
+      comment: z.string().max(2000).optional(),
+    }),
+  });
+};
+
 export const validateGetMyReviewsSchema = (
   lang: keyof typeof validationMessages,
 ) => {

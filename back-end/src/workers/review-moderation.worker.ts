@@ -31,7 +31,7 @@ export class ReviewModerationWorker {
 
         if (result.processed > 0) {
           logger.info(
-            `[ReviewModerationWorker] processed=${result.processed}, awaitingAdmin=${result.movedToAdmin}, rejected=${result.rejected}`,
+            `[ReviewModerationWorker] processed=${result.processed}, keptVisible=${result.keptVisible}, hidden=${result.hidden}`,
           );
         }
       } catch (error) {

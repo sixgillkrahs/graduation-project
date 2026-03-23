@@ -4,6 +4,29 @@ import request from "@/lib/axios/request";
 import { ReviewsEndpoint } from "./config";
 
 export default class ReviewsService {
+  public static readonly getEligibilityByAgent = (
+    agentUserId: string,
+  ): Promise<IResp<IReviewService.ReviewEligibility>> => {
+    return request({
+      url: ReviewsEndpoint.getEligibilityByAgent(agentUserId),
+      method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly createByAgent = (
+    payload: IReviewService.CreateAgentReviewPayload,
+  ): Promise<IResp<IReviewInvitationService.CreateReviewResponse>> => {
+    return request({
+      url: ReviewsEndpoint.createByAgent(payload.agentUserId),
+      method: AxiosMethod.POST,
+      data: {
+        rating: payload.rating,
+        tags: payload.tags,
+        comment: payload.comment,
+      },
+    });
+  };
+
   public static readonly getPublicByAgent = (
     agentUserId: string,
     params?: IReviewService.GetPublicParams,

@@ -1,4 +1,7 @@
 export const ReviewsEndpoint = {
+  getEligibilityByAgent: (agentUserId: string) =>
+    `/reviews/agents/${agentUserId}/eligibility`,
+  createByAgent: (agentUserId: string) => `/reviews/agents/${agentUserId}`,
   getPublicByAgent: (agentUserId: string) =>
     `/reviews/agents/${agentUserId}/public`,
   getMyReviews: () => "/reviews/me",
@@ -12,6 +15,7 @@ export const ReviewsEndpoint = {
 } as const;
 
 export const ReviewsQueryKey = {
+  eligibility: "reviewEligibility",
   publicList: "publicAgentReviews",
   myList: "myReviews",
 } as const;

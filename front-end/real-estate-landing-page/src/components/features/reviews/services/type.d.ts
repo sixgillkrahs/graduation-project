@@ -3,6 +3,7 @@ namespace IReviewService {
     | "PENDING"
     | "AWAITING_ADMIN"
     | "PUBLISHED"
+    | "HIDDEN"
     | "REJECTED"
     | "REPORTED";
   export type ReviewAutoReplyStatus =
@@ -65,6 +66,7 @@ namespace IReviewService {
     averageRating: number;
     totalReviews: number;
     pendingCount: number;
+    hiddenCount: number;
     reportedCount: number;
     unansweredCount: number;
   }
@@ -93,6 +95,20 @@ namespace IReviewService {
   export interface ReplyPayload {
     reviewId: string;
     reply: string;
+  }
+
+  export interface ReviewEligibility {
+    eligible: boolean;
+    agentName?: string;
+    propertyName?: string;
+    quickTags?: string[];
+  }
+
+  export interface CreateAgentReviewPayload {
+    agentUserId: string;
+    rating: number;
+    tags: string[];
+    comment?: string;
   }
 
   export interface ReportPayload {

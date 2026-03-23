@@ -1,5 +1,6 @@
 import { RefreshMonthlyLeaderboardJob } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
+import { createBullMqJobId } from "@/utils/bullmq";
 import { Queue } from "bullmq";
 
 export class AgentLeaderboardQueue {
@@ -12,7 +13,12 @@ export class AgentLeaderboardQueue {
   }
 
   enqueueRefreshMonthlyLeaderboard(data: RefreshMonthlyLeaderboardJob) {
-    const jobId = `agent-leaderboard:${data.year}:${data.month}:${data.currency}`;
+    const jobId = createBullMqJobId(
+      "agent-leaderboard",
+      data.year,
+      data.month,
+      data.currency,
+    );
 
     return this.queue.add("refreshMonthlyLeaderboard", data, {
       jobId,

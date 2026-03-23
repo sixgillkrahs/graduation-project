@@ -110,6 +110,9 @@ export const useUpdateSchedule = (): UseMutationResult<
       queryClient.invalidateQueries({
         queryKey: [ScheduleQueryKey.getAvailability],
       });
+      queryClient.invalidateQueries({
+        queryKey: [ScheduleQueryKey.getLeads],
+      });
     },
   });
 };

@@ -13,7 +13,7 @@ const CardField = ({
   return (
     <div
       className={cn(
-        "rounded-[18px] grid gap-2 bg-black/10",
+        "grid min-w-0 gap-2 rounded-[18px] bg-black/10",
         title ? "p-4" : "px-4 py-2",
         className,
       )}
@@ -25,7 +25,9 @@ const CardField = ({
           </span>
         </div>
       )}
-      <div>{value}</div>
+      <div className="min-w-0 break-words [overflow-wrap:anywhere]">
+        {value}
+      </div>
     </div>
   );
 };

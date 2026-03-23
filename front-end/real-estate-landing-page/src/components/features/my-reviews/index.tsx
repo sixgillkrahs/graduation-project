@@ -75,6 +75,11 @@ const getStatusLabel = (status: IReviewService.ReviewStatus) => {
         label: "Da bao cao Admin",
         className: "border-red-200 bg-red-50 text-red-600",
       };
+    case "HIDDEN":
+      return {
+        label: "Da bi an boi AI",
+        className: "border-amber-200 bg-amber-50 text-amber-700",
+      };
     case "PUBLISHED":
       return {
         label: "Dang hien thi",
@@ -144,8 +149,7 @@ const ReviewCard = ({
   );
   const statusMeta = getStatusLabel(review.status);
   const canReply =
-    !["PENDING", "AWAITING_ADMIN"].includes(review.status) &&
-    !review.agentReply;
+    ["PUBLISHED", "REPORTED"].includes(review.status) && !review.agentReply;
   const canReport = review.status === "PUBLISHED";
   const canUseAutoReply = isPro && review.status === "PUBLISHED" && canReply;
   const autoReplyStatus = review.autoReply?.status || "IDLE";
@@ -240,6 +244,12 @@ const ReviewCard = ({
       {review.status === "REPORTED" && (
         <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           Review da bi an tam thoi de admin kiem tra.
+        </div>
+      )}
+
+      {review.status === "HIDDEN" && (
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Review da bi an sau khi batch AI danh gia noi dung la khong phu hop.
         </div>
       )}
 
@@ -502,7 +512,7 @@ const MyReviews = () => {
             </div>
             <div className="rounded-2xl border border-border bg-background px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Dang kiem duyet
+                Dang cho xu ly
               </p>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {summary?.pendingCount || 0}
@@ -569,7 +579,10 @@ const MyReviews = () => {
           <p>
             Hien thi {reviews.length} / {reviewData?.totalResults || 0} review
           </p>
-          <p>{summary?.reportedCount || 0} review dang bi an do bao cao</p>
+          <p>
+            {(summary?.hiddenCount || 0) + (summary?.reportedCount || 0)} review
+            dang bi an
+          </p>
         </div>
 
         {isLoading ? (

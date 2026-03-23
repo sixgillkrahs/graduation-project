@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import ReviewSubmissionModal from "@/components/features/agent-public-profile/components/ReviewSubmissionModal";
 import { ROUTES } from "@/const/routes";
-import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import { useCreateReview } from "./services/mutate";
 import { useGetReviewInvitation } from "./services/query";
@@ -32,17 +32,14 @@ const ReviewInvitation = ({ token }: ReviewInvitationProps) => {
       comment: payload.comment,
     });
 
-    if (
-      response.data.status === "PENDING" ||
-      response.data.status === "AWAITING_ADMIN"
-    ) {
+    if (response.data.status === "PUBLISHED") {
       toast.success(
-        "Đánh giá đã được tiếp nhận, sẽ qua batch AI và chờ Admin duyệt trước khi hiển thị.",
+        "Danh gia da hien thi ngay. Backend se quet batch AI sau do va co the an lai neu noi dung khong phu hop.",
       );
       return;
     }
 
-    toast.success("Đánh giá đã được tiếp nhận. Cảm ơn bạn đã phản hồi.");
+    toast.success("Danh gia da duoc tiep nhan.");
   };
 
   if (isLoading) {
@@ -50,7 +47,7 @@ const ReviewInvitation = ({ token }: ReviewInvitationProps) => {
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
           <p className="text-sm font-medium text-muted-foreground">
-            Đang tải lời mời đánh giá...
+            Dang tai loi moi danh gia...
           </p>
         </div>
       </div>
@@ -62,10 +59,10 @@ const ReviewInvitation = ({ token }: ReviewInvitationProps) => {
       <div className="flex min-h-[60vh] items-center justify-center px-4">
         <div className="w-full max-w-lg rounded-3xl border border-border bg-card p-6 text-center shadow-sm">
           <h1 className="text-xl font-semibold text-foreground">
-            Lời mời đánh giá không còn hợp lệ
+            Loi moi danh gia khong con hop le
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Link này có thể đã hết hạn hoặc đã được sử dụng.
+            Link nay co the da het han hoac da duoc su dung.
           </p>
         </div>
       </div>
@@ -80,11 +77,11 @@ const ReviewInvitation = ({ token }: ReviewInvitationProps) => {
             Havenly Review
           </p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
-            Hoàn tất đánh giá sau buổi xem nhà
+            Hoan tat danh gia sau buoi xem nha
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-            Popup đánh giá chỉ mở khi lời mời hợp lệ được tạo từ một lịch hẹn đã
-            hoàn thành.
+            Review se duoc hien thi ngay sau khi gui. He thong van tiep tuc gom
+            batch de AI quet noi dung va co the an lai neu khong phu hop.
           </p>
         </div>
       </div>
@@ -103,4 +100,3 @@ const ReviewInvitation = ({ token }: ReviewInvitationProps) => {
 };
 
 export default ReviewInvitation;
-

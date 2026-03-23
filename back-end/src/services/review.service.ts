@@ -13,6 +13,8 @@ import ReviewModel, {
   ReviewStatusEnum,
 } from "@/models/review.model";
 import { NoticeTypeEnum } from "@/models/notice.model";
+import ScheduleModel, { SCHEDULE_STATUS } from "@/models/schedule.model";
+import UserModel from "@/models/user.model";
 import { NotificationQueue } from "@/queues/notification.queue";
 import { ReviewReplyAiService } from "@/services/review-reply-ai.service";
 import { AppError } from "@/utils/appError";
@@ -149,6 +151,79 @@ export class ReviewService {
       isInappropriate: Boolean(result.is_inappropriate),
       moderatedAt: new Date(),
     };
+  }
+
+  private async createReviewFromInvitation(
+    invitation: IReviewInvitation & { _id?: mongoose.Types.ObjectId },
+    input: {
+      rating: number;
+      tags: string[];
+      comment?: string;
+    },
+  ) {
+    const review = await ReviewModel.create({
+      invitationId: (invitation as any)._id,
+      scheduleId: invitation.scheduleId,
+      listingId: invitation.listingId,
+      agentUserId: invitation.agentUserId,
+      customerUserId: invitation.customerUserId,
+      customerName: invitation.customerName,
+      customerEmail: invitation.customerEmail,
+      propertyName: invitation.propertyName,
+      rating: input.rating,
+      tags: input.tags,
+      comment: input.comment?.trim() || "",
+      status: ReviewStatusEnum.PUBLISHED,
+    });
+
+    await ReviewInvitationModel.updateOne(
+      { _id: (invitation as any)._id },
+      { $set: { usedAt: new Date() } },
+    ).exec();
+
+    await this.refreshAgentRating(String(invitation.agentUserId));
+    await this.notifyAgentAboutPublishedReview(review.toObject());
+
+    return review.toObject();
+  }
+
+  private async findEligibleScheduleForAgentReview(
+    agentUserId: string,
+    customerUserId: string,
+  ) {
+    const schedules = await ScheduleModel.find({
+      agentId: new mongoose.Types.ObjectId(agentUserId),
+      userId: new mongoose.Types.ObjectId(customerUserId),
+      status: SCHEDULE_STATUS.COMPLETED,
+    })
+      .sort({ updatedAt: -1, createdAt: -1 })
+      .limit(20)
+      .populate("listingId", "title")
+      .lean()
+      .exec();
+
+    if (schedules.length === 0) {
+      return null;
+    }
+
+    const reviewedScheduleIds = new Set(
+      (
+        await ReviewModel.find({
+          scheduleId: {
+            $in: schedules.map((schedule) => schedule._id),
+          },
+        })
+          .select("scheduleId")
+          .lean()
+          .exec()
+      ).map((review) => String(review.scheduleId)),
+    );
+
+    return (
+      schedules.find(
+        (schedule) => !reviewedScheduleIds.has(String(schedule._id)),
+      ) || null
+    );
   }
 
   private async notifyAgentAboutPublishedReview(
@@ -356,7 +431,7 @@ export class ReviewService {
     const tokenHash = this.hashToken(rawToken);
     const expiresAt = new Date(Date.now() + ReviewService.INVITATION_TTL_MS);
 
-    await ReviewInvitationModel.findOneAndUpdate(
+    const invitation = await ReviewInvitationModel.findOneAndUpdate(
       { scheduleId: input.scheduleId },
       {
         $set: {
@@ -377,9 +452,12 @@ export class ReviewService {
         new: true,
         setDefaultsOnInsert: true,
       },
-    ).exec();
+    )
+      .lean()
+      .exec();
 
     return {
+      invitationId: String((invitation as any)?._id || ""),
       token: rawToken,
       expiresAt,
     };
@@ -433,38 +511,127 @@ export class ReviewService {
       };
     }
 
-    const review = await ReviewModel.create({
-      invitationId: (invitation as any)._id,
-      scheduleId: invitation.scheduleId,
-      listingId: invitation.listingId,
-      agentUserId: invitation.agentUserId,
-      customerUserId: invitation.customerUserId,
-      customerName: invitation.customerName,
-      customerEmail: invitation.customerEmail,
-      propertyName: invitation.propertyName,
-      rating: input.rating,
-      tags: input.tags,
-      comment: input.comment?.trim() || "",
-      status: ReviewStatusEnum.PENDING,
-    });
-
-    await ReviewInvitationModel.updateOne(
-      { _id: (invitation as any)._id },
-      { $set: { usedAt: new Date() } },
-    ).exec();
+    const review = await this.createReviewFromInvitation(invitation as any, input);
 
     return {
       invitation,
-      review: review.toObject(),
+      review,
       invalid: false,
     };
+  }
+
+  async getAgentReviewEligibility(agentUserId: string, customerUserId: string) {
+    if (
+      !mongoose.Types.ObjectId.isValid(agentUserId) ||
+      !mongoose.Types.ObjectId.isValid(customerUserId)
+    ) {
+      return {
+        eligible: false,
+      };
+    }
+
+    const [agent, eligibleSchedule] = await Promise.all([
+      UserModel.findById(agentUserId).select("fullName").lean().exec(),
+      this.findEligibleScheduleForAgentReview(agentUserId, customerUserId),
+    ]);
+
+    if (!eligibleSchedule) {
+      return {
+        eligible: false,
+      };
+    }
+
+    return {
+      eligible: true,
+      agentName: agent?.fullName || "Agent",
+      propertyName:
+        ((eligibleSchedule.listingId as any)?.title as string) ||
+        eligibleSchedule.location ||
+        "Bat dong san",
+      quickTags: [
+        "Nhiệt tình",
+        "Đúng giờ",
+        "Am hiểu thị trường",
+        "Hỗ trợ pháp lý tốt",
+      ],
+    };
+  }
+
+  async submitReviewForAgent(input: {
+    agentUserId: string;
+    customerUserId: string;
+    rating: number;
+    tags: string[];
+    comment?: string;
+  }) {
+    if (
+      !mongoose.Types.ObjectId.isValid(input.agentUserId) ||
+      !mongoose.Types.ObjectId.isValid(input.customerUserId)
+    ) {
+      return null;
+    }
+
+    const [agent, eligibleSchedule] = await Promise.all([
+      UserModel.findById(input.agentUserId).select("fullName").lean().exec(),
+      this.findEligibleScheduleForAgentReview(
+        input.agentUserId,
+        input.customerUserId,
+      ),
+    ]);
+
+    if (!eligibleSchedule) {
+      return null;
+    }
+
+    let invitationRecord = await ReviewInvitationModel.findOne({
+      scheduleId: eligibleSchedule._id,
+    })
+      .lean()
+      .exec();
+
+    if (!invitationRecord) {
+      const invitation = await this.createOrRefreshInvitation({
+        scheduleId: String(eligibleSchedule._id),
+        listingId:
+          ((eligibleSchedule.listingId as any)?._id as string | undefined) ||
+          (typeof eligibleSchedule.listingId === "string"
+            ? eligibleSchedule.listingId
+            : undefined),
+        agentUserId: input.agentUserId,
+        customerUserId: input.customerUserId,
+        customerName: eligibleSchedule.customerName,
+        customerEmail: eligibleSchedule.customerEmail,
+        agentName: agent?.fullName || "Agent",
+        propertyName:
+          ((eligibleSchedule.listingId as any)?.title as string) ||
+          eligibleSchedule.location ||
+          "Bat dong san",
+      });
+
+      if (!invitation?.invitationId) {
+        return null;
+      }
+
+      invitationRecord = await ReviewInvitationModel.findById(
+        invitation.invitationId,
+      )
+        .lean()
+        .exec();
+    }
+
+    if (!invitationRecord) {
+      return null;
+    }
+
+    return this.createReviewFromInvitation(invitationRecord as any, input);
   }
 
   async processPendingReviewBatch(
     batchSize = ENV.REVIEW_MODERATION_BATCH_SIZE,
   ) {
     const pendingReviews = await ReviewModel.find({
-      status: ReviewStatusEnum.PENDING,
+      status: ReviewStatusEnum.PUBLISHED,
+      "moderation.moderatedAt": { $exists: false },
     })
       .sort({ createdAt: 1 })
       .limit(batchSize)
@@ -474,8 +641,8 @@ export class ReviewService {
     if (pendingReviews.length === 0) {
       return {
         processed: 0,
-        movedToAdmin: 0,
-        rejected: 0,
+        keptVisible: 0,
+        hidden: 0,
       };
     }
 
@@ -487,16 +654,16 @@ export class ReviewService {
       review.comment?.trim(),
     );
     const bulkOperations: mongoose.AnyBulkWriteOperation<IReview>[] = [];
-    let movedToAdmin = 0;
-    let rejected = 0;
+    const hiddenAgentIds = new Set<string>();
+    let keptVisible = 0;
+    let hidden = 0;
 
     for (const review of emptyCommentReviews) {
       bulkOperations.push({
         updateOne: {
-          filter: { _id: review._id, status: ReviewStatusEnum.PENDING },
+          filter: { _id: review._id, status: ReviewStatusEnum.PUBLISHED },
           update: {
             $set: {
-              status: ReviewStatusEnum.AWAITING_ADMIN,
               moderation: {
                 backend: "system",
                 labels: ["clean"],
@@ -510,7 +677,7 @@ export class ReviewService {
           },
         },
       });
-      movedToAdmin += 1;
+      keptVisible += 1;
     }
     if (commentReviews.length > 0) {
       try {
@@ -544,12 +711,12 @@ export class ReviewService {
         commentReviews.forEach((review, index) => {
           const moderation = results[index];
           const nextStatus = moderation.is_inappropriate
-            ? ReviewStatusEnum.REJECTED
-            : ReviewStatusEnum.AWAITING_ADMIN;
+            ? ReviewStatusEnum.HIDDEN
+            : ReviewStatusEnum.PUBLISHED;
 
           bulkOperations.push({
             updateOne: {
-              filter: { _id: review._id, status: ReviewStatusEnum.PENDING },
+              filter: { _id: review._id, status: ReviewStatusEnum.PUBLISHED },
               update: {
                 $set: {
                   status: nextStatus,
@@ -559,10 +726,11 @@ export class ReviewService {
             },
           });
 
-          if (nextStatus === ReviewStatusEnum.REJECTED) {
-            rejected += 1;
+          if (nextStatus === ReviewStatusEnum.HIDDEN) {
+            hidden += 1;
+            hiddenAgentIds.add(String(review.agentUserId));
           } else {
-            movedToAdmin += 1;
+            keptVisible += 1;
           }
         });
       } catch (error) {
@@ -577,10 +745,18 @@ export class ReviewService {
       await ReviewModel.bulkWrite(bulkOperations);
     }
 
+    if (hiddenAgentIds.size > 0) {
+      await Promise.all(
+        Array.from(hiddenAgentIds).map((agentUserId) =>
+          this.refreshAgentRating(agentUserId),
+        ),
+      );
+    }
+
     return {
       processed: bulkOperations.length,
-      movedToAdmin,
-      rejected,
+      keptVisible,
+      hidden,
     };
   }
 
@@ -591,7 +767,11 @@ export class ReviewService {
   }) {
     const filter: Record<string, any> = {
       status: {
-        $in: [ReviewStatusEnum.AWAITING_ADMIN, ReviewStatusEnum.REPORTED],
+        $in: [
+          ReviewStatusEnum.AWAITING_ADMIN,
+          ReviewStatusEnum.HIDDEN,
+          ReviewStatusEnum.REPORTED,
+        ],
       },
     };
 
@@ -625,7 +805,11 @@ export class ReviewService {
       {
         _id: reviewId,
         status: {
-          $in: [ReviewStatusEnum.AWAITING_ADMIN, ReviewStatusEnum.REPORTED],
+          $in: [
+            ReviewStatusEnum.AWAITING_ADMIN,
+            ReviewStatusEnum.HIDDEN,
+            ReviewStatusEnum.REPORTED,
+          ],
         },
       },
       {
@@ -666,6 +850,7 @@ export class ReviewService {
       !existingReview ||
       ![
         ReviewStatusEnum.AWAITING_ADMIN,
+        ReviewStatusEnum.HIDDEN,
         ReviewStatusEnum.REPORTED,
         ReviewStatusEnum.PUBLISHED,
       ].includes(existingReview.status)
@@ -816,6 +1001,7 @@ export class ReviewService {
           averageRating: 0,
           totalReviews: 0,
           pendingCount: 0,
+          hiddenCount: 0,
           reportedCount: 0,
           unansweredCount: 0,
         },
@@ -827,6 +1013,7 @@ export class ReviewService {
       ReviewStatusEnum.PENDING,
       ReviewStatusEnum.AWAITING_ADMIN,
       ReviewStatusEnum.PUBLISHED,
+      ReviewStatusEnum.HIDDEN,
       ReviewStatusEnum.REPORTED,
     ];
     const filter: Record<string, any> = {
@@ -856,6 +1043,7 @@ export class ReviewService {
         totalReviews: number;
         averageRating: number;
         pendingCount: number;
+        hiddenCount: number;
         reportedCount: number;
         unansweredCount: number;
       }>([
@@ -897,6 +1085,11 @@ export class ReviewService {
                 ],
               },
             },
+            hiddenCount: {
+              $sum: {
+                $cond: [{ $eq: ["$status", ReviewStatusEnum.HIDDEN] }, 1, 0],
+              },
+            },
             reportedCount: {
               $sum: {
                 $cond: [{ $eq: ["$status", ReviewStatusEnum.REPORTED] }, 1, 0],
@@ -933,6 +1126,7 @@ export class ReviewService {
         averageRating: Number((summaryStats[0]?.averageRating || 0).toFixed(1)),
         totalReviews: summaryStats[0]?.totalReviews || 0,
         pendingCount: summaryStats[0]?.pendingCount || 0,
+        hiddenCount: summaryStats[0]?.hiddenCount || 0,
         reportedCount: summaryStats[0]?.reportedCount || 0,
         unansweredCount: summaryStats[0]?.unansweredCount || 0,
       },

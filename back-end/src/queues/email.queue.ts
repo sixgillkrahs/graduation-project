@@ -8,6 +8,7 @@ import {
   SendDealClosedEmailJob,
 } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
+import { createBullMqJobId } from "@/utils/bullmq";
 import { Queue } from "bullmq";
 
 export class EmailQueue {
@@ -21,7 +22,7 @@ export class EmailQueue {
   }
 
   enqueueVerifyEmail(data: SendVerifyEmailJob) {
-    const jobId = `verify:${data.email}:${data.token}`;
+    const jobId = createBullMqJobId("verify", data.email, data.token);
 
     return this.queue.add("sendVerifyEmail", data, {
       jobId,
@@ -33,7 +34,7 @@ export class EmailQueue {
   }
 
   enqueuePasswordResetEmail(data: SendPasswordResetEmailJob) {
-    const jobId = `password-reset:${data.to}`;
+    const jobId = createBullMqJobId("password-reset", data.to);
     return this.queue.add("sendPasswordResetEmail", data, {
       jobId,
       attempts: 5,
@@ -44,7 +45,7 @@ export class EmailQueue {
   }
 
   enqueueRejectEmail(data: SendRejectEmailJob) {
-    const jobId = `reject-email:${data.to}`;
+    const jobId = createBullMqJobId("reject-email", data.to);
     return this.queue.add("sendRejectEmail", data, {
       jobId,
       attempts: 5,
@@ -66,7 +67,11 @@ export class EmailQueue {
   }
 
   enqueueAppointmentConfirmedEmail(data: SendAppointmentConfirmedEmailJob) {
-    const jobId = `appointment-confirmed:${data.to}:${Date.now()}`;
+    const jobId = createBullMqJobId(
+      "appointment-confirmed",
+      data.to,
+      Date.now(),
+    );
     return this.queue.add("sendAppointmentConfirmedEmail", data, {
       jobId,
       attempts: 5,
@@ -77,7 +82,7 @@ export class EmailQueue {
   }
 
   enqueueDealClosedEmail(data: SendDealClosedEmailJob) {
-    const jobId = `deal-closed:${data.to}:${Date.now()}`;
+    const jobId = createBullMqJobId("deal-closed", data.to, Date.now());
     return this.queue.add("sendDealClosedEmail", data, {
       jobId,
       attempts: 5,
@@ -88,7 +93,7 @@ export class EmailQueue {
   }
 
   enqueueReviewInvitationEmail(data: SendReviewInvitationEmailJob) {
-    const jobId = `review-invitation:${data.to}:${Date.now()}`;
+    const jobId = createBullMqJobId("review-invitation", data.to, Date.now());
     return this.queue.add("sendReviewInvitationEmail", data, {
       jobId,
       attempts: 5,
