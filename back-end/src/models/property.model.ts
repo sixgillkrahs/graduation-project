@@ -150,12 +150,31 @@ interface PropertyModel
   ) => Promise<mongoose.HydratedDocument<IProperty, IPropertyMethods>[]>;
 }
 
+function isRequiredForPublishedOrPending(this: any) {
+  const ownerDocument =
+    typeof this?.ownerDocument === "function" ? this.ownerDocument() : this;
+
+  return ownerDocument?.status !== PropertyStatusEnum.DRAFT;
+}
+
 const locationSchema = new mongoose.Schema(
   {
-    province: { type: String, required: true, trim: true },
+    province: {
+      type: String,
+      required: isRequiredForPublishedOrPending,
+      trim: true,
+    },
     district: { type: String, trim: true },
-    ward: { type: String, required: true, trim: true },
-    address: { type: String, required: true, trim: true },
+    ward: {
+      type: String,
+      required: isRequiredForPublishedOrPending,
+      trim: true,
+    },
+    address: {
+      type: String,
+      required: isRequiredForPublishedOrPending,
+      trim: true,
+    },
     hideAddress: { type: Boolean, default: false },
     coordinates: {
       lat: { type: Number },
@@ -167,15 +186,19 @@ const locationSchema = new mongoose.Schema(
 
 const featuresSchema = new mongoose.Schema(
   {
-    area: { type: Number, required: true },
-    price: { type: Number, required: true },
+    area: { type: Number, required: isRequiredForPublishedOrPending },
+    price: { type: Number, required: isRequiredForPublishedOrPending },
     currency: {
       type: String,
       enum: CurrencyEnum,
-      required: true,
+      required: isRequiredForPublishedOrPending,
       default: CurrencyEnum.VND,
     },
-    priceUnit: { type: String, enum: PriceUnitEnum, required: true },
+    priceUnit: {
+      type: String,
+      enum: PriceUnitEnum,
+      required: isRequiredForPublishedOrPending,
+    },
     totalPrice: { type: Number },
     bedrooms: { type: Number },
     bathrooms: { type: Number },
@@ -223,12 +246,12 @@ const propertySchema = new mongoose.Schema<
     demandType: {
       type: String,
       enum: PropertyDemandTypeEnum,
-      required: true,
+      required: isRequiredForPublishedOrPending,
     },
     propertyType: {
       type: String,
       enum: PropertyTypeEnum,
-      required: true,
+      required: isRequiredForPublishedOrPending,
     },
     projectName: {
       type: String,
@@ -236,11 +259,11 @@ const propertySchema = new mongoose.Schema<
     },
     location: {
       type: locationSchema,
-      required: true,
+      required: isRequiredForPublishedOrPending,
     },
     features: {
       type: featuresSchema,
-      required: true,
+      required: isRequiredForPublishedOrPending,
     },
     amenities: {
       type: [String],
@@ -252,11 +275,11 @@ const propertySchema = new mongoose.Schema<
     },
     title: {
       type: String,
-      required: true,
+      required: isRequiredForPublishedOrPending,
     },
     description: {
       type: String,
-      required: true,
+      required: isRequiredForPublishedOrPending,
     },
     status: {
       type: String,

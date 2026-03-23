@@ -3,6 +3,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { CsButton } from "@/components/custom";
 import AmenitiesField from "@/components/features/my-listings/components/AmenitiesField";
+import { useListingDraft } from "@/components/features/my-listings/components/ListingDraftContext";
 import { Counter } from "@/components/ui/counter";
 import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
@@ -14,6 +15,7 @@ const FeaturesPricing = () => {
   const dispatch = useDispatch();
   const { control, trigger, watch } = useFormContext<ListingFormData>();
   const demandType = watch("demandType");
+  const { saveDraft, isSavingDraft } = useListingDraft();
 
   const handleContinue = async () => {
     const isValid = await trigger(PropertyService.stepFields.step3);
@@ -245,7 +247,7 @@ const FeaturesPricing = () => {
             Back
           </CsButton>
           <div className="flex gap-4">
-            <CsButton onClick={() => {}} type="button">
+            <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
               Save Draft
             </CsButton>
             <CsButton onClick={handleContinue} type="button">

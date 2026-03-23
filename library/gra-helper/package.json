@@ -2,11 +2,22 @@
   "name": "gra-helper",
   "version": "1.0.1",
   "description": "Shared middleware library for graduation project",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cjs/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm build:cjs && pnpm build:esm",
+    "build:cjs": "tsc -p tsconfig.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "dev": "tsc --watch",
+    "prepare": "pnpm build",
     "prepublishOnly": "pnpm build"
   },
   "keywords": ["middleware", "express", "validation"],

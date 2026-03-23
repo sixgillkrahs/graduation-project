@@ -1,12 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { ListingDraftProvider } from "@/components/features/my-listings/components/ListingDraftContext";
 import { CsStep } from "@/components/ui/stepper";
+import { ROUTES } from "@/const/routes";
 import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import { toast } from "@/lib/toast";
 import type { RootState } from "@/store";
-import { setStep } from "@/store/listing.store";
+import { resetListing, setStep } from "@/store/listing.store";
 import type { ListingFormData } from "../dto/listingformdata.dto";
+import { useCreateProperty } from "../services/mutate";
 import PropertyService from "../services/service";
 import BasicInfo from "./components/BasicInfo";
 import FeaturesPricing from "./components/FeaturesPricing";
@@ -16,10 +21,13 @@ import Review from "./components/Review";
 
 const AddListing = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const currentStep = useSelector(
     (state: RootState) => state.listing.currentStep,
   );
   const listingData = useSelector((state: RootState) => state.listing.data);
+  const { mutateAsync: createProperty, isPending: isSavingDraft } =
+    useCreateProperty();
 
   const methods = useForm<ListingFormData>({
     defaultValues: {
@@ -95,6 +103,21 @@ const AddListing = () => {
     console.log("Final submission:", data);
   };
 
+  const saveDraft = async () => {
+    try {
+      await createProperty({
+        ...methods.getValues(),
+        status: "DRAFT",
+      });
+      toast.success("Draft saved successfully.");
+      dispatch(resetListing());
+      router.push(ROUTES.AGENT_LISTINGS);
+    } catch (error) {
+      toast.error("Failed to save draft. Please try again.");
+      console.error(error);
+    }
+  };
+
   const steps = [
     { title: "Basic Info", content: <BasicInfo /> },
     { title: "Location", content: <Location /> },
@@ -104,18 +127,20 @@ const AddListing = () => {
   ];
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onFinalSubmit)}>
-        <div className="max-w-7xl mx-auto p-8 pb-24">
-          <CsStep
-            steps={steps}
-            currentStep={currentStep + 1}
-            onStepChange={(step) => dispatch(setStep(step - 1))}
-            showNavigation={false}
-          />
-        </div>
-      </form>
-    </FormProvider>
+    <ListingDraftProvider value={{ saveDraft, isSavingDraft }}>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onFinalSubmit)}>
+          <div className="max-w-7xl mx-auto p-8 pb-24">
+            <CsStep
+              steps={steps}
+              currentStep={currentStep + 1}
+              onStepChange={(step) => dispatch(setStep(step - 1))}
+              showNavigation={false}
+            />
+          </div>
+        </form>
+      </FormProvider>
+    </ListingDraftProvider>
   );
 };
 

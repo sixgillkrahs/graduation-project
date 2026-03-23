@@ -87,8 +87,8 @@ importers:
         specifier: ^12.23.26
         version: 12.23.26(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       gra-helper:
-        specifier: ^1.0.1
-        version: 1.0.1
+        specifier: link:../../library/gra-helper
+        version: link:../../library/gra-helper
       highcharts:
         specifier: ^12.4.0
         version: 12.4.0
@@ -2649,9 +2649,6 @@ packages:
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
-
-  gra-helper@1.0.1:
-    resolution: {integrity: sha512-jDSfWCiv0Su6tWpy9T2b+Nbinni8KEaNrBF/DPRuKqKWwPqCKv40ohndRr59kpA4YMwxUJhX1ObynnHYJLJqrQ==}
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
@@ -6314,8 +6311,6 @@ snapshots:
       is-glob: 4.0.3
 
   gopd@1.2.0: {}
-
-  gra-helper@1.0.1: {}
 
   graceful-fs@4.2.11: {}
 

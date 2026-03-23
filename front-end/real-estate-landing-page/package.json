@@ -39,7 +39,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.3.2",
     "framer-motion": "^12.23.26",
-    "gra-helper": "^1.0.1",
+    "gra-helper": "link:../../library/gra-helper",
     "highcharts": "^12.4.0",
     "highcharts-react-official": "^3.2.3",
     "input-otp": "^1.4.2",

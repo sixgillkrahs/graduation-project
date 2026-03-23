@@ -1,10 +1,5 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
-import ImageUpload from "@/components/ui/image-upload";
-import { Input } from "@/components/ui/input";
-import { useUploadImages } from "@/shared/upload/mutate";
-import { nextStep, prevStep } from "@/store/listing.store";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,9 +13,15 @@ import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { useDispatch, useSelector } from "react-redux";
-import { ListingFormData } from "../../dto/listingformdata.dto";
+import { CsButton } from "@/components/custom";
+import { useListingDraft } from "@/components/features/my-listings/components/ListingDraftContext";
+import ImageUpload from "@/components/ui/image-upload";
+import { Input } from "@/components/ui/input";
+import { useUploadImages } from "@/shared/upload/mutate";
+import type { RootState } from "@/store";
+import { nextStep, prevStep } from "@/store/listing.store";
+import type { ListingFormData } from "../../dto/listingformdata.dto";
 import PropertyService from "../../services/service";
-import { RootState } from "@/store";
 
 const MediaContent = () => {
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ const MediaContent = () => {
   const { control, trigger, watch } = useFormContext<ListingFormData>();
   const virtualTourUrls = watch("virtualTourUrls");
   const [active360Index, setActive360Index] = React.useState(0);
+  const { saveDraft, isSavingDraft } = useListingDraft();
 
   const profile = useSelector((state: RootState) => state.profile.data);
   const isPro = profile?.planInfo?.plan === "PRO";
@@ -267,7 +269,7 @@ const MediaContent = () => {
             Back
           </CsButton>
           <div className="flex gap-4">
-            <CsButton onClick={() => {}} type="button">
+            <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
               Save Draft
             </CsButton>
             <CsButton

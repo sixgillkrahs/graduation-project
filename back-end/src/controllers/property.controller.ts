@@ -246,6 +246,10 @@ export class PropertyController extends BaseController {
       }
 
       const body = req.body;
+      const targetStatus =
+        body.status === PropertyStatusEnum.DRAFT
+          ? PropertyStatusEnum.DRAFT
+          : PropertyStatusEnum.PENDING;
       const agent = await this.agentService.getAgentByUserId(user.userId._id);
       let isPro = false; // Declare isPro here to be accessible outside the agent check
       if (agent && agent.status === "APPROVED") {
@@ -255,7 +259,7 @@ export class PropertyController extends BaseController {
             !agent.planInfo.endDate || new Date(agent.planInfo.endDate) > now;
         }
 
-        if (!isPro) {
+        if (!isPro && targetStatus !== PropertyStatusEnum.DRAFT) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
@@ -359,12 +363,12 @@ export class PropertyController extends BaseController {
         media: {
           images: body.images || [],
           thumbnail: body?.thumbnail || "",
-          video: body?.video || "",
+          videoLink: body?.videoLink || "",
           virtualTourUrls: body?.virtualTourUrls || [],
         },
         amenities: body.amenities || [],
-        description: body.description || "No description",
-        status: PropertyStatusEnum.PENDING,
+        description: body.description || "",
+        status: targetStatus,
         viewCount: 0,
       };
 
@@ -656,6 +660,10 @@ export class PropertyController extends BaseController {
       }
 
       const body = req.body;
+      const targetStatus =
+        body.status === PropertyStatusEnum.DRAFT
+          ? PropertyStatusEnum.DRAFT
+          : PropertyStatusEnum.PENDING;
       const agent = await this.agentService.getAgentByUserId(user.userId._id);
       let isPro = false;
       if (agent && agent.status === "APPROVED") {
@@ -765,7 +773,7 @@ export class PropertyController extends BaseController {
         },
         amenities: body.amenities || existingProperty.amenities || [],
         description: body.description ?? existingProperty.description,
-        status: PropertyStatusEnum.PENDING, // Always return to pending queue after someone edits
+        status: targetStatus,
         rejectReason: "", // clear out any old rejection notice
       };
 

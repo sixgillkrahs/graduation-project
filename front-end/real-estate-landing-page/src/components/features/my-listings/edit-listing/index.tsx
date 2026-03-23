@@ -1,16 +1,24 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { ListingDraftProvider } from "@/components/features/my-listings/components/ListingDraftContext";
 import { CsStep } from "@/components/ui/stepper";
+import { ROUTES } from "@/const/routes";
 import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import { toast } from "@/lib/toast";
 import type { ListingState } from "@/models/listing.model";
 import type { RootState } from "@/store";
-import { setStep, updateListingData } from "@/store/listing.store";
+import {
+  resetListing,
+  setStep,
+  updateListingData,
+} from "@/store/listing.store";
 import type { ListingFormData } from "../dto/listingformdata.dto";
+import { useUpdateProperty } from "../services/mutate";
 import { useGetPropertyDetail } from "../services/query";
 import PropertyService from "../services/service";
 import BasicInfo from "./components/BasicInfo";
@@ -21,12 +29,15 @@ import Review from "./components/Review";
 
 const EditListing = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const currentStep = useSelector(
     (state: RootState) => state.listing.currentStep,
   );
   const [isReady, setIsReady] = useState(false);
   const params = useParams();
   const propertyId = params.id as string;
+  const { mutateAsync: updateProperty, isPending: isSavingDraft } =
+    useUpdateProperty();
 
   // Fetch property details
   const { data: propertyResponse, isLoading } =
@@ -134,6 +145,24 @@ const EditListing = () => {
     console.log("Final submission:", data);
   };
 
+  const saveDraft = async () => {
+    try {
+      await updateProperty({
+        id: propertyId,
+        data: {
+          ...methods.getValues(),
+          status: "DRAFT",
+        },
+      });
+      toast.success("Draft saved successfully.");
+      dispatch(resetListing());
+      router.push(ROUTES.AGENT_LISTINGS);
+    } catch (error) {
+      toast.error("Failed to save draft. Please try again.");
+      console.error(error);
+    }
+  };
+
   const steps = [
     { title: "Basic Info", content: <BasicInfo /> },
     { title: "Location", content: <Location /> },
@@ -152,18 +181,20 @@ const EditListing = () => {
   }
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onFinalSubmit)}>
-        <div className="max-w-7xl mx-auto p-8 pb-24">
-          <CsStep
-            steps={steps}
-            currentStep={currentStep + 1}
-            onStepChange={(step) => dispatch(setStep(step - 1))}
-            showNavigation={false}
-          />
-        </div>
-      </form>
-    </FormProvider>
+    <ListingDraftProvider value={{ saveDraft, isSavingDraft }}>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(onFinalSubmit)}>
+          <div className="max-w-7xl mx-auto p-8 pb-24">
+            <CsStep
+              steps={steps}
+              currentStep={currentStep + 1}
+              onStepChange={(step) => dispatch(setStep(step - 1))}
+              showNavigation={false}
+            />
+          </div>
+        </form>
+      </FormProvider>
+    </ListingDraftProvider>
   );
 };
 

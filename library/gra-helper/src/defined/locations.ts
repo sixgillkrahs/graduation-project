@@ -103,4 +103,5 @@ export const LIST_WARD = [
   { label: "Phường Láng Hạ", value: "Lang Ha Ward" },
   { label: "Phường Yên Hòa", value: "Yen Hoa Ward" },
   { label: "Phường Phú Diễn", value: "Phu Dien Ward" },
+  { label: "Phường Từ Liêm", value: "Tu Liem Ward" },
 ];

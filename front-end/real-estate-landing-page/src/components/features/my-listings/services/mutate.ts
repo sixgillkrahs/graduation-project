@@ -1,10 +1,10 @@
-import { IResp } from "@/@types/service";
-import { UseMutationResult, useMutation } from "@tanstack/react-query";
-import PropertyService from "./service";
-import { IPropertyDto } from "../dto/property.dto";
-import { ListingFormData } from "../dto/listingformdata.dto";
+import { type UseMutationResult, useMutation } from "@tanstack/react-query";
+import type { IResp } from "@/@types/service";
 import { queryClient } from "@/lib/react-query/queryClient";
+import type { ListingFormData } from "../dto/listingformdata.dto";
+import type { IPropertyDto } from "../dto/property.dto";
 import { PropertyKey } from "./config";
+import PropertyService from "./service";
 
 export const useCreateProperty = (): UseMutationResult<
   IResp<IPropertyDto>,
@@ -19,6 +19,11 @@ export const useCreateProperty = (): UseMutationResult<
     meta: {
       ERROR_SOURCE: "notifications.createPropertyFailed",
       SUCCESS_MESSAGE: "notifications.createPropertySuccess",
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [PropertyKey.getProperties],
+      });
     },
   });
 };

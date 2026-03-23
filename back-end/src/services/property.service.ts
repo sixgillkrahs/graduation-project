@@ -68,12 +68,16 @@ export class PropertyService {
   };
 
   updateProperty = async (id: string, updateData: Partial<IProperty>) => {
-    return await PropertyModel.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    })
-      .lean()
-      .exec();
+    const property = await PropertyModel.findById(id).exec();
+
+    if (!property) {
+      return null;
+    }
+
+    property.set(updateData);
+    await property.save();
+
+    return property.toObject();
   };
 
   deleteProperty = async (id: string) => {

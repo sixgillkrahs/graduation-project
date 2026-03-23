@@ -79,6 +79,41 @@ const envSchema = z.object({
     .string()
     .optional()
     .default("gemini-2.0-flash"),
+  ADMIN_UNITS_BASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://provinces.open-api.vn/api/v2"),
+  ADMIN_UNITS_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .default(5000),
+  ADMIN_UNITS_CACHE_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .default(604800),
+  GEOCODING_BASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .default("https://photon.komoot.io"),
+  GEOCODING_DEFAULT_LANGUAGE: z.string().optional().default("default"),
+  GEOCODING_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .default(5000),
+  GEOCODING_CACHE_TTL_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .default(86400),
   // VNPay
   VNP_TMN_CODE: z.string().optional().default("CGXZLS0Z"),
   VNP_HASH_SECRET: z

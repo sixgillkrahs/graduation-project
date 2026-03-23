@@ -22,21 +22,21 @@ import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
-import { toast } from "@/lib/toast";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useDispatch } from "react-redux";
 import { CsButton } from "@/components/custom";
+import { useListingDraft } from "@/components/features/my-listings/components/ListingDraftContext";
 import { Icon } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
-import { Map } from "@/components/ui/Map";
+import { Map as ListingMap } from "@/components/ui/Map";
 import { ROUTES } from "@/const/routes";
 import { getPropertyAmenityLabel } from "@/lib/property-amenities";
 import { formatPropertyPrice } from "@/lib/property-price";
+import { toast } from "@/lib/toast";
 import { prevStep, resetListing } from "@/store/listing.store";
 import type { ListingFormData } from "../../dto/listingformdata.dto";
 import { useCreateProperty } from "../../services/mutate";
-import PropertyService from "../../services/service";
 
 const Review = () => {
   const dispatch = useDispatch();
@@ -45,6 +45,7 @@ const Review = () => {
     useCreateProperty();
   const { getValues, handleSubmit } = useFormContext<ListingFormData>();
   const data = getValues();
+  const { saveDraft, isSavingDraft } = useListingDraft();
 
   // Create preview URLs for images
   const imageUrls = useMemo(() => {
@@ -156,20 +157,15 @@ const Review = () => {
                   Province / City
                 </span>
                 <span className="text-gray-900 font-medium">
-                  {PropertyService.Provinces.find(
-                    (p) => p.value === data.province,
-                  )?.label ||
-                    data.province ||
-                    "Not specified"}
+                  {data.province || "Not specified"}
                 </span>
               </div>
               <div>
-                <span className="text-sm text-gray-500 block mb-1">Ward</span>
+                <span className="text-sm text-gray-500 block mb-1">
+                  Administrative Unit
+                </span>
                 <span className="text-gray-900 font-medium">
-                  {PropertyService.Wards.find((w) => w.value === data.ward)
-                    ?.label ||
-                    data.ward ||
-                    "Not specified"}
+                  {data.ward || "Not specified"}
                 </span>
               </div>
               <div className="col-span-2">
@@ -181,7 +177,7 @@ const Review = () => {
             </div>
             {data.latitude && data.longitude && (
               <div className="rounded-xl overflow-hidden border border-gray-200">
-                <Map
+                <ListingMap
                   latitude={data.latitude}
                   longitude={data.longitude}
                   height="200px"
@@ -400,7 +396,7 @@ const Review = () => {
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 px-4 overflow-x-auto">
                     {virtualTourUrls.map((url, idx) => (
                       <button
-                        key={idx}
+                        key={url}
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -412,11 +408,14 @@ const Review = () => {
                             : "border-white/50 hover:border-white/80 opacity-80 hover:opacity-100"
                         }`}
                       >
-                        <img
-                          src={url}
-                          alt={`360 thumbnail ${idx}`}
-                          className="w-full h-full object-cover"
-                        />
+                        <span className="relative block h-full w-full">
+                          <NextImage
+                            src={url}
+                            alt={`360 thumbnail ${idx}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -553,7 +552,9 @@ const Review = () => {
             Back
           </CsButton>
           <div className="flex gap-4">
-            <CsButton type="button">Save Draft</CsButton>
+            <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
+              Save Draft
+            </CsButton>
             <CsButton
               onClick={handleSubmit(onPublish)}
               type="button"
@@ -573,4 +574,3 @@ const Review = () => {
 };
 
 export default Review;
-

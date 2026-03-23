@@ -1,27 +1,28 @@
-import { CsButton } from "@/components/custom";
-import { Tabs } from "@/components/ui";
-import { Input } from "@/components/ui/input";
-import { ItemTabs } from "@/components/ui/Tabs/tabs.types";
-import { nextStep } from "@/store/listing.store";
 import clsx from "clsx";
 import {
   ArrowLeft,
   ArrowRight,
   Building2,
   Info,
+  Loader2,
   MapPin,
   Wand2,
-  Loader2,
 } from "lucide-react";
+import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import PropertyService from "../../services/service";
-import { ListingFormData } from "../../dto/listingformdata.dto";
+import { CsButton } from "@/components/custom";
+import { useListingDraft } from "@/components/features/my-listings/components/ListingDraftContext";
+import { Tabs } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import type { ItemTabs } from "@/components/ui/Tabs/tabs.types";
 import { CsTextarea } from "@/components/ui/textarea";
-import { RootState } from "@/store";
-import { useState } from "react";
-import { toast } from "@/lib/toast";
 import { useAIModeration } from "@/hooks/useAIModeration";
+import { toast } from "@/lib/toast";
+import type { RootState } from "@/store";
+import { nextStep } from "@/store/listing.store";
+import type { ListingFormData } from "../../dto/listingformdata.dto";
+import PropertyService from "../../services/service";
 
 const BasicInfo = () => {
   const dispatch = useDispatch();
@@ -37,6 +38,7 @@ const BasicInfo = () => {
 
   const formData = watch();
   const description = watch("description");
+  const { saveDraft, isSavingDraft } = useListingDraft();
 
   // AI Moderation check for description hook
   useAIModeration({
@@ -255,7 +257,9 @@ const BasicInfo = () => {
             Cancel
           </CsButton>
           <div className="flex gap-4">
-            <CsButton type="button">Save Draft</CsButton>
+            <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
+              Save Draft
+            </CsButton>
             <CsButton onClick={handleContinue} type="button">
               Continue
               <ArrowRight className="w-5 h-5 ml-2" />
@@ -268,4 +272,3 @@ const BasicInfo = () => {
 };
 
 export default BasicInfo;
-

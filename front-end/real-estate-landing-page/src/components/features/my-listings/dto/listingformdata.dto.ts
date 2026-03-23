@@ -31,4 +31,5 @@ export interface ListingFormData {
   thumbnail: string;
   videoLink?: string;
   virtualTourUrls?: string[];
+  status?: "DRAFT" | "PENDING";
 }

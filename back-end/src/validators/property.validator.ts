@@ -5,6 +5,7 @@ import {
   PropertyDirectionEnum,
   PropertyFurnitureEnum,
   PropertyLegalStatusEnum,
+  PropertyStatusEnum,
   PropertyTypeEnum,
   PriceUnitEnum,
 } from "@/models/property.model";
@@ -12,19 +13,21 @@ import { z } from "zod";
 
 export const createPropertySchema = (lang: keyof typeof validationMessages) => {
   const t = validationMessages[lang] || validationMessages.vi;
+  const requiredMessage = (field: string) => t.required(field);
 
-  return z.object({
-    body: z.object({
-      demandType: z.enum(PropertyDemandTypeEnum),
-      propertyType: z.enum(PropertyTypeEnum),
+  const bodySchema = z
+    .object({
+      demandType: z.enum(PropertyDemandTypeEnum).optional(),
+      propertyType: z.enum(PropertyTypeEnum).optional(),
       projectName: z.string().optional(),
-      province: z.string().min(1, t.required("Tỉnh/Thành phố")),
-      ward: z.string().min(1, t.required("Phường/Xã")),
-      address: z.string().min(1, t.required("Địa chỉ cụ thể")),
-      latitude: z.number().optional(),
-      longitude: z.number().optional(),
-      area: z.string().or(z.number()),
-      price: z.string().or(z.number()),
+      title: z.string().optional(),
+      province: z.string().optional(),
+      ward: z.string().optional(),
+      address: z.string().optional(),
+      latitude: z.number().nullable().optional(),
+      longitude: z.number().nullable().optional(),
+      area: z.string().or(z.number()).optional(),
+      price: z.string().or(z.number()).optional(),
       currency: z.enum(CurrencyEnum).optional(),
       priceUnit: z.enum(PriceUnitEnum).optional(),
       bedrooms: z.number().or(z.string()).optional(),
@@ -38,6 +41,67 @@ export const createPropertySchema = (lang: keyof typeof validationMessages) => {
       videoLink: z.string().optional(),
       virtualTourUrls: z.array(z.string()).optional(),
       description: z.string().optional(),
-    }),
+      status: z.enum(PropertyStatusEnum).optional(),
+    })
+    .superRefine((body, ctx) => {
+      if (body.status === PropertyStatusEnum.DRAFT) {
+        return;
+      }
+
+      const requiredStringFields = [
+        { field: "title", label: "Tiêu đề tin đăng" },
+        { field: "province", label: "Tỉnh/Thành phố" },
+        { field: "ward", label: "Phường/Xã" },
+        { field: "address", label: "Địa chỉ cụ thể" },
+        { field: "description", label: "Mô tả" },
+      ] as const;
+
+      for (const item of requiredStringFields) {
+        const value = body[item.field];
+
+        if (typeof value !== "string" || !value.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [item.field],
+            message: requiredMessage(item.label),
+          });
+        }
+      }
+
+      if (!body.demandType) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["demandType"],
+          message: requiredMessage("Loại giao dịch"),
+        });
+      }
+
+      if (!body.propertyType) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["propertyType"],
+          message: requiredMessage("Loại bất động sản"),
+        });
+      }
+
+      if (body.area === undefined || body.area === null || body.area === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["area"],
+          message: requiredMessage("Diện tích"),
+        });
+      }
+
+      if (body.price === undefined || body.price === null || body.price === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["price"],
+          message: requiredMessage("Giá"),
+        });
+      }
+    });
+
+  return z.object({
+    body: bodySchema,
   });
 };
