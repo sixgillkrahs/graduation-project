@@ -39,7 +39,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { IScheduleDTO, SCHEDULE_STATUS } from "../schedule/dto/schedule.dto";
 import { useUpdateSchedule } from "../schedule/services/mutation";
 import { useGetSchedulesMe } from "../schedule/services/query";
@@ -849,3 +849,4 @@ const MyAppointments = () => {
 };
 
 export default MyAppointments;
+

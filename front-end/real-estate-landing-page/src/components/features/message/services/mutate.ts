@@ -1,6 +1,6 @@
 import { queryClient } from "@/lib/react-query/queryClient";
 import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ConversationsQueryKey } from "./config";
 import ConversationService from "./service";
 
@@ -18,3 +18,4 @@ export const useCreateConversation = () => {
     },
   });
 };
+

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { CheckCircle2, Mail } from "lucide-react";
 import { CsButton } from "@/components/custom";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 interface CelebrationModalProps {
   isOpen: boolean;
@@ -131,3 +131,4 @@ export const CelebrationModal = React.memo(
 );
 
 CelebrationModal.displayName = "CelebrationModal";
+

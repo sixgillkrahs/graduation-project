@@ -11,7 +11,7 @@ import PropertyService from "../../services/service";
 import { ListingFormData } from "../../dto/listingformdata.dto";
 import { CsTextarea } from "@/components/ui/textarea";
 import { useEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useAIModeration } from "@/hooks/useAIModeration";
 
 const BasicInfo = () => {
@@ -215,3 +215,4 @@ const BasicInfo = () => {
 };
 
 export default BasicInfo;
+

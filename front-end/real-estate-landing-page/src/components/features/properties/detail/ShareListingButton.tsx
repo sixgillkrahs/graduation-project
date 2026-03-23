@@ -3,7 +3,7 @@
 import { Copy, Link2, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Facebook } from "@/components/ui/Icon/Facebook";
 import { Zalo } from "@/components/ui/Icon/Zalo";
 import {
@@ -210,3 +210,4 @@ const ShareListingButton = ({
 };
 
 export default ShareListingButton;
+

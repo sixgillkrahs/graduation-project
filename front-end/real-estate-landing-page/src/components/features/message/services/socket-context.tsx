@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { io, Socket } from "socket.io-client";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { RootState } from "@/store";
 
 const SocketContext = createContext<Socket | null>(null);
@@ -52,3 +52,4 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );
 };
+

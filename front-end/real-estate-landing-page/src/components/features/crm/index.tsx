@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import CsTabs from "@/components/custom/tabs";
 import { useUpdateLeadStatus } from "@/components/features/leads/services/mutate";
 import { useGetAgentLeads } from "@/components/features/leads/services/query";

@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { useSignUp } from "./services/mutate";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const SignUp = () => {
   const router = useRouter();

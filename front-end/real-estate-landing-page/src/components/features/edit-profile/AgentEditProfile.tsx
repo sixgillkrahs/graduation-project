@@ -16,7 +16,7 @@ import { fetchProfileItem } from "@/store/profile.store";
 import { AppDispatch } from "@/store";
 import { Camera, Edit } from "lucide-react";
 import { CsSelect } from "@/components/ui/select";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useDispatch } from "react-redux";
 import { useAIModeration } from "@/hooks/useAIModeration";
 

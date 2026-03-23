@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { fetchProfileItem } from "@/store/profile.store";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ROUTES } from "@/const/routes";
 import {
   useCreateMoMoUrl,

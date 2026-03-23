@@ -9,7 +9,7 @@ import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
 import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useUploadImages } from "@/shared/upload/mutate";
 
 type BusinessInfoFormType = Omit<BusinessInfoType, "certificateImage"> & {
@@ -236,3 +236,4 @@ const BusinessInfo = () => {
 };
 
 export default memo(BusinessInfo);
+

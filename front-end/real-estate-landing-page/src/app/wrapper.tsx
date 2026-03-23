@@ -4,11 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import type React from "react";
 import { PhotoProvider } from "react-photo-view";
 import { Provider } from "react-redux";
-import { Toaster } from "sonner";
 import { GlobalAuthDialog } from "@/components/custom/auth/GlobalAuthDialog";
 import { SocketProvider } from "@/components/features/message/services/socket-context";
 import PropertyCompareSync from "@/components/features/properties/compare/PropertyCompareSync";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/react-query/queryClient";
 import { store } from "@/store";
 
@@ -25,7 +25,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
           <PropertyCompareSync />
           <SocketProvider>
             <PhotoProvider>{children}</PhotoProvider>
-            <Toaster richColors position="top-right" />
+            <Toaster position="top-right" />
             <GlobalAuthDialog />
           </SocketProvider>
         </Provider>

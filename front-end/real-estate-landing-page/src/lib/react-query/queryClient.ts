@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import {
   Mutation,
   MutationCache,
@@ -9,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 import { getClientTranslation } from "@/lib/i18n/getClientTranslation";
+import { toast } from "@/lib/toast";
 
 export const queryClient = new QueryClient({
   defaultOptions: {

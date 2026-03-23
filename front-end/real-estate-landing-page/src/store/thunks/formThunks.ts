@@ -6,7 +6,7 @@ import {
 } from "../store";
 import { RootState } from "..";
 import request from "@/lib/axios/request";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export const submitForm = createAsyncThunk(
   "form/submit",

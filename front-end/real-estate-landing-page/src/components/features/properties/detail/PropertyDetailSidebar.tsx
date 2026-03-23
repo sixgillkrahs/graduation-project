@@ -14,7 +14,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { CsButton } from "@/components/custom";
 import CsTabs from "@/components/custom/tabs";
 import { Calendar } from "@/components/ui/calendar";
@@ -781,3 +781,4 @@ const PropertyDetailSidebar = ({
 };
 
 export default PropertyDetailSidebar;
+

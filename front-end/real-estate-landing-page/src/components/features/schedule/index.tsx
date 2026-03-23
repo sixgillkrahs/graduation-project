@@ -21,7 +21,7 @@ import { SCHEDULE_STATUS, SCHEDULE_TYPE } from "./dto/schedule.dto";
 import { reducer } from "./hooks/useReduce";
 import { useGetSchedulesMe } from "./services/query";
 import { useUpdateSchedule } from "./services/mutation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 /** Convert "10:00 AM" / "02:00 PM" to "10:00" / "14:00". Already-24h strings pass through. */
 const parseTo24h = (time: string): string => {
@@ -599,3 +599,4 @@ const Schedule = () => {
 };
 
 export default Schedule;
+

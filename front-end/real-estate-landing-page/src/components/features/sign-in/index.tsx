@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { startAuthentication } from "@simplewebauthn/browser";
 import {
   useSignIn,
@@ -206,3 +206,4 @@ const SignIn = () => {
 };
 
 export default SignIn;
+

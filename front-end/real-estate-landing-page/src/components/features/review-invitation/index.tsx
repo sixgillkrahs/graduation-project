@@ -3,7 +3,7 @@
 import ReviewSubmissionModal from "@/components/features/agent-public-profile/components/ReviewSubmissionModal";
 import { ROUTES } from "@/const/routes";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useCreateReview } from "./services/mutate";
 import { useGetReviewInvitation } from "./services/query";
 
@@ -103,3 +103,4 @@ const ReviewInvitation = ({ token }: ReviewInvitationProps) => {
 };
 
 export default ReviewInvitation;
+

@@ -4,7 +4,7 @@ import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
 import { ROUTES } from "@/const/routes";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";

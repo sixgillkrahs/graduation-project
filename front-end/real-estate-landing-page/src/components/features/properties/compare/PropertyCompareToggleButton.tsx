@@ -2,7 +2,7 @@
 
 import { Check, Scale } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import {
   PROPERTY_COMPARE_MAX_ITEMS,
@@ -118,3 +118,4 @@ const PropertyCompareToggleButton = ({
 };
 
 export default PropertyCompareToggleButton;
+

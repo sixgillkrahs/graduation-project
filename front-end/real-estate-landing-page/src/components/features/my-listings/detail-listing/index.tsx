@@ -8,7 +8,7 @@ import { normalizePropertyPrice } from "@/lib/property-price";
 import { AlertCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState, useCallback } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useForm } from "react-hook-form";
 
 // Sub-components
@@ -193,3 +193,4 @@ export const ListingDetail = () => {
 };
 
 export default ListingDetail;
+

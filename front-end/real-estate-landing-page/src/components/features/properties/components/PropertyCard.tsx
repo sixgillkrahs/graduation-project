@@ -169,7 +169,7 @@ const PropertyCard = ({
             <div className="h-4 w-px shrink-0 bg-gray-200"></div>
             <div className="flex items-center gap-1.5 whitespace-nowrap text-sm text-gray-600">
               <Maximize className="main-color-red h-4 w-4 shrink-0" />
-              <span className="font-medium">{specs.area} mÂ²</span>
+              <span className="font-medium">{specs.area} m²</span>
             </div>
           </div>
 

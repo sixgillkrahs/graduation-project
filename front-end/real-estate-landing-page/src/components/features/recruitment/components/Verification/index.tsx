@@ -14,7 +14,7 @@ import { submitForm } from "@/store/thunks/formThunks";
 import { memo, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import ExtractService from "../../services/service";
 
 const Verification = () => {
@@ -207,3 +207,4 @@ const Verification = () => {
 };
 
 export default memo(Verification);
+

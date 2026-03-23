@@ -6,7 +6,7 @@ import { nextStep, updateBasicInfo } from "@/store/store";
 import { memo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { useUploadImages } from "@/shared/upload/mutate";
 import { useExtractID } from "../../services/mutation";
 import { BasicInfo as BasicInfoType } from "@/models/basicInfo.model";
@@ -253,3 +253,4 @@ const BasicInfo = () => {
 };
 
 export default memo(BasicInfo);
+

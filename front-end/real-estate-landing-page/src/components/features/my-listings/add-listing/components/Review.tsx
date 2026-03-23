@@ -22,7 +22,7 @@ import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "@/lib/toast";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import { useDispatch } from "react-redux";
@@ -573,3 +573,4 @@ const Review = () => {
 };
 
 export default Review;
+
