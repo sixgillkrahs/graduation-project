@@ -29,6 +29,7 @@ export const client = (() => {
     baseURL: getApiBaseUrl(),
     headers: {
       Accept: "application/json, text/plain, */*",
+      "X-Auth-App": "landing",
     },
     withCredentials: true, // bật cái này nếu ở backend có bật cờ Access-Control-Allow-Credentials: true
   });

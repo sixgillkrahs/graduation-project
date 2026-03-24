@@ -20,6 +20,7 @@ export const client = (() => {
     baseURL: import.meta.env.VITE_BASEURL,
     headers: {
       Accept: "application/json, text/plain, */*",
+      "X-Auth-App": "uaa",
     },
     withCredentials: true, // bật cái này nếu ở backend có bật cờ Access-Control-Allow-Credentials: true
   });
