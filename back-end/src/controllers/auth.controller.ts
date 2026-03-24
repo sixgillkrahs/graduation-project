@@ -9,6 +9,12 @@ import { EmailQueue } from "@/queues/email.queue";
 import { AuthService } from "@/services/auth.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
+import {
+  clearAuthCookies,
+  getRefreshTokenFromRequest,
+  parseRequestCookies,
+  setAuthCookies,
+} from "@/utils/authCookies";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 import {
@@ -19,7 +25,6 @@ import {
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
 import bcrypt from "bcrypt";
-import { parse } from "cookie";
 import { randomBytes } from "crypto";
 import { NextFunction, Request, Response } from "express";
 import { BaseController } from "./base.controller";
@@ -41,40 +46,6 @@ export class AuthController extends BaseController {
     this.authService = authService;
     this.roleService = roleService;
     this.emailQueue = emailQueue;
-  }
-
-  private setAuthCookies(
-    res: Response,
-    accessToken: string,
-    refreshToken: string,
-    rememberMe?: boolean,
-  ) {
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none" as const,
-    };
-
-    res.cookie(
-      "accessToken",
-      accessToken,
-      rememberMe
-        ? {
-            ...cookieOptions,
-            maxAge: 15 * 60 * 1000,
-          }
-        : cookieOptions,
-    );
-    res.cookie(
-      "refreshToken",
-      refreshToken,
-      rememberMe
-        ? {
-            ...cookieOptions,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-          }
-        : cookieOptions,
-    );
   }
 
   private resolveFrontendRedirectUrl(callbackUrl?: string) {
@@ -171,7 +142,7 @@ export class AuthController extends BaseController {
         15 * 1000 * 60 * 24, // 15 ngày
       );
 
-      this.setAuthCookies(res, accessToken, refreshToken, rememberMe);
+      setAuthCookies(req, res, accessToken, refreshToken, rememberMe);
       return {
         user: {
           id: auth.userId._id,
@@ -256,20 +227,7 @@ export class AuthController extends BaseController {
 
   logout = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
-      res.cookie("accessToken", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        expires: new Date(0),
-        path: "/",
-      });
-      res.cookie("refreshToken", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        expires: new Date(0),
-        path: "/",
-      });
+      clearAuthCookies(req, res);
       return { success: true, message: "Đăng xuất thành công" };
     });
   };
@@ -277,16 +235,7 @@ export class AuthController extends BaseController {
   refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const lang = req.lang;
-      const cookieHeader = req.headers.cookie;
-      if (!cookieHeader) {
-        throw new AppError(
-          "Unauthorized - Invalid token",
-          401,
-          ErrorCode.INVALID_TOKEN,
-        );
-      }
-      const cookies = parse(cookieHeader);
-      const token = cookies.refreshToken;
+      const token = getRefreshTokenFromRequest(req);
       if (!token) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
@@ -344,18 +293,7 @@ export class AuthController extends BaseController {
         },
         15 * 1000 * 60 * 24, // 15 ngày
       );
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 15 * 1000 * 60,
-      });
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 15 * 1000 * 60 * 24, // 15 ngày
-      });
+      setAuthCookies(req, res, accessToken, refreshToken, true);
       return user;
     });
   };
@@ -772,20 +710,7 @@ export class AuthController extends BaseController {
         15 * 1000 * 60 * 24, // 15 ngày
       );
 
-      const cookieOptions = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none" as const,
-      };
-
-      res.cookie("accessToken", accessToken, {
-        ...cookieOptions,
-        maxAge: 15 * 60 * 1000,
-      });
-      res.cookie("refreshToken", refreshToken, {
-        ...cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      setAuthCookies(req, res, accessToken, refreshToken, true);
 
       return {
         user: {
@@ -865,7 +790,7 @@ export class AuthController extends BaseController {
       mode = parsedState.mode === "sign-up" ? "sign-up" : "sign-in";
       callbackUrl = this.resolveFrontendRedirectUrl(parsedState.callbackUrl);
 
-      const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
+      const cookies = parseRequestCookies(req);
       const storedState = cookies.google_oauth_state;
 
       if (!storedState || storedState !== parsedState.token) {
@@ -1091,7 +1016,7 @@ export class AuthController extends BaseController {
         15 * 1000 * 60 * 24,
       );
 
-      this.setAuthCookies(res, accessToken, refreshToken);
+      setAuthCookies(req, res, accessToken, refreshToken);
       res.redirect(callbackUrl);
     } catch (error) {
       res.clearCookie("google_oauth_state", { path: "/" });

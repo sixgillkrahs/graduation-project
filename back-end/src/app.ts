@@ -54,6 +54,12 @@ const setupMiddleware = (app: express.Application) => {
     cors({
       origin: [ENV.FRONTEND_URL, ENV.FRONTEND_URLLANDINGPAGE],
       credentials: true,
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Auth-App",
+        "Accept-Language",
+      ],
     }),
   );
 

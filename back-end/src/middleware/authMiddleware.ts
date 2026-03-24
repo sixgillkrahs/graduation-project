@@ -1,9 +1,9 @@
 import { ENV } from "@/config/env";
 import { logger } from "@/config/logger";
 import { AuthService } from "@/services/auth.service";
+import { getAccessTokenFromRequest } from "@/utils/authCookies";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
-import { parse } from "cookie";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { Operation } from "@/models/permission.model";
@@ -123,16 +123,7 @@ export const requireAuth = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const cookieHeader = req.headers.cookie;
-    if (!cookieHeader) {
-      throw new AppError(
-        "Unauthorized - Invalid token",
-        401,
-        ErrorCode.INVALID_TOKEN,
-      );
-    }
-    const cookies = parse(cookieHeader);
-    const token = cookies.accessToken;
+    const token = getAccessTokenFromRequest(req);
     if (!token) {
       throw new AppError("No token provided", 401, ErrorCode.UNAUTHORIZED);
     }
@@ -246,16 +237,10 @@ export const optionalAuth = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const cookieHeader = req.headers.cookie;
     // Check Authorization header as fallback if no cookie
     const authHeader = req.headers.authorization;
 
-    let token;
-
-    if (cookieHeader) {
-      const cookies = parse(cookieHeader);
-      token = cookies.accessToken;
-    }
+    let token = getAccessTokenFromRequest(req);
 
     if (!token && authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
