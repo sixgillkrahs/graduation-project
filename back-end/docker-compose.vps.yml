@@ -36,7 +36,9 @@ services:
       - app-network
 
   api:
-    build: .
+    build:
+      context: ..
+      dockerfile: back-end/Dockerfile
     env_file:
       - ${APP_ENV_FILE:-.env.vps}
     environment:

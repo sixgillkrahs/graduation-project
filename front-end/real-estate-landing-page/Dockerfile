@@ -1,13 +1,20 @@
 FROM node:20-alpine AS base
 
+ARG APP_DIR=front-end/real-estate-landing-page
+ARG LIB_DIR=library/gra-helper
+
 # Stage 1: Install dependencies
 FROM base AS deps
 # Install libc6-compat if needed by Alpine
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+ARG APP_DIR
+ARG LIB_DIR
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY ${APP_DIR}/package.json ./
+COPY ${APP_DIR}/yarn.lock* ${APP_DIR}/package-lock.json* ${APP_DIR}/pnpm-lock.yaml* ./
+COPY ${LIB_DIR} /library/gra-helper
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
@@ -18,11 +25,23 @@ RUN \
 # Stage 2: Build the application
 FROM base AS builder
 WORKDIR /app
+ARG APP_DIR
+ARG LIB_DIR
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+ARG NEXT_PUBLIC_API_BASE_SOCKET=http://localhost:8000
+ARG INTERNAL_API_BASE_URL=http://localhost:8000/api
+ARG NEXT_PUBLIC_ENVIRONMENT=production
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY ${APP_DIR} .
+COPY ${LIB_DIR} /library/gra-helper
+RUN rm -rf ./node_modules/gra-helper && cp -R /library/gra-helper ./node_modules/gra-helper
 
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_API_BASE_SOCKET=${NEXT_PUBLIC_API_BASE_SOCKET}
+ENV INTERNAL_API_BASE_URL=${INTERNAL_API_BASE_URL}
+ENV NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}
 
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
@@ -35,8 +54,17 @@ RUN \
 FROM base AS runner
 WORKDIR /app
 
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
+ARG NEXT_PUBLIC_API_BASE_SOCKET=http://localhost:8000
+ARG INTERNAL_API_BASE_URL=http://localhost:8000/api
+ARG NEXT_PUBLIC_ENVIRONMENT=production
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_API_BASE_SOCKET=${NEXT_PUBLIC_API_BASE_SOCKET}
+ENV INTERNAL_API_BASE_URL=${INTERNAL_API_BASE_URL}
+ENV NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs

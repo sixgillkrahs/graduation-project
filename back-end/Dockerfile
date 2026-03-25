@@ -3,30 +3,43 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
+ARG APP_DIR=back-end
+ARG LIB_DIR=library/gra-helper
+
 # Stage 1: Install all dependencies (for build)
 FROM base AS deps
 # Install libc6-compat if needed by Alpine
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+ARG APP_DIR
+ARG LIB_DIR
+COPY ${APP_DIR}/package.json ${APP_DIR}/pnpm-lock.yaml ./
+COPY ${LIB_DIR} /library/gra-helper
+RUN pnpm config set node-linker hoisted && pnpm install --frozen-lockfile
 
 # Stage 2: Install production dependencies only
 FROM base AS prod-deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+ARG APP_DIR
+ARG LIB_DIR
+COPY ${APP_DIR}/package.json ${APP_DIR}/pnpm-lock.yaml ./
+COPY ${LIB_DIR} /library/gra-helper
+RUN pnpm config set node-linker hoisted && pnpm install --frozen-lockfile --prod
 
 # Stage 3: Build the application
 FROM base AS builder
 WORKDIR /app
+ARG APP_DIR
+ARG LIB_DIR
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY ${APP_DIR} .
+COPY ${LIB_DIR} /library/gra-helper
 RUN pnpm run build
 
 # Stage 4: Production server
 FROM base AS runner
 WORKDIR /app
+ARG LIB_DIR
 
 ENV NODE_ENV=production
 ENV PORT=8080
@@ -37,6 +50,7 @@ RUN adduser --system --uid 1001 expressjs
 
 # Copy production node_modules from prod-deps stage
 COPY --from=prod-deps --chown=expressjs:nodejs /app/node_modules ./node_modules
+COPY --from=prod-deps --chown=expressjs:nodejs /library/gra-helper /library/gra-helper
 
 # Copy compiled source code
 COPY --from=builder --chown=expressjs:nodejs /app/dist ./dist

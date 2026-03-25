@@ -373,7 +373,6 @@ const Location = () => {
                   placeholder="Select province / city"
                   options={provinceSelectOptions}
                   value={field.value}
-                  searchable
                   onChange={({ target }) => {
                     field.onChange(target.value);
                     setValue("ward", "");
@@ -399,7 +398,6 @@ const Location = () => {
                   options={localUnitSelectOptions}
                   value={field.value}
                   disabled={!selectedProvince}
-                  searchable
                   onChange={({ target }) => field.onChange(target.value)}
                   error={error?.message}
                 />

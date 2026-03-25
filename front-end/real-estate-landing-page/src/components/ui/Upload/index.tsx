@@ -203,7 +203,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       onChange?.([]);
     };
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -220,7 +220,7 @@ const Upload = forwardRef<HTMLInputElement, UploadProps>(
       }
     };
 
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
       e.preventDefault();
       e.stopPropagation();
     };

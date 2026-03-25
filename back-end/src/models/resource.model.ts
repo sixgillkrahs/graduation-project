@@ -164,7 +164,11 @@ class ResourceClass {
     const sort = { createdAt: -1, _id: -1 };
 
     const [results, totalResults] = await Promise.all([
-      this.find(searchFilter).sort(sort).skip(skip).limit(limit).exec(),
+      this.find(searchFilter)
+        .sort(sort as any)
+        .skip(skip)
+        .limit(limit)
+        .exec(),
       this.countDocuments(searchFilter).exec(),
     ]);
 

@@ -1,6 +1,6 @@
 {
   "name": "gra-helper",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Shared middleware library for graduation project",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
