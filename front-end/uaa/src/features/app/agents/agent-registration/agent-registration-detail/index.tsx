@@ -3,8 +3,8 @@ import { useGetAgentsRegistration } from "../services/query";
 import AgentRegistrationService from "../services/service";
 import { ArrowLeftOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
 import { resolveDocumentImageUrl } from "@shared/helper/documentImage";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import message from "@shared/message";
-import { toVietnamTime } from "@shared/render/time";
 import { Button, Card, Col, Flex, Image, Input, Modal, Row, Space, Tag, Typography } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -93,6 +93,7 @@ const InfoField = ({ label, value }: InfoFieldProps) => {
 
 const AgentRegistrationDetail = () => {
   const { t } = useTranslation("agents");
+  const { formatDateTime } = useDateTimeFormatter();
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: agentRegistrationDetail } = useGetAgentsRegistration(id!);
@@ -184,7 +185,7 @@ const AgentRegistrationDetail = () => {
                 />
                 <InfoField
                   label={t("detail.rejectDate")}
-                  value={toVietnamTime(agentRegistrationDetail?.data?.updatedAt)}
+                  value={formatDateTime(agentRegistrationDetail?.data?.updatedAt)}
                 />
               </>
             )}
@@ -192,7 +193,7 @@ const AgentRegistrationDetail = () => {
               <>
                 <InfoField
                   label={t("detail.approveDate")}
-                  value={toVietnamTime(agentRegistrationDetail?.data?.updatedAt)}
+                  value={formatDateTime(agentRegistrationDetail?.data?.updatedAt)}
                 />
                 <InfoField label={t("detail.note")} value={agentRegistrationDetail?.data.note || "-"} />
               </>

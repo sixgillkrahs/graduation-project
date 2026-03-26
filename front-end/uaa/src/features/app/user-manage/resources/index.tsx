@@ -2,8 +2,8 @@ import FormResource from "./components/FormResource";
 import { useCreateResource, useDeleteResource, useUpdateResource } from "./services/mutation";
 import { useGetResource, useGetResources } from "./services/query";
 import ProTable from "@/components/ProTable";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { getLocalizedResourceLabel } from "@shared/i18n/accessControl";
-import { toVietnamTime } from "@shared/render/time";
 import type { IParamsPagination, IResp } from "@shared/types/service";
 import type { ColumnsType } from "antd/es/table";
 import type { SorterResult, TablePaginationConfig } from "antd/es/table/interface";
@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 
 const Resources = () => {
   const { t } = useTranslation();
+  const { formatDateTime } = useDateTimeFormatter();
   const { mutateAsync: deleteResource } = useDeleteResource();
   const { mutateAsync: createResource, isPending: isCreating } = useCreateResource();
   const { mutateAsync: updateResource, isPending: isUpdating } = useUpdateResource();
@@ -47,7 +48,7 @@ const Resources = () => {
       title: t("resource.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
       sorter: true,
       width: 230,
     },
@@ -55,7 +56,7 @@ const Resources = () => {
       title: t("resource.updatedAt"),
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
       sorter: true,
       width: 230,
     },

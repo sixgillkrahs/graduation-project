@@ -1,7 +1,7 @@
 import { useDeleteJob, useRetryJob } from "./services/mutate";
 import { useGetJobs } from "./services/query";
 import FullTable from "@/components/FullTable";
-import { toVietnamTime } from "@shared/render/time";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { Alert, Dropdown, Modal, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EllipsisVertical, RotateCcw, Trash } from "lucide-react";
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 
 const Jobs = () => {
   const { t } = useTranslation(["jobs", "translation"]);
+  const { formatDateTime } = useDateTimeFormatter();
   const [modal, contextHolder] = Modal.useModal();
 
   const retryMutation = useRetryJob();
@@ -173,7 +174,7 @@ const Jobs = () => {
       title: t("jobs:columns.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
     },
     {
       title: t("columns.action"),

@@ -4,6 +4,7 @@ import { IParamsPagination } from "@/@types/service";
 import { CsButton } from "@/components/custom";
 import { IPropertyDto } from "@/components/features/my-listings/dto/property.dto";
 import { CsTable, TableColumn } from "@/components/ui/table";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import { formatPropertyPrice } from "@/lib/property-price";
 import { ArrowLeft, Building, Mail, MapPin, Phone } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ const DetailLandlord = () => {
   const { id } = useParams();
   const router = useRouter();
   const landlordId = (id as string) || "";
+  const { formatDate } = useDateTimeFormatter();
 
   const { data: landlordRes, isLoading: isLoadingLandlord } =
     useLandlordDetail(landlordId);
@@ -124,7 +126,7 @@ const DetailLandlord = () => {
       key: "createdAt",
       render: (value) => (
         <span className="text-gray-500 text-sm">
-          {value ? new Date(value as string).toLocaleDateString("vi-VN") : "-"}
+          {formatDate(value as string, { fallback: "-" })}
         </span>
       ),
     },

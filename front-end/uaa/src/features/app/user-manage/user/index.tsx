@@ -1,7 +1,7 @@
 import ViewModal from "./components/ViewModal";
 import { useGetUsers } from "./services/query";
 import FullTable from "@/components/FullTable";
-import { toVietnamTime } from "@shared/render/time";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { Dropdown, Switch, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EllipsisVertical, Eye } from "lucide-react";
@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 
 const Users = () => {
   const { t } = useTranslation();
+  const { formatDateTime } = useDateTimeFormatter();
   const [header, setHeader] = useState<{
     open: boolean;
     id: string | null;
@@ -55,7 +56,7 @@ const Users = () => {
       title: t("users.createdAt"),
       dataIndex: ["createdAt"],
       key: "createdAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
     },
     {
       title: t("columns.action"),

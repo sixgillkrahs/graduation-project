@@ -1,17 +1,17 @@
+import { formatLandingDateTime } from "@/lib/date-time-format";
+
 export const formatPropertyPostedDate = (
   value: string | Date,
   locale = "en",
 ) => {
-  const date = value instanceof Date ? value : new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    timeZone: "UTC",
-    year: "numeric",
-  }).format(date);
+  return formatLandingDateTime(
+    value,
+    {
+      defaultLanguage: locale.toLowerCase().startsWith("vi") ? "vi" : "en",
+    },
+    {
+      includeTime: false,
+      fallback: "",
+    },
+  );
 };

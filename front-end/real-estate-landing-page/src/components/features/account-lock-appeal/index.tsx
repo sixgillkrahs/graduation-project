@@ -1,5 +1,6 @@
 "use client";
 
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import { toast } from "@/lib/toast";
 import { useState } from "react";
 import { useGetAccountLockAppealContext } from "./services/query";
@@ -9,15 +10,8 @@ type AccountLockAppealProps = {
   token: string;
 };
 
-const formatDateTime = (value?: string | null) => {
-  if (!value) {
-    return "Forever";
-  }
-
-  return new Date(value).toLocaleString("vi-VN");
-};
-
 const AccountLockAppeal = ({ token }: AccountLockAppealProps) => {
+  const { formatDateTime } = useDateTimeFormatter();
   const { data, isLoading, error } = useGetAccountLockAppealContext(token);
   const { mutateAsync: submitAppeal, isPending } = useSubmitAccountLockAppeal();
   const [reason, setReason] = useState("");
@@ -112,7 +106,7 @@ const AccountLockAppeal = ({ token }: AccountLockAppealProps) => {
               <p className="mt-1 font-medium text-slate-900">
                 {context.lockType === "PERMANENT"
                   ? "Forever"
-                  : formatDateTime(context.lockedUntil)}
+                  : formatDateTime(context.lockedUntil, { includeSeconds: false })}
               </p>
             </div>
           </div>

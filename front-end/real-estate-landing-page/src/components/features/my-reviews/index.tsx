@@ -2,6 +2,7 @@
 
 import { CsButton } from "@/components/custom";
 import { RootState } from "@/store";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import {
   Flag,
   LoaderCircle,
@@ -43,18 +44,6 @@ const FILTERS: Array<{
   { label: "1-3 sao", value: "1-3star" },
   { label: "Chua phan hoi", value: "unanswered" },
 ];
-
-const formatDate = (value?: string) => {
-  if (!value) {
-    return "--";
-  }
-
-  return new Date(value).toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
 
 const getStatusLabel = (status: IReviewService.ReviewStatus) => {
   switch (status) {
@@ -128,6 +117,7 @@ const ReviewCard = ({
   isGeneratingAutoReply,
   isApplyingAutoReply,
   isDiscardingAutoReply,
+  formatDate,
 }: {
   review: IReviewService.ReviewItem;
   isPro: boolean;
@@ -141,6 +131,7 @@ const ReviewCard = ({
   isGeneratingAutoReply: boolean;
   isApplyingAutoReply: boolean;
   isDiscardingAutoReply: boolean;
+  formatDate: (value?: string | number | Date | null) => string;
 }) => {
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -410,6 +401,7 @@ const ReviewCard = ({
 };
 
 const MyReviews = () => {
+  const { formatDate } = useDateTimeFormatter();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<IReviewService.ReviewFilter>("all");
   const [page, setPage] = useState(1);
@@ -616,6 +608,7 @@ const MyReviews = () => {
                 isGeneratingAutoReply={isGeneratingAutoReply}
                 isApplyingAutoReply={isApplyingAutoReply}
                 isDiscardingAutoReply={isDiscardingAutoReply}
+                formatDate={formatDate}
               />
             ))}
           </div>

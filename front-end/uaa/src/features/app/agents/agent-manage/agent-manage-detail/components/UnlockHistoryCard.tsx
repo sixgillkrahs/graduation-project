@@ -1,4 +1,4 @@
-import { toVietnamTime } from "@shared/render/time";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { Card, Table, Tag, Typography, type TableColumnsType } from "antd";
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
@@ -13,6 +13,7 @@ const emptyHistories: IAgentRegistrationService.UnlockRequestHistory[] = [];
 
 const UnlockHistoryCard = ({ histories = emptyHistories }: UnlockHistoryCardProps) => {
   const { t } = useTranslation("agents");
+  const { formatDateTime } = useDateTimeFormatter();
 
   const columns: TableColumnsType<IAgentRegistrationService.UnlockRequestHistory> = [
     {
@@ -37,7 +38,7 @@ const UnlockHistoryCard = ({ histories = emptyHistories }: UnlockHistoryCardProp
       dataIndex: "requestedAt",
       key: "requestedAt",
       width: 190,
-      render: (value: string) => toVietnamTime(value),
+      render: (value: string) => formatDateTime(value),
     },
     {
       title: t("manage.unlockHistoryReviewedAt", {
@@ -46,7 +47,7 @@ const UnlockHistoryCard = ({ histories = emptyHistories }: UnlockHistoryCardProp
       dataIndex: "reviewedAt",
       key: "reviewedAt",
       width: 190,
-      render: (value: string) => toVietnamTime(value),
+      render: (value: string) => formatDateTime(value),
     },
     {
       title: t("manage.unlockHistoryReviewedBy", {

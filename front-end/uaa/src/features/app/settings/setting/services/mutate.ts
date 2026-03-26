@@ -7,10 +7,11 @@ export const useUpdateGeneralSettings = () => {
   return useMutation({
     mutationFn: (payload: ISettingService.UpdateGeneralSettingsDTO) =>
       GeneralSettingsService.UpdateGeneralSettings(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [GeneralSettingsQueryKey.GetGeneralSettings],
-      });
+    onSuccess: (response) => {
+      queryClient.setQueryData(
+        [GeneralSettingsQueryKey.GetGeneralSettings],
+        response,
+      );
     },
     meta: {
       ERROR_SOURCE: "[Update settings failed]",

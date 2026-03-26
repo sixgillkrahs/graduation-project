@@ -6,8 +6,8 @@ import {
   useUnlockAgentAccount,
 } from "../agent-manage/services/mutate";
 import FullTable from "@/components/FullTable";
+import { useDateTimeFormatter } from "@/shared/hooks/useDateTimeFormatter";
 import MessageService from "@/shared/message";
-import { toVietnamTime } from "@/shared/render/time";
 import type { ItemType } from "antd/es/menu/interface";
 import type { ColumnsType } from "antd/es/table";
 import { Modal, Tag } from "antd";
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 const UnlockRequestInbox = () => {
   const { t } = useTranslation("agents");
+  const { formatDateTime } = useDateTimeFormatter();
   const navigate = useNavigate();
   const { mutateAsync: unlockAgentAccount } = useUnlockAgentAccount();
   const { mutateAsync: rejectUnlockRequest } = useRejectUnlockRequest();
@@ -41,7 +42,7 @@ const UnlockRequestInbox = () => {
       title: t("unlockRequests.columns.requestedAt"),
       dataIndex: "requestedAt",
       key: "requestedAt",
-      render: (value: string) => toVietnamTime(value),
+      render: (value: string) => formatDateTime(value),
     },
     {
       title: t("unlockRequests.columns.lockType"),

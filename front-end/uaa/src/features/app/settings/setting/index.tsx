@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useUpdateGeneralSettings } from "./services/mutate";
 import { useGetGeneralSettings } from "./services/query";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -94,6 +95,7 @@ const SectionTitle = ({
 
 const Setting = () => {
   const { t } = useTranslation();
+  const { formatDateTime } = useDateTimeFormatter();
   const [form] = Form.useForm<GeneralSettingsFormValues>();
   const {
     data: generalSettings,
@@ -431,7 +433,7 @@ const Setting = () => {
               </div>
               <div className="text-sm text-slate-500">
                 {generalSettings?.data?.updatedAt
-                  ? new Date(generalSettings.data.updatedAt).toLocaleString()
+                  ? formatDateTime(generalSettings.data.updatedAt)
                   : t("settings.general.sidePanel.storage.neverSaved")}
               </div>
             </div>

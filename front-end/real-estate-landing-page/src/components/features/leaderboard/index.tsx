@@ -6,6 +6,7 @@ import { usePublicLeaderboard } from "@/components/features/leaderboard/services
 import type { LeaderboardEntry } from "@/components/features/leaderboard/services/service";
 import { Avatar } from "@/components/ui/avatar";
 import { ROUTES } from "@/const/routes";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import { useAppDispatch } from "@/lib/hooks";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import { openConversation } from "@/store/chat.store";
@@ -148,11 +149,6 @@ const COPY = {
   },
 } as const;
 
-const formatMonthPeriod = (month: number, year: number, locale: string) =>
-  new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(
-    new Date(year, month - 1, 1),
-  );
-
 const formatCompactCurrency = (
   value: number,
   locale: string,
@@ -178,6 +174,7 @@ const AgentDirectory = () => {
   const locale = useLocale();
   const copy = locale.toLowerCase().startsWith("vi") ? COPY.vi : COPY.en;
   const localeTag = locale.toLowerCase().startsWith("vi") ? "vi-VN" : "en-US";
+  const { formatMonthYear } = useDateTimeFormatter();
   const dispatch = useAppDispatch();
   const directoryRef = useRef<HTMLDivElement>(null);
   const now = new Date();
@@ -339,8 +336,8 @@ const AgentDirectory = () => {
   );
 
   const displayPeriod = useMemo(
-    () => formatMonthPeriod(selectedMonth, selectedYear, localeTag),
-    [localeTag, selectedMonth, selectedYear],
+    () => formatMonthYear(new Date(selectedYear, selectedMonth - 1, 1)),
+    [formatMonthYear, selectedMonth, selectedYear],
   );
 
   const handlePrevMonth = () => {

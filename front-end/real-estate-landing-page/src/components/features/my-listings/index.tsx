@@ -6,6 +6,7 @@ import { Dropdown, DropdownItem, Icon, Image } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import { ROUTES } from "@/const/routes";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import { Building2, Eye, Plus, Search, Send, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -56,6 +57,7 @@ const demandTypeOptions = [
 
 const MyListings = () => {
   const router = useRouter();
+  const { formatDate } = useDateTimeFormatter();
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -202,7 +204,7 @@ const MyListings = () => {
             )}
           </div>
           <div className="text-xs text-gray-500">
-            {new Date(record.createdAt).toLocaleDateString("en-GB")}
+            {formatDate(record.createdAt)}
           </div>
         </div>
       ),

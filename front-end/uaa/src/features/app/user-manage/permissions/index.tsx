@@ -8,13 +8,13 @@ import {
 import { useGetPermission, useGetPermissions } from "./services/query";
 import PermissionService from "./services/service";
 import FullTable, { type IFilter } from "@/components/FullTable";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import {
   getLocalizedOperationLabel,
   getLocalizedPermissionLabel,
   getLocalizedResourceLabel,
 } from "@shared/i18n/accessControl";
 import { renderConstant } from "@shared/render/const";
-import { toVietnamTime } from "@shared/render/time";
 import type { IResp } from "@shared/types/service";
 import { Checkbox } from "antd";
 import type { ItemType } from "antd/es/menu/interface";
@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 
 const Permissions = () => {
   const { t } = useTranslation();
+  const { formatDateTime } = useDateTimeFormatter();
   const { mutateAsync: deletePermission, isPending: isDeleting } = useDeletePermission();
   const { mutateAsync: createPermission, isPending: isCreating } = useCreatePermission();
   const { mutateAsync: updatePermission, isPending: isUpdating } = useUpdatePermission();
@@ -64,7 +65,7 @@ const Permissions = () => {
       title: t("permission.column.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
       sorter: true,
       width: 230,
     },
@@ -72,7 +73,7 @@ const Permissions = () => {
       title: t("permission.column.updatedAt"),
       dataIndex: "updatedAt",
       key: "updatedAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
       sorter: true,
       width: 230,
     },

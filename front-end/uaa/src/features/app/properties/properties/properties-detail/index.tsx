@@ -17,6 +17,7 @@ import {
   Typography,
   message,
 } from "antd";
+import { useDateTimeFormatter } from "@/shared/hooks/useDateTimeFormatter";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import {
   ArrowLeft,
@@ -43,6 +44,7 @@ const PropertyDetail = () => {
   const { mutate: approveProperty, isPending: isApproving } = useApproveProperty();
   const { mutate: rejectProperty, isPending: isRejecting } = useRejectProperty();
   const { t } = useTranslation();
+  const { formatDate } = useDateTimeFormatter();
   const { data: propertyResp, isLoading } = useGetPropertyDetail(id || "");
 
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
@@ -285,7 +287,7 @@ const PropertyDetail = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="text-gray-400" size={20} />
-                <Text>{new Date(property?.createdAt).toLocaleDateString()}</Text>
+                <Text>{formatDate(property?.createdAt)}</Text>
               </div>
             </div>
           </Card>

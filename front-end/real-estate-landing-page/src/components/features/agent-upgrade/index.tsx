@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store";
 import { fetchProfileItem } from "@/store/profile.store";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import { toast } from "@/lib/toast";
 import { ROUTES } from "@/const/routes";
 import {
@@ -22,6 +23,7 @@ const AgentUpgrade = () => {
   const { open, show, hide } = useModal();
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const { formatDate } = useDateTimeFormatter();
 
   const profile = useSelector((state: RootState) => state.profile.data);
   const isPro = profile?.planInfo?.plan === "PRO";
@@ -284,7 +286,7 @@ const AgentUpgrade = () => {
               >
                 Expires:{" "}
                 {profile?.planInfo?.endDate
-                  ? new Date(profile.planInfo.endDate).toLocaleDateString()
+                  ? formatDate(profile.planInfo.endDate)
                   : "N/A"}
               </button>
             )}

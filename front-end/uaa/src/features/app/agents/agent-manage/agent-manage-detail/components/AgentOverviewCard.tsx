@@ -1,6 +1,6 @@
 import AgentRegistrationService from "../../../agent-registration/services/service";
 import InfoField from "./InfoField";
-import { toVietnamTime } from "@shared/render/time";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { Card, Tag } from "antd";
 import { memo } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ type AgentOverviewCardProps = {
 
 const AgentOverviewCard = ({ detail }: AgentOverviewCardProps) => {
   const { t } = useTranslation("agents");
+  const { formatDateTime } = useDateTimeFormatter();
   const statusColor = AgentRegistrationService.STATUS.find(
     (item) => item.value === detail.status,
   )?.color;
@@ -48,7 +49,7 @@ const AgentOverviewCard = ({ detail }: AgentOverviewCardProps) => {
               </Tag>
             }
           />
-          <InfoField label={t("manage.lockedAt")} value={toVietnamTime(accountLock.lockedAt)} />
+          <InfoField label={t("manage.lockedAt")} value={formatDateTime(accountLock.lockedAt)} />
           <InfoField label={t("manage.lockReason")} value={accountLock.reason || "-"} />
           <InfoField
             label={t("manage.lockedUntil")}
@@ -56,7 +57,7 @@ const AgentOverviewCard = ({ detail }: AgentOverviewCardProps) => {
               accountLock.lockType === "PERMANENT"
                 ? t("manage.forever")
                 : accountLock.lockedUntil
-                  ? toVietnamTime(accountLock.lockedUntil)
+                  ? formatDateTime(accountLock.lockedUntil)
                   : "-"
             }
           />
@@ -70,7 +71,7 @@ const AgentOverviewCard = ({ detail }: AgentOverviewCardProps) => {
           />
           <InfoField
             label={t("manage.unlockRequestedAt")}
-            value={toVietnamTime(detail.unlockRequest.requestedAt)}
+            value={formatDateTime(detail.unlockRequest.requestedAt)}
           />
           <InfoField
             label={t("manage.unlockContactEmail")}
@@ -79,7 +80,7 @@ const AgentOverviewCard = ({ detail }: AgentOverviewCardProps) => {
           <InfoField label={t("manage.unlockReason")} value={detail.unlockRequest.reason} />
         </>
       ) : null}
-      <InfoField label={t("detail.approveDate")} value={toVietnamTime(detail.updatedAt)} />
+      <InfoField label={t("detail.approveDate")} value={formatDateTime(detail.updatedAt)} />
       <InfoField label={t("detail.note")} value={detail.note || "-"} />
     </Card>
   );

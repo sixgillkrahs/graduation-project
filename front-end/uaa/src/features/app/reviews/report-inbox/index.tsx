@@ -2,6 +2,7 @@ import { useLockAgentAccount } from "../../agents/agent-manage/services/mutate";
 import { useRejectProperty } from "../../properties/services/mutate";
 import { useMarkReportNoticeAsRead, useResolveReport } from "./services/mutate";
 import { useGetReportDetail, useGetReportInbox } from "./services/query";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import MessageService from "@shared/message";
 import type { IParamsPagination } from "@shared/types/service";
 import {
@@ -49,9 +50,6 @@ type TargetFilter = "ALL" | IReportNoticeService.ReportTargetType;
 type LockType = "TEMPORARY" | "PERMANENT";
 type QuickLockPreset = "ONE_DAY" | "ONE_WEEK" | "ONE_MONTH";
 
-const formatDateTime = (value?: string | null) =>
-  value ? new Date(value).toLocaleString("vi-VN") : "--";
-
 const compactId = (value?: string) =>
   !value ? "--" : value.length <= 14 ? value : `${value.slice(0, 6)}...${value.slice(-4)}`;
 
@@ -66,6 +64,7 @@ const buildPresetLockUntil = (preset: QuickLockPreset) => {
 
 const ReportInbox = () => {
   const { t } = useTranslation(["reviews", "translation"]);
+  const { formatDateTime } = useDateTimeFormatter();
   const navigate = useNavigate();
   const [params, setParams] = useState<IParamsPagination>({ page: 1, limit: 10 });
   const [searchValue, setSearchValue] = useState("");

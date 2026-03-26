@@ -103,7 +103,7 @@ export const getLandingSettings = cache(async (): Promise<LandingSettings> => {
         Accept: "application/json",
         "X-Auth-App": "landing",
       },
-      next: { revalidate: 300 },
+      cache: "no-store",
     });
 
     if (!response.ok) {

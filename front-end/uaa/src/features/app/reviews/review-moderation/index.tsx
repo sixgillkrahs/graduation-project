@@ -1,5 +1,6 @@
 import { useApproveReview, useRejectReview } from "./services/mutate";
 import { useGetReviewModerationQueue } from "./services/query";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import MessageService from "@shared/message";
 import type { IParamsPagination } from "@shared/types/service";
 import {
@@ -37,11 +38,6 @@ const { Paragraph, Text, Title } = Typography;
 const { TextArea, Search: SearchInput } = Input;
 import { useTranslation } from "react-i18next";
 
-const formatDateTime = (value?: string) => {
-  if (!value) return "--";
-  return new Date(value).toLocaleString("vi-VN");
-};
-
 const statusMeta = (status: IReviewModerationService.ReviewStatus, t: any) => {
   switch (status) {
     case "AWAITING_ADMIN":
@@ -61,6 +57,7 @@ const statusMeta = (status: IReviewModerationService.ReviewStatus, t: any) => {
 
 const ReviewModeration = () => {
   const { t } = useTranslation("reviews");
+  const { formatDateTime } = useDateTimeFormatter();
   const [params, setParams] = useState<IParamsPagination>({
     page: 1,
     limit: 10,

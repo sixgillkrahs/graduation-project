@@ -2,7 +2,7 @@ import FormRole, { type FormRef } from "./components/FormRole";
 import { useDeleteRole } from "./services/mutate";
 import { useGetRoles } from "./services/query";
 import FullTable from "@/components/FullTable";
-import { toVietnamTime } from "@shared/render/time";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { Button, Checkbox, Dropdown, Flex, Modal } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EllipsisVertical, Eye, Pencil, PlusIcon, Trash } from "lucide-react";
@@ -13,6 +13,7 @@ const Roles = () => {
   const { mutateAsync: deleteRole } = useDeleteRole();
   const [modal, contextHolder] = Modal.useModal();
   const { t } = useTranslation();
+  const { formatDateTime } = useDateTimeFormatter();
   const ref = useRef<FormRef>(null);
   const columns: ColumnsType<IRoleService.RoleDTO> = [
     {
@@ -41,14 +42,14 @@ const Roles = () => {
       title: t("roles.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
     },
     {
       title: t("roles.updatedAt"),
       dataIndex: "updatedAt",
       key: "updatedAt",
       sorter: true,
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
     },
     {
       title: t("columns.action"),

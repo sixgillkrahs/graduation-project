@@ -2,8 +2,8 @@ import { useDeleteAgentsRegistration } from "../services/mutate";
 import { useGetAgentsRegistrations } from "../services/query";
 import AgentRegistrationService from "../services/service";
 import FullTable from "@/components/FullTable";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { renderConstant } from "@shared/render/const";
-import { toVietnamTime } from "@shared/render/time";
 import type { IResp } from "@shared/types/service";
 import { Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 const AgentRegistration = () => {
   const navigate = useNavigate();
   const { t } = useTranslation("agents");
+  const { formatDateTime } = useDateTimeFormatter();
   const { mutateAsync: deleteAgentRegistration, isPending: isDeleting } =
     useDeleteAgentsRegistration();
   const columns: ColumnsType<IAgentRegistrationService.AgentRegistration> = [
@@ -74,7 +75,7 @@ const AgentRegistration = () => {
       title: t("columns.createdAt"),
       dataIndex: ["createdAt"],
       key: "createdAt",
-      render: (value) => toVietnamTime(value),
+      render: (value) => formatDateTime(value),
     },
   ];
 

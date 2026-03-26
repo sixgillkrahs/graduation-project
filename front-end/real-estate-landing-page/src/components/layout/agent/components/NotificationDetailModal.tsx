@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ interface NotificationDetailModalProps {
 export const NotificationDetailModal: React.FC<
   NotificationDetailModalProps
 > = ({ isOpen, onClose, notification }) => {
+  const { formatDateTime } = useDateTimeFormatter();
   if (!notification) return null;
 
   return (
@@ -124,10 +126,7 @@ export const NotificationDetailModal: React.FC<
             </span>
             <span className="flex items-center gap-2">
               <strong>Date:</strong>{" "}
-              {new Date(notification.timestamp).toLocaleString("vi-VN", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
+              {formatDateTime(notification.timestamp, { includeSeconds: false })}
             </span>
           </div>
         </div>

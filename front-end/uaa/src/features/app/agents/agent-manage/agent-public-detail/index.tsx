@@ -1,8 +1,8 @@
 import AgentRegistrationService from "../../agent-registration/services/service";
 import { useGetAgentPublicProfile } from "../services/query";
 import { ArrowLeftOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { useDateTimeFormatter } from "@shared/hooks/useDateTimeFormatter";
 import { renderConstant } from "@shared/render/const";
-import { toVietnamTime } from "@shared/render/time";
 import {
   Avatar,
   Button,
@@ -40,6 +40,7 @@ const InfoField = ({ label, value }: InfoFieldProps) => {
 
 const AgentPublicDetail = () => {
   const { t } = useTranslation("agents");
+  const { formatDateTime } = useDateTimeFormatter();
   const { userId } = useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useGetAgentPublicProfile(userId || "");
@@ -227,14 +228,14 @@ const AgentPublicDetail = () => {
                     {detail.leaderboard.currency}
                   </div>
                   <div>
-                    {t("public.period", {
+                  {t("public.period", {
                       month: detail.leaderboard.month,
                       year: detail.leaderboard.year,
                     })}
                   </div>
                   {detail.leaderboard.latestSoldAt ? (
                     <div>
-                      {t("public.latestSoldAt")}: {toVietnamTime(detail.leaderboard.latestSoldAt)}
+                      {t("public.latestSoldAt")}: {formatDateTime(detail.leaderboard.latestSoldAt)}
                     </div>
                   ) : null}
                 </div>

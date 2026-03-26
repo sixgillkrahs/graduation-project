@@ -4,6 +4,7 @@ import {
   type LandingSettings,
   defaultLandingSettings,
 } from "@/lib/landing-settings";
+import { syncLandingDateTimeSettings } from "@/lib/date-time-format";
 import {
   createContext,
   useContext,
@@ -30,6 +31,8 @@ export const LandingSettingsProvider = ({
   children: ReactNode;
   settings: LandingSettings;
 }) => {
+  syncLandingDateTimeSettings(settings);
+
   return (
     <LandingSettingsContext.Provider value={settings}>
       <div style={getBrandVariables(settings.brandColor)}>{children}</div>

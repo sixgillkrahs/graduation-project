@@ -2,6 +2,7 @@ import type { IProperty } from "../../model/property.model";
 import { useGetPropertiesPublished } from "../../services/query";
 import { renderDemandTypeTag, renderPropertyPriceCell } from "../property-display";
 import FullTable from "@/components/FullTable";
+import { useDateTimeFormatter } from "@/shared/hooks/useDateTimeFormatter";
 import { Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
@@ -10,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const PropertiesPublished = () => {
   const { t } = useTranslation();
+  const { formatDate } = useDateTimeFormatter();
   const navigate = useNavigate();
   const PROPERTY_TYPES = ["APARTMENT", "HOUSE", "STREET_HOUSE", "VILLA", "LAND", "OTHER"].map(
     (type) => ({ label: type, value: type }),
@@ -88,7 +90,7 @@ const PropertiesPublished = () => {
       title: t("properties.createdAt"),
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date) => new Date(date).toLocaleDateString(),
+      render: (date) => formatDate(date),
     },
   ];
 
