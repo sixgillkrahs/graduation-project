@@ -43,6 +43,7 @@ ARG LIB_DIR
 
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV RUN_STARTUP_SEEDS=true
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
@@ -55,9 +56,13 @@ COPY --from=prod-deps --chown=expressjs:nodejs /library/gra-helper /library/gra-
 # Copy compiled source code
 COPY --from=builder --chown=expressjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=expressjs:nodejs /app/package.json ./package.json
+COPY --chown=expressjs:nodejs back-end/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # Setup directories for logs and uploads assuming the app might write to them
-RUN mkdir -p uploads logs && chown -R expressjs:nodejs uploads logs
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+  && sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+  && mkdir -p uploads logs \
+  && chown -R expressjs:nodejs uploads logs
 
 # Switch to non-root user
 USER expressjs
@@ -68,4 +73,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/monitoring/health || exit 1
 
-CMD ["npm", "start"]
+CMD ["sh", "/usr/local/bin/docker-entrypoint.sh"]

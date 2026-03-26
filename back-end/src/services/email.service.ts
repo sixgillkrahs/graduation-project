@@ -9,6 +9,8 @@ import {
   getAppointmentConfirmedEmailTemplate,
   getDealClosedEmailTemplate,
   getReviewInvitationEmailTemplate,
+  getAccountLockedEmailTemplate,
+  getUnlockRequestReviewedEmailTemplate,
 } from "@/templates/email";
 
 export class EmailService {
@@ -224,6 +226,41 @@ export class EmailService {
     }
   }
 
+  async sendAccountLockedEmail(
+    to: string,
+    name: string,
+    lockType: "TEMPORARY" | "PERMANENT",
+    appealUrl: string,
+    lockedUntil?: string | null,
+    reason?: string | null,
+  ): Promise<void> {
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to,
+        subject: "Your agent account has been locked",
+        html: getAccountLockedEmailTemplate(name, {
+          lockType,
+          reason,
+          lockedUntil,
+          appealUrl,
+        }),
+      });
+      logger.info("Account locked email sent", {
+        context: "EmailService.sendAccountLockedEmail",
+        to,
+        messageId: info.messageId,
+      });
+    } catch (error) {
+      logger.error("Failed to send account locked email", {
+        context: "EmailService.sendAccountLockedEmail",
+        error: error instanceof Error ? error.message : "Unknown error",
+        to,
+      });
+      throw error;
+    }
+  }
+
   async sendReviewInvitationEmail(
     to: string,
     customerName: string,
@@ -253,6 +290,39 @@ export class EmailService {
         context: "EmailService.sendReviewInvitationEmail",
         error: error instanceof Error ? error.message : "Unknown error",
         to,
+      });
+      throw error;
+    }
+  }
+
+  async sendUnlockRequestReviewedEmail(
+    to: string,
+    name: string,
+    decision: "APPROVED" | "REJECTED",
+  ): Promise<void> {
+    const isApproved = decision === "APPROVED";
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.fromAddress,
+        to,
+        subject: isApproved
+          ? "Your unlock request has been approved"
+          : "Your unlock request has been rejected",
+        html: getUnlockRequestReviewedEmailTemplate(name, decision),
+      });
+      logger.info("Unlock request review email sent", {
+        context: "EmailService.sendUnlockRequestReviewedEmail",
+        to,
+        decision,
+        messageId: info.messageId,
+      });
+    } catch (error) {
+      logger.error("Failed to send unlock request review email", {
+        context: "EmailService.sendUnlockRequestReviewedEmail",
+        error: error instanceof Error ? error.message : "Unknown error",
+        to,
+        decision,
       });
       throw error;
     }

@@ -1,12 +1,14 @@
 "use client";
 
 import Logo from "@/assets/Logo.svg";
+import { useLandingSettings } from "@/components/providers/LandingSettingsProvider";
 import { ROUTES } from "@/const/routes";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const Header = () => {
   const router = useRouter();
+  const settings = useLandingSettings();
 
   const handleToHome = () => {
     router.push(ROUTES.HOME);
@@ -17,7 +19,7 @@ const Header = () => {
       onClick={handleToHome}
     >
       <Image src={Logo} alt="logo" width={24} height={24} />
-      <span className="text-black">Havenly</span>
+      <span className="text-black">{settings.systemName}</span>
     </div>
   );
 };

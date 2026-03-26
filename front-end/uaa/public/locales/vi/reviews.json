@@ -92,9 +92,82 @@
       "read": "Đã đọc",
       "unread": "Chưa đọc"
     },
+    "filters": {
+      "status": {
+        "all": "Tất cả thông báo",
+        "unread": "Chưa đọc",
+        "read": "Đã đọc"
+      },
+      "target": {
+        "all": "Mọi đối tượng",
+        "listing": "Listing",
+        "agent": "Môi giới"
+      }
+    },
+    "summary": {
+      "pageResults": "Hiển thị {{count}} / {{total}} báo cáo trên trang hiện tại",
+      "unreadFocus": "{{count}} mục chưa đọc trong kết quả hiện tại"
+    },
+    "reportStatus": {
+      "OPEN": "Đang mở",
+      "CONFIRMED": "Đúng báo cáo",
+      "DISMISSED": "Bác bỏ"
+    },
+    "drawer": {
+      "title": "Xử lý báo cáo",
+      "empty": "Không có chi tiết báo cáo",
+      "reason": "Lý do báo cáo",
+      "reporter": "Người báo cáo",
+      "unknownReporter": "Không rõ người báo cáo",
+      "details": "Chi tiết người báo cáo gửi",
+      "adminNote": "Ghi chú nội bộ",
+      "adminNotePlaceholder": "Thêm ghi chú nội bộ trước khi xử lý",
+      "targetTitle": "Đối tượng bị báo cáo",
+      "targetMissing": "Đối tượng bị báo cáo không còn tồn tại",
+      "listingStatus": "Trạng thái listing",
+      "listingTitle": "Listing",
+      "listingOwner": "Chủ listing",
+      "listingRejectReason": "Lý do từ chối hiện tại",
+      "agentStatus": "Trạng thái môi giới",
+      "agentName": "Môi giới",
+      "agentAccount": "Tình trạng tài khoản",
+      "agentActive": "Đang hoạt động",
+      "agentLocked": "Đã bị khóa",
+      "agentLockReason": "Lý do khóa",
+      "actionsTitle": "Hành động moderation"
+    },
+    "lockModal": {
+      "title": "Khóa tài khoản môi giới",
+      "description": "Chọn thời gian khóa nếu admin xác nhận báo cáo này là đúng.",
+      "temporary": "Khóa tạm thời",
+      "permanent": "Khóa vĩnh viễn",
+      "oneDay": "Khóa 1 ngày",
+      "oneWeek": "Khóa 1 tuần",
+      "oneMonth": "Khóa 1 tháng",
+      "reason": "Lý do khóa",
+      "reasonPlaceholder": "Mô tả lý do khóa tài khoản này",
+      "reasonRequired": "Vui lòng nhập lý do khóa",
+      "confirm": "Khóa tài khoản"
+    },
     "actions": {
+      "review": "Xem xử lý",
       "markRead": "Đánh dấu đã đọc",
-      "readSuccess": "Đã đánh dấu thông báo báo cáo là đã đọc."
+      "readSuccess": "Đã đánh dấu thông báo báo cáo là đã đọc.",
+      "clearFilters": "Xóa bộ lọc",
+      "openTarget": "Mở đối tượng",
+      "confirm": "Xác nhận báo cáo",
+      "dismiss": "Bác bỏ báo cáo",
+      "confirmSuccess": "Đã xác nhận báo cáo.",
+      "dismissSuccess": "Đã bác bỏ báo cáo.",
+      "rejectListing": "Ẩn listing",
+      "rejectListingHint": "Từ chối listing bị báo cáo ngay lập tức",
+      "lockAgent": "Khóa môi giới",
+      "lockAgentHint": "Áp dụng khóa tài khoản cho môi giới bị báo cáo",
+      "listingPunished": "Đã ẩn listing và xác nhận báo cáo.",
+      "agentPunished": "Đã khóa môi giới và xác nhận báo cáo.",
+      "defaultListingReason": "Listing bị từ chối từ bàn xử lý báo cáo của admin.",
+      "defaultAgentReason": "Tài khoản bị khóa từ bàn xử lý báo cáo của admin.",
+      "missingReport": "Thông báo này không chứa mã báo cáo hợp lệ."
     }
   }
 }

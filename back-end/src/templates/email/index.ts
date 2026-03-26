@@ -5,3 +5,5 @@ export * from "./sendOTP.template";
 export * from "./appointment.template";
 export * from "./deal-closed.template";
 export * from "./review-invitation.template";
+export * from "./account-locked.template";
+export * from "./unlock-request-reviewed.template";

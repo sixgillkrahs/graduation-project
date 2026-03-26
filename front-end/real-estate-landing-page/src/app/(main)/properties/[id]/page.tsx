@@ -1,4 +1,5 @@
 import PropertyDetail from "@/components/features/properties/detail";
+import { getLandingSettings } from "@/lib/landing-settings";
 import {
   buildPropertyBreadcrumbSchema,
   buildPropertyListingSchema,
@@ -17,7 +18,10 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const property = await getPublicPropertyDetail(id);
+  const [property, settings] = await Promise.all([
+    getPublicPropertyDetail(id),
+    getLandingSettings(),
+  ]);
 
   if (!property) {
     return {
@@ -31,16 +35,19 @@ export async function generateMetadata({
     };
   }
 
-  return buildPropertyMetadata(property, id);
+  return buildPropertyMetadata(property, id, settings);
 }
 
 const Page = async ({ params }: PageProps) => {
   const { id } = await params;
-  const property = await getPublicPropertyDetail(id);
+  const [property, settings] = await Promise.all([
+    getPublicPropertyDetail(id),
+    getLandingSettings(),
+  ]);
   const schemas = property
     ? [
-        buildPropertyBreadcrumbSchema(property, id),
-        buildPropertyListingSchema(property, id),
+        buildPropertyBreadcrumbSchema(property, id, settings),
+        buildPropertyListingSchema(property, id, settings),
       ]
     : [];
 

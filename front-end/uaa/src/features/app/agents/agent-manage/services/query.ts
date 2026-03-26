@@ -10,6 +10,13 @@ export const useGetAgents = (params: IParamsPagination) => {
   });
 };
 
+export const useGetUnlockRequests = (params: IParamsPagination) => {
+  return useQuery({
+    queryKey: [AgentQueryKey.GetUnlockRequests, params],
+    queryFn: () => AgentRegistrationService.GetUnlockRequests(params),
+  });
+};
+
 export const useGetAgentPublicProfile = (userId: string) => {
   return useQuery({
     queryKey: [AgentQueryKey.GetAgentPublicProfile, userId],

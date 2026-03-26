@@ -35,6 +35,11 @@ const router: RouterConfig = {
           name: "menu.agentManage",
         },
         {
+          path: "/unlock-requests",
+          component: lazy(() => import("./agents/unlock-request")),
+          name: "menu.agentUnlockRequests",
+        },
+        {
           path: "/manage/user/:userId",
           component: lazy(() => import("./agents/agent-manage/agent-public-detail")),
           name: "menu.agentManageDetail",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLandingSettings } from "@/components/providers/LandingSettingsProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -70,6 +71,7 @@ const Label = ({
 
 const Footer = () => {
   const t = useTranslations("Footer");
+  const settings = useLandingSettings();
 
   const classIcon =
     "text-white cs-bg-gray p-2 rounded-full w-10 h-10 active:scale-90 transition-all duration-300 cursor-pointer";
@@ -90,7 +92,7 @@ const Footer = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 w-full lg:w-auto">
               <div>
                 <span className={classText}>
-                  {t("titlebrowser", { name: "Havenly" })}
+                  {t("titlebrowser", { name: settings.systemName })}
                 </span>
                 <ul className={classLi}>
                   <li>{t("menu.ListForRent")}</li>
@@ -100,20 +102,28 @@ const Footer = () => {
               </div>
               <div>
                 <span className={classText}>
-                  {t("workAt", { name: "Havenly" })}
+                  {t("workAt", { name: settings.systemName })}
                 </span>
                 <ul className={classLi}>
+                  {settings.allowPublicRegistration ? (
+                    <li>
+                      <Link href={`${ROUTES.BECOME_AGENT}`}>
+                        {t("menuWorkAt.BecomeAgent", {
+                          name: settings.systemName,
+                        })}
+                      </Link>
+                    </li>
+                  ) : null}
                   <li>
-                    <Link href={`${ROUTES.BECOME_AGENT}`}>
-                      {t("menuWorkAt.BecomeAgent", { name: "Havenly" })}
-                    </Link>
+                    {t("menuWorkAt.BePhotographer", {
+                      name: settings.systemName,
+                    })}
                   </li>
-                  <li>{t("menuWorkAt.BePhotographer", { name: "Havenly" })}</li>
                 </ul>
               </div>
               <div>
                 <span className={classText}>
-                  {t("About", { name: "Havenly" })}
+                  {t("About", { name: settings.systemName })}
                 </span>
                 <ul className={classLi}>
                   <Link href={`${ROUTES.FAQ}`}>
@@ -128,13 +138,13 @@ const Footer = () => {
             <div className="flex flex-col gap-2 w-full lg:min-w-[300px] lg:w-auto">
               <Label
                 label={t("email")}
-                value="contact@realestate.com"
-                href="mailto:contact@realestate.com"
+                value={settings.supportEmail}
+                href={`mailto:${settings.supportEmail}`}
               />
               <Label
                 label={t("phone")}
-                value="0966999999"
-                href="tel:0966999999"
+                value={settings.supportPhone}
+                href={`tel:${settings.supportPhone}`}
               />
               <div className="mt-8">
                 <div className={classText}>{t("followUs")}</div>
@@ -150,7 +160,7 @@ const Footer = () => {
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center md:items-end mt-8 lg:mt-0 gap-6">
           <div className="text-[60px]! sm:text-[100px]! lg:text-[220px]! cs-typography-gray font-semibold! leading-none">
-            Havenly
+            {settings.systemName}
           </div>
           <div className="pb-2 lg:pb-12 flex items-center gap-6">
             <ModeToggle />

@@ -35,6 +35,7 @@ import reviewRoutes from "./routes/review.routes";
 import leadRoutes from "./routes/lead.routes";
 import locationRoutes from "./routes/location.routes";
 import reportRoutes from "./routes/report.routes";
+import settingRoutes from "./routes/setting.routes";
 
 const app = express();
 
@@ -112,6 +113,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/settings", settingRoutes);
 
 const swaggerOptions = {
   explorer: true,

@@ -16,6 +16,8 @@ export enum ReportReasonEnum {
 
 export enum ReportStatusEnum {
   OPEN = "OPEN",
+  CONFIRMED = "CONFIRMED",
+  DISMISSED = "DISMISSED",
 }
 
 export interface IReport {
@@ -26,6 +28,9 @@ export interface IReport {
   details?: string;
   status: ReportStatusEnum;
   reportedAt: Date;
+  adminNote?: string;
+  resolvedAt?: Date | null;
+  resolvedBy?: mongoose.Schema.Types.ObjectId | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -65,10 +70,25 @@ const reportSchema = new mongoose.Schema<IReport>(
       enum: ReportStatusEnum,
       default: ReportStatusEnum.OPEN,
     },
+    adminNote: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+      default: "",
+    },
     reportedAt: {
       type: Date,
       required: true,
       default: Date.now,
+    },
+    resolvedAt: {
+      type: Date,
+      default: null,
+    },
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: collections.users,
+      default: null,
     },
   },
   {

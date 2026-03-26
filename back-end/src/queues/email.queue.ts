@@ -6,6 +6,8 @@ import {
   SendReviewInvitationEmailJob,
   SendVerifyEmailJob,
   SendDealClosedEmailJob,
+  SendAccountLockedEmailJob,
+  SendUnlockRequestReviewedEmailJob,
 } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
 import { createBullMqJobId } from "@/utils/bullmq";
@@ -84,6 +86,32 @@ export class EmailQueue {
   enqueueDealClosedEmail(data: SendDealClosedEmailJob) {
     const jobId = createBullMqJobId("deal-closed", data.to, Date.now());
     return this.queue.add("sendDealClosedEmail", data, {
+      jobId,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+  }
+
+  enqueueAccountLockedEmail(data: SendAccountLockedEmailJob) {
+    const jobId = createBullMqJobId("account-locked", data.to, Date.now());
+    return this.queue.add("sendAccountLockedEmail", data, {
+      jobId,
+      attempts: 5,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+      removeOnFail: false,
+    });
+  }
+
+  enqueueUnlockRequestReviewedEmail(data: SendUnlockRequestReviewedEmailJob) {
+    const jobId = createBullMqJobId(
+      `unlock-request-reviewed-${data.decision.toLowerCase()}`,
+      data.to,
+      Date.now(),
+    );
+    return this.queue.add("sendUnlockRequestReviewedEmail", data, {
       jobId,
       attempts: 5,
       backoff: { type: "exponential", delay: 3000 },

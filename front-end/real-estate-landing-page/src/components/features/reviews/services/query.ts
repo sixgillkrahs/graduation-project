@@ -5,11 +5,12 @@ import ReviewsService from "./service";
 export const useGetPublicAgentReviews = (
   agentUserId: string,
   params?: IReviewService.GetPublicParams,
+  enabled = true,
 ) => {
   return useQuery({
     queryKey: [ReviewsQueryKey.publicList, agentUserId, params],
     queryFn: () => ReviewsService.getPublicByAgent(agentUserId, params),
-    enabled: Boolean(agentUserId),
+    enabled: enabled && Boolean(agentUserId),
   });
 };
 

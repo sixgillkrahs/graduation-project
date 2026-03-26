@@ -9,7 +9,34 @@ declare namespace IAgentRegistrationService {
     updatedAt: string;
     reasonReject?: string;
     note?: string;
+    userId?: string;
+    accountLock?: AccountLock | null;
+    unlockRequest?: UnlockRequest | null;
+    unlockRequestHistories?: UnlockRequestHistory[];
     id: string;
+  }
+
+  export interface AccountLock {
+    lockType: "TEMPORARY" | "PERMANENT";
+    reason?: string | null;
+    lockedAt: string;
+    lockedUntil?: string | null;
+  }
+
+  export interface UnlockRequest {
+    reason: string;
+    contactEmail?: string | null;
+    requestedAt: string;
+  }
+
+  export interface UnlockRequestHistory {
+    reason: string;
+    contactEmail?: string | null;
+    requestedAt: string;
+    decision: "APPROVED" | "REJECTED";
+    reviewedAt: string;
+    reviewedBy?: string | null;
+    reviewedByName?: string | null;
   }
 
   export interface BasicInfo {
@@ -48,5 +75,11 @@ declare namespace IAgentRegistrationService {
 
   export interface ApproveBody {
     note?: string;
+  }
+
+  export interface LockAccountBody {
+    lockType: "TEMPORARY" | "PERMANENT";
+    reason: string;
+    lockUntil?: string;
   }
 }

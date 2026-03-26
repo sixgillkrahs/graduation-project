@@ -2,6 +2,7 @@
 
 import Logo from "@/assets/Logo.svg";
 import MainNotificationBell from "@/components/layout/MainNotificationBell";
+import { useLandingSettings } from "@/components/providers/LandingSettingsProvider";
 import { ROUTES } from "@/const/routes";
 import { useLogout } from "@/shared/auth/mutate";
 import { useGetMe } from "@/shared/auth/query";
@@ -16,6 +17,7 @@ import { Dropdown, DropdownItem, Icon } from "../ui";
 
 const Header = () => {
   const { data: me, isLoading, isError, isSuccess } = useGetMe();
+  const settings = useLandingSettings();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -55,7 +57,7 @@ const Header = () => {
             onClick={() => router.push(ROUTES.HOME)}
           >
             <Image src={Logo} alt="logo" width={24} height={24} />
-            <span className="text-foreground">Havenly</span>
+            <span className="text-foreground">{settings.systemName}</span>
           </div>
 
           {/* Center: Desktop Nav */}

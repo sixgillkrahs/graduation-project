@@ -3,7 +3,6 @@ import Sidebar from "@/components/layout/message/Sidebar";
 
 export const metadata: Metadata = {
   title: "Messages",
-  description: "Real Estate Landing Page",
 };
 
 export default function MessagesLayout({

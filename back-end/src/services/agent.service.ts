@@ -37,6 +37,10 @@ export class AgentService {
     return await AgentModel.updateAgent(id, agentData);
   };
 
+  deleteAgentRegistration = async (id: string) => {
+    return await AgentModel.deleteAgent(id);
+  };
+
   getAgentRegistrations = async (
     options: {
       page: number;
@@ -60,7 +64,7 @@ export class AgentService {
       userId: { $in: userIds },
       status: AgentStatusEnum.APPROVED,
     })
-      .select("userId planInfo status")
+      .select("userId planInfo status basicInfo createdAt updatedAt")
       .lean()
       .exec();
   };

@@ -8,7 +8,7 @@ import { EmailService } from "@/services/email.service";
 import { PropertyService } from "@/services/property.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
-import { applicationSchema } from "@/validators/agent.validator";
+import { applicationSchema, lockAccountSchema } from "@/validators/agent.validator";
 import { validateIdHeaderSchema } from "@/validators/base.validator";
 import { Router } from "express";
 import { PropertySaleService } from "@/services/property-sale.service";
@@ -361,11 +361,44 @@ router.use(requireAuth);
  *                   updatedAt:
  *                     type: string
  */
-router.get(
-  "/",
-  authorize(),
-  agentController.getAgentRegistrations,
-);
+router.get("/", authorize(), agentController.getAgentRegistrations);
+
+/**
+ * @swagger
+ * /agents-registrations/unlock-requests:
+ *   get:
+ *     summary: Get pending unlock requests for locked agent accounts
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         description: Search by agent full name or email
+ *     responses:
+ *       200:
+ *         description: Paginated unlock requests
+ */
+router.get("/unlock-requests", authorize(), agentController.getUnlockRequests);
 
 /**
  * @swagger
@@ -433,6 +466,55 @@ router.get(
   authorize(),
   validateRequest((lang) => validateIdHeaderSchema(lang)),
   agentController.agentRegistrationDetail,
+);
+
+router.patch(
+  "/:id/account-lock",
+  authorize(),
+  validateRequest((lang) => lockAccountSchema(lang)),
+  agentController.lockAgentAccount,
+);
+
+router.patch(
+  "/:id/account-unlock",
+  authorize(),
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  agentController.unlockAgentAccount,
+);
+
+/**
+ * @swagger
+ * /agents-registrations/{id}/unlock-request/reject:
+ *   patch:
+ *     summary: Reject a pending unlock request while keeping the account locked
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Agent registration ID
+ *     responses:
+ *       200:
+ *         description: Unlock request rejected successfully
+ *       404:
+ *         description: Agent or unlock request not found
+ */
+router.patch(
+  "/:id/unlock-request/reject",
+  authorize(),
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  agentController.rejectUnlockRequest,
+);
+
+router.delete(
+  "/:id",
+  authorize({
+    operation: Operation.Delete,
+  }),
+  validateRequest((lang) => validateIdHeaderSchema(lang)),
+  agentController.deleteAgentRegistration,
 );
 
 /**

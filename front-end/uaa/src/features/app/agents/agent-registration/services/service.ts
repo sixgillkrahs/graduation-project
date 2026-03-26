@@ -108,6 +108,15 @@ export default class AgentRegistrationService {
     });
   };
 
+  public static readonly DeleteAgentsRegistration = (
+    id: Id,
+  ): Promise<IResp<void>> => {
+    return request({
+      url: AgentRegistrationEndpoint.DeleteAgentsRegistration(id),
+      method: AxiosMethod.DELETE,
+    });
+  };
+
   public static readonly RejectAgentsRegistration = (
     id: Id,
     data: {

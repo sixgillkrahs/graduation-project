@@ -1,16 +1,21 @@
+import { useDeleteAgentsRegistration } from "../services/mutate";
 import { useGetAgentsRegistrations } from "../services/query";
 import AgentRegistrationService from "../services/service";
 import FullTable from "@/components/FullTable";
 import { renderConstant } from "@shared/render/const";
 import { toVietnamTime } from "@shared/render/time";
+import type { IResp } from "@shared/types/service";
 import { Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const AgentRegistration = () => {
   const navigate = useNavigate();
   const { t } = useTranslation("agents");
+  const { mutateAsync: deleteAgentRegistration, isPending: isDeleting } =
+    useDeleteAgentsRegistration();
   const columns: ColumnsType<IAgentRegistrationService.AgentRegistration> = [
     {
       title: t("columns.nameRegister"),
@@ -77,6 +82,13 @@ const AgentRegistration = () => {
     navigate(`/agents/registration/${record.id}`);
   };
 
+  const onDelete = useCallback(
+    (id: string): Promise<IResp<void>> => {
+      return deleteAgentRegistration(id);
+    },
+    [deleteAgentRegistration],
+  );
+
   return (
     <FullTable<IAgentRegistrationService.AgentRegistration>
       columns={columns}
@@ -85,6 +97,8 @@ const AgentRegistration = () => {
       useGetList={useGetAgentsRegistrations}
       isView={false}
       isEdit={false}
+      onDelete={onDelete}
+      loading={isDeleting}
       isDetail={true}
       onDetail={handleDetail}
       filter={[

@@ -15,6 +15,12 @@ declare global {
           phone: string;
           isActive: boolean;
           avatarUrl: string;
+          lockInfo?: {
+            lockType: "TEMPORARY" | "PERMANENT";
+            reason?: string;
+            lockedAt: Date;
+            lockedUntil?: Date | null;
+          } | null;
         };
         roleId: {
           _id: string;

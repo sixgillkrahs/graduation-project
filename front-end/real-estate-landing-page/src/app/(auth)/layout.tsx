@@ -1,11 +1,5 @@
-import type { Metadata } from "next";
 import Header from "@/components/layout/auth/Header";
 import Sider from "@/components/layout/Sider";
-
-export const metadata: Metadata = {
-  title: "Havenly",
-  description: "Real Estate Landing Page",
-};
 
 export default function AuthLayout({
   children,

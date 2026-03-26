@@ -25,4 +25,24 @@ export default class ReportInboxService {
       method: AxiosMethod.PATCH,
     });
   };
+
+  public static readonly getDetail = (
+    id: string,
+  ): Promise<IResp<IReportNoticeService.ReportDetail>> => {
+    return request({
+      url: ReportInboxEndpoint.detail(id),
+      method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly resolve = (
+    id: string,
+    data: IReportNoticeService.ResolveBody,
+  ): Promise<IResp<IReportNoticeService.ReportDetail>> => {
+    return request({
+      url: ReportInboxEndpoint.resolve(id),
+      method: AxiosMethod.PATCH,
+      data,
+    });
+  };
 }

@@ -1,7 +1,9 @@
 import { ENV } from "@/config/env";
 import { logger } from "@/config/logger";
 import { AuthService } from "@/services/auth.service";
+import { UserService } from "@/services/user.service";
 import { getAccessTokenFromRequest } from "@/utils/authCookies";
+import { getAccountLockState } from "@/utils/accountLock";
 import { AppError } from "@/utils/appError";
 import { ErrorCode } from "@/utils/errorCodes";
 import { NextFunction, Request, Response } from "express";
@@ -26,6 +28,12 @@ interface UserId {
   phone: string;
   isActive: boolean;
   avatarUrl: string;
+  lockInfo?: {
+    lockType: "TEMPORARY" | "PERMANENT";
+    reason?: string;
+    lockedAt: Date;
+    lockedUntil?: Date | null;
+  } | null;
 }
 
 interface RoleId {
@@ -82,7 +90,7 @@ const AUTH_POPULATE = [
   },
   {
     path: "userId",
-    select: "_id email fullName isActive phone avatarUrl",
+    select: "_id email fullName isActive phone avatarUrl lockInfo",
   },
 ];
 
@@ -137,9 +145,22 @@ export const requireAuth = async (
       if (!user) {
         throw new AppError("User not found", 404, ErrorCode.NOT_FOUND);
       }
+      if (!user.userId?.isActive) {
+        throw new AppError("User not active", 401, ErrorCode.USER_NOT_ACTIVE);
+      }
+      const lockState = getAccountLockState(user.userId.lockInfo);
+      if (lockState.isExpired) {
+        const userService = new UserService();
+        await userService.clearUserLock(user.userId._id);
+      } else if (lockState.isLocked) {
+        throw new AppError("Account is locked", 403, ErrorCode.FORBIDDEN);
+      }
       req.user = user;
       next();
     } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
       logger.warn({
         message: "Invalid token",
         context: "AuthMiddleware.requireAuth",
@@ -259,7 +280,23 @@ export const optionalAuth = async (
       )) as Root;
 
       if (user) {
-        req.user = user;
+        if (!user.userId?.isActive) {
+          return next();
+        }
+        const lockState = getAccountLockState(user.userId.lockInfo);
+        if (lockState.isExpired) {
+          const userService = new UserService();
+          await userService.clearUserLock(user.userId._id);
+          req.user = {
+            ...user,
+            userId: {
+              ...user.userId,
+              lockInfo: null,
+            },
+          };
+        } else if (!lockState.isLocked) {
+          req.user = user;
+        }
       }
       next();
     } catch (error) {

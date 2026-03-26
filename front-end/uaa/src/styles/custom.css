@@ -1,5 +1,5 @@
 @theme {
-  --color-black-900: #1A1A1A;
+  --color-black-900: #1a1a1a;
   --color-black-800: #333333;
 }
 
@@ -9,4 +9,41 @@
 
 .text-black-800 {
   color: var(--color-black-800);
+}
+
+.report-inbox-table .ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.report-inbox-table .ant-table-tbody > tr.report-inbox-row > td {
+  padding-top: 18px !important;
+  padding-bottom: 18px !important;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9 !important;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.report-inbox-table .ant-table-tbody > tr.report-inbox-row:hover > td {
+  background: #f8fafc !important;
+}
+
+.report-inbox-table .ant-table-tbody > tr.report-inbox-row-unread > td {
+  background: #fffaf5;
+}
+
+.report-inbox-table .ant-table-tbody > tr.report-inbox-row-unread > td:first-child {
+  box-shadow: inset 4px 0 0 #f97316;
+}
+
+.ant-table-tbody > tr.agent-manage-row-locked > td {
+  background: #fef2f2 !important;
+}
+
+.ant-table-tbody > tr.agent-manage-row-locked:hover > td {
+  background: #fee2e2 !important;
 }

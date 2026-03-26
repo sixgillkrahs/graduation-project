@@ -20,6 +20,7 @@ import { useState } from "react";
 import bgImage from "@/assets/images/bg.jpg";
 import { CsButton } from "@/components/custom";
 import ReviewSubmissionModal from "@/components/features/agent-public-profile/components/ReviewSubmissionModal";
+import { useLandingSettings } from "@/components/providers/LandingSettingsProvider";
 import { useAgentPublicProfile } from "@/components/features/agent-public-profile/services/query";
 import { useCreateConversation } from "@/components/features/message/services/mutate";
 import { mapPropertyToCompareItem } from "@/components/features/properties/compare/compare.utils";
@@ -76,6 +77,7 @@ const formatReviewDate = (value?: string | Date) => {
 
 const AgentPublicProfile = () => {
   const t = useTranslations("AgentPublicProfile");
+  const settings = useLandingSettings();
   const locale = useLocale();
   const localeTag = locale.toLowerCase().startsWith("vi") ? "vi-VN" : "en-US";
   const params = useParams();
@@ -89,7 +91,7 @@ const AgentPublicProfile = () => {
     useGetPublicAgentReviews(agentId, {
       page: 1,
       limit: 6,
-    });
+    }, settings.enableListingReviews);
   const { data: activeListingsData, isLoading: isLoadingActiveListings } =
     useAgentOnSaleProperties(agentId, {
       page: 1,
@@ -98,7 +100,10 @@ const AgentPublicProfile = () => {
   const {
     data: reviewEligibilityData,
     isLoading: isLoadingReviewEligibility,
-  } = useGetAgentReviewEligibility(agentId, Boolean(me?.data?.userId));
+  } = useGetAgentReviewEligibility(
+    agentId,
+    settings.enableListingReviews && Boolean(me?.data?.userId),
+  );
   const { mutateAsync: createConversation, isPending: isCreatingConversation } =
     useCreateConversation();
   const { mutateAsync: createAgentReview, isPending: isCreatingAgentReview } =
@@ -382,10 +387,18 @@ const AgentPublicProfile = () => {
                     variant="outline"
                     icon={<Star className="mr-2 size-4" />}
                     onClick={handleOpenReview}
-                    disabled={isClientLoggedIn && !canReviewAgent}
-                    loading={isCreatingAgentReview || isLoadingReviewEligibility}
+                    disabled={
+                      !settings.enableListingReviews ||
+                      (isClientLoggedIn && !canReviewAgent)
+                    }
+                    loading={
+                      settings.enableListingReviews &&
+                      (isCreatingAgentReview || isLoadingReviewEligibility)
+                    }
                   >
-                    {canReviewAgent
+                    {!settings.enableListingReviews
+                      ? "Reviews are currently disabled"
+                      : canReviewAgent
                       ? t("actions.writeReview")
                       : t("actions.reviewUnavailable")}
                   </CsButton>
@@ -562,7 +575,8 @@ const AgentPublicProfile = () => {
               </div>
             </section>
 
-            <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8">
+            {settings.enableListingReviews ? (
+              <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8">
               <div className="mb-6">
                 <p className="text-sm font-semibold text-primary">
                   {t("reviews.title")}
@@ -713,7 +727,8 @@ const AgentPublicProfile = () => {
                   </div>
                 </div>
               )}
-            </section>
+              </section>
+            ) : null}
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
@@ -769,16 +784,18 @@ const AgentPublicProfile = () => {
         </div>
       </section>
 
-      <ReviewSubmissionModal
-        open={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        agentName={reviewEligibility?.agentName || displayName}
-        agentAvatar={displayAvatar}
-        propertyName={reviewEligibility?.propertyName || displayLocation}
-        quickTags={reviewEligibility?.quickTags}
-        isSubmitting={isCreatingAgentReview}
-        onSubmit={handleSubmitReview}
-      />
+      {settings.enableListingReviews ? (
+        <ReviewSubmissionModal
+          open={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          agentName={reviewEligibility?.agentName || displayName}
+          agentAvatar={displayAvatar}
+          propertyName={reviewEligibility?.propertyName || displayLocation}
+          quickTags={reviewEligibility?.quickTags}
+          isSubmitting={isCreatingAgentReview}
+          onSubmit={handleSubmitReview}
+        />
+      ) : null}
     </main>
   );
 };

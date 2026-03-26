@@ -1,15 +1,21 @@
 import { env } from "@/config/env";
 import type { PropertyDto } from "@/components/features/properties/dto/property.dto";
+import {
+  getBrandDescription,
+  getBrandName,
+  getConfiguredWebsiteUrl,
+  type LandingSettings,
+} from "@/lib/landing-settings";
 import type { Metadata } from "next";
 import { cache } from "react";
 
-const BRAND_NAME = "Havenly";
-const DEFAULT_DESCRIPTION =
-  "Discover verified property listings, connect with agents, and explore homes for sale or rent on Havenly.";
-
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
-export const getSiteUrl = () => {
+export const getSiteUrl = (settings?: Partial<LandingSettings>) => {
+  if (settings?.websiteUrl) {
+    return getConfiguredWebsiteUrl(settings);
+  }
+
   const explicitSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   if (explicitSiteUrl) {
@@ -19,11 +25,15 @@ export const getSiteUrl = () => {
   return trimTrailingSlash(env.NEXT_PUBLIC_API_BASE_URL).replace(/\/api$/, "");
 };
 
-export const getMetadataBase = () => new URL(getSiteUrl());
+export const getMetadataBase = (settings?: Partial<LandingSettings>) =>
+  new URL(getSiteUrl(settings));
 
-export const getAbsoluteUrl = (path = "/") => {
+export const getAbsoluteUrl = (
+  path = "/",
+  settings?: Partial<LandingSettings>,
+) => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${getSiteUrl()}${normalizedPath}`;
+  return `${getSiteUrl(settings)}${normalizedPath}`;
 };
 
 const stripHtml = (value?: string) =>
@@ -78,10 +88,7 @@ const getSeoDescription = (property: PropertyDto) => {
     .join(" | ");
 
   const detail = stripHtml(property.description);
-  return truncate(
-    detail ? `${summary}. ${detail}` : summary || DEFAULT_DESCRIPTION,
-    160,
-  );
+  return truncate(detail ? `${summary}. ${detail}` : summary || getBrandDescription(), 160);
 };
 
 const mapAvailability = (status?: string) => {
@@ -130,30 +137,34 @@ export const getPublicPropertyDetail = cache(async (id: string) => {
   }
 });
 
-export const buildDefaultMetadata = (): Metadata => {
-  const siteUrl = getAbsoluteUrl("/");
+export const buildDefaultMetadata = (
+  settings?: Partial<LandingSettings>,
+): Metadata => {
+  const brandName = getBrandName(settings);
+  const description = getBrandDescription(settings);
+  const siteUrl = getAbsoluteUrl("/", settings);
 
   return {
-    metadataBase: getMetadataBase(),
+    metadataBase: getMetadataBase(settings),
     title: {
-      default: BRAND_NAME,
-      template: `%s | ${BRAND_NAME}`,
+      default: brandName,
+      template: `%s | ${brandName}`,
     },
-    description: DEFAULT_DESCRIPTION,
+    description,
     alternates: {
       canonical: siteUrl,
     },
     openGraph: {
       type: "website",
-      siteName: BRAND_NAME,
-      title: BRAND_NAME,
-      description: DEFAULT_DESCRIPTION,
+      siteName: brandName,
+      title: brandName,
+      description,
       url: siteUrl,
     },
     twitter: {
       card: "summary_large_image",
-      title: BRAND_NAME,
-      description: DEFAULT_DESCRIPTION,
+      title: brandName,
+      description,
     },
   };
 };
@@ -161,15 +172,17 @@ export const buildDefaultMetadata = (): Metadata => {
 export const buildPropertyMetadata = (
   property: PropertyDto,
   propertyId: string,
+  settings?: Partial<LandingSettings>,
 ): Metadata => {
-  const canonicalUrl = getAbsoluteUrl(`/properties/${propertyId}`);
+  const brandName = getBrandName(settings);
+  const canonicalUrl = getAbsoluteUrl(`/properties/${propertyId}`, settings);
   const title = truncate(
     `${property.title} in ${property.location?.district || property.location?.province || "Vietnam"}`,
     60,
   );
   const description = getSeoDescription(property);
   const images = getPropertyImages(property).map((url) =>
-    url.startsWith("http") ? url : getAbsoluteUrl(url),
+    url.startsWith("http") ? url : getAbsoluteUrl(url, settings),
   );
 
   return {
@@ -183,7 +196,7 @@ export const buildPropertyMetadata = (
       title,
       description,
       url: canonicalUrl,
-      siteName: BRAND_NAME,
+      siteName: brandName,
       images: images.map((url) => ({
         url,
         alt: property.title,
@@ -201,6 +214,7 @@ export const buildPropertyMetadata = (
 export const buildPropertyBreadcrumbSchema = (
   property: PropertyDto,
   propertyId: string,
+  settings?: Partial<LandingSettings>,
 ) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -209,19 +223,19 @@ export const buildPropertyBreadcrumbSchema = (
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: getAbsoluteUrl("/"),
+      item: getAbsoluteUrl("/", settings),
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Properties",
-      item: getAbsoluteUrl("/properties"),
+      item: getAbsoluteUrl("/properties", settings),
     },
     {
       "@type": "ListItem",
       position: 3,
       name: property.title,
-      item: getAbsoluteUrl(`/properties/${propertyId}`),
+      item: getAbsoluteUrl(`/properties/${propertyId}`, settings),
     },
   ],
 });
@@ -229,14 +243,15 @@ export const buildPropertyBreadcrumbSchema = (
 export const buildPropertyListingSchema = (
   property: PropertyDto,
   propertyId: string,
+  settings?: Partial<LandingSettings>,
 ) => ({
   "@context": "https://schema.org",
   "@type": "RealEstateListing",
   name: property.title,
   description: getSeoDescription(property),
-  url: getAbsoluteUrl(`/properties/${propertyId}`),
+  url: getAbsoluteUrl(`/properties/${propertyId}`, settings),
   image: getPropertyImages(property).map((url) =>
-    url.startsWith("http") ? url : getAbsoluteUrl(url),
+    url.startsWith("http") ? url : getAbsoluteUrl(url, settings),
   ),
   datePosted: property.createdAt,
   dateModified: property.updatedAt,
@@ -247,14 +262,14 @@ export const buildPropertyListingSchema = (
     price: property.features?.price,
     priceCurrency: property.features?.currency || "VND",
     availability: mapAvailability(property.status),
-    url: getAbsoluteUrl(`/properties/${propertyId}`),
+    url: getAbsoluteUrl(`/properties/${propertyId}`, settings),
   },
   seller: {
     "@type": "RealEstateAgent",
     name: property.userId?.fullName,
     email: property.userId?.email,
     telephone: property.userId?.phone,
-    url: getAbsoluteUrl(`/agents/${property.userId?._id}`),
+    url: getAbsoluteUrl(`/agents/${property.userId?._id}`, settings),
   },
   itemOffered: {
     "@type": "Residence",
@@ -277,8 +292,10 @@ export const buildPropertyListingSchema = (
 export const buildFaqMetadata = (
   title: string,
   description: string,
+  settings?: Partial<LandingSettings>,
 ): Metadata => {
-  const canonicalUrl = getAbsoluteUrl("/faq");
+  const brandName = getBrandName(settings);
+  const canonicalUrl = getAbsoluteUrl("/faq", settings);
 
   return {
     title,
@@ -291,7 +308,7 @@ export const buildFaqMetadata = (
       title,
       description,
       url: canonicalUrl,
-      siteName: BRAND_NAME,
+      siteName: brandName,
     },
     twitter: {
       card: "summary_large_image",
@@ -301,7 +318,10 @@ export const buildFaqMetadata = (
   };
 };
 
-export const buildFaqBreadcrumbSchema = (faqTitle: string) => ({
+export const buildFaqBreadcrumbSchema = (
+  faqTitle: string,
+  settings?: Partial<LandingSettings>,
+) => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
@@ -309,13 +329,13 @@ export const buildFaqBreadcrumbSchema = (faqTitle: string) => ({
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: getAbsoluteUrl("/"),
+      item: getAbsoluteUrl("/", settings),
     },
     {
       "@type": "ListItem",
       position: 2,
       name: faqTitle,
-      item: getAbsoluteUrl("/faq"),
+      item: getAbsoluteUrl("/faq", settings),
     },
   ],
 });

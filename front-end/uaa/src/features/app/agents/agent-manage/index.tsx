@@ -70,6 +70,7 @@ const AgentManagement = () => {
       isEdit={false}
       isDetail={true}
       onDetail={handleDetail}
+      rowClassName={(record) => (record.accountLock ? "agent-manage-row-locked" : "")}
     />
   );
 };

@@ -4,7 +4,6 @@ import Sidebar from "@/components/layout/agent/Sidebar";
 
 export const metadata: Metadata = {
   title: "Agent Dashboard",
-  description: "Real Estate Landing Page",
 };
 
 export default function AgentLayout({

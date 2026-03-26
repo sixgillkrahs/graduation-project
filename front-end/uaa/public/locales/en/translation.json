@@ -73,6 +73,7 @@
     "agent": "Agent",
     "agentRegistration": "Agent Registration",
     "agentManage": "Agent Management",
+    "agentUnlockRequests": "Unlock Requests",
     "agentManageDetail": "Agent Detail",
     "properties": "Properties",
     "propertiesPending": "Properties Pending",
@@ -133,6 +134,97 @@
     "sale": "Sale",
     "rent": "Rent"
   },
+  "settings": {
+    "general": {
+      "badge": "Admin General Settings",
+      "title": "General Settings",
+      "description": "Configure the core platform identity, regional defaults, and day-to-day operating switches for the admin portal.",
+      "actions": {
+        "reset": "Reset to defaults"
+      },
+      "messages": {
+        "saveSuccess": "General settings saved",
+        "resetSuccess": "General settings reset to defaults",
+        "loadError": "Settings could not be loaded from the server.",
+        "loadFallback": "Saved settings could not be loaded. Default values were restored."
+      },
+      "preview": {
+        "title": "Portal Preview",
+        "live": "Live mode",
+        "maintenance": "Maintenance mode",
+        "language": "Default language",
+        "support": "Support channel"
+      },
+      "sections": {
+        "platform": {
+          "title": "Platform identity",
+          "description": "Define the primary branding and URLs used across the admin workspace."
+        },
+        "regional": {
+          "title": "Regional defaults",
+          "description": "Control the default language, timezone, currency, and date formatting."
+        },
+        "operations": {
+          "title": "Operations and support",
+          "description": "Set the public support contacts and a few platform-wide operating switches."
+        }
+      },
+      "fields": {
+        "systemName": "System name",
+        "adminPortalTitle": "Admin portal title",
+        "systemTagline": "System tagline",
+        "websiteUrl": "Landing page URL",
+        "brandColor": "Primary brand color",
+        "defaultLanguage": "Default language",
+        "timezone": "Timezone",
+        "currency": "Currency",
+        "dateFormat": "Date format",
+        "supportEmail": "Support email",
+        "supportPhone": "Support phone",
+        "maintenanceMode": "Maintenance mode",
+        "allowPublicRegistration": "Allow public registration",
+        "enableListingReviews": "Enable listing reviews"
+      },
+      "placeholders": {
+        "systemName": "Enter the public system name",
+        "adminPortalTitle": "Enter the admin workspace title",
+        "systemTagline": "Write a short operational description for the platform",
+        "websiteUrl": "https://example.com",
+        "supportEmail": "support@example.com",
+        "supportPhone": "+84 28 1234 5678"
+      },
+      "validation": {
+        "systemName": "System name is required",
+        "adminPortalTitle": "Admin portal title is required",
+        "systemTagline": "System tagline is required",
+        "websiteUrl": "Landing page URL is required",
+        "websiteUrlInvalid": "Please enter a valid URL",
+        "brandColor": "Primary brand color is required",
+        "brandColorInvalid": "Please enter a valid hex color in the format #RRGGBB",
+        "defaultLanguage": "Default language is required",
+        "timezone": "Timezone is required",
+        "currency": "Currency is required",
+        "dateFormat": "Date format is required",
+        "supportEmail": "Support email is required",
+        "supportEmailInvalid": "Please enter a valid email address",
+        "supportPhone": "Support phone is required"
+      },
+      "sidePanel": {
+        "storage": {
+          "title": "Storage status",
+          "description": "Settings on this screen are loaded from and persisted to the backend API.",
+          "alertTitle": "Server persistence",
+          "alertDescription": "Changes are stored centrally in the backend so all admins see the same general configuration.",
+          "lastSaved": "Last saved",
+          "neverSaved": "Not saved yet"
+        },
+        "actions": {
+          "title": "Actions",
+          "description": "Save the current configuration snapshot or restore the default values."
+        }
+      }
+    }
+  },
   "accessControl": {
     "operations": {
       "create": "Create",
@@ -161,7 +253,8 @@
       "chat": "Chat",
       "uploads": "Uploads",
       "payments": "Payments",
-      "monitoring": "Monitoring"
+      "monitoring": "Monitoring",
+      "settings": "Settings"
     }
   }
 }

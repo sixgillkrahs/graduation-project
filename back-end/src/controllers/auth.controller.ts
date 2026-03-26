@@ -9,6 +9,7 @@ import { EmailQueue } from "@/queues/email.queue";
 import { AuthService } from "@/services/auth.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
+import { getAccountLockState } from "@/utils/accountLock";
 import {
   clearAuthCookies,
   getRefreshTokenFromRequest,
@@ -87,6 +88,39 @@ export class AuthController extends BaseController {
     );
   }
 
+  private async assertUserAccess(
+    user: IUser & { _id?: string | { toString(): string } },
+    lang: keyof typeof validationMessages,
+    errorCode: ErrorCode = ErrorCode.USER_NOT_ACTIVE,
+  ) {
+    if (!user.isActive) {
+      throw new AppError(
+        validationMessages[lang].userNotActive || "User not active",
+        401,
+        errorCode,
+      );
+    }
+
+    const lockState = getAccountLockState(user.lockInfo);
+
+    if (lockState.isExpired && user._id) {
+      await this.userService.clearUserLock(String(user._id));
+      return;
+    }
+
+    if (lockState.isLocked) {
+      const message = lockState.isPermanent
+        ? lang === "vi"
+          ? "Tai khoan da bi khoa vinh vien"
+          : "Account has been locked permanently"
+        : lang === "vi"
+          ? "Tai khoan dang bi khoa tam thoi"
+          : "Account is temporarily locked";
+
+      throw new AppError(message, 403, ErrorCode.FORBIDDEN);
+    }
+  }
+
   login = async (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const lang = req.lang;
@@ -103,7 +137,7 @@ export class AuthController extends BaseController {
         },
         {
           path: "userId",
-          select: "_id email fullName isActive phone",
+          select: "_id email fullName isActive phone lockInfo",
         },
       ]);
       if (!auth || !auth.password) {
@@ -113,13 +147,7 @@ export class AuthController extends BaseController {
           ErrorCode.INCORRECT_CREDENTIALS,
         );
       }
-      if (!auth.userId.isActive) {
-        throw new AppError(
-          validationMessages[lang].userNotActive || "User not active",
-          401,
-          ErrorCode.USER_NOT_FOUND,
-        );
-      }
+      await this.assertUserAccess(auth.userId, lang, ErrorCode.USER_NOT_FOUND);
       const isPasswordValid = await bcrypt.compare(password, auth.password);
       if (!isPasswordValid) {
         throw new AppError(
@@ -263,13 +291,11 @@ export class AuthController extends BaseController {
           ErrorCode.USER_NOT_FOUND,
         );
       }
-      if (!user.isActive) {
-        throw new AppError(
-          validationMessages[lang].userNotActive || "User not active",
-          401,
-          ErrorCode.INVALID_TOKEN,
-        );
-      }
+      await this.assertUserAccess(
+        user as IUser & { _id?: string | { toString(): string } },
+        lang,
+        ErrorCode.INVALID_TOKEN,
+      );
       const userAuth = await this.authService.getAuthByUserId<
         IAuth & { _id: string }
       >(decoded.userId.toString());
@@ -315,13 +341,10 @@ export class AuthController extends BaseController {
       const { oldPassword, newPassword } = req.body;
       const lang = req.lang;
       const currentUser = req.user;
-      if (!currentUser.userId.isActive) {
-        throw new AppError(
-          validationMessages[lang].userNotActive || "User not active",
-          401,
-          ErrorCode.USER_NOT_ACTIVE,
-        );
-      }
+      await this.assertUserAccess(
+        currentUser.userId as IUser & { _id?: string | { toString(): string } },
+        lang,
+      );
       // Kiểm tra mật khẩu cũ có đúng không
       const isPasswordValid = await bcrypt.compare(
         oldPassword,
@@ -614,7 +637,7 @@ export class AuthController extends BaseController {
         },
         {
           path: "userId",
-          select: "_id email fullName isActive phone",
+          select: "_id email fullName isActive phone lockInfo",
         },
       ]);
 
@@ -626,13 +649,7 @@ export class AuthController extends BaseController {
         );
       }
 
-      if (!auth.userId.isActive) {
-        throw new AppError(
-          lang === "vi" ? "Tài khoản chưa được kích hoạt" : "User not active",
-          401,
-          ErrorCode.USER_NOT_FOUND,
-        );
-      }
+      await this.assertUserAccess(auth.userId, lang, ErrorCode.USER_NOT_FOUND);
 
       const passkeys = auth.passkeys;
       if (!passkeys || !passkeys.length) {
@@ -902,9 +919,11 @@ export class AuthController extends BaseController {
           isActive: true,
           isDeleted: false,
         });
-      } else if (!user.isActive) {
-        throw new AppError("User not active", 401, ErrorCode.USER_NOT_ACTIVE);
       } else {
+        await this.assertUserAccess(
+          user as IUser & { _id?: string | { toString(): string } },
+          req.lang,
+        );
         const updates: Partial<IUser> = {};
 
         if (!user.avatarUrl && googleProfile.picture) {
@@ -942,7 +961,7 @@ export class AuthController extends BaseController {
         },
         {
           path: "userId",
-          select: "_id email fullName isActive phone avatarUrl",
+          select: "_id email fullName isActive phone avatarUrl lockInfo",
         },
       ]);
 
@@ -989,7 +1008,7 @@ export class AuthController extends BaseController {
           },
           {
             path: "userId",
-            select: "_id email fullName isActive phone avatarUrl",
+            select: "_id email fullName isActive phone avatarUrl lockInfo",
           },
         ]);
       }
@@ -1001,6 +1020,8 @@ export class AuthController extends BaseController {
           ErrorCode.INTERNAL_SERVER_ERROR,
         );
       }
+
+      await this.assertUserAccess(auth.userId, req.lang);
 
       const accessToken = this.authService.generateAccessToken(
         {

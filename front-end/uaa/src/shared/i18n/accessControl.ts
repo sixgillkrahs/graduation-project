@@ -21,6 +21,7 @@ const resourcePathKeyMap: Record<string, string> = {
   "/api/upload": "uploads",
   "/api/payment": "payments",
   "/api/monitoring": "monitoring",
+  "/api/settings": "settings",
 };
 
 type ResourceLike = {

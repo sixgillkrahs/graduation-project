@@ -75,6 +75,7 @@
     "agent": "Môi giới",
     "agentRegistration": "Đăng ký môi giới",
     "agentManage": "Quản lý môi giới",
+    "agentUnlockRequests": "Yêu cầu mở khóa",
     "agentManageDetail": "Chi tiết môi giới",
     "properties": "Bất động sản",
     "propertiesPending": "Bất động sản chờ duyệt",
@@ -134,6 +135,97 @@
   "common": {
     "sale": "Bán",
     "rent": "Thuê"
+  },
+  "settings": {
+    "general": {
+      "badge": "Cài đặt chung admin",
+      "title": "Cài đặt chung",
+      "description": "Thiết lập thông tin nhận diện hệ thống, các giá trị mặc định theo khu vực và các công tắc vận hành chung cho cổng admin.",
+      "actions": {
+        "reset": "Khôi phục mặc định"
+      },
+      "messages": {
+        "saveSuccess": "Đã lưu cài đặt chung trên trình duyệt",
+        "resetSuccess": "Đã khôi phục cài đặt chung về mặc định",
+        "loadError": "Không thể tải cài đặt từ máy chủ.",
+        "loadFallback": "Không thể tải cài đặt đã lưu. Hệ thống đã quay về giá trị mặc định."
+      },
+      "preview": {
+        "title": "Xem trước cổng admin",
+        "live": "Đang hoạt động",
+        "maintenance": "Bảo trì",
+        "language": "Ngôn ngữ mặc định",
+        "support": "Kênh hỗ trợ"
+      },
+      "sections": {
+        "platform": {
+          "title": "Nhận diện hệ thống",
+          "description": "Khai báo tên hệ thống, tên cổng admin, URL và màu nhận diện chính."
+        },
+        "regional": {
+          "title": "Thiết lập khu vực",
+          "description": "Quản lý ngôn ngữ, múi giờ, tiền tệ và định dạng ngày mặc định."
+        },
+        "operations": {
+          "title": "Vận hành và hỗ trợ",
+          "description": "Thiết lập kênh hỗ trợ và các công tắc vận hành chung cho toàn hệ thống."
+        }
+      },
+      "fields": {
+        "systemName": "Tên hệ thống",
+        "adminPortalTitle": "Tiêu đề cổng admin",
+        "systemTagline": "Mô tả ngắn",
+        "websiteUrl": "URL landing page",
+        "brandColor": "Màu thương hiệu chính",
+        "defaultLanguage": "Ngôn ngữ mặc định",
+        "timezone": "Múi giờ",
+        "currency": "Tiền tệ",
+        "dateFormat": "Định dạng ngày",
+        "supportEmail": "Email hỗ trợ",
+        "supportPhone": "Số điện thoại hỗ trợ",
+        "maintenanceMode": "Chế độ bảo trì",
+        "allowPublicRegistration": "Cho phép đăng ký công khai",
+        "enableListingReviews": "Bật đánh giá tin đăng"
+      },
+      "placeholders": {
+        "systemName": "Nhập tên hiển thị công khai của hệ thống",
+        "adminPortalTitle": "Nhập tên hiển thị cho workspace admin",
+        "systemTagline": "Nhập mô tả ngắn cho cổng quản trị",
+        "websiteUrl": "https://example.com",
+        "supportEmail": "support@example.com",
+        "supportPhone": "+84 28 1234 5678"
+      },
+      "validation": {
+        "systemName": "Vui lòng nhập tên hệ thống",
+        "adminPortalTitle": "Vui lòng nhập tiêu đề cổng admin",
+        "systemTagline": "Vui lòng nhập mô tả ngắn",
+        "websiteUrl": "Vui lòng nhập URL landing page",
+        "websiteUrlInvalid": "URL không hợp lệ",
+        "brandColor": "Vui lòng chọn màu thương hiệu",
+        "brandColorInvalid": "Vui lòng nhập mã màu hex đúng định dạng #RRGGBB",
+        "defaultLanguage": "Vui lòng chọn ngôn ngữ mặc định",
+        "timezone": "Vui lòng chọn múi giờ",
+        "currency": "Vui lòng chọn tiền tệ",
+        "dateFormat": "Vui lòng chọn định dạng ngày",
+        "supportEmail": "Vui lòng nhập email hỗ trợ",
+        "supportEmailInvalid": "Email không hợp lệ",
+        "supportPhone": "Vui lòng nhập số điện thoại hỗ trợ"
+      },
+      "sidePanel": {
+        "storage": {
+          "title": "Trạng thái lưu trữ",
+          "description": "Các cài đặt ở màn hình này được tải từ và lưu trực tiếp vào backend API.",
+          "alertTitle": "Lưu trên máy chủ",
+          "alertDescription": "Những thay đổi sẽ được lưu tập trung ở backend để toàn bộ admin dùng chung một cấu hình.",
+          "lastSaved": "Lần lưu gần nhất",
+          "neverSaved": "Chưa lưu"
+        },
+        "actions": {
+          "title": "Thao tác",
+          "description": "Lưu trạng thái cấu hình hiện tại hoặc khôi phục về giá trị mặc định."
+        }
+      }
+    }
   },
   "accessControl": {
     "operations": {

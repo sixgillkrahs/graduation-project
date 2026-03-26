@@ -29,6 +29,21 @@ export type SendOTPEmailJob = {
   otp: string;
 };
 
+export type SendAccountLockedEmailJob = {
+  to: string;
+  name: string;
+  lockType: "TEMPORARY" | "PERMANENT";
+  reason?: string | null;
+  lockedUntil?: string | null;
+  appealUrl: string;
+};
+
+export type SendUnlockRequestReviewedEmailJob = {
+  to: string;
+  name: string;
+  decision: "APPROVED" | "REJECTED";
+};
+
 export type UpsertPropertyEmbeddingJob = {
   propertyId: string;
   textData: string;

@@ -5,6 +5,7 @@ import { ReportService } from "@/services/report.service";
 import { NoticeService } from "@/services/notice.service";
 import {
   ReportReasonEnum,
+  ReportStatusEnum,
   ReportTargetTypeEnum,
 } from "@/models/report.model";
 import { AppError } from "@/utils/appError";
@@ -73,6 +74,7 @@ export class ReportController extends BaseController {
                 details: details?.trim() || "",
                 reporterUserId,
                 reportedAt: (report as any).reportedAt || new Date(),
+                reportStatus: ReportStatusEnum.OPEN,
               },
             }),
           ),
@@ -84,6 +86,59 @@ export class ReportController extends BaseController {
             io.to(notice.userId.toString()).emit("new_notice", notice);
           });
         }
+      }
+
+      return report;
+    });
+  };
+
+  getReportById = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const lang = req.lang;
+
+      const report = await this.reportService.getReportDetail(id);
+
+      if (!report) {
+        throw new AppError(
+          lang === "vi" ? "Báo cáo không tồn tại" : "Report not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      return report;
+    });
+  };
+
+  resolveReport = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const { id } = req.params;
+      const lang = req.lang;
+      const resolvedBy = req.user?.userId?._id?.toString();
+
+      if (!resolvedBy) {
+        throw new AppError("Unauthorized", 401, ErrorCode.UNAUTHORIZED);
+      }
+
+      const { status, adminNote } = req.body as {
+        status: ReportStatusEnum.CONFIRMED | ReportStatusEnum.DISMISSED;
+        adminNote?: string;
+      };
+
+      const report = await this.reportService.resolveReport({
+        reportId: id,
+        resolvedBy,
+        status,
+        adminNote,
+      });
+
+      if (!report) {
+        throw new AppError(
+          lang === "vi" ? "Báo cáo không tồn tại" : "Report not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
       }
 
       return report;

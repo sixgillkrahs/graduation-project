@@ -9,3 +9,11 @@ export const useGetReportInbox = (params: IParamsPagination) => {
     queryFn: () => ReportInboxService.getList(params),
   });
 };
+
+export const useGetReportDetail = (id: string) => {
+  return useQuery({
+    queryKey: [ReportInboxQueryKey.detail, id],
+    queryFn: () => ReportInboxService.getDetail(id),
+    enabled: !!id,
+  });
+};

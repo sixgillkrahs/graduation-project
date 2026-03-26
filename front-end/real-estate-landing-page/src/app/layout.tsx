@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import { getLandingSettings } from "@/lib/landing-settings";
+import { buildDefaultMetadata } from "@/lib/seo";
 import { Be_Vietnam_Pro } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
+import { cookies } from "next/headers";
 import "react-photo-view/dist/react-photo-view.css";
 import "../styles/globals.css";
-import { buildDefaultMetadata } from "@/lib/seo";
 import Wrapper from "./wrapper";
 
 export const beVietnamPro = Be_Vietnam_Pro({
@@ -14,21 +15,41 @@ export const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-satoshi",
 });
 
-export const metadata: Metadata = buildDefaultMetadata();
+export async function generateMetadata() {
+  const settings = await getLandingSettings();
 
-export default function RootLayout({
+  return buildDefaultMetadata(settings);
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [settings, cookieStore] = await Promise.all([
+    getLandingSettings(),
+    cookies(),
+  ]);
+  const cookieLocale = cookieStore.get("locale")?.value;
+  const locale =
+    cookieLocale === "vi"
+      ? "vi"
+      : cookieLocale === "en"
+        ? "en"
+        : settings.defaultLanguage;
+
   return (
-    <html lang="en" className={beVietnamPro.variable} suppressHydrationWarning>
+    <html
+      lang={locale}
+      className={beVietnamPro.variable}
+      suppressHydrationWarning
+    >
       <body
         className={`${beVietnamPro.variable} antialiased`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider>
-          <Wrapper>{children}</Wrapper>
+          <Wrapper settings={settings}>{children}</Wrapper>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
 import { CsButton } from "@/components/custom";
+import { useLandingSettings } from "@/components/providers/LandingSettingsProvider";
 import CsTabs from "@/components/custom/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -141,11 +142,12 @@ const PropertyDetailSidebar = ({
   isPastTimeSlot,
 }: PropertyDetailSidebarProps) => {
   const t = useTranslations("PropertiesPage");
+  const settings = useLandingSettings();
   const { data: publicReviewsData, isLoading: isLoadingPublicReviews } =
     useGetPublicAgentReviews(property.userId._id, {
       page: 1,
       limit: 1,
-    });
+    }, settings.enableListingReviews);
   const reviewsSummary = publicReviewsData?.data?.summary;
   const hasPublishedReviews = Boolean(reviewsSummary?.totalReviews);
   const inquiryTopics = [
@@ -211,18 +213,22 @@ const PropertyDetailSidebar = ({
                   >
                     {property.userId.fullName}
                   </Link>
-                  {isLoadingPublicReviews ? (
+                  {settings.enableListingReviews && isLoadingPublicReviews ? (
                     <div className="mt-1 flex items-center gap-1 text-xs font-medium text-muted-foreground">
                       <LoaderCircle className="h-3 w-3 animate-spin" />
                       <span>Loading reviews...</span>
                     </div>
-                  ) : hasPublishedReviews ? (
+                  ) : settings.enableListingReviews && hasPublishedReviews ? (
                     <div className="mt-1 flex items-center gap-1 text-xs font-medium text-amber-500">
                       <Star className="h-3 w-3 fill-current" />
                       <span>
                         {reviewsSummary?.averageRating?.toFixed(1)} (
                         {reviewsSummary?.totalReviews} reviews)
                       </span>
+                    </div>
+                  ) : !settings.enableListingReviews ? (
+                    <div className="mt-1 text-xs font-medium text-muted-foreground">
+                      Public reviews are currently disabled
                     </div>
                   ) : (
                     <div className="mt-1 text-xs font-medium text-muted-foreground">

@@ -14,12 +14,10 @@ import bcrypt from "bcrypt";
 import { EmailQueue } from "@/queues/email.queue";
 import { IAuth } from "@/models/auth.model";
 import { PropertyService } from "@/services/property.service";
-import {
-  CurrencyEnum,
-  PropertyStatusEnum,
-} from "@/models/property.model";
+import { CurrencyEnum, PropertyStatusEnum } from "@/models/property.model";
 import { PropertySaleService } from "@/services/property-sale.service";
 import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
+import { ACCOUNT_LOCK_TYPE, getAccountLockState } from "@/utils/accountLock";
 
 export class AgentController extends BaseController {
   constructor(
@@ -34,6 +32,47 @@ export class AgentController extends BaseController {
     private agentLeaderboardService: AgentLeaderboardService,
   ) {
     super();
+  }
+
+  private buildAccountLockAppealUrl(token: string) {
+    return `${ENV.FRONTEND_URLLANDINGPAGE}/account-lock/${token}`;
+  }
+
+  private buildUnlockRequestHistory(
+    unlockRequest: {
+      reason: string;
+      contactEmail?: string | null;
+      requestedAt: Date;
+    },
+    decision: "APPROVED" | "REJECTED",
+    reviewer?: {
+      id?: string;
+      fullName?: string;
+      email?: string;
+    },
+  ) {
+    return {
+      reason: unlockRequest.reason,
+      contactEmail: unlockRequest.contactEmail || null,
+      requestedAt: unlockRequest.requestedAt,
+      decision,
+      reviewedAt: new Date(),
+      reviewedBy: reviewer?.id || null,
+      reviewedByName: reviewer?.fullName || reviewer?.email || null,
+    };
+  }
+
+  private buildUnlockRequestReviewRecipients(
+    accountEmail: string,
+    contactEmail?: string | null,
+  ) {
+    return Array.from(
+      new Set(
+        [accountEmail, contactEmail]
+          .map((email) => email?.trim())
+          .filter(Boolean) as string[],
+      ),
+    ).join(", ");
   }
 
   application = (
@@ -206,7 +245,654 @@ export class AgentController extends BaseController {
           ErrorCode.NOT_FOUND,
         );
       }
-      return agentRegistration;
+      if (!agentRegistration.userId) {
+        return {
+          ...agentRegistration,
+          accountLock: null,
+          unlockRequest: null,
+          unlockRequestHistories: [],
+        };
+      }
+
+      const user = await this.userService.getUserById(
+        String(agentRegistration.userId),
+      );
+
+      if (!user) {
+        return {
+          ...agentRegistration,
+          accountLock: null,
+          unlockRequest: null,
+          unlockRequestHistories: [],
+        };
+      }
+
+      const lockState = getAccountLockState(user.lockInfo);
+      const unlockRequestHistories = (user.unlockRequestHistories || [])
+        .map((history) => ({
+          reason: history.reason,
+          contactEmail: history.contactEmail || null,
+          requestedAt: history.requestedAt,
+          decision: history.decision,
+          reviewedAt: history.reviewedAt,
+          reviewedBy: history.reviewedBy ? String(history.reviewedBy) : null,
+          reviewedByName: history.reviewedByName || null,
+        }))
+        .sort(
+          (left, right) =>
+            new Date(right.reviewedAt).getTime() -
+            new Date(left.reviewedAt).getTime(),
+        );
+
+      if (lockState.isExpired) {
+        await this.userService.clearUserLock(String(user._id));
+      }
+
+      return {
+        ...agentRegistration,
+        accountLock: lockState.isLocked
+          ? {
+              lockType: user.lockInfo?.lockType,
+              reason: user.lockInfo?.reason || null,
+              lockedAt: user.lockInfo?.lockedAt,
+              lockedUntil: user.lockInfo?.lockedUntil ?? null,
+            }
+          : null,
+        unlockRequest: user.unlockRequest
+          ? {
+              reason: user.unlockRequest.reason,
+              contactEmail: user.unlockRequest.contactEmail || null,
+              requestedAt: user.unlockRequest.requestedAt,
+            }
+          : null,
+        unlockRequestHistories,
+      };
+    });
+  };
+
+  lockAgentAccount = (
+    req: Request<
+      { id: string },
+      {},
+      {
+        lockType: "TEMPORARY" | "PERMANENT";
+        lockUntil?: string;
+        reason: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { id } = req.params;
+      const { lockType, lockUntil, reason } = req.body;
+      const trimmedReason = reason?.trim();
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+
+      if (!agentRegistration) {
+        throw new AppError(
+          lang === "vi" ? "Không tìm thấy môi giới" : "Agent not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      if (
+        agentRegistration.status !== AgentStatusEnum.APPROVED ||
+        !agentRegistration.userId
+      ) {
+        throw new AppError(
+          lang === "vi"
+            ? "Chỉ có môi giới đã được duyệt mới có thể khóa tài khoản"
+            : "Only approved agent accounts can be locked",
+          409,
+          ErrorCode.CONFLICT,
+        );
+      }
+
+      if (
+        lockType !== ACCOUNT_LOCK_TYPE.PERMANENT &&
+        lockType !== ACCOUNT_LOCK_TYPE.TEMPORARY
+      ) {
+        throw new AppError(
+          lang === "vi" ? "Loại khóa không hợp lệ" : "Invalid lock type",
+          400,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+
+      if (!trimmedReason) {
+        throw new AppError(
+          lang === "vi"
+            ? "Vui lòng nhập lý do khóa"
+            : "Lock reason is required",
+          400,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+
+      let parsedLockUntil: Date | null = null;
+
+      if (lockType === ACCOUNT_LOCK_TYPE.TEMPORARY) {
+        parsedLockUntil = lockUntil ? new Date(lockUntil) : null;
+
+        if (!parsedLockUntil || Number.isNaN(parsedLockUntil.getTime())) {
+          throw new AppError(
+            lang === "vi"
+              ? "Ngày khóa không hợp lệ"
+              : "Invalid account lock date",
+            400,
+            ErrorCode.INVALID_INPUT,
+          );
+        }
+
+        if (parsedLockUntil.getTime() <= Date.now()) {
+          throw new AppError(
+            lang === "vi"
+              ? "Ngày khóa phải là trong tương lai"
+              : "Account lock date must be in the future",
+            400,
+            ErrorCode.INVALID_INPUT,
+          );
+        }
+      }
+
+      const user = await this.userService.getUserById(
+        String(agentRegistration.userId),
+      );
+
+      if (!user) {
+        throw new AppError(
+          lang === "vi" ? "Không tìm thấy người dùng" : "User not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      await this.userService.setUserLock(String(agentRegistration.userId), {
+        lockType,
+        reason: trimmedReason,
+        lockedAt: new Date(),
+        lockedUntil:
+          lockType === ACCOUNT_LOCK_TYPE.TEMPORARY ? parsedLockUntil : null,
+      });
+      await this.userService.clearUnlockRequest(
+        String(agentRegistration.userId),
+      );
+
+      const appealToken = this.authService.generateAccessToken(
+        {
+          userId: String(agentRegistration.userId),
+          email: user.email,
+          purpose: "ACCOUNT_LOCK_APPEAL",
+        },
+        1000 * 60 * 60 * 24 * 7,
+        ENV.JWT_SECRET_LANDING_PAGE,
+      );
+
+      await this.emailQueue.enqueueAccountLockedEmail({
+        to: user.email,
+        name:
+          user.fullName || agentRegistration.basicInfo?.nameRegister || "Agent",
+        lockType,
+        reason: trimmedReason,
+        lockedUntil:
+          lockType === ACCOUNT_LOCK_TYPE.TEMPORARY
+            ? parsedLockUntil?.toISOString() || null
+            : null,
+        appealUrl: this.buildAccountLockAppealUrl(appealToken),
+      });
+
+      return {
+        success: true,
+        lockType,
+        reason: trimmedReason,
+        lockedUntil:
+          lockType === ACCOUNT_LOCK_TYPE.TEMPORARY
+            ? parsedLockUntil?.toISOString()
+            : null,
+      };
+    });
+  };
+
+  unlockAgentAccount = (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { id } = req.params;
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+
+      if (!agentRegistration || !agentRegistration.userId) {
+        throw new AppError(
+          lang === "vi" ? "Không tìm thấy môi giới" : "Agent not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      const user = await this.userService.getUserById(
+        String(agentRegistration.userId),
+      );
+
+      if (!user) {
+        throw new AppError("User not found", 404, ErrorCode.NOT_FOUND);
+      }
+
+      if (user.unlockRequest) {
+        await this.userService.appendUnlockRequestHistory(
+          String(agentRegistration.userId),
+          this.buildUnlockRequestHistory(user.unlockRequest, "APPROVED", {
+            id: req.user?.userId?._id?.toString(),
+            fullName: req.user?.userId?.fullName,
+            email: req.user?.userId?.email,
+          }),
+        );
+      }
+
+      const unlockReviewRecipients = user.unlockRequest
+        ? this.buildUnlockRequestReviewRecipients(
+            user.email,
+            user.unlockRequest.contactEmail,
+          )
+        : null;
+
+      await this.userService.clearUserLock(String(agentRegistration.userId));
+      await this.userService.clearUnlockRequest(
+        String(agentRegistration.userId),
+      );
+
+      if (unlockReviewRecipients) {
+        await this.emailQueue.enqueueUnlockRequestReviewedEmail({
+          to: unlockReviewRecipients,
+          name:
+            user.fullName || agentRegistration.basicInfo?.nameRegister || "Agent",
+          decision: "APPROVED",
+        });
+      }
+
+      return {
+        success: true,
+      };
+    });
+  };
+
+  rejectUnlockRequest = (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { id } = req.params;
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+
+      if (!agentRegistration || !agentRegistration.userId) {
+        throw new AppError(
+          lang === "vi" ? "Không tìm thấy môi giới" : "Agent not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      const user = await this.userService.getUserById(
+        String(agentRegistration.userId),
+      );
+
+      if (!user?.unlockRequest) {
+        throw new AppError(
+          lang === "vi"
+            ? "Không tìm thấy yêu cầu mở khóa"
+            : "Unlock request not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      await this.userService.appendUnlockRequestHistory(
+        String(agentRegistration.userId),
+        this.buildUnlockRequestHistory(user.unlockRequest, "REJECTED", {
+          id: req.user?.userId?._id?.toString(),
+          fullName: req.user?.userId?.fullName,
+          email: req.user?.userId?.email,
+        }),
+      );
+
+      const unlockReviewRecipients = this.buildUnlockRequestReviewRecipients(
+        user.email,
+        user.unlockRequest.contactEmail,
+      );
+
+      await this.userService.clearUnlockRequest(
+        String(agentRegistration.userId),
+      );
+
+      await this.emailQueue.enqueueUnlockRequestReviewedEmail({
+        to: unlockReviewRecipients,
+        name: user.fullName || agentRegistration.basicInfo?.nameRegister || "Agent",
+        decision: "REJECTED",
+      });
+
+      return {
+        success: true,
+      };
+    });
+  };
+
+  getUnlockRequests = (
+    req: Request<
+      {},
+      {},
+      {},
+      {
+        limit?: string;
+        page?: string;
+        sortField?: string;
+        sortOrder?: string;
+        query?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const { limit, page, sortField, sortOrder, query } = req.query;
+
+      const userFilter: Record<string, any> = {
+        unlockRequest: { $exists: true, $ne: null },
+      };
+
+      if (query?.trim()) {
+        const searchRegex = new RegExp(query.trim(), "i");
+        userFilter.$or = [{ fullName: searchRegex }, { email: searchRegex }];
+      }
+
+      const paginatedUsers = await this.userService.getUsers(
+        {
+          page: page ? Number(page) : 1,
+          limit: limit ? Number(limit) : 10,
+          sortBy: `${(sortField as string) || "unlockRequest.requestedAt"}:${(sortOrder as string) || "desc"}`,
+        },
+        userFilter,
+        "_id fullName email phone lockInfo unlockRequest createdAt updatedAt",
+      );
+
+      const typedUsers = paginatedUsers as unknown as {
+        results: Array<{
+          _id: string;
+          fullName?: string;
+          email: string;
+          phone?: string;
+          lockInfo?: {
+            lockType: "TEMPORARY" | "PERMANENT";
+            reason?: string;
+            lockedAt: Date;
+            lockedUntil?: Date | null;
+          } | null;
+          unlockRequest?: {
+            reason: string;
+            contactEmail?: string | null;
+            requestedAt: Date;
+          } | null;
+          createdAt?: Date;
+          updatedAt?: Date;
+        }>;
+        totalPages: number;
+        totalResults: number;
+        page: number;
+        limit: number;
+      };
+
+      const users = typedUsers.results || [];
+      const userIds = users.map((user) => String(user._id));
+      const agents = userIds.length
+        ? await this.agentService.getAgentsByUserIds(userIds)
+        : [];
+
+      const agentMap = new Map(
+        agents.map((agent: any) => [String(agent.userId), agent]),
+      );
+
+      const results = [];
+
+      for (const user of users) {
+        const lockState = getAccountLockState(user.lockInfo);
+
+        if (lockState.isExpired) {
+          await this.userService.clearUserLock(String(user._id));
+          await this.userService.clearUnlockRequest(String(user._id));
+          continue;
+        }
+
+        if (!lockState.isLocked || !user.unlockRequest) {
+          await this.userService.clearUnlockRequest(String(user._id));
+          continue;
+        }
+
+        const agent = agentMap.get(String(user._id));
+
+        if (!agent) {
+          continue;
+        }
+
+        results.push({
+          id: String(user._id),
+          registrationId: String(agent._id),
+          fullName: user.fullName || agent.basicInfo?.nameRegister || "",
+          email: user.email || agent.basicInfo?.email || "",
+          phone: user.phone || agent.basicInfo?.phoneNumber || "",
+          requestedAt: user.unlockRequest.requestedAt,
+          contactEmail: user.unlockRequest.contactEmail || null,
+          unlockReason: user.unlockRequest.reason,
+          accountLock: {
+            lockType: user.lockInfo?.lockType,
+            reason: user.lockInfo?.reason || null,
+            lockedAt: user.lockInfo?.lockedAt,
+            lockedUntil: user.lockInfo?.lockedUntil ?? null,
+          },
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        });
+      }
+
+      return {
+        ...typedUsers,
+        results,
+      };
+    });
+  };
+
+  getAccountLockAppealContext = (
+    req: Request<{ token: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { token } = req.params;
+      const decoded = this.authService.validateToken(
+        token,
+        ENV.JWT_SECRET_LANDING_PAGE,
+      ) as
+        | {
+            userId: string;
+            email: string;
+            purpose?: string;
+          }
+        | false;
+
+      if (!decoded || decoded.purpose !== "ACCOUNT_LOCK_APPEAL") {
+        throw new AppError(
+          lang === "vi"
+            ? "LiÃªn káº¿t khÃ´ng há»£p lá»‡"
+            : "Invalid appeal link",
+          400,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+
+      const [user, agentProfile] = await Promise.all([
+        this.userService.getUserById(decoded.userId),
+        this.agentService.getAgentByUserId(decoded.userId),
+      ]);
+
+      if (!user || !agentProfile) {
+        throw new AppError(
+          lang === "vi" ? "KhÃ´ng tÃ¬m tháº¥y tÃ i khoáº£n" : "User not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      const lockState = getAccountLockState(user.lockInfo);
+
+      if (!lockState.isLocked) {
+        throw new AppError(
+          lang === "vi"
+            ? "TÃ i khoáº£n hiá»‡n khÃ´ng cÃ²n bá»‹ khÃ³a"
+            : "Account is no longer locked",
+          409,
+          ErrorCode.CONFLICT,
+        );
+      }
+
+      return {
+        fullName: user.fullName || agentProfile.basicInfo?.nameRegister || "",
+        email: user.email,
+        lockType: user.lockInfo?.lockType,
+        lockReason: user.lockInfo?.reason || null,
+        lockedAt: user.lockInfo?.lockedAt,
+        lockedUntil: user.lockInfo?.lockedUntil ?? null,
+        hasPendingRequest: !!user.unlockRequest,
+      };
+    });
+  };
+
+  submitAccountLockAppeal = (
+    req: Request<
+      {},
+      {},
+      {
+        token: string;
+        reason: string;
+        contactEmail?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { token, reason, contactEmail } = req.body;
+      const trimmedReason = reason?.trim();
+
+      if (!trimmedReason) {
+        throw new AppError(
+          lang === "vi" ? "Vui lòng nhập lý do" : "Reason is required",
+          400,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+
+      const decoded = this.authService.validateToken(
+        token,
+        ENV.JWT_SECRET_LANDING_PAGE,
+      ) as
+        | {
+            userId: string;
+            email: string;
+            purpose?: string;
+          }
+        | false;
+
+      if (!decoded || decoded.purpose !== "ACCOUNT_LOCK_APPEAL") {
+        throw new AppError(
+          lang === "vi"
+            ? "Liên kết khóa tài khoản không hợp lệ"
+            : "Invalid appeal link",
+          400,
+          ErrorCode.INVALID_TOKEN,
+        );
+      }
+
+      const [user, agentProfile] = await Promise.all([
+        this.userService.getUserById(decoded.userId),
+        this.agentService.getAgentByUserId(decoded.userId),
+      ]);
+
+      if (!user || !agentProfile) {
+        throw new AppError(
+          lang === "vi" ? "KhÃ´ng tÃ¬m tháº¥y tÃ i khoáº£n" : "User not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      const lockState = getAccountLockState(user.lockInfo);
+
+      if (!lockState.isLocked) {
+        throw new AppError(
+          lang === "vi"
+            ? "TÃ i khoáº£n hiá»‡n khÃ´ng cÃ²n bá»‹ khÃ³a"
+            : "Account is no longer locked",
+          409,
+          ErrorCode.CONFLICT,
+        );
+      }
+
+      await this.userService.setUnlockRequest(decoded.userId, {
+        reason: trimmedReason,
+        contactEmail: contactEmail?.trim() || decoded.email,
+        requestedAt: new Date(),
+      });
+
+      return {
+        success: true,
+      };
+    });
+  };
+
+  deleteAgentRegistration = (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const lang = req.lang;
+      const { id } = req.params;
+      const agentRegistration =
+        await this.agentService.getAgentRegistrationById(id);
+
+      if (!agentRegistration) {
+        throw new AppError(
+          lang === "vi"
+            ? "Yêu cầu không tồn tại"
+            : "Agent registration not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      if (
+        agentRegistration.status === AgentStatusEnum.APPROVED ||
+        agentRegistration.userId
+      ) {
+        throw new AppError(
+          lang === "vi"
+            ? "Không thể xóa hồ sơ đã được duyệt"
+            : "Approved agent registration cannot be deleted",
+          409,
+          ErrorCode.CONFLICT,
+        );
+      }
+
+      return await this.agentService.deleteAgentRegistration(id);
     });
   };
 
@@ -401,9 +1087,8 @@ export class AgentController extends BaseController {
     next: NextFunction,
   ) => {
     this.handleRequest(req, res, next, async () => {
-      const lang = req.lang;
       const { limit, page, sortField, sortOrder } = req.query;
-      let filter: Record<string, any> = {
+      const filter: Record<string, any> = {
         status: {
           $in: [AgentStatusEnum.APPROVED],
         },
@@ -415,9 +1100,64 @@ export class AgentController extends BaseController {
           sortBy: `${(sortField as string) || "createdAt"}:${(sortOrder as string) || "desc"}`,
         },
         filter,
-        "id basicInfo businessInfo",
+        "id userId basicInfo businessInfo",
       );
-      return agentRegistrations;
+      const paginatedAgentRegistrations = agentRegistrations as unknown as {
+        results: Array<IAgent & { id: string; userId?: string }>;
+        [key: string]: any;
+      };
+      const results = paginatedAgentRegistrations.results || [];
+      const userIds = results
+        .map((agent: IAgent & { id: string; userId?: string }) =>
+          String(agent.userId || ""),
+        )
+        .filter(Boolean);
+
+      const users = userIds.length
+        ? await this.userService.getUsersByIds(userIds, "_id lockInfo")
+        : [];
+
+      const userMap = new Map(users.map((user) => [String(user._id), user]));
+
+      const enrichedResults = await Promise.all(
+        results.map(async (agent: IAgent & { id: string; userId?: string }) => {
+          const plainAgent =
+            typeof (agent as any)?.toJSON === "function"
+              ? (agent as any).toJSON()
+              : agent;
+          const user = agent.userId ? userMap.get(String(agent.userId)) : null;
+
+          if (!user) {
+            return {
+              ...plainAgent,
+              accountLock: null,
+            };
+          }
+
+          const lockState = getAccountLockState(user.lockInfo);
+
+          if (lockState.isExpired) {
+            await this.userService.clearUserLock(String(user._id));
+          }
+
+          return {
+            ...plainAgent,
+            accountLock: lockState.isLocked
+              ? {
+                  lockType: user.lockInfo?.lockType,
+                  reason: user.lockInfo?.reason || null,
+                  lockedAt: user.lockInfo?.lockedAt,
+                  lockedUntil: user.lockInfo?.lockedUntil ?? null,
+                }
+              : null,
+          };
+        }),
+      );
+
+      return {
+        ...paginatedAgentRegistrations,
+        results: enrichedResults,
+      };
     });
   };
 
@@ -444,6 +1184,18 @@ export class AgentController extends BaseController {
       ) {
         throw new AppError(
           lang === "vi" ? "Môi giới không tồn tại" : "Agent not found",
+          404,
+          ErrorCode.NOT_FOUND,
+        );
+      }
+
+      const lockState = getAccountLockState(userProfile.lockInfo);
+
+      if (lockState.isExpired) {
+        await this.userService.clearUserLock(String(userProfile._id));
+      } else if (lockState.isLocked) {
+        throw new AppError(
+          lang === "vi" ? "MÃ´i giá»›i khÃ´ng tá»“n táº¡i" : "Agent not found",
           404,
           ErrorCode.NOT_FOUND,
         );
@@ -478,7 +1230,10 @@ export class AgentController extends BaseController {
           currency: CurrencyEnum.USD,
         }),
       ]);
-      const leaderboardSnapshot = [vndLeaderboardSnapshot, usdLeaderboardSnapshot]
+      const leaderboardSnapshot = [
+        vndLeaderboardSnapshot,
+        usdLeaderboardSnapshot,
+      ]
         .filter(Boolean)
         .sort((left, right) => {
           if ((left?.rank || Infinity) !== (right?.rank || Infinity)) {
@@ -510,7 +1265,9 @@ export class AgentController extends BaseController {
         phone,
         role: "Professional Real Estate Agent",
         location:
-          userProfile.address || agentProfile.businessInfo.workingArea?.[0] || "",
+          userProfile.address ||
+          agentProfile.businessInfo.workingArea?.[0] ||
+          "",
         rating: agentProfile.rating ?? 0,
         description: agentProfile.description || "",
         yearsOfExperience: agentProfile.businessInfo.yearsOfExperience,
@@ -750,11 +1507,7 @@ export class AgentController extends BaseController {
     });
   };
 
-  getRevenueLeaderboard = (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
+  getRevenueLeaderboard = (req: Request, res: Response, next: NextFunction) => {
     this.handleRequest(req, res, next, async () => {
       const { month, year, currency, limit } = req.query as {
         month?: string;

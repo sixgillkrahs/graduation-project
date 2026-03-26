@@ -1,5 +1,6 @@
 import { AgentController } from "@/controllers/agent.controller";
 import { requireAuth } from "@/middleware/authMiddleware";
+import { validateRequest } from "@/middleware/validateRequest";
 import { EmailQueue } from "@/queues/email.queue";
 import { AgentService } from "@/services/agent.service";
 import { AuthService } from "@/services/auth.service";
@@ -9,6 +10,10 @@ import { PropertyService } from "@/services/property.service";
 import { RoleService } from "@/services/role.service";
 import { UserService } from "@/services/user.service";
 import { AgentLeaderboardService } from "@/services/agent-leaderboard.service";
+import {
+  accountLockAppealTokenSchema,
+  submitAccountLockAppealSchema,
+} from "@/validators/agent.validator";
 import { Router } from "express";
 
 const router = Router();
@@ -111,6 +116,106 @@ const agentController = new AgentController(
  *                     type: string
  */
 router.get("/", agentController.getAgents);
+
+/**
+ * @swagger
+ * /agents/account-lock/appeal/{token}:
+ *   get:
+ *     summary: Get account lock appeal context
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appeal token received in the account lock email
+ *     responses:
+ *       200:
+ *         description: Account lock appeal context
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 fullName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 lockType:
+ *                   type: string
+ *                   enum: [TEMPORARY, PERMANENT]
+ *                 lockReason:
+ *                   type: string
+ *                   nullable: true
+ *                 lockedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 lockedUntil:
+ *                   type: string
+ *                   format: date-time
+ *                   nullable: true
+ *                 hasPendingRequest:
+ *                   type: boolean
+ *       400:
+ *         description: Invalid or expired appeal token
+ *       409:
+ *         description: Account is no longer locked
+ */
+router.get(
+  "/account-lock/appeal/:token",
+  validateRequest((lang) => accountLockAppealTokenSchema(lang)),
+  agentController.getAccountLockAppealContext,
+);
+
+/**
+ * @swagger
+ * /agents/account-lock/appeal:
+ *   post:
+ *     summary: Submit account lock appeal
+ *     tags: [Agent]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - reason
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Appeal token received in the account lock email
+ *               reason:
+ *                 type: string
+ *                 maxLength: 2000
+ *                 description: Agent explanation for requesting account unlock
+ *               contactEmail:
+ *                 type: string
+ *                 format: email
+ *                 description: Optional contact email for follow-up
+ *     responses:
+ *       200:
+ *         description: Appeal submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Invalid payload or expired appeal token
+ *       409:
+ *         description: Account is no longer locked
+ */
+router.post(
+  "/account-lock/appeal",
+  validateRequest((lang) => submitAccountLockAppealSchema(lang)),
+  agentController.submitAccountLockAppeal,
+);
 
 /**
  * @swagger

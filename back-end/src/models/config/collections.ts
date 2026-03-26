@@ -19,6 +19,7 @@ const collections = {
   schedules: "schedules",
   transactions: "transactions",
   jobs: "jobs",
+  settings: "settings",
 };
 
 export default collections;

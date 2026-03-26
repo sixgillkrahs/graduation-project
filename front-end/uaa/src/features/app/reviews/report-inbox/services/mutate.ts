@@ -13,3 +13,18 @@ export const useMarkReportNoticeAsRead = () => {
     },
   });
 };
+
+export const useResolveReport = () => {
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: IReportNoticeService.ResolveBody }) =>
+      ReportInboxService.resolve(id, body),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [ReportInboxQueryKey.list],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [ReportInboxQueryKey.detail, variables.id],
+      });
+    },
+  });
+};

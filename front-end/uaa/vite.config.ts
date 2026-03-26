@@ -30,9 +30,6 @@ export default defineConfig(() => {
         registerType: "autoUpdate",
         srcDir: "src",
         filename: "sw.ts",
-        injectManifest: {
-          swDest: "dist/sw.js",
-        },
         includeAssets: ["favicon.svg", "apple-touch-icon-180x180.png", "assets/*"],
         manifest: {
           name: "My React App",

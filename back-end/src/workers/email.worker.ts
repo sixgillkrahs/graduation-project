@@ -6,6 +6,8 @@ import {
   SendReviewInvitationEmailJob,
   SendVerifyEmailJob,
   SendDealClosedEmailJob,
+  SendAccountLockedEmailJob,
+  SendUnlockRequestReviewedEmailJob,
 } from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
 import { EmailService } from "@/services/email.service";
@@ -35,6 +37,17 @@ export class EmailWorker {
         } else if (job.name === "sendOTPEmail") {
           const { to, otp } = job.data as SendOTPEmailJob;
           await this.emailService.sendOTPEmail(to, otp);
+        } else if (job.name === "sendAccountLockedEmail") {
+          const { to, name, lockType, appealUrl, lockedUntil, reason } =
+            job.data as SendAccountLockedEmailJob;
+          await this.emailService.sendAccountLockedEmail(
+            to,
+            name,
+            lockType,
+            appealUrl,
+            lockedUntil,
+            reason,
+          );
         } else if (job.name === "sendAppointmentConfirmedEmail") {
           const {
             to,
@@ -67,6 +80,14 @@ export class EmailWorker {
             agentName,
             propertyName,
             reviewUrl,
+          );
+        } else if (job.name === "sendUnlockRequestReviewedEmail") {
+          const { to, name, decision } =
+            job.data as SendUnlockRequestReviewedEmailJob;
+          await this.emailService.sendUnlockRequestReviewedEmail(
+            to,
+            name,
+            decision,
           );
         }
       },

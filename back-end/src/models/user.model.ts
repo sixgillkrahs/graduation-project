@@ -12,6 +12,26 @@ export interface IUser {
   prefixPhone?: string;
   isActive?: boolean;
   isDeleted?: boolean;
+  lockInfo?: {
+    lockType: "TEMPORARY" | "PERMANENT";
+    reason?: string;
+    lockedAt: Date;
+    lockedUntil?: Date | null;
+  } | null;
+  unlockRequest?: {
+    reason: string;
+    contactEmail?: string;
+    requestedAt: Date;
+  } | null;
+  unlockRequestHistories?: Array<{
+    reason: string;
+    contactEmail?: string | null;
+    requestedAt: Date;
+    decision: "APPROVED" | "REJECTED";
+    reviewedAt: Date;
+    reviewedBy?: mongoose.Types.ObjectId | string | null;
+    reviewedByName?: string | null;
+  }>;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -90,6 +110,70 @@ const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>(
       type: Boolean,
       default: false,
     },
+    lockInfo: {
+      lockType: {
+        type: String,
+        enum: ["TEMPORARY", "PERMANENT"],
+      },
+      reason: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+      },
+      lockedAt: {
+        type: Date,
+      },
+      lockedUntil: {
+        type: Date,
+        default: null,
+      },
+    },
+    unlockRequest: {
+      reason: {
+        type: String,
+        trim: true,
+      },
+      contactEmail: {
+        type: String,
+        trim: true,
+      },
+      requestedAt: {
+        type: Date,
+      },
+    },
+    unlockRequestHistories: [
+      {
+        reason: {
+          type: String,
+          trim: true,
+        },
+        contactEmail: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+        requestedAt: {
+          type: Date,
+        },
+        decision: {
+          type: String,
+          enum: ["APPROVED", "REJECTED"],
+        },
+        reviewedAt: {
+          type: Date,
+        },
+        reviewedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: collections.users,
+          default: null,
+        },
+        reviewedByName: {
+          type: String,
+          trim: true,
+          default: null,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

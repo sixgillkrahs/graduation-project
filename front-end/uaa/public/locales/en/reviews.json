@@ -92,9 +92,82 @@
       "read": "Read",
       "unread": "Unread"
     },
+    "filters": {
+      "status": {
+        "all": "All notices",
+        "unread": "Unread",
+        "read": "Read"
+      },
+      "target": {
+        "all": "All targets",
+        "listing": "Listing",
+        "agent": "Agent"
+      }
+    },
+    "summary": {
+      "pageResults": "Showing {{count}} / {{total}} notices on this page",
+      "unreadFocus": "{{count}} unread items in the current result"
+    },
+    "reportStatus": {
+      "OPEN": "Open",
+      "CONFIRMED": "Confirmed",
+      "DISMISSED": "Dismissed"
+    },
+    "drawer": {
+      "title": "Report case review",
+      "empty": "No report detail available",
+      "reason": "Reason",
+      "reporter": "Reporter",
+      "unknownReporter": "Unknown reporter",
+      "details": "Reported details",
+      "adminNote": "Admin note",
+      "adminNotePlaceholder": "Add an internal note before taking action",
+      "targetTitle": "Reported target",
+      "targetMissing": "The reported target is no longer available",
+      "listingStatus": "Listing status",
+      "listingTitle": "Listing",
+      "listingOwner": "Listing owner",
+      "listingRejectReason": "Current reject reason",
+      "agentStatus": "Agent status",
+      "agentName": "Agent",
+      "agentAccount": "Account state",
+      "agentActive": "Active",
+      "agentLocked": "Locked",
+      "agentLockReason": "Lock reason",
+      "actionsTitle": "Moderation actions"
+    },
+    "lockModal": {
+      "title": "Lock agent account",
+      "description": "Choose how long the account should be locked if this report is valid.",
+      "temporary": "Temporary",
+      "permanent": "Permanent",
+      "oneDay": "Lock for 1 day",
+      "oneWeek": "Lock for 1 week",
+      "oneMonth": "Lock for 1 month",
+      "reason": "Lock reason",
+      "reasonPlaceholder": "Describe why the account should be locked",
+      "reasonRequired": "Please enter a lock reason",
+      "confirm": "Lock account"
+    },
     "actions": {
+      "review": "Review",
       "markRead": "Mark as read",
-      "readSuccess": "Report notice marked as read."
+      "readSuccess": "Report notice marked as read.",
+      "clearFilters": "Clear filters",
+      "openTarget": "Open target",
+      "confirm": "Confirm report",
+      "dismiss": "Dismiss report",
+      "confirmSuccess": "Report confirmed.",
+      "dismissSuccess": "Report dismissed.",
+      "rejectListing": "Hide listing",
+      "rejectListingHint": "Reject the reported listing immediately",
+      "lockAgent": "Lock agent",
+      "lockAgentHint": "Apply an account lock to the reported agent",
+      "listingPunished": "Listing rejected and report confirmed.",
+      "agentPunished": "Agent locked and report confirmed.",
+      "defaultListingReason": "Rejected from admin report moderation.",
+      "defaultAgentReason": "Locked from admin report moderation.",
+      "missingReport": "This notice does not contain a valid report reference."
     }
   }
 }

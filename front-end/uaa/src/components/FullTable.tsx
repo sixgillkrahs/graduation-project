@@ -91,6 +91,7 @@ interface IProTableProps<T extends { id: string | number }> {
   extraAction?: (record: T) => ItemType[];
   extraButtonTop?: ReactNode;
   filter?: IFilter<T>[];
+  rowClassName?: (record: T, index: number) => string;
   search?: {
     placeholder?: string;
     name?: string;
@@ -119,6 +120,7 @@ const FullTable = <T extends { id: string | number }>({
   extraAction,
   extraButtonTop,
   filter,
+  rowClassName,
   search,
   useGetList,
   loading,
@@ -495,6 +497,7 @@ const FullTable = <T extends { id: string | number }>({
         key={"pro-table"}
         className="h-[500px] overflow-auto"
         rowKey={(record) => record.id}
+        rowClassName={rowClassName}
         pagination={false}
         scroll={{
           x: 1000,

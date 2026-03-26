@@ -3,7 +3,10 @@ import { requireAuth } from "@/middleware/authMiddleware";
 import { validateRequest } from "@/middleware/validateRequest";
 import { NoticeService } from "@/services/notice.service";
 import { ReportService } from "@/services/report.service";
-import { validateCreateReportSchema } from "@/validators/report.validator";
+import {
+  validateCreateReportSchema,
+  validateResolveReportSchema,
+} from "@/validators/report.validator";
 import { Router } from "express";
 
 const router = Router();
@@ -54,6 +57,15 @@ router.post(
   requireAuth,
   validateRequest((lang) => validateCreateReportSchema(lang)),
   reportController.createReport,
+);
+
+router.get("/:id", requireAuth, reportController.getReportById);
+
+router.patch(
+  "/:id/resolve",
+  requireAuth,
+  validateRequest((lang) => validateResolveReportSchema(lang)),
+  reportController.resolveReport,
 );
 
 export default router;

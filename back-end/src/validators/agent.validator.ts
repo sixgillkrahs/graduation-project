@@ -1,4 +1,5 @@
 import { validationMessages } from "@/i18n/validationMessages";
+import { createObjectIdSchema } from "./base.validator";
 import { z } from "zod";
 
 export const applicationSchema = (lang: keyof typeof validationMessages) => {
@@ -28,6 +29,57 @@ export const applicationSchema = (lang: keyof typeof validationMessages) => {
       agreeToTerms: z.literal(true, {
         error: t.required("Bạn phải đồng ý điều khoản"),
       }),
+    }),
+  });
+};
+
+export const lockAccountSchema = (lang: keyof typeof validationMessages) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    params: z.object({
+      id: createObjectIdSchema(lang),
+    }),
+    body: z
+      .object({
+        lockType: z.enum(["TEMPORARY", "PERMANENT"]),
+        lockUntil: z.string().optional(),
+        reason: z.string().trim().min(1, t.required("Lý do khóa")).max(500),
+      })
+      .superRefine((body, ctx) => {
+        if (body.lockType === "TEMPORARY" && !body.lockUntil?.trim()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["lockUntil"],
+            message: t.required("Ngày khóa"),
+          });
+        }
+      }),
+  });
+};
+
+export const accountLockAppealTokenSchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    params: z.object({
+      token: z.string().trim().min(1, t.required("Token")),
+    }),
+  });
+};
+
+export const submitAccountLockAppealSchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    body: z.object({
+      token: z.string().trim().min(1, t.required("Token")),
+      reason: z.string().trim().min(1, t.required("Nội dung giải trình")).max(2000),
+      contactEmail: z.union([z.literal(""), z.email(t.email)]).optional(),
     }),
   });
 };
