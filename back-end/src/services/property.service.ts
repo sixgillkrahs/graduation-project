@@ -10,6 +10,19 @@ import {
 import { QdrantService } from "./qdrant.service";
 import { QdrantQueue } from "@/queues/qdrant.queue";
 
+interface GetPropertiesOptions {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  populate?: string;
+}
+
+interface GeoSearchOptions {
+  latitude: number;
+  longitude: number;
+  radiusKm: number;
+}
+
 @singleton
 export class PropertyService {
   private qdrantService: QdrantService;
@@ -94,16 +107,209 @@ export class PropertyService {
       .lean();
   };
 
+  private buildSortObject(sortBy?: string) {
+    const sortEntries = (sortBy || "createdAt:desc")
+      .split(",")
+      .map((sortOption) => sortOption.trim())
+      .filter(Boolean)
+      .map((sortOption) => {
+        const [key, order] = sortOption.split(":");
+        return [key, order === "desc" ? -1 : 1] as const;
+      });
+
+    if (!sortEntries.some(([field]) => field === "_id")) {
+      sortEntries.push(["_id", -1]);
+    }
+
+    return Object.fromEntries(sortEntries);
+  }
+
+  private parsePopulateOptions(
+    populate?: string,
+  ): Array<string | PopulateOptions> {
+    if (!populate) {
+      return [];
+    }
+
+    return populate
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .map((item) => {
+        if (item.includes(":")) {
+          const [path, select] = item.split(":");
+          return { path, select };
+        }
+
+        return item;
+      });
+  }
+
+  private async getGeoFilteredProperties(
+    options: GetPropertiesOptions,
+    filter: Record<string, any>,
+  ) {
+    const geoSearch = filter.__geoSearch as GeoSearchOptions | undefined;
+    if (!geoSearch) {
+      return null;
+    }
+
+    const { __geoSearch, ...mongoFilter } = filter;
+    const limit =
+      options.limit && Number(options.limit) > 0 ? Number(options.limit) : 10;
+    const page =
+      options.page && Number(options.page) > 0 ? Number(options.page) : 1;
+    const skip = (page - 1) * limit;
+    const sort = this.buildSortObject(options.sortBy);
+
+    const radiusKm = geoSearch.radiusKm > 0 ? geoSearch.radiusKm : 5;
+    const latitudeDelta = radiusKm / 111.32;
+    const safeCosine = Math.max(
+      Math.cos((geoSearch.latitude * Math.PI) / 180),
+      0.01,
+    );
+    const longitudeDelta = radiusKm / (111.32 * safeCosine);
+    const centerLatitudeRadians = (geoSearch.latitude * Math.PI) / 180;
+    const centerLongitudeRadians = (geoSearch.longitude * Math.PI) / 180;
+    const sinCenterLatitude = Math.sin(centerLatitudeRadians);
+    const cosCenterLatitude = Math.cos(centerLatitudeRadians);
+
+    const geoMatch = {
+      ...mongoFilter,
+      "location.coordinates.lat": {
+        $gte: geoSearch.latitude - latitudeDelta,
+        $lte: geoSearch.latitude + latitudeDelta,
+      },
+      "location.coordinates.long": {
+        $gte: geoSearch.longitude - longitudeDelta,
+        $lte: geoSearch.longitude + longitudeDelta,
+      },
+    };
+
+    const distanceExpression = {
+      $multiply: [
+        6371,
+        {
+          $acos: {
+            $max: [
+              -1,
+              {
+                $min: [
+                  1,
+                  {
+                    $add: [
+                      {
+                        $multiply: [
+                          {
+                            $sin: {
+                              $degreesToRadians:
+                                "$location.coordinates.lat",
+                            },
+                          },
+                          sinCenterLatitude,
+                        ],
+                      },
+                      {
+                        $multiply: [
+                          {
+                            $cos: {
+                              $degreesToRadians:
+                                "$location.coordinates.lat",
+                            },
+                          },
+                          cosCenterLatitude,
+                          {
+                            $cos: {
+                              $subtract: [
+                                {
+                                  $degreesToRadians:
+                                    "$location.coordinates.long",
+                                },
+                                centerLongitudeRadians,
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const basePipeline: mongoose.PipelineStage[] = [
+      { $match: geoMatch },
+      {
+        $addFields: {
+          distanceKm: distanceExpression,
+        },
+      },
+      {
+        $match: {
+          distanceKm: { $lte: radiusKm },
+        },
+      },
+    ];
+
+    const [countResult, results] = await Promise.all([
+      PropertyModel.aggregate([
+        ...basePipeline,
+        {
+          $count: "totalResults",
+        },
+      ]).exec(),
+      PropertyModel.aggregate([
+        ...basePipeline,
+        {
+          $sort: sort,
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+      ]).exec(),
+    ]);
+
+    const totalResults = countResult[0]?.totalResults || 0;
+    const populateOptions = this.parsePopulateOptions(options.populate);
+    let populatedResults = results;
+
+    for (const populateOption of populateOptions) {
+      populatedResults = await PropertyModel.populate(
+        populatedResults,
+        populateOption,
+      );
+    }
+
+    return {
+      results: populatedResults,
+      page,
+      limit,
+      totalPages: Math.ceil(totalResults / limit),
+      totalResults,
+    };
+  }
+
   getProperties = async (
-    options: {
-      page: number;
-      limit: number;
-      sortBy?: string;
-      populate?: string;
-    },
+    options: GetPropertiesOptions,
     filter: Record<string, any> = {},
     select?: string,
   ) => {
+    const geoFilteredProperties = await this.getGeoFilteredProperties(
+      options,
+      filter,
+    );
+
+    if (geoFilteredProperties) {
+      return geoFilteredProperties;
+    }
+
     return await PropertyModel.paginate?.(options, filter, select);
   };
 

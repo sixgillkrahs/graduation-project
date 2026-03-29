@@ -2,6 +2,7 @@ export const ROUTES = {
   // Main
   HOME: "/",
   PROPERTIES: "/properties",
+  PROPERTY_ADVANCED_SEARCH: "/properties/advanced-search",
   PROPERTY_COMPARE: "/properties/compare",
   PROPERTY_DETAIL: (id: string) => `/properties/${id}` as const,
   LIST: "/list",

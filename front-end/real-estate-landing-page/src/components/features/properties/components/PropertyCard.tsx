@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { showAuthDialog } from "@/store/auth-dialog.store";
 import { PropertyQueryKey } from "../services/config";
 import { useRecordInteraction } from "../services/mutate";
+import { CsButton } from "@/components/custom";
 
 export interface PropertyCardProps {
   id: string;
@@ -119,12 +120,12 @@ const PropertyCard = ({
       </button>
 
       <Link href={ROUTES.PROPERTY_DETAIL(id)} className="flex h-full flex-col">
-        <div className="relative h-64 w-full overflow-hidden bg-gray-100">
+        <div className="relative h-64 w-full overflow-hidden">
           <Image
             src={image}
             alt={title}
             fill
-            className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+            className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105 p-2 rounded-2xl"
           />
 
           <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-2">
@@ -157,41 +158,13 @@ const PropertyCard = ({
 
         <div className="flex flex-1 flex-col gap-3 p-4">
           <div className="space-y-3">
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,124px)_1fr]">
-              <div
-                className={cn(
-                  "rounded-2xl border px-3 py-3",
-                  isRent
-                    ? "border-sky-100 bg-sky-50/80"
-                    : "border-amber-100 bg-amber-50/80",
-                )}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                  {t("card.transactionLabel")}
-                </p>
-                <p className="mt-2 text-sm font-bold text-gray-900">
-                  {listingTypeLabel}
-                </p>
-              </div>
-
-              <div
-                className={cn(
-                  "rounded-2xl border px-4 py-3 shadow-sm",
-                  isRent
-                    ? "border-sky-100 bg-gradient-to-br from-sky-50 via-white to-cyan-50"
-                    : "border-amber-100 bg-gradient-to-br from-amber-50 via-white to-orange-50",
-                )}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                  {priceLabel}
-                </p>
-                <p className="mt-1 text-xl font-black text-gray-900 md:text-2xl">
-                  {displayPrice}
-                </p>
-                <p className="mt-1 text-xs font-medium text-gray-500">
-                  {priceHint}
-                </p>
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1">
+                <span className="text-[20px] font-bold"> {displayPrice}</span>
+                <span className="text-gray-600">
+                  {type !== "sale" && "/month"}
+                </span>
+              </span>
             </div>
 
             <h3 className="line-clamp-1 font-semibold text-gray-900 transition-colors group-hover:text-red-500">

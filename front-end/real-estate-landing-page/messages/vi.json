@@ -378,6 +378,41 @@
       "furnitureBasic": "Cơ bản",
       "furnitureEmpty": "Trống"
     },
+    "advancedSearch": {
+      "eyebrow": "Tìm kiếm nâng cao",
+      "title": "Tìm bất động sản trên bản đồ",
+      "description": "Lọc listing theo khu vực, loại bất động sản, ngân sách và số phòng ngủ, sau đó đối chiếu trực tiếp với vị trí trên bản đồ.",
+      "filters": {
+        "searchPlaceholder": "Nhập khu vực, quận huyện hoặc dự án",
+        "allTypes": "Tất cả loại",
+          "allPrices": "Mọi mức giá",
+          "maxPrice": "Dưới {price} tỷ",
+          "anyBedrooms": "Mọi số phòng ngủ",
+          "bedroomCount": "{count} phòng ngủ",
+          "bedroomPlus": "Từ 4 phòng ngủ",
+          "search": "Tìm kiếm",
+          "reset": "Đặt lại"
+        },
+      "list": {
+        "eyebrow": "Danh sách bất động sản",
+        "title": "Kết quả phù hợp",
+        "results": "Hiển thị {count} / {total} bất động sản",
+        "updating": "Đang cập nhật kết quả...",
+        "errorTitle": "Không thể tải danh sách bất động sản",
+        "errorDescription": "Hệ thống đang tạm thời gián đoạn. Hãy thử tải lại danh sách.",
+        "retry": "Thử lại",
+        "emptyTitle": "Chưa có bất động sản phù hợp",
+        "emptyDescription": "Hãy nới bộ lọc hoặc đổi khu vực tìm kiếm để xem thêm kết quả."
+      },
+      "map": {
+        "eyebrow": "Bản đồ khu vực",
+        "title": "Bản đồ bất động sản",
+        "description": "Marker trên bản đồ tương ứng với các listing đang có ở khung bên trái.",
+        "emptyEyebrow": "Bản đồ trống",
+        "emptyTitle": "Chưa có marker để hiển thị",
+        "emptyDescription": "Các listing hiện tại chưa có đủ tọa độ hoặc chưa có kết quả phù hợp với bộ lọc."
+      }
+    },
     "compare": {
       "add": "So sánh",
       "selected": "Đã chọn",

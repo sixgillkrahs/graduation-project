@@ -378,6 +378,41 @@
       "furnitureBasic": "Basic furnished",
       "furnitureEmpty": "Unfurnished"
     },
+    "advancedSearch": {
+      "eyebrow": "Advanced Search",
+      "title": "Search properties on the map",
+      "description": "Filter listings by area, property type, budget, and bedroom count, then review each option directly against its map location.",
+      "filters": {
+        "searchPlaceholder": "Search by area, district, or project",
+        "allTypes": "All types",
+          "allPrices": "Any price",
+          "maxPrice": "Under {price}B",
+          "anyBedrooms": "Any bedrooms",
+          "bedroomCount": "{count} bedrooms",
+          "bedroomPlus": "4+ bedrooms",
+          "search": "Search",
+          "reset": "Reset"
+        },
+      "list": {
+        "eyebrow": "Property Feed",
+        "title": "Matching listings",
+        "results": "Showing {count} / {total} properties",
+        "updating": "Refreshing results...",
+        "errorTitle": "Could not load property listings",
+        "errorDescription": "The listing feed is temporarily unavailable. Try loading the results again.",
+        "retry": "Try again",
+        "emptyTitle": "No matching properties yet",
+        "emptyDescription": "Widen the filters or change the search area to discover more listings."
+      },
+      "map": {
+        "eyebrow": "Search Map",
+        "title": "Property map",
+        "description": "Each marker on the map represents one of the active listings shown on the left.",
+        "emptyEyebrow": "Map empty",
+        "emptyTitle": "No markers to display",
+        "emptyDescription": "The current listings either have no coordinates yet or no results match the active filters."
+      }
+    },
     "compare": {
       "add": "Compare",
       "selected": "Selected",

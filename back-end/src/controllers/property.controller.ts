@@ -213,6 +213,38 @@ export class PropertyController extends BaseController {
       delete parsed.hasVirtualTour;
     }
 
+    const latitude = parsed.latitude ?? parsed.lat;
+    const longitude = parsed.longitude ?? parsed.lng;
+    const radiusKm = parsed.radiusKm;
+
+    if (latitude !== undefined && longitude !== undefined) {
+      const parsedLatitude = Number(latitude);
+      const parsedLongitude = Number(longitude);
+      const parsedRadiusKm = Number(radiusKm);
+
+      if (
+        Number.isFinite(parsedLatitude) &&
+        Number.isFinite(parsedLongitude) &&
+        Math.abs(parsedLatitude) <= 90 &&
+        Math.abs(parsedLongitude) <= 180
+      ) {
+        parsed.__geoSearch = {
+          latitude: parsedLatitude,
+          longitude: parsedLongitude,
+          radiusKm:
+            Number.isFinite(parsedRadiusKm) && parsedRadiusKm > 0
+              ? parsedRadiusKm
+              : 5,
+        };
+      }
+    }
+
+    delete parsed.latitude;
+    delete parsed.longitude;
+    delete parsed.lat;
+    delete parsed.lng;
+    delete parsed.radiusKm;
+
     // Text search across multiple fields
     if (parsed.query) {
       const searchRegex = { $regex: parsed.query, $options: "i" };
