@@ -236,12 +236,12 @@
       "priceCap": "Dưới {price} tỷ"
     },
     "recentlyViewed": {
-      "eyebrow": "Tiáº¿p tá»¥c shortlist",
-      "title": "Báº¥t Ä‘á»™ng sáº£n Ä‘Ã£ xem gáº§n Ä‘Ã¢y",
-      "description": "Má»Ÿ láº¡i nhanh nhá»¯ng listing báº¡n vá»«a xem mÃ  khÃ´ng cáº§n lá»c láº¡i tá»« Ä‘áº§u.",
-      "clear": "XÃ³a lá»‹ch sá»­",
-      "expand": "Má»Ÿ rá»™ng",
-      "collapse": "Thu gá»n"
+      "eyebrow": "Lịch sử",
+      "title": "Bất động sản xem gần đây",
+      "description": "Mở lại nhanh những listing bạn vừa xem mà không cần lọc lại từ đầu.",
+      "clear": "Xóa danh sách",
+      "expand": "Mở rộng",
+      "collapse": "Thu nhỏ"
     },
     "search": {
       "placeholder": "Tìm kiếm Thành phố, Quận/Huyện, hoặc Dự án...",
@@ -366,7 +366,17 @@
       "parking": "Bãi đỗ xe",
       "elevator": "Thang máy",
       "security": "An ninh 24/7",
-      "wifi": "Wifi & Internet"
+      "wifi": "Wifi & Internet",
+      "legal": "Pháp lý",
+      "furniture": "Nội thất",
+      "legalPinkBook": "Sổ hồng",
+      "legalRedBook": "Sổ đỏ",
+      "legalSaleContract": "Hợp đồng mua bán",
+      "legalWaiting": "Đang chờ cấp sổ",
+      "legalOther": "Khác",
+      "furnitureFull": "Đầy đủ",
+      "furnitureBasic": "Cơ bản",
+      "furnitureEmpty": "Trống"
     },
     "compare": {
       "add": "So sánh",

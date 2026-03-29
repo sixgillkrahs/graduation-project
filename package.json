@@ -6,7 +6,11 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd back-end && npm run dev",
     "dev:frontend": "cd front-end/real-estate-landing-page && npm run dev",
-    "install:all": "npm install && cd back-end && npm install && cd front-end/real-estate-landing-page && npm install"
+    "install:all": "npm install && cd back-end && npm install && cd front-end/real-estate-landing-page && npm install",
+    "docker:be:up": "pnpm --dir back-end docker:prod",
+    "docker:be:down": "pnpm --dir back-end docker:prod:down",
+    "docker:fe:up": "docker compose -f docker-compose.frontend.yml up -d --build",
+    "docker:fe:down": "docker compose -f docker-compose.frontend.yml down"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

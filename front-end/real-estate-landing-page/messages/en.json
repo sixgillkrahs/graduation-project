@@ -366,7 +366,17 @@
       "parking": "Parking",
       "elevator": "Elevator",
       "security": "24/7 Security",
-      "wifi": "Wifi & Internet"
+      "wifi": "Wifi & Internet",
+      "legal": "Legal status",
+      "furniture": "Furniture",
+      "legalPinkBook": "Pink Book",
+      "legalRedBook": "Red Book",
+      "legalSaleContract": "Sale Contract",
+      "legalWaiting": "Waiting for Book",
+      "legalOther": "Other",
+      "furnitureFull": "Fully furnished",
+      "furnitureBasic": "Basic furnished",
+      "furnitureEmpty": "Unfurnished"
     },
     "compare": {
       "add": "Compare",

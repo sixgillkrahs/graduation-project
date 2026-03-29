@@ -1,0 +1,23 @@
+# This Dockerfile is built from the monorepo root via docker-compose.
+# Keep only the app and its linked local package in the build context.
+**
+!front-end/
+!front-end/uaa/
+!front-end/uaa/**
+!library/
+!library/gra-helper/
+!library/gra-helper/**
+
+front-end/uaa/node_modules
+front-end/uaa/dist
+front-end/uaa/coverage
+front-end/uaa/stats.html
+front-end/uaa/uaa-dev.err
+front-end/uaa/uaa-dev.out
+front-end/uaa/.git
+front-end/uaa/.vscode
+front-end/uaa/README.md
+front-end/uaa/llms.txt
+
+library/gra-helper/node_modules
+library/gra-helper/.git

@@ -2,7 +2,7 @@ import { useGetGeneralSettings } from "@/features/app/settings/setting/services/
 import {
   defaultDateTimeFormatterSettings,
   type DateTimeFormatterSettings,
-} from "../../../../shared/date-time/formatter";
+} from "gra-helper";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 const GeneralSettingsContext = createContext<DateTimeFormatterSettings>(

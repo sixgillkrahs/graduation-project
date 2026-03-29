@@ -5,7 +5,7 @@ import { formatLandingDateTime } from "@/lib/date-time-format";
 import {
   formatMonthYearBySettings,
   type FormatDateTimeOptions,
-} from "../../../shared/date-time/formatter";
+} from "gra-helper";
 import { useLocale } from "next-intl";
 import { useCallback } from "react";
 

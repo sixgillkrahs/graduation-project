@@ -14,11 +14,11 @@ export default defineConfig(() => {
       react(),
       shouldAnalyze
         ? (visualizer({
-            filename: "stats.html",
-            open: false,
-            gzipSize: true,
-            brotliSize: true,
-          }) as any)
+          filename: "stats.html",
+          open: false,
+          gzipSize: true,
+          brotliSize: true,
+        }) as any)
         : null,
       tailwindcss(),
       VitePWA({

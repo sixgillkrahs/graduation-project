@@ -143,7 +143,9 @@ const Properties = () => {
                     avatar: prop.userId.avatarUrl,
                   }}
                   postedAt={formatPropertyPostedDate(prop.createdAt, locale)}
-                  type={prop.demandType === "sale" ? "sale" : "rent"}
+                  type={
+                    prop.demandType?.toLowerCase() === "sale" ? "sale" : "rent"
+                  }
                   isFavorite={prop.isFavorite}
                   compareItem={mapPropertyToCompareItem(prop)}
                 />

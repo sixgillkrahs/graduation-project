@@ -3,7 +3,7 @@ import {
   formatDateTimeBySettings,
   type DateTimeFormatterSettings,
   type FormatDateTimeOptions,
-} from "../../../shared/date-time/formatter";
+} from "gra-helper";
 import type { LandingSettings } from "@/lib/landing-settings";
 
 let currentLandingDateTimeSettings: DateTimeFormatterSettings =

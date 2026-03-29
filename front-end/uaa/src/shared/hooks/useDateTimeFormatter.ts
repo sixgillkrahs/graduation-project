@@ -3,7 +3,7 @@ import {
   formatDateTimeBySettings,
   formatMonthYearBySettings,
   type FormatDateTimeOptions,
-} from "../../../../shared/date-time/formatter";
+} from "gra-helper";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 

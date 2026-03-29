@@ -1,12 +1,28 @@
 services:
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        BUILD_SCRIPT: build:prod
     image: graduation-project/uaa:latest
     container_name: uaa-frontend
     restart: unless-stopped
+    build:
+      context: ../..
+      dockerfile: front-end/uaa/Dockerfile
+      target: runner
+      args:
+        APP_DIR: front-end/uaa
+        LIB_DIR: library/gra-helper
+        BUILD_SCRIPT: ${UAA_BUILD_SCRIPT:-build:prod}
     ports:
-      - "5173:8080"
+      - "${UAA_PORT:-5173}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s

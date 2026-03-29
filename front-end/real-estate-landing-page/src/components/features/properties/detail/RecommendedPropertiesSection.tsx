@@ -95,7 +95,9 @@ const RecommendedPropertiesSection = ({
                 avatar: property.userId?.avatarUrl,
               }}
               postedAt={formatPropertyPostedDate(property.createdAt, locale)}
-              type={property.demandType === "sale" ? "sale" : "rent"}
+              type={
+                property.demandType?.toLowerCase() === "sale" ? "sale" : "rent"
+              }
               isFavorite={property.isFavorite}
               compareItem={mapPropertyToCompareItem(property)}
             />

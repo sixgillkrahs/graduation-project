@@ -40,7 +40,7 @@ const PropertyDetailGallery = ({
         />
         <div className="absolute left-4 top-4 flex gap-2">
           <Badge className="cs-bg-red font-semibold text-white hover:bg-emerald-700">
-            {property.demandType === "sale"
+            {property.demandType?.toLowerCase() === "sale"
               ? t("card.forSale")
               : t("card.forRent")}
           </Badge>

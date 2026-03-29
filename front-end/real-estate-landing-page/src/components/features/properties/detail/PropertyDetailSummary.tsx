@@ -2,14 +2,17 @@
 
 import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import {
+  Armchair,
   Bath,
   Bed,
   Calendar as CalendarIcon,
   Compass,
+  ShieldCheck,
   Map as MapIcon,
   Maximize,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
 import { formatPropertyPostedDate } from "@/lib/property-date";
 import type { PropertyCompareItem } from "../compare/compare.types";
@@ -23,6 +26,21 @@ interface PropertyDetailSummaryProps {
   displayPrice: string;
 }
 
+type PropertyStat = {
+  key: string;
+  icon: ReactElement;
+  label: string;
+  value: number | string;
+  valueClassName?: string;
+};
+
+const formatFallbackLabel = (value: string) =>
+  value
+    .toLowerCase()
+    .split("_")
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+
 const PropertyDetailSummary = ({
   property,
   compareItem,
@@ -30,6 +48,117 @@ const PropertyDetailSummary = ({
 }: PropertyDetailSummaryProps) => {
   const t = useTranslations("PropertiesPage");
   const locale = useLocale();
+  const demandType = property.demandType?.trim().toLowerCase();
+  const legalStatus = property.features.legalStatus?.trim();
+  const furniture = property.features.furniture?.trim();
+  const direction = property.features.direction?.trim();
+  const propertyTypeKeyMap: Record<string, string> = {
+    APARTMENT: "search.typeApartment",
+    HOUSE: "search.typeHouse",
+    STREET_HOUSE: "search.typeStreetHouse",
+    VILLA: "search.typeVilla",
+    LAND: "search.typeLand",
+    OTHER: "search.typeOther",
+  };
+  const directionKeyMap: Record<string, string> = {
+    NORTH: "filter.north",
+    SOUTH: "filter.south",
+    EAST: "filter.east",
+    WEST: "filter.west",
+    NORTH_EAST: "filter.northEast",
+    NORTH_WEST: "filter.northWest",
+    SOUTH_EAST: "filter.southEast",
+    SOUTH_WEST: "filter.southWest",
+  };
+  const legalStatusKeyMap: Record<string, string> = {
+    PINK_BOOK: "detail.legalPinkBook",
+    RED_BOOK: "detail.legalRedBook",
+    SALE_CONTRACT: "detail.legalSaleContract",
+    WAITING: "detail.legalWaiting",
+    OTHER: "detail.legalOther",
+  };
+  const furnitureKeyMap: Record<string, string> = {
+    FULL: "detail.furnitureFull",
+    BASIC: "detail.furnitureBasic",
+    EMPTY: "detail.furnitureEmpty",
+  };
+
+  const propertyTypeLabel = property.propertyType
+    ? propertyTypeKeyMap[property.propertyType]
+      ? t(propertyTypeKeyMap[property.propertyType])
+      : formatFallbackLabel(property.propertyType)
+    : "";
+  const directionLabel = direction
+    ? directionKeyMap[direction]
+      ? t(directionKeyMap[direction])
+      : formatFallbackLabel(direction)
+    : "";
+  const legalStatusLabel = legalStatus
+    ? legalStatusKeyMap[legalStatus]
+      ? t(legalStatusKeyMap[legalStatus])
+      : formatFallbackLabel(legalStatus)
+    : "";
+  const furnitureLabel = furniture
+    ? furnitureKeyMap[furniture]
+      ? t(furnitureKeyMap[furniture])
+      : formatFallbackLabel(furniture)
+    : "";
+
+  const propertyStatItems: Array<PropertyStat | null> = [
+    property.features.bedrooms > 0
+      ? {
+          key: "bedrooms",
+          icon: <Bed className="h-6 w-6 text-primary" />,
+          label: t("detail.bedrooms"),
+          value: property.features.bedrooms,
+        }
+      : null,
+    property.features.bathrooms > 0
+      ? {
+          key: "bathrooms",
+          icon: <Bath className="h-6 w-6 text-primary" />,
+          label: t("detail.bathrooms"),
+          value: property.features.bathrooms,
+        }
+      : null,
+    property.features.area > 0
+      ? {
+          key: "area",
+          icon: <Maximize className="h-6 w-6 text-primary" />,
+          label: t("detail.area"),
+          value: `${property.features.area} m2`,
+        }
+      : null,
+    demandType === "sale" && legalStatusLabel
+      ? {
+          key: "legal-status",
+          icon: <ShieldCheck className="h-6 w-6 text-primary" />,
+          label: t("detail.legal"),
+          value: legalStatusLabel,
+        }
+      : null,
+    furniture &&
+    !["none", "empty"].includes(furniture.toLowerCase()) &&
+    furnitureLabel
+      ? {
+          key: "furniture",
+          icon: <Armchair className="h-6 w-6 text-primary" />,
+          label: t("detail.furniture"),
+          value: furnitureLabel,
+        }
+      : null,
+    directionLabel
+      ? {
+          key: "direction",
+          icon: <Compass className="h-6 w-6 text-primary" />,
+          label: t("detail.direction"),
+          value: directionLabel,
+        }
+      : null,
+  ];
+  const propertyStats = propertyStatItems.filter(
+    (stat): stat is PropertyStat => stat !== null,
+  );
 
   return (
     <>
@@ -77,24 +206,14 @@ const PropertyDetailSummary = ({
         </div>
 
         <div className="flex flex-wrap gap-2 pt-2">
-          <Badge
-            variant="outline"
-            className="border-emerald-200 bg-emerald-50 text-emerald-700"
-          >
-            {property.propertyType}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="border-blue-200 bg-blue-50 text-blue-700"
-          >
-            {property.features.legalStatus}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="border-orange-200 bg-orange-50 text-orange-700"
-          >
-            {property.features.furniture}
-          </Badge>
+          {propertyTypeLabel ? (
+            <Badge
+              variant="outline"
+              className="border-emerald-200 bg-emerald-50 text-emerald-700"
+            >
+              {propertyTypeLabel}
+            </Badge>
+          ) : null}
           <PropertyCompareToggleButton item={compareItem} />
           <ShareListingButton
             property={property}
@@ -105,61 +224,25 @@ const PropertyDetailSummary = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 border-y border-border py-6 md:grid-cols-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-border/50 bg-muted p-2.5">
-            <Bed className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">
-              {t("detail.bedrooms")}
-            </p>
-            <p className="font-bold text-foreground">
-              {property.features.bedrooms}
-            </p>
-          </div>
+      {propertyStats.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 border-y border-border py-6 sm:grid-cols-2 lg:grid-cols-3">
+          {propertyStats.map((stat) => (
+            <div key={stat.key} className="flex items-center gap-3">
+              <div className="rounded-lg border border-border/50 bg-muted p-2.5">
+                {stat.icon}
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p
+                  className={`font-bold text-foreground ${stat.valueClassName || ""}`.trim()}
+                >
+                  {stat.value}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
-
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-border/50 bg-muted p-2.5">
-            <Bath className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">
-              {t("detail.bathrooms")}
-            </p>
-            <p className="font-bold text-foreground">
-              {property.features.bathrooms}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-border/50 bg-muted p-2.5">
-            <Maximize className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">{t("detail.area")}</p>
-            <p className="font-bold text-foreground">
-              {property.features.area} m2
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg border border-border/50 bg-muted p-2.5">
-            <Compass className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">
-              {t("detail.direction")}
-            </p>
-            <p className="font-bold capitalize text-foreground">
-              {property.features.direction || "N/A"}
-            </p>
-          </div>
-        </div>
-      </div>
+      ) : null}
     </>
   );
 };

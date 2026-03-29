@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { MonitoringController } from "@/controllers/monitoring.controller";
 import { MetricsService } from "@/services/metrics.service";
-import { authorize, requireAuth } from "@/middleware/authMiddleware";
 
 const router = Router();
 const metricsService = new MetricsService();
@@ -20,8 +19,6 @@ const monitoringController = new MonitoringController(metricsService);
  *   get:
  *     summary: Get system metrics
  *     tags: [Monitoring]
- *     security:
- *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Prometheus metrics in text format
@@ -29,10 +26,8 @@ const monitoringController = new MonitoringController(metricsService);
  *           text/plain:
  *             schema:
  *               type: string
- *       401:
- *         description: Unauthorized
  */
-router.get("/metrics", requireAuth, authorize(), monitoringController.getMetrics);
+router.get("/metrics", monitoringController.getMetrics);
 
 /**
  * @swagger

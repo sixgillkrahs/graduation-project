@@ -1,6 +1,5 @@
 import App from "./App.tsx";
 import "./i18n";
-import { GeneralSettingsProvider } from "@shared/providers/GeneralSettingsProvider";
 import { store } from "./store";
 import { queryClient } from "@shared/queryClient.ts";
 import "@styles/index.css";
@@ -24,11 +23,9 @@ createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
         <ReactQueryDevtools initialIsOpen={true} />
-        <GeneralSettingsProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </GeneralSettingsProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </QueryClientProvider>
     </Provider>
   </StrictMode>,

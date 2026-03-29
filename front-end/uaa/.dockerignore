@@ -1,32 +1,13 @@
-## .dockerignore
-
-# Ignore node_modules directory to prevent copying unnecessary dependencies
-
 node_modules
 pnpm-store
-
-# Ignore local editor settings
-
 .vscode
-
-# Ignore Git repository files
-
 .git
-
-# Ignore build folder
-
 dist
 build
 coverage
 stats.html
 uaa-dev.err
 uaa-dev.out
-
-# Ignore ESLint, Prettier, and other configuration files that aren't needed in the final image
-
-.eslint*
-.prettier*
-.editorconfig
 .DS_Store
 README.md
 llms.txt

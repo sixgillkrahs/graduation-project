@@ -31,6 +31,7 @@
       "@features/*": ["features/*"],
       "@shared/*": ["shared/*"],
       "@assets/*": ["assets/*"],
+      "gra-helper": ["../../../library/gra-helper/src/index.ts"],
       "@/*": ["*"]
     }
   },

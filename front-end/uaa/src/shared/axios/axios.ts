@@ -6,6 +6,7 @@ let failedQueue: {
   resolve: (value?: unknown) => void;
   reject: (reason?: any) => void;
 }[] = [];
+const SKIP_REFRESH_PATHS = ["/auth/login", "/auth/refresh-token"];
 
 const processQueue = (error: any) => {
   failedQueue.forEach((prom) => {
@@ -38,8 +39,9 @@ client.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
     const status = error.response?.status;
+    const requestUrl = originalRequest?.url ?? "";
 
-    if (originalRequest?.url?.includes("/auth/refresh")) {
+    if (SKIP_REFRESH_PATHS.some((path) => requestUrl.includes(path))) {
       return Promise.reject(error);
     }
     if (status === 401 && !originalRequest._retry) {
