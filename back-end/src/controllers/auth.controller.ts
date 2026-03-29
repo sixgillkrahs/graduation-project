@@ -105,6 +105,7 @@ export class AuthController extends BaseController {
 
     if (lockState.isExpired && user._id) {
       await this.userService.clearUserLock(String(user._id));
+      await this.authService.setAuthActiveByUserId(String(user._id), true);
       return;
     }
 

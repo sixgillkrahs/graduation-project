@@ -7,8 +7,14 @@ import {
   type QueryKey,
 } from "@tanstack/react-query";
 import axios from "axios";
+import { env } from "@/config/env";
 import { getClientTranslation } from "@/lib/i18n/getClientTranslation";
 import { toast } from "@/lib/toast";
+
+const shouldShowErrorSource = env.NEXT_PUBLIC_ENVIRONMENT !== "production";
+
+const formatErrorToastMessage = (errorSource: string, errorMessage: string) =>
+  shouldShowErrorSource ? `${errorSource}: ${errorMessage}` : errorMessage;
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,7 +53,7 @@ export const queryClient = new QueryClient({
         errorMessage = error.message;
       }
 
-      toast.error(`${errorSource}: ${errorMessage}`, {
+      toast.error(formatErrorToastMessage(errorSource, errorMessage), {
         position: "top-center",
       });
     },
@@ -76,7 +82,7 @@ export const queryClient = new QueryClient({
         errorMessage = error.response?.data?.message || errorMessage;
       }
 
-      toast.error(`${errorSource}: ${errorMessage}`, {
+      toast.error(formatErrorToastMessage(errorSource, errorMessage), {
         position: "top-center",
       });
     },

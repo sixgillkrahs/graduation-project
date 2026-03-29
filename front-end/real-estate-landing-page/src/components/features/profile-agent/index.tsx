@@ -20,9 +20,12 @@ import { CsButton } from "@/components/custom";
 import DOMPurify from "dompurify";
 import { BadgeCheck, FileText } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
 import { resolveDocumentImageUrl } from "@/lib/document-image";
+import { useLocale } from "next-intl";
 
 const Profile = () => {
+  const copy = getAgentCmsCopy(useLocale()).profile;
   const router = useRouter();
   const { data: profileData, loading: isLoading } = useSelector(
     (state: RootState) => state.profile,
@@ -83,8 +86,7 @@ const Profile = () => {
     (completedProfileItems / totalProfileItems) * 100,
   );
   const sanitizedDescription = DOMPurify.sanitize(
-    profileData?.description ||
-      "<p>No public description has been added yet.</p>",
+    profileData?.description || copy.noDescription,
   );
 
   return (
@@ -102,10 +104,11 @@ const Profile = () => {
             </div>
 
             <div className="text-sm">
-              <div className="mb-0.5 font-medium text-amber-900">Warning</div>
+              <div className="mb-0.5 font-medium text-amber-900">
+                {copy.bankWarningTitle}
+              </div>
               <div className="text-amber-700 leading-relaxed">
-                Your profile is not complete. Please complete your bank
-                information to continue.
+                {copy.bankWarningDescription}
               </div>
             </div>
           </div>
@@ -131,7 +134,7 @@ const Profile = () => {
                   {profileData?.basicInfo.phoneNumber}
                 </span>
                 <div className="bg-[#F7F7F7] main-color-red w-fit font-bold text-center px-3 py-1 rounded-lg flex items-center gap-2 text-[12px]!">
-                  {profileData?.businessInfo && <>Real Estate Agent</>}
+                  {profileData?.businessInfo && <>{copy.roleBadge}</>}
                 </div>
               </div>
             </div>
@@ -142,21 +145,21 @@ const Profile = () => {
               onClick={handleRegisterPasskey}
               className="w-full border border-black/10! bg-white! text-black"
             >
-              Register Passkey
+              {copy.registerPasskey}
             </CsButton>
             <CsButton
               className="w-full border border-black/10! bg-white! text-black"
               icon={<Icon.RotateLock className="size-5" />}
               onClick={handleOpenModal}
             >
-              Change Password
+              {copy.changePassword}
             </CsButton>
             <CsButton
               className="cs-bg-black w-full text-white sm:col-span-2 xl:col-span-1"
               icon={<Icon.Pencil className="size-5" />}
               onClick={handleToEdit}
             >
-              Edit Profile
+              {copy.editProfile}
             </CsButton>
           </div>
         </div>
@@ -167,19 +170,16 @@ const Profile = () => {
                 <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
                   <Icon.User className="size-5" />
                 </div>{" "}
-                Contact Info
+                {copy.sections.contactInfo}
               </div>
               <div className="grid gap-4 py-4 px-8">
                 <RenderField
-                  label="Phone Number"
+                  label={copy.fields.phoneNumber}
                   value={profileData?.basicInfo.phoneNumber || ""}
                 />
+                <RenderField label={copy.fields.email} value={profileData?.basicInfo.email || ""} />
                 <RenderField
-                  label="Email"
-                  value={profileData?.basicInfo.email || ""}
-                />
-                <RenderField
-                  label="Address"
+                  label={copy.fields.address}
                   value={profileData?.basicInfo.identityInfo.placeOfBirth || ""}
                 />
               </div>
@@ -196,7 +196,7 @@ const Profile = () => {
                   <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
                     <Icon.BankCard className="size-5" />
                   </div>{" "}
-                  Bank Info
+                  {copy.sections.bankInfo}
                 </div>
                 {isBankInfoMissing && (
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 shrink-0">
@@ -206,15 +206,15 @@ const Profile = () => {
               </div>
               <div className="grid gap-4 py-4 px-8">
                 <RenderField
-                  label="Bank Account Name"
+                  label={copy.fields.bankAccountName}
                   value={profileData?.bankInfo?.bankAccountName || "-"}
                 />
                 <RenderField
-                  label="Bank Account Number"
+                  label={copy.fields.bankAccountNumber}
                   value={profileData?.bankInfo?.bankAccountNumber || "-"}
                 />
                 <RenderField
-                  label="Bank Name"
+                  label={copy.fields.bankName}
                   value={profileData?.bankInfo?.bankName || "-"}
                 />
               </div>
@@ -225,25 +225,25 @@ const Profile = () => {
               <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
                 <Icon.Briefcase className="size-5" />
               </div>{" "}
-              Professional Profile
+              {copy.sections.professionalProfile}
             </div>
             <div className="grid min-w-0 gap-4 px-8 py-4">
               <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2">
                 <CardField
-                  title="Experience"
+                  title={copy.fields.experience}
                   value={
                     <span>
                       <span className="cs-typography text-[18px]! font-bold!">
                         {profileData?.businessInfo.yearsOfExperience}
                       </span>{" "}
                       <span className="cs-paragraph-gray text-[14px]! font-bold!">
-                        years
+                        {copy.fields.years}
                       </span>
                     </span>
                   }
                 />
                 <CardField
-                  title="Rating"
+                  title={copy.fields.rating}
                   value={
                     <span className="flex items-center gap-1 ">
                       <span className="cs-typography text-[18px]! font-bold!">
@@ -257,13 +257,13 @@ const Profile = () => {
               <div className="grid gap-2">
                 <div className="grid gap-1">
                   <div className="cs-paragraph-gray text-[14px]! font-bold! uppercase">
-                    Tax Code
+                    {copy.fields.taxCode}
                   </div>
                   <CardField value={profileData?.businessInfo.taxCode || ""} />
                 </div>
                 <div className="grid gap-1">
                   <div className="cs-paragraph-gray text-[14px]! font-bold! uppercase">
-                    Certificate Number
+                    {copy.fields.certificateNumber}
                   </div>
                   <CardField
                     value={profileData?.businessInfo.certificateNumber || ""}
@@ -276,7 +276,7 @@ const Profile = () => {
                   <span>
                     <FileText className="size-5" />
                   </span>{" "}
-                  Description
+                  {copy.sections.description}
                 </span>
                 <CardField
                   className="whitespace-pre-wrap leading-7"
@@ -294,7 +294,7 @@ const Profile = () => {
                   <span>
                     <BadgeCheck className="size-5" />
                   </span>{" "}
-                  Specialization
+                  {copy.sections.specialization}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {profileData?.businessInfo.specialization.map((item) => {
@@ -314,7 +314,7 @@ const Profile = () => {
                   <span>
                     <Icon.MapPin className="size-5" />
                   </span>{" "}
-                  Working Area
+                  {copy.sections.workingArea}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {profileData?.businessInfo.workingArea.map((item) => {
@@ -337,12 +337,12 @@ const Profile = () => {
                 <div className="size-5 flex items-center justify-center bg-black/10 p-2 rounded-lg box-content">
                   <Icon.IdCard className="size-5" />
                 </div>{" "}
-                Documents
+                {copy.sections.documents}
               </div>
               <div className="grid gap-4 py-4 px-8">
                 <div className="grid gap-2">
                   <div className="cs-paragraph text-[14px]! font-bold! uppercase">
-                    Identity Card
+                    {copy.fields.identityCard}
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <Image
@@ -369,7 +369,7 @@ const Profile = () => {
                 </div>
                 <div className="grid gap-2">
                   <div className="cs-paragraph text-[14px]! font-bold! uppercase">
-                    Business License
+                    {copy.fields.businessLicense}
                   </div>
                   <div className="grid gap-2">
                     {profileData?.imageInfo?.certificateImage.map((item) => {

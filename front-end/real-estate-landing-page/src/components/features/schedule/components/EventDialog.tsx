@@ -14,9 +14,10 @@ import { CsSelect } from "@/components/ui/select";
 import { CsTextarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { enUS, vi } from "date-fns/locale";
 import { memo, useEffect } from "react";
 import { Controller, FieldErrors, useForm } from "react-hook-form";
-import { Home } from "lucide-react";
+import { useLocale } from "next-intl";
 import {
   CreateScheduleRequest,
   SCHEDULE_STATUS,
@@ -37,6 +38,9 @@ interface EventDialogProps {
 }
 
 const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
+  const locale = useLocale();
+  const isVi = locale.toLowerCase().startsWith("vi");
+  const dateLocale = isVi ? vi : enUS;
   const { mutateAsync: createSchedule, isPending: createSchedulePending } =
     useCreateSchedule();
   const { mutateAsync: updateSchedule, isPending: updateSchedulePending } =
@@ -68,6 +72,101 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
       title: "",
     },
   });
+
+  const copy = {
+    tabs: {
+      general: isVi ? "Thông tin chung" : "General Info",
+      customer: isVi ? "Khách hàng" : "Customer",
+      notes: isVi ? "Ghi chú" : "Notes",
+      property: isVi ? "Bất động sản liên kết" : "Linked Property",
+    },
+    title: isVi ? "Tiêu đề lịch hẹn" : "Schedule Title",
+    date: isVi ? "Ngày" : "Date",
+    color: isVi ? "Màu sự kiện" : "Event Color",
+    startTime: isVi ? "Thời gian bắt đầu" : "Start Time",
+    endTime: isVi ? "Thời gian kết thúc" : "End Time",
+    type: isVi ? "Loại" : "Type",
+    status: isVi ? "Trạng thái" : "Status",
+    location: isVi ? "Địa điểm" : "Location",
+    customerName: isVi ? "Tên khách hàng" : "Customer Name",
+    customerPhone: isVi ? "Số điện thoại" : "Phone Number",
+    customerEmail: isVi ? "Địa chỉ email" : "Email Address",
+    customerNote: isVi ? "Ghi chú khách hàng" : "Customer Note",
+    agentNote: isVi ? "Ghi chú nội bộ" : "Internal Agent Note",
+    placeholders: {
+      title: isVi ? "ví dụ: Xem căn hộ A" : "e.g. Viewing Apartment A",
+      date: isVi ? "Chọn ngày" : "Pick a date",
+      type: isVi ? "Chọn loại" : "Select type",
+      status: isVi ? "Chọn trạng thái" : "Select status",
+      location: isVi
+        ? "ví dụ: 123 Nguyễn Huệ, Quận 1"
+        : "e.g. 123 Main St, Springfield",
+      customerName: isVi ? "Nguyễn Văn A" : "John Doe",
+      customerPhone: "0987654321",
+      customerEmail: isVi ? "nguyenvana@example.com" : "john@example.com",
+      customerNote: isVi ? "Yêu cầu đặc biệt..." : "Special requests...",
+      agentNote: isVi ? "Ghi chú riêng..." : "Private notes...",
+    },
+    validation: {
+      title: isVi ? "Tiêu đề là bắt buộc" : "Title is required",
+      startTime: isVi
+        ? "Thời gian bắt đầu là bắt buộc"
+        : "Start time is required",
+      endTime: isVi
+        ? "Thời gian kết thúc là bắt buộc"
+        : "End time is required",
+      type: isVi ? "Loại là bắt buộc" : "Type is required",
+      status: isVi ? "Trạng thái là bắt buộc" : "Status is required",
+      location: isVi ? "Địa điểm là bắt buộc" : "Location is required",
+      customerName: isVi ? "Tên là bắt buộc" : "Name is required",
+      customerPhone: isVi
+        ? "Số điện thoại là bắt buộc"
+        : "Phone is required",
+      customerEmail: isVi ? "Email là bắt buộc" : "Email is required",
+      customerEmailInvalid: isVi
+        ? "Email không hợp lệ"
+        : "Invalid email address",
+    },
+    statuses: {
+      viewing: isVi ? "Xem nhà" : "Viewing",
+      meeting: isVi ? "Họp" : "Meeting",
+      call: isVi ? "Gọi" : "Call",
+      pending: isVi ? "Chờ duyệt" : "Pending",
+      confirmed: isVi ? "Đã xác nhận" : "Confirmed",
+      cancelled: isVi ? "Đã hủy" : "Cancelled",
+      completed: isVi ? "Hoàn thành" : "Completed",
+      expired: isVi ? "Quá hạn" : "Expired",
+    },
+    noProperty: isVi
+      ? "Không có ngôi nhà nào được đính kèm lịch hẹn này."
+      : "No property is linked to this appointment.",
+    propertyAlt: isVi ? "Bất động sản" : "Property",
+    fallbackPrice: isVi ? "Thỏa thuận" : "Contact for pricing",
+    addTitle: isVi ? "Thêm lịch hẹn mới" : "Add New Schedule",
+    editTitle: isVi ? "Chỉnh sửa lịch hẹn" : "Edit Schedule",
+    delete: isVi ? "Xóa" : "Delete",
+    deleteTitle: isVi ? "Xóa lịch hẹn?" : "Delete schedule?",
+    deleteDescription: isVi
+      ? "Hành động này không thể hoàn tác. Bạn có chắc muốn xóa lịch hẹn này không?"
+      : "This action cannot be undone. Are you sure you want to delete this schedule?",
+    deleteConfirm: isVi ? "Xác nhận xóa" : "Yes, Delete",
+    cancel: isVi ? "Hủy" : "Cancel",
+    save: isVi ? "Lưu lịch hẹn" : "Save Schedule",
+    update: isVi ? "Cập nhật lịch hẹn" : "Update Schedule",
+    currency: isVi ? "VNĐ" : "VND",
+  };
+  const scheduleTypeOptions = [
+    { label: copy.statuses.viewing, value: SCHEDULE_TYPE.VIEWING },
+    { label: copy.statuses.meeting, value: SCHEDULE_TYPE.MEETING },
+    { label: copy.statuses.call, value: SCHEDULE_TYPE.CALL },
+  ];
+  const scheduleStatusOptions = [
+    { label: copy.statuses.pending, value: SCHEDULE_STATUS.PENDING },
+    { label: copy.statuses.confirmed, value: SCHEDULE_STATUS.CONFIRMED },
+    { label: copy.statuses.cancelled, value: SCHEDULE_STATUS.CANCELLED },
+    { label: copy.statuses.completed, value: SCHEDULE_STATUS.COMPLETED },
+    { label: copy.statuses.expired, value: SCHEDULE_STATUS.EXPIRED },
+  ];
 
   useEffect(() => {
     if (open && scheduleDetail?.data) {
@@ -128,18 +227,18 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
 
   const TABS = [
     {
-      label: "General Info",
+      label: copy.tabs.general,
       value: "general",
       content: (
         <div className="space-y-4 p-4">
           <Controller
             name="title"
             control={control}
-            rules={{ required: "Title is required" }}
+            rules={{ required: copy.validation.title }}
             render={({ field }) => (
               <Input
-                label="Schedule Title"
-                placeholder="e.g. Viewing Apartment A"
+                label={copy.title}
+                placeholder={copy.placeholders.title}
                 error={errors.title?.message}
                 preIcon={<Icon.Briefcase className="w-5 h-5 text-gray-400" />}
                 {...field}
@@ -149,7 +248,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="text-sm font-medium mb-1.5 block">
-                Date Range
+                {copy.date}
               </label>
               <div className="grid gap-2">
                 <Popover>
@@ -162,9 +261,11 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
                       icon={<Icon.CalendarSchedule className="mr-2 h-4 w-4" />}
                     >
                       {scheduleDetail?.data?.date ? (
-                        format(new Date(scheduleDetail.data.date), "LLL dd, y")
+                          format(new Date(scheduleDetail.data.date), "LLL dd, y", {
+                            locale: dateLocale,
+                          })
                       ) : (
-                        <span>Pick a date</span>
+                        <span>{copy.placeholders.date}</span>
                       )}
                     </CsButton>
                   </PopoverTrigger>
@@ -191,7 +292,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
 
             <div className="col-span-2">
               <label className="text-sm font-medium mb-1.5 block">
-                Event Color
+                {copy.color}
               </label>
               <Controller
                 name="color"
@@ -232,10 +333,10 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
             <Controller
               name="startTime"
               control={control}
-              rules={{ required: "Start time is required" }}
+              rules={{ required: copy.validation.startTime }}
               render={({ field }) => (
                 <Input
-                  label="Start Time"
+                  label={copy.startTime}
                   type="time"
                   value={field.value || ""}
                   onChange={(e) => onTimeChange("start", e.target.value)}
@@ -247,10 +348,10 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
             <Controller
               name="endTime"
               control={control}
-              rules={{ required: "End time is required" }}
+              rules={{ required: copy.validation.endTime }}
               render={({ field }) => (
                 <Input
-                  label="End Time"
+                  label={copy.endTime}
                   type="time"
                   value={field.value || ""}
                   onChange={(e) => onTimeChange("end", e.target.value)}
@@ -264,13 +365,13 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
             <Controller
               name="type"
               control={control}
-              rules={{ required: "Type is required" }}
+              rules={{ required: copy.validation.type }}
               render={({ field }) => {
                 return (
                   <CsSelect
-                    label="Type"
-                    placeholder="Select type"
-                    options={ScheduleService.SCHEDULE_TYPE_OPTIONS}
+                    label={copy.type}
+                    placeholder={copy.placeholders.type}
+                    options={scheduleTypeOptions}
                     error={errors.type?.message}
                     value={field.value}
                     onChange={(value) => field.onChange(value)}
@@ -282,13 +383,13 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
             <Controller
               name="status"
               control={control}
-              rules={{ required: "Status is required" }}
+              rules={{ required: copy.validation.status }}
               render={({ field }) => {
                 return (
                   <CsSelect
-                    label="Status"
-                    placeholder="Select status"
-                    options={ScheduleService.SCHEDULE_STATUS_OPTIONS}
+                    label={copy.status}
+                    placeholder={copy.placeholders.status}
+                    options={scheduleStatusOptions}
                     error={errors.status?.message}
                     value={field.value}
                     onChange={(value) => field.onChange(value)}
@@ -301,11 +402,11 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
           <Controller
             name="location"
             control={control}
-            rules={{ required: "Location is required" }}
+            rules={{ required: copy.validation.location }}
             render={({ field }) => (
               <Input
-                label="Location"
-                placeholder="e.g. 123 Main St, Springfield"
+                label={copy.location}
+                placeholder={copy.placeholders.location}
                 error={errors.location?.message}
                 preIcon={<Icon.MapPin className="w-5 h-5 text-gray-400" />}
                 {...field}
@@ -316,7 +417,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
       ),
     },
     {
-      label: "Customer",
+      label: copy.tabs.customer,
       value: "customer",
       content: (
         <div className="space-y-4 p-4">
@@ -325,11 +426,11 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
               <Controller
                 name="customerName"
                 control={control}
-                rules={{ required: "Name is required" }}
+                rules={{ required: copy.validation.customerName }}
                 render={({ field }) => (
                   <Input
-                    label="Customer Name"
-                    placeholder="John Doe"
+                    label={copy.customerName}
+                    placeholder={copy.placeholders.customerName}
                     error={errors.customerName?.message}
                     preIcon={<Icon.User className="w-5 h-5 text-gray-400" />}
                     {...field}
@@ -339,11 +440,11 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
               <Controller
                 name="customerPhone"
                 control={control}
-                rules={{ required: "Phone is required" }}
+                rules={{ required: copy.validation.customerPhone }}
                 render={({ field }) => (
                   <Input
-                    label="Phone Number"
-                    placeholder="0987654321"
+                    label={copy.customerPhone}
+                    placeholder={copy.placeholders.customerPhone}
                     error={errors.customerPhone?.message}
                     preIcon={<Icon.Phone className="w-5 h-5 text-gray-400" />}
                     {...field}
@@ -355,16 +456,16 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
               name="customerEmail"
               control={control}
               rules={{
-                required: "Email is required",
+                required: copy.validation.customerEmail,
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
+                  message: copy.validation.customerEmailInvalid,
                 },
               }}
               render={({ field }) => (
                 <Input
-                  label="Email Address"
-                  placeholder="john@example.com"
+                  label={copy.customerEmail}
+                  placeholder={copy.placeholders.customerEmail}
                   error={errors.customerEmail?.message}
                   preIcon={<Icon.Mail className="w-5 h-5 text-gray-400" />}
                   {...field}
@@ -376,7 +477,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
       ),
     },
     {
-      label: "Notes",
+      label: copy.tabs.notes,
       value: "notes",
       content: (
         <div className="space-y-4 p-4">
@@ -385,8 +486,8 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
             control={control}
             render={({ field }) => (
               <CsTextarea
-                label="Customer Note"
-                placeholder="Special requests..."
+                label={copy.customerNote}
+                placeholder={copy.placeholders.customerNote}
                 error={errors.customerNote?.message}
                 {...field}
               />
@@ -397,8 +498,8 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
             control={control}
             render={({ field }) => (
               <CsTextarea
-                label="Internal Agent Note"
-                placeholder="Private notes..."
+                label={copy.agentNote}
+                placeholder={copy.placeholders.agentNote}
                 error={errors.agentNote?.message}
                 {...field}
               />
@@ -408,7 +509,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
       ),
     },
     {
-      label: "Linked Property",
+      label: copy.tabs.property,
       value: "property",
       content: (
         <div className="space-y-4 p-4">
@@ -429,7 +530,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
                   (scheduleDetail.data.listingId as any).media?.images?.[0] ||
                   "https://via.placeholder.com/150"
                 }
-                alt="Property"
+                alt={copy.propertyAlt}
                 className="w-28 h-28 shrink-0 rounded-lg object-cover border border-gray-200"
               />
               <div className="flex flex-col flex-1 justify-center gap-1.5 overflow-hidden">
@@ -439,9 +540,9 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
                 <p className="text-base font-extrabold text-red-600">
                   {(
                     scheduleDetail.data.listingId as any
-                  ).features?.price?.toLocaleString() || "Thỏa thuận"}
+                  ).features?.price?.toLocaleString() || copy.fallbackPrice}
                   <span className="text-xs text-gray-500 font-medium ml-1">
-                    VNĐ
+                    {copy.currency}
                   </span>
                 </p>
                 {(scheduleDetail.data.listingId as any).location?.address && (
@@ -455,13 +556,11 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
               </div>
             </div>
           ) : (
-            <div className="py-12 flex flex-col items-center justify-center text-center">
-              <Icon.ArrowRight className="w-12 h-12 text-gray-200 mb-3" />
-              <p className="text-gray-400 font-medium">
-                Không có ngôi nhà nào được đính kèm lịch hẹn này.
-              </p>
-            </div>
-          )}
+              <div className="py-12 flex flex-col items-center justify-center text-center">
+                <Icon.ArrowRight className="w-12 h-12 text-gray-200 mb-3" />
+                <p className="text-gray-400 font-medium">{copy.noProperty}</p>
+              </div>
+            )}
         </div>
       ),
     },
@@ -471,7 +570,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
     <CsDialog
       open={open}
       onOpenChange={onClose}
-      title={id ? "Edit Schedule" : "Add New Schedule"}
+      title={id ? copy.editTitle : copy.addTitle}
       width={600}
       footer={
         <>
@@ -485,7 +584,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
                       variant="destructive"
                       className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-200"
                     >
-                      Delete
+                      {copy.delete}
                     </CsButton>
                   </div>
                 </PopoverTrigger>
@@ -493,11 +592,10 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
                   <div className="flex flex-col gap-2">
                     <div className="space-y-1">
                       <h4 className="font-medium leading-none">
-                        Delete Schedule?
+                        {copy.deleteTitle}
                       </h4>
                       <p className="text-sm text-gray-500">
-                        This action cannot be undone. Are you sure you want to
-                        delete this schedule?
+                        {copy.deleteDescription}
                       </p>
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
@@ -511,7 +609,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
                         loading={deleteSchedulePending}
                         type="button"
                       >
-                        Yes, Delete
+                        {copy.deleteConfirm}
                       </CsButton>
                     </div>
                   </div>
@@ -521,7 +619,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
           </div>
           <div className="flex gap-2">
             <CsButton onClick={onClose} type="button" variant="outline">
-              Cancel
+              {copy.cancel}
             </CsButton>
             <CsButton
               type="submit"
@@ -529,7 +627,7 @@ const EventDialog = memo(({ open, onClose, id }: EventDialogProps) => {
               className="bg-primary text-white shadow-lg hover:shadow-xl transition-all"
               loading={createSchedulePending || updateSchedulePending}
             >
-              {id ? "Update Schedule" : "Save Schedule"}
+              {id ? copy.update : copy.save}
             </CsButton>
           </div>
         </>

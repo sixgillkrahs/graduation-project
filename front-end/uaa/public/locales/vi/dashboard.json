@@ -1,8 +1,153 @@
 {
-  "activeAgents": "Nhân viên hoạt động",
-  "quickActions": "Hành động nhanh",
-  "addList": "Thêm danh sách",
-  "marketingMaterial": "Tài liệu Marketing",
-  "scheduleShowing": "Lên lịch xem nhà",
-  "commissionCalc": "Tính hoa hồng"
+  "actions": {
+    "refresh": "Làm mới dashboard",
+    "open": "Mở"
+  },
+  "hero": {
+    "badge": "Toàn cảnh vận hành",
+    "title": "Trung tâm điều hành admin",
+    "description": "Theo dõi áp lực kiểm duyệt, hàng đợi xử lý và trạng thái tác vụ nền trong một màn hình điều hành duy nhất.",
+    "workload": {
+      "title": "Khối lượng chờ xử lý",
+      "description": "Các mục đang chờ trong hồ sơ môi giới, yêu cầu mở khóa, tin đăng, review, report và job lỗi."
+    },
+    "publishHealth": {
+      "title": "Sức khỏe xuất bản",
+      "description": "{{published}} tin đã xuất bản trên tổng {{total}} tin đang theo dõi"
+    },
+    "processingJobs": {
+      "title": "Job đang chạy",
+      "description": "Tác vụ nền đang được xử lý"
+    },
+    "unreadReports": {
+      "title": "Report chưa đọc",
+      "description": "Cảnh báo mới từ hộp thư report"
+    }
+  },
+  "errors": {
+    "partialData": {
+      "title": "Một phần dữ liệu dashboard chưa tải được",
+      "description": "Dashboard hiện đang hiển thị dữ liệu chưa đầy đủ. Bạn vẫn có thể dùng các card và queue đang có, sau đó thử làm mới lại."
+    }
+  },
+  "stats": {
+    "activeAgents": {
+      "title": "Môi giới đang hoạt động",
+      "description": "Tổng số môi giới đã được duyệt và đang hoạt động trên nền tảng"
+    },
+    "pendingRegistrations": {
+      "title": "Hồ sơ chờ duyệt",
+      "description": "Đơn đăng ký môi giới đang chờ vòng duyệt đầu tiên"
+    },
+    "unlockRequests": {
+      "title": "Yêu cầu mở khóa",
+      "description": "Tài khoản môi giới bị khóa đang chờ admin xem xét"
+    },
+    "pendingProperties": {
+      "title": "Tin đăng chờ duyệt",
+      "description": "Tin đăng đang chờ phê duyệt trước khi hiển thị"
+    },
+    "reviewQueue": {
+      "title": "Hàng đợi review",
+      "description": "Đánh giá khách hàng cần admin kiểm duyệt"
+    },
+    "unreadReports": {
+      "title": "Report chưa đọc",
+      "description": "Thông báo report chưa được mở"
+    },
+    "failedJobs": {
+      "title": "Job lỗi",
+      "description": "Tác vụ nền cần retry hoặc điều tra thêm",
+      "footer": "{{count}} job đang chạy"
+    },
+    "publishedProperties": {
+      "title": "Tin đã xuất bản",
+      "description": "Tin đăng hiện đang hiển thị cho người mua và người thuê"
+    }
+  },
+  "sections": {
+    "activity": {
+      "title": "Hoạt động gần đây",
+      "description": "Các tín hiệu mới nhất từ hồ sơ môi giới, mở khóa, tin đăng, review, report và job nền."
+    },
+    "queues": {
+      "title": "Hàng đợi cần ưu tiên",
+      "description": "Những queue nên được kiểm tra trước khi khối lượng xử lý bắt đầu tăng."
+    },
+    "quickActions": {
+      "title": "Thao tác nhanh",
+      "description": "Đi thẳng vào những luồng xử lý admin thường cần thao tác nhất."
+    }
+  },
+  "queues": {
+    "registrations": {
+      "title": "Hồ sơ môi giới",
+      "description": "Duyệt các đơn đăng ký môi giới mới"
+    },
+    "properties": {
+      "title": "Kiểm duyệt bất động sản",
+      "description": "Phê duyệt hoặc từ chối tin đăng trước khi lên live"
+    },
+    "reports": {
+      "title": "Hộp thư report",
+      "description": "Kiểm tra các cảnh báo mới về tin đăng hoặc môi giới"
+    },
+    "jobs": {
+      "title": "Job nền",
+      "description": "Rà soát job lỗi và khôi phục luồng xử lý"
+    }
+  },
+  "queueStatus": {
+    "clear": "Ổn định",
+    "watch": "Cần theo dõi",
+    "critical": "Ưu tiên cao"
+  },
+  "quickActions": {
+    "registrations": {
+      "title": "Duyệt hồ sơ môi giới",
+      "description": "Mở hàng đợi hồ sơ môi giới đang chờ xử lý."
+    },
+    "unlockRequests": {
+      "title": "Xử lý mở khóa",
+      "description": "Xem xét kháng nghị từ các tài khoản môi giới bị khóa."
+    },
+    "pendingProperties": {
+      "title": "Duyệt tin đăng chờ",
+      "description": "Phê duyệt hoặc từ chối các tin đăng mới."
+    },
+    "reviews": {
+      "title": "Kiểm duyệt review",
+      "description": "Xử lý đánh giá khách hàng đang chờ admin."
+    },
+    "reports": {
+      "title": "Mở hộp thư report",
+      "description": "Điều tra các thông báo report mới từ hệ thống."
+    },
+    "jobs": {
+      "title": "Kiểm tra job lỗi",
+      "description": "Rà soát các job nền thất bại và retry khi cần."
+    }
+  },
+  "activity": {
+    "empty": "Chưa có hoạt động vận hành gần đây.",
+    "labels": {
+      "genericError": "Lỗi chưa xác định"
+    },
+    "types": {
+      "registration": "Có hồ sơ môi giới mới",
+      "unlock": "Có yêu cầu mở khóa",
+      "property": "Có tin đăng chờ duyệt",
+      "report": "Có report mới",
+      "review": "Có review vào hàng đợi kiểm duyệt",
+      "job": "Job nền bị lỗi"
+    },
+    "descriptions": {
+      "registration": "{{name}} • {{email}}",
+      "unlock": "{{name}} • {{email}}",
+      "property": "{{title}} • {{province}}",
+      "report": "{{title}}",
+      "review": "{{customer}} • {{property}}",
+      "job": "{{type}} • {{error}}"
+    }
+  }
 }

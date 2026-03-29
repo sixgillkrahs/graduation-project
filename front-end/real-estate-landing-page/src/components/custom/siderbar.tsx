@@ -44,6 +44,7 @@ function CsSidebar({
   info,
   onClick,
   isPro = false,
+  labels,
 }: {
   items: MenuItem[];
   children?: ReactNode;
@@ -56,6 +57,15 @@ function CsSidebar({
   };
   onClick?: (url: string, title: string) => void;
   isPro?: boolean;
+  labels?: {
+    clientMode: string;
+    proTitle: string;
+    basicTitle: string;
+    proDescription: string;
+    basicDescription: string;
+    proAction: string;
+    basicAction: string;
+  };
 }) {
   const router = useRouter();
 
@@ -210,9 +220,9 @@ function CsSidebar({
                         </svg>
                       )}
                     </div>
-                    <span className="font-bold text-sm tracking-tight text-amber-400">
-                      {isPro ? "PRO Privileges" : "Upgrade Plan"}
-                    </span>
+                <span className="font-bold text-sm tracking-tight text-amber-400">
+                      {isPro ? labels?.proTitle : labels?.basicTitle}
+                </span>
                   </div>
                   <p
                     className={cn(
@@ -221,8 +231,8 @@ function CsSidebar({
                     )}
                   >
                     {isPro
-                      ? "View your unlimited features and benefits."
-                      : "Get unlimited listings and priority support."}
+                      ? labels?.proDescription
+                      : labels?.basicDescription}
                   </p>
                   <button
                     type="button"
@@ -234,7 +244,7 @@ function CsSidebar({
                         : "bg-white text-neutral-900 hover:bg-neutral-100",
                     )}
                   >
-                    {isPro ? "View Plan Details" : "Upgrade to Pro"}
+                    {isPro ? labels?.proAction : labels?.basicAction}
                   </button>
                 </div>
                 {isPro && (
@@ -246,14 +256,14 @@ function CsSidebar({
         </SidebarContent>
         <SidebarFooter className="border-t p-0">
           <SidebarMenuButton
-            tooltip={"Client Mode"}
+            tooltip={labels?.clientMode}
             onClick={() => {
               router.push(ROUTES.HOME);
             }}
             className="m-2 cursor-pointer"
           >
             <ArrowLeft />
-            <span className="truncate text-base">Client Mode</span>
+            <span className="truncate text-base">{labels?.clientMode}</span>
           </SidebarMenuButton>
         </SidebarFooter>
         <SidebarRail />

@@ -30,6 +30,18 @@ export class AuthService {
     return AuthModel.findByIdAndUpdate(id, auth);
   }
 
+  async setAuthActiveByUserId(userId: string, isActive: boolean) {
+    return AuthModel.findOneAndUpdate(
+      {
+        userId,
+      },
+      {
+        isActive,
+      },
+      { new: true },
+    );
+  }
+
   async getAuthById<T>(
     id: string,
     populate?: string | PopulateOptions | (string | PopulateOptions)[],

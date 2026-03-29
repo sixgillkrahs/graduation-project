@@ -1,4 +1,6 @@
 import { Modal } from "@/components/ui";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
+import { useLocale } from "next-intl";
 import { Controller, useForm } from "react-hook-form";
 import { useChangePassword } from "../../profile/services/mutate";
 import { Password } from "@/components/ui/password";
@@ -11,6 +13,7 @@ export const ModalChangePassword = ({
   open: boolean;
   onCancel: () => void;
 }) => {
+  const copy = getAgentCmsCopy(useLocale()).profile.passwordModal;
   const { mutateAsync: changePassword, isPending } = useChangePassword();
   const {
     handleSubmit,
@@ -37,18 +40,18 @@ export const ModalChangePassword = ({
   };
 
   return (
-    <Modal open={open} onCancel={onCancel} title="Change Password">
+    <Modal open={open} onCancel={onCancel} title={copy.title}>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         <Controller
           name="oldPassword"
           control={control}
           rules={{
-            required: "Old password is required",
+            required: copy.oldPasswordRequired,
           }}
           render={({ field }) => (
             <Password
-              label="Old Password"
-              placeholder="Old Password"
+              label={copy.oldPassword}
+              placeholder={copy.oldPassword}
               error={errors.oldPassword?.message}
               {...field}
             />
@@ -58,12 +61,12 @@ export const ModalChangePassword = ({
           name="newPassword"
           control={control}
           rules={{
-            required: "New password is required",
+            required: copy.newPasswordRequired,
           }}
           render={({ field }) => (
             <Password
-              label="New Password"
-              placeholder="New Password"
+              label={copy.newPassword}
+              placeholder={copy.newPassword}
               type={"password"}
               error={errors.newPassword?.message}
               {...field}
@@ -74,12 +77,12 @@ export const ModalChangePassword = ({
           name="confirmPassword"
           control={control}
           rules={{
-            required: "Confirm password is required",
+            required: copy.confirmPasswordRequired,
           }}
           render={({ field }) => (
             <Password
-              label="Confirm Password"
-              placeholder="Confirm Password"
+              label={copy.confirmPassword}
+              placeholder={copy.confirmPassword}
               type={"password"}
               error={errors.confirmPassword?.message}
               {...field}
@@ -87,15 +90,15 @@ export const ModalChangePassword = ({
           )}
         />
         <div className="flex justify-end gap-2 pt-4">
-          <CsButton type="submit" className="text-black " onClick={onCancel}>
-            Cancel
+          <CsButton type="button" className="text-black " onClick={onCancel}>
+            {copy.cancel}
           </CsButton>
           <CsButton
             type="submit"
             className="cs-bg-black text-white"
             loading={isPending}
           >
-            Change Password
+            {copy.submit}
           </CsButton>
         </div>
       </form>

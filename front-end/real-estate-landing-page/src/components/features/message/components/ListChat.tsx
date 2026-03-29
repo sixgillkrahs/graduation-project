@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import StateSurface from "@/components/ui/state-surface";
 import { ROUTES } from "@/const/routes";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
+import { useLocale } from "next-intl";
 import { useGetMe } from "@/shared/auth/query";
 import { useConversations } from "../services/query";
 import MessageItem from "./MessageItem";
@@ -14,6 +16,7 @@ interface ListChatProps {
 }
 
 const ListChat = ({ onSelectConversation }: ListChatProps) => {
+  const copy = getAgentCmsCopy(useLocale()).messages;
   const router = useRouter();
   const { data: me } = useGetMe();
   const { data, isLoading, isError, refetch } = useConversations(
@@ -26,10 +29,10 @@ const ListChat = ({ onSelectConversation }: ListChatProps) => {
         <StateSurface
           size="compact"
           tone="brand"
-          eyebrow="Messages"
+          eyebrow={copy.title}
           icon={<Spinner className="h-5 w-5" />}
-          title="Loading conversations"
-          description="Fetching your latest chats and unread activity."
+          title={copy.loadingConversationsTitle}
+          description={copy.loadingConversationsDescription}
         />
       </div>
     );
@@ -41,12 +44,12 @@ const ListChat = ({ onSelectConversation }: ListChatProps) => {
         <StateSurface
           size="compact"
           tone="danger"
-          eyebrow="Messages"
+          eyebrow={copy.title}
           icon={<AlertCircle className="h-5 w-5" />}
-          title="Could not load conversations"
-          description="The inbox is temporarily unavailable. Retry to reconnect."
+          title={copy.conversationsErrorTitle}
+          description={copy.conversationsErrorDescription}
           primaryAction={{
-            label: "Try again",
+            label: copy.tryAgain,
             onClick: () => {
               void refetch();
             },
@@ -62,10 +65,10 @@ const ListChat = ({ onSelectConversation }: ListChatProps) => {
         <StateSurface
           size="compact"
           tone="brand"
-          eyebrow="Messages"
+          eyebrow={copy.title}
           icon={<MessageSquareMore className="h-5 w-5" />}
-          title="No conversations yet"
-          description="When a buyer or agent starts a chat, it will appear here."
+          title={copy.noConversationsTitle}
+          description={copy.noConversationsDescription}
         />
       </div>
     );
@@ -86,7 +89,7 @@ const ListChat = ({ onSelectConversation }: ListChatProps) => {
           <MessageItem
             key={item.id}
             avatar={item.displayAvatar || ""}
-            title={item.displayName || "User"}
+            title={item.displayName || copy.defaultUser}
             message={item.lastMessage?.content || ""}
             time={item.lastMessage?.createdAt || ""}
             isRead={item.lastMessage?.isRead}

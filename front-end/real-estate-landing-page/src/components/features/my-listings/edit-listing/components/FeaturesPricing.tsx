@@ -1,4 +1,6 @@
 import { ArrowLeft, ArrowRight, Home } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { CsButton } from "@/components/custom";
@@ -12,13 +14,63 @@ import type { ListingFormData } from "../../dto/listingformdata.dto";
 import PropertyService from "../../services/service";
 
 const FeaturesPricing = () => {
+  const t = useTranslations("ListingForm");
   const dispatch = useDispatch();
-  const { control, trigger, watch } = useFormContext<ListingFormData>();
+  const { control, trigger, watch, setValue, clearErrors } =
+    useFormContext<ListingFormData>();
   const demandType = watch("demandType");
+  const propertyType = watch("propertyType");
+  const priceUnit = watch("priceUnit");
   const { saveDraft, isSavingDraft } = useListingDraft();
+  const showLegalStatus = PropertyService.canShowLegalStatus(demandType);
+  const showRoomFields = PropertyService.canShowRoomFields(propertyType);
+  const showFurniture = PropertyService.canShowFurniture(propertyType);
+  const priceUnitOptions = PropertyService.getPriceUnitOptions(demandType, {
+    vnd: t("featuresPricing.priceUnits.vnd"),
+    million: t("featuresPricing.priceUnits.million"),
+    billion: t("featuresPricing.priceUnits.billion"),
+    millionPerSquareMeter: t("featuresPricing.priceUnits.millionPerSquareMeter"),
+    vndPerMonth: t("featuresPricing.priceUnits.vndPerMonth"),
+    millionPerMonth: t("featuresPricing.priceUnits.millionPerMonth"),
+  });
+
+  useEffect(() => {
+    if (!showLegalStatus) {
+      setValue("legalStatus", "");
+      clearErrors("legalStatus");
+    }
+
+    if (!showRoomFields) {
+      setValue("bedrooms", 0);
+      setValue("bathrooms", 0);
+      clearErrors(["bedrooms", "bathrooms"]);
+    }
+
+    if (!showFurniture) {
+      setValue("furniture", "");
+      clearErrors("furniture");
+    }
+  }, [
+    clearErrors,
+    setValue,
+    showFurniture,
+    showLegalStatus,
+    showRoomFields,
+  ]);
+
+  useEffect(() => {
+    const validPriceUnits = priceUnitOptions.map((option) => option.value);
+
+    if (!validPriceUnits.includes(priceUnit)) {
+      setValue("priceUnit", PropertyService.defaultFormValues.priceUnit);
+      clearErrors("priceUnit");
+    }
+  }, [clearErrors, priceUnit, priceUnitOptions, setValue]);
 
   const handleContinue = async () => {
-    const isValid = await trigger(PropertyService.stepFields.step3);
+    const isValid = await trigger(
+      PropertyService.getStep3Fields({ demandType, propertyType }),
+    );
     if (isValid) {
       dispatch(nextStep());
     }
@@ -29,28 +81,43 @@ const FeaturesPricing = () => {
   };
 
   const directionOptions = [
-    { label: "North", value: "NORTH" },
-    { label: "South", value: "SOUTH" },
-    { label: "East", value: "EAST" },
-    { label: "West", value: "WEST" },
-    { label: "North East", value: "NORTH_EAST" },
-    { label: "North West", value: "NORTH_WEST" },
-    { label: "South East", value: "SOUTH_EAST" },
-    { label: "South West", value: "SOUTH_WEST" },
+    { label: t("featuresPricing.directionOptions.north"), value: "NORTH" },
+    { label: t("featuresPricing.directionOptions.south"), value: "SOUTH" },
+    { label: t("featuresPricing.directionOptions.east"), value: "EAST" },
+    { label: t("featuresPricing.directionOptions.west"), value: "WEST" },
+    {
+      label: t("featuresPricing.directionOptions.northEast"),
+      value: "NORTH_EAST",
+    },
+    {
+      label: t("featuresPricing.directionOptions.northWest"),
+      value: "NORTH_WEST",
+    },
+    {
+      label: t("featuresPricing.directionOptions.southEast"),
+      value: "SOUTH_EAST",
+    },
+    {
+      label: t("featuresPricing.directionOptions.southWest"),
+      value: "SOUTH_WEST",
+    },
   ];
 
   const legalStatusOptions = [
-    { label: "Pink Book", value: "PINK_BOOK" },
-    { label: "Red Book", value: "RED_BOOK" },
-    { label: "Sales Contract", value: "SALE_CONTRACT" },
-    { label: "Waiting for Book", value: "WAITING" },
-    { label: "Other", value: "OTHER" },
+    { label: t("featuresPricing.legalStatusOptions.pinkBook"), value: "PINK_BOOK" },
+    { label: t("featuresPricing.legalStatusOptions.redBook"), value: "RED_BOOK" },
+    {
+      label: t("featuresPricing.legalStatusOptions.salesContract"),
+      value: "SALE_CONTRACT",
+    },
+    { label: t("featuresPricing.legalStatusOptions.waiting"), value: "WAITING" },
+    { label: t("featuresPricing.legalStatusOptions.other"), value: "OTHER" },
   ];
 
   const furnitureOptions = [
-    { label: "Full", value: "FULL" },
-    { label: "Basic", value: "BASIC" },
-    { label: "None", value: "EMPTY" },
+    { label: t("featuresPricing.furnitureOptions.full"), value: "FULL" },
+    { label: t("featuresPricing.furnitureOptions.basic"), value: "BASIC" },
+    { label: t("featuresPricing.furnitureOptions.none"), value: "EMPTY" },
   ];
 
   const currencyOptions = [
@@ -58,33 +125,18 @@ const FeaturesPricing = () => {
     { label: "USD", value: "USD" },
   ];
 
-  const priceUnitOptionsSale = [
-    { label: "Raw amount", value: "VND" },
-    { label: "Million", value: "MILLION" },
-    { label: "Billion", value: "BILLION" },
-    { label: "Million / m2", value: "MILLION_PER_M2" },
-  ];
-
-  const priceUnitOptionsRent = [
-    { label: "VND / month", value: "VND" },
-    { label: "Million / month", value: "MILLION" },
-  ];
-
-  const priceUnitOptions =
-    demandType === "RENT" ? priceUnitOptionsRent : priceUnitOptionsSale;
-
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
         <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-          <Home className="w-6 h-6" /> Step 3: Features & Pricing
+          <Home className="w-6 h-6" /> {t("featuresPricing.title")}
           {demandType === "RENT" ? (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
-              🏠 Cho Thuê – Giá / Tháng
+              {t("featuresPricing.badges.rent")}
             </span>
           ) : (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">
-              🔑 Bán
+              {t("featuresPricing.badges.sale")}
             </span>
           )}
         </h2>
@@ -94,13 +146,13 @@ const FeaturesPricing = () => {
             <Controller
               name="area"
               control={control}
-              rules={{ required: "Area is required" }}
+              rules={{ required: t("validation.areaRequired") }}
               render={({ field, fieldState }) => (
                 <Input
-                  label="Area (m2)"
+                  label={t("featuresPricing.fields.area.label")}
                   type="number"
                   error={fieldState.error?.message}
-                  placeholder="e.g. 120"
+                  placeholder={t("featuresPricing.fields.area.placeholder")}
                   {...field}
                 />
               )}
@@ -108,14 +160,22 @@ const FeaturesPricing = () => {
             <Controller
               name="price"
               control={control}
-              rules={{ required: "Price is required" }}
+              rules={{ required: t("validation.priceRequired") }}
               render={({ field, fieldState }) => (
                 <Input
-                  label={demandType === "RENT" ? "Price / Month" : "Price"}
+                  label={
+                    demandType === "RENT"
+                      ? t("featuresPricing.fields.pricePerMonth.label")
+                      : t("featuresPricing.fields.price.label")
+                  }
                   type="number"
                   error={fieldState.error?.message}
-                  placeholder="e.g. 500000"
-                  suffix={demandType === "RENT" ? "/tháng" : undefined}
+                  placeholder={t("featuresPricing.fields.price.placeholder")}
+                  suffix={
+                    demandType === "RENT"
+                      ? t("featuresPricing.fields.pricePerMonth.suffix")
+                      : undefined
+                  }
                   {...field}
                 />
               )}
@@ -123,11 +183,11 @@ const FeaturesPricing = () => {
             <Controller
               name="currency"
               control={control}
-              rules={{ required: "Currency is required" }}
+              rules={{ required: t("validation.currencyRequired") }}
               render={({ field, fieldState }) => (
                 <CsSelect
-                  label="Currency"
-                  placeholder="Select Currency"
+                  label={t("featuresPricing.fields.currency.label")}
+                  placeholder={t("featuresPricing.fields.currency.placeholder")}
                   options={currencyOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -138,11 +198,11 @@ const FeaturesPricing = () => {
             <Controller
               name="priceUnit"
               control={control}
-              rules={{ required: "Price unit is required" }}
+              rules={{ required: t("validation.priceUnitRequired") }}
               render={({ field, fieldState }) => (
                 <CsSelect
-                  label="Price Unit"
-                  placeholder="Select Unit"
+                  label={t("featuresPricing.fields.priceUnit.label")}
+                  placeholder={t("featuresPricing.fields.priceUnit.placeholder")}
                   options={priceUnitOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -152,44 +212,52 @@ const FeaturesPricing = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6 items-end">
-            <Controller
-              name="bedrooms"
-              control={control}
-              render={({ field }) => (
-                <Counter
-                  label="Bedrooms"
-                  value={field.value}
-                  onChange={field.onChange}
-                  alignLabel="left"
-                  className="flex justify-between w-full"
-                />
-              )}
-            />
-            <Controller
-              name="bathrooms"
-              control={control}
-              render={({ field }) => (
-                <Counter
-                  label="Bathrooms"
-                  value={field.value}
-                  onChange={field.onChange}
-                  alignLabel="left"
-                  className="flex justify-between w-full"
-                />
-              )}
-            />
-          </div>
+          {showRoomFields && (
+            <div className="grid grid-cols-2 gap-6 items-end">
+              <Controller
+                name="bedrooms"
+                control={control}
+                render={({ field }) => (
+                  <Counter
+                    label={t("featuresPricing.fields.bedrooms.label")}
+                    value={field.value}
+                    onChange={field.onChange}
+                    alignLabel="left"
+                    className="flex justify-between w-full"
+                  />
+                )}
+              />
+              <Controller
+                name="bathrooms"
+                control={control}
+                render={({ field }) => (
+                  <Counter
+                    label={t("featuresPricing.fields.bathrooms.label")}
+                    value={field.value}
+                    onChange={field.onChange}
+                    alignLabel="left"
+                    className="flex justify-between w-full"
+                  />
+                )}
+              />
+            </div>
+          )}
 
-          <div className="grid grid-cols-3 gap-6">
+          <div
+            className={`grid gap-6 ${
+              showLegalStatus && showFurniture
+                ? "grid-cols-3"
+                : "grid-cols-1 md:grid-cols-2"
+            }`}
+          >
             <Controller
               name="direction"
               control={control}
-              rules={{ required: "Direction is required" }}
+              rules={{ required: t("validation.directionRequired") }}
               render={({ field, fieldState }) => (
                 <CsSelect
-                  label="Direction"
-                  placeholder="Select Direction"
+                  label={t("featuresPricing.fields.direction.label")}
+                  placeholder={t("featuresPricing.fields.direction.placeholder")}
                   options={directionOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -197,36 +265,44 @@ const FeaturesPricing = () => {
                 />
               )}
             />
-            <Controller
-              name="legalStatus"
-              control={control}
-              rules={{ required: "Legal Status is required" }}
-              render={({ field, fieldState }) => (
-                <CsSelect
-                  label="Legal Status"
-                  placeholder="Select Status"
-                  options={legalStatusOptions}
-                  value={field.value}
-                  error={fieldState.error?.message}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-            <Controller
-              name="furniture"
-              control={control}
-              rules={{ required: "Furniture is required" }}
-              render={({ field, fieldState }) => (
-                <CsSelect
-                  label="Furniture"
-                  placeholder="Select Furniture"
-                  options={furnitureOptions}
-                  value={field.value}
-                  error={fieldState.error?.message}
-                  onChange={field.onChange}
-                />
-              )}
-            />
+            {showLegalStatus && (
+              <Controller
+                name="legalStatus"
+                control={control}
+                rules={{ required: t("validation.legalStatusRequired") }}
+                render={({ field, fieldState }) => (
+                  <CsSelect
+                    label={t("featuresPricing.fields.legalStatus.label")}
+                    placeholder={t(
+                      "featuresPricing.fields.legalStatus.placeholder",
+                    )}
+                    options={legalStatusOptions}
+                    value={field.value}
+                    error={fieldState.error?.message}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            )}
+            {showFurniture && (
+              <Controller
+                name="furniture"
+                control={control}
+                rules={{ required: t("validation.furnitureRequired") }}
+                render={({ field, fieldState }) => (
+                  <CsSelect
+                    label={t("featuresPricing.fields.furniture.label")}
+                    placeholder={t(
+                      "featuresPricing.fields.furniture.placeholder",
+                    )}
+                    options={furnitureOptions}
+                    value={field.value}
+                    error={fieldState.error?.message}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            )}
           </div>
 
           <Controller
@@ -244,14 +320,14 @@ const FeaturesPricing = () => {
 
         <div className="flex justify-between pt-10">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
-            Back
+            {t("actions.back")}
           </CsButton>
           <div className="flex gap-4">
             <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
-              Save Draft
+              {t("actions.saveDraft")}
             </CsButton>
             <CsButton onClick={handleContinue} type="button">
-              Continue
+              {t("actions.continue")}
               <ArrowRight className="w-5 h-5 ml-2" />
             </CsButton>
           </div>

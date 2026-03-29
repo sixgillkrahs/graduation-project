@@ -108,6 +108,7 @@ export class UserService {
     return UserModel.findByIdAndUpdate(
       id,
       {
+        isActive: true,
         $unset: {
           lockInfo: 1,
         },

@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,7 +11,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import {
-  getPropertyAmenityLabel,
+  getPropertyAmenityDisplay,
   isSamePropertyAmenity,
   normalizePropertyAmenity,
   PROPERTY_AMENITIES,
@@ -29,12 +30,27 @@ interface AmenitiesFieldProps {
 const AmenitiesField = ({
   value = [],
   onChange,
-  label = "Amenities",
-  placeholder = "Type an amenity and press Enter",
-  description = "You can add your own amenities for each property.",
+  label,
+  placeholder,
+  description,
   error,
 }: AmenitiesFieldProps) => {
+  const t = useTranslations("ListingForm");
+  const propertyDetailT = useTranslations("PropertiesPage");
   const [draftAmenity, setDraftAmenity] = useState("");
+  const resolvedLabel = label ?? t("featuresPricing.amenities.label");
+  const resolvedPlaceholder =
+    placeholder ?? t("featuresPricing.amenities.placeholder");
+  const resolvedDescription =
+    description ?? t("featuresPricing.amenities.description");
+
+  const getAmenityLabel = (amenity: string) => {
+    const display = getPropertyAmenityDisplay(amenity);
+
+    return display.translationKey
+      ? propertyDetailT(display.translationKey)
+      : display.label;
+  };
 
   const updateAmenities = (rawAmenity: string) => {
     const nextAmenities = rawAmenity
@@ -81,14 +97,14 @@ const AmenitiesField = ({
 
   return (
     <Field data-invalid={!!error}>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel>{resolvedLabel}</FieldLabel>
 
       <div className="space-y-3">
         <div className="flex gap-3">
           <input
             type="text"
             value={draftAmenity}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             onChange={(event) => setDraftAmenity(event.target.value)}
             onKeyDown={(event) => {
               if (event.key !== "Enter" && event.key !== ",") {
@@ -115,17 +131,13 @@ const AmenitiesField = ({
           </button>
         </div>
 
-        <FieldDescription>{description}</FieldDescription>
+        <FieldDescription>{resolvedDescription}</FieldDescription>
 
         {value.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {value.map((amenity) => (
-              <Badge
-                key={`${amenity}-${getPropertyAmenityLabel(amenity)}`}
-                variant="secondary"
-                className="gap-1 px-3 py-1"
-              >
-                {getPropertyAmenityLabel(amenity)}
+              <Badge key={amenity} variant="secondary" className="gap-1 px-3 py-1">
+                {getAmenityLabel(amenity)}
                 <button
                   type="button"
                   onClick={() => handleRemoveAmenity(amenity)}
@@ -141,7 +153,7 @@ const AmenitiesField = ({
         {suggestedAmenities.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Suggested
+              {t("featuresPricing.amenities.suggested")}
             </p>
             <div className="flex flex-wrap gap-2">
               {suggestedAmenities.map((option) => (
@@ -151,7 +163,7 @@ const AmenitiesField = ({
                   onClick={() => updateAmenities(option.label)}
                   className="rounded-full border border-border bg-background px-3 py-1 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  {option.label}
+                  {getAmenityLabel(option.label)}
                 </button>
               ))}
             </div>

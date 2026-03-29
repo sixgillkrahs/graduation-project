@@ -73,6 +73,11 @@
     "logout": "Logout",
     "login": "Login"
   },
+  "AgentHeader": {
+    "language": "Language",
+    "workspace": "Agent CMS",
+    "switchLanguage": "Switch language to"
+  },
   "Banner": {
     "title": "Start Your Search Today",
     "rent": "Rent",
@@ -385,14 +390,14 @@
       "filters": {
         "searchPlaceholder": "Search by area, district, or project",
         "allTypes": "All types",
-          "allPrices": "Any price",
-          "maxPrice": "Under {price}B",
-          "anyBedrooms": "Any bedrooms",
-          "bedroomCount": "{count} bedrooms",
-          "bedroomPlus": "4+ bedrooms",
-          "search": "Search",
-          "reset": "Reset"
-        },
+        "allPrices": "Any price",
+        "maxPrice": "Under {price}B",
+        "anyBedrooms": "Any bedrooms",
+        "bedroomCount": "{count} bedrooms",
+        "bedroomPlus": "4+ bedrooms",
+        "search": "Search",
+        "reset": "Reset"
+      },
       "list": {
         "eyebrow": "Property Feed",
         "title": "Matching listings",
@@ -803,5 +808,266 @@
       }
     },
     "footnote": "Reports are reviewed by the moderation team before any action is taken."
+  },
+  "ListingForm": {
+    "steps": {
+      "basicInfo": "Basic Info",
+      "location": "Location",
+      "featuresPricing": "Features & Pricing",
+      "media": "Media",
+      "review": "Review"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "back": "Back",
+      "continue": "Continue",
+      "saveDraft": "Save Draft",
+      "publish": "Publish Listing"
+    },
+    "toast": {
+      "draftSaved": "Draft saved successfully.",
+      "draftSaveFailed": "Failed to save draft. Please try again.",
+      "createSuccess": "Listing created successfully. Please wait for approval.",
+      "createFailed": "Failed to create property. Please try again.",
+      "updateSuccess": "Listing updated successfully. Please wait for approval.",
+      "updateFailed": "Failed to update property. Please try again.",
+      "descriptionBlocked": "Please revise the description before continuing.",
+      "aiMissingInputs": "Enter a title and choose a property type before generating AI content.",
+      "aiGenerated": "AI description generated successfully."
+    },
+    "validation": {
+      "titleRequired": "Listing title is required",
+      "descriptionRequired": "Listing description is required",
+      "areaRequired": "Area is required",
+      "priceRequired": "Price is required",
+      "currencyRequired": "Currency is required",
+      "priceUnitRequired": "Price unit is required",
+      "directionRequired": "Direction is required",
+      "legalStatusRequired": "Legal status is required",
+      "furnitureRequired": "Furniture is required",
+      "provinceRequired": "Province / City is required",
+      "wardRequired": "Administrative unit is required"
+    },
+    "edit": {
+      "loading": "Loading property details..."
+    },
+    "basicInfo": {
+      "title": "Step 1: Basic Information",
+      "aiButtonTitle": "AI Content Generator (PRO)",
+      "aiGeneratedDescription": "Discover this outstanding {demandType} opportunity featuring a {propertyType} named \"{title}\". The property offers a well-balanced layout, strong natural light, and a comfortable living environment suitable for modern lifestyles. Its location, amenities, and overall presentation create a compelling option for serious buyers or tenants.",
+      "demandTypes": {
+        "rent": "Rent",
+        "sale": "Sale"
+      },
+      "propertyTypes": {
+        "apartment": "Apartment",
+        "house": "House",
+        "villa": "Villa",
+        "land": "Land",
+        "street_house": "Street House"
+      },
+      "fields": {
+        "title": {
+          "label": "Listing title",
+          "placeholder": "Enter listing title"
+        },
+        "description": {
+          "label": "Listing description",
+          "placeholder": "Enter listing description"
+        },
+        "demandType": "Demand Type",
+        "propertyType": "Property Type",
+        "projectName": {
+          "label": "Project Name (Optional)",
+          "placeholder": "Enter project name"
+        }
+      }
+    },
+    "location": {
+      "title": "Step 2: Location",
+      "search": {
+        "label": "Search Location",
+        "placeholder": "Search for your property address...",
+        "hint": "Search to quickly set the pin and address, then verify the administrative details below.",
+        "searching": "Searching..."
+      },
+      "map": {
+        "label": "Pin Location on Map",
+        "hint": "Click or drag the marker to set the exact location."
+      },
+      "fields": {
+        "province": {
+          "label": "Province / City",
+          "placeholder": "Select province / city"
+        },
+        "ward": {
+          "label": "Ward / Commune / Special Zone",
+          "placeholder": "Select administrative unit",
+          "placeholderSelectProvince": "Select province first"
+        },
+        "address": {
+          "label": "Street Address",
+          "placeholder": "Example: 208 Nguyen Huu Canh"
+        }
+      }
+    },
+    "featuresPricing": {
+      "title": "Step 3: Features & Pricing",
+      "badges": {
+        "rent": "For Rent - Monthly Pricing",
+        "sale": "For Sale"
+      },
+      "fields": {
+        "area": {
+          "label": "Area (m²)",
+          "placeholder": "e.g. 120"
+        },
+        "price": {
+          "label": "Price",
+          "placeholder": "e.g. 500000"
+        },
+        "pricePerMonth": {
+          "label": "Price / Month",
+          "suffix": "/month"
+        },
+        "currency": {
+          "label": "Currency",
+          "placeholder": "Select currency"
+        },
+        "priceUnit": {
+          "label": "Price Unit",
+          "placeholder": "Select unit"
+        },
+        "bedrooms": {
+          "label": "Bedrooms"
+        },
+        "bathrooms": {
+          "label": "Bathrooms"
+        },
+        "direction": {
+          "label": "Direction",
+          "placeholder": "Select direction"
+        },
+        "legalStatus": {
+          "label": "Legal Status",
+          "placeholder": "Select status"
+        },
+        "furniture": {
+          "label": "Furniture",
+          "placeholder": "Select furniture"
+        }
+      },
+      "priceUnits": {
+        "vnd": "VND",
+        "million": "Million VND",
+        "billion": "Billion VND",
+        "millionPerSquareMeter": "Million VND per m²",
+        "vndPerMonth": "VND per month",
+        "millionPerMonth": "Million VND per month"
+      },
+      "directionOptions": {
+        "north": "North",
+        "south": "South",
+        "east": "East",
+        "west": "West",
+        "northEast": "North East",
+        "northWest": "North West",
+        "southEast": "South East",
+        "southWest": "South West"
+      },
+      "legalStatusOptions": {
+        "pinkBook": "Pink Book",
+        "redBook": "Red Book",
+        "salesContract": "Sales Contract",
+        "waiting": "Waiting for Book",
+        "other": "Other"
+      },
+      "furnitureOptions": {
+        "full": "Full",
+        "basic": "Basic",
+        "none": "None"
+      },
+      "amenities": {
+        "label": "Amenities",
+        "placeholder": "Type an amenity and press Enter",
+        "description": "You can add custom amenities for this property.",
+        "suggested": "Suggested"
+      }
+    },
+    "media": {
+      "title": "Step 4: Media",
+      "images": {
+        "description": "Upload high-quality images of your property. You can upload multiple images at once."
+      },
+      "thumbnail": {
+        "title": "Thumbnail Image",
+        "description": "Upload a cover image that will be displayed on the listing card."
+      },
+      "video": {
+        "title": "Video URL (Optional)",
+        "label": "YouTube / Vimeo Link",
+        "placeholder": "https://www.youtube.com/watch?v=..."
+      },
+      "virtualTour": {
+        "title": "360° Virtual Tour Images",
+        "description": "Upload 360° panorama images (equirectangular projection)."
+      },
+      "preview": {
+        "title": "Preview",
+        "empty": "360° Preview",
+        "thumbnailAlt": "360 thumbnail {index}"
+      }
+    },
+    "review": {
+      "title": "Review Your Listing",
+      "description": "Please review all the information before publishing your listing.",
+      "notSpecified": "Not specified",
+      "na": "N/A",
+      "ready": "Ready to publish",
+      "previewMode": "Preview Mode",
+      "noImages": "No images uploaded",
+      "watchVideo": "Watch video tour",
+      "imageAlt": "Property image {index}",
+      "thumbnailAlt": "Property thumbnail",
+      "virtualTourThumbnailAlt": "360 thumbnail {index}",
+      "demandType": {
+        "rent": "For Rent",
+        "sale": "For Sale"
+      },
+      "fields": {
+        "listingType": "Listing Type",
+        "propertyType": "Property Type",
+        "projectName": "Project Name",
+        "province": "Province / City",
+        "administrativeUnit": "Administrative Unit",
+        "address": "Address",
+        "area": "Area",
+        "price": "Price",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "direction": "Direction",
+        "legalStatus": "Legal Status",
+        "furniture": "Furniture"
+      },
+      "sections": {
+        "overview": "Overview",
+        "location": "Location",
+        "propertyDetails": "Property Details",
+        "amenities": "Amenities",
+        "images": "Images ({count})",
+        "thumbnail": "Thumbnail Image",
+        "video": "Video Tour",
+        "virtualTour": "360° Virtual Tour ({count})",
+        "confirm": "Review & Confirm"
+      },
+      "badges": {
+        "virtualTour": "360° Tour",
+        "video": "Video"
+      },
+      "card": {
+        "beds": "{count} Beds",
+        "baths": "{count} Baths"
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { useSignIn } from "./services/mutation";
 import logo from "@/assets/logo.svg";
-import { Button, Divider, Form, Image, Input, Switch } from "antd";
+import { Button, Form, Image, Input, Switch } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -13,8 +13,7 @@ const SignIn = () => {
   const location = useLocation();
   const [form] = useForm<ISignInService.SignInRequest>();
   const redirectPath =
-    (location.state as { from?: { pathname?: string } } | null)?.from
-      ?.pathname || "/dashboard";
+    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || "/dashboard";
 
   const onSubmit = async (values: ISignInService.SignInRequest) => {
     const resp = await signIn(values);
@@ -83,16 +82,6 @@ const SignIn = () => {
                 </Button>
               </Form>
             </div>
-            <Divider />
-            <Button className="bg-black-800 w-full text-white" size="large">
-              Sign Site On
-            </Button>
-          </div>
-          <div className="text-black-900 text-center text-sm">
-            Don't have an account?{" "}
-            <Link to="/auth/sign-up" className="text-primary">
-              Sign up now
-            </Link>
           </div>
         </div>
       </div>

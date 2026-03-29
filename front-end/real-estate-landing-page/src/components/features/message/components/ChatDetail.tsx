@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { CsButton } from "@/components/custom";
 import { Avatar } from "@/components/ui/avatar";
 import StateSurface from "@/components/ui/state-surface";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
 import { queryClient } from "@/lib/react-query/queryClient";
 import { cn } from "@/lib/utils";
+import { useLocale } from "next-intl";
 import { useGetMe } from "@/shared/auth/query";
 import { ConversationsQueryKey } from "../services/config";
 import { useSocket } from "../services/socket-context";
@@ -16,6 +18,8 @@ interface ChatDetailProps {
 }
 
 const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
+  const locale = useLocale();
+  const copy = getAgentCmsCopy(locale).messages;
   const bottomRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState("");
   const socket = useSocket();
@@ -310,10 +314,10 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
             <StateSurface
               size="compact"
               tone="brand"
-              eyebrow="Conversation"
+              eyebrow={copy.title}
               icon={<MessageSquareMore className="h-5 w-5" />}
-              title="No messages yet"
-              description={`Start the conversation with ${otherParticipant.fullName || "this contact"} from the composer below.`}
+              title={copy.noMessagesTitle}
+              description={`${copy.noMessagesDescriptionPrefix} ${otherParticipant.fullName || copy.noMessagesDescriptionFallback} ${locale.toLowerCase().startsWith("vi") ? "ở ô nhập phía dưới." : "using the composer below."}`}
             />
           </div>
         ) : (
@@ -376,7 +380,7 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
               className="w-8 h-8 shrink-0 mb-1"
             />
             <div className="bg-gray-100 rounded-2xl rounded-bl-none px-4 py-2 text-sm border border-gray-200">
-              <span className="text-gray-500 text-xs italic">Typing...</span>
+              <span className="text-gray-500 text-xs italic">{copy.typing}</span>
             </div>
           </div>
         )}
@@ -389,7 +393,7 @@ const ChatDetail = ({ messages, conversation }: ChatDetailProps) => {
           onChange={handleInputChange}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all placeholder:text-gray-400"
-          placeholder="Type a message..."
+          placeholder={copy.inputPlaceholder}
         />
         <CsButton
           onClick={handleSendMessage}

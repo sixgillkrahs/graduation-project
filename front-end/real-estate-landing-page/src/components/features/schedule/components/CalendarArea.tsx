@@ -4,18 +4,20 @@ import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { memo, useCallback, useRef, useState } from "react";
-import { renderEventContent } from "./EventItem";
+import type { EventClickArgs } from "../dto/schedule.dto";
 import EventDialog from "./EventDialog";
-import { EventClickArgs } from "../dto/schedule.dto";
+import { renderEventContent } from "./EventItem";
 
 const CalendarArea = ({
   filteredEvents,
   handleDateClick,
   handleDatesSet,
+  isVi,
 }: {
   filteredEvents: any[];
   handleDateClick: (info: any) => void;
   handleDatesSet: (dateInfo: any) => void;
+  isVi: boolean;
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
   const [open, setOpen] = useState(false);
@@ -37,9 +39,8 @@ const CalendarArea = ({
   }, []);
 
   return (
-    <>
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-1 overflow-hidden calendar-wrapper">
-        <FullCalendar
+    <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-1 overflow-hidden calendar-wrapper">
+      <FullCalendar
           ref={calendarRef}
           plugins={[
             dayGridPlugin,
@@ -52,6 +53,13 @@ const CalendarArea = ({
             left: "prev,next today",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+          }}
+          buttonText={{
+            today: isVi ? "Hôm nay" : "Today",
+            month: isVi ? "Tháng" : "Month",
+            week: isVi ? "Tuần" : "Week",
+            day: isVi ? "Ngày" : "Day",
+            list: isVi ? "Danh sách" : "List",
           }}
           editable={true}
           selectable={true}
@@ -89,9 +97,8 @@ const CalendarArea = ({
           open={open}
           onClose={handleClose}
           id={selectedEvent?._def.publicId || ""}
-        />
-      </div>
-    </>
+      />
+    </div>
   );
 };
 

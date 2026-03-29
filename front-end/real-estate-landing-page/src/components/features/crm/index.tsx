@@ -1,6 +1,5 @@
 "use client";
 
-import { format } from "date-fns";
 import {
   Calendar,
   CheckCircle2,
@@ -15,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 import { toast } from "@/lib/toast";
 import CsTabs from "@/components/custom/tabs";
@@ -32,69 +32,73 @@ import { useUpdateSchedule } from "@/components/features/schedule/services/mutat
 import { useGetLeads } from "@/components/features/schedule/services/query";
 import { Input } from "@/components/ui/input";
 import { CsTable, type TableColumn } from "@/components/ui/table";
+import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
 
-const leadStatusMeta: Record<LeadStatus, { label: string; className: string }> =
-  {
-    NEW: {
-      label: "New",
-      className: "bg-amber-100 text-amber-700",
-    },
-    CONTACTED: {
-      label: "Contacted",
-      className: "bg-blue-100 text-blue-700",
-    },
-    QUALIFIED: {
-      label: "Qualified",
-      className: "bg-violet-100 text-violet-700",
-    },
-    SCHEDULED: {
-      label: "Scheduled",
-      className: "bg-emerald-100 text-emerald-700",
-    },
-    WON: {
-      label: "Won",
-      className: "bg-green-100 text-green-700",
-    },
-    LOST: {
-      label: "Lost",
-      className: "bg-rose-100 text-rose-700",
-    },
-  };
+const getLeadStatusMeta = (
+  isVi: boolean,
+): Record<LeadStatus, { label: string; className: string }> => ({
+  NEW: {
+    label: isVi ? "Mới" : "New",
+    className: "bg-amber-100 text-amber-700",
+  },
+  CONTACTED: {
+    label: isVi ? "Đã liên hệ" : "Contacted",
+    className: "bg-blue-100 text-blue-700",
+  },
+  QUALIFIED: {
+    label: isVi ? "Đủ điều kiện" : "Qualified",
+    className: "bg-violet-100 text-violet-700",
+  },
+  SCHEDULED: {
+    label: isVi ? "Đã lên lịch" : "Scheduled",
+    className: "bg-emerald-100 text-emerald-700",
+  },
+  WON: {
+    label: isVi ? "Thành công" : "Won",
+    className: "bg-green-100 text-green-700",
+  },
+  LOST: {
+    label: isVi ? "Thất bại" : "Lost",
+    className: "bg-rose-100 text-rose-700",
+  },
+});
 
-const topicLabels: Record<string, string> = {
-  PRICE: "Price",
-  LEGAL: "Legal",
-  LOCATION: "Location",
-  NEGOTIATION: "Negotiation",
-  VIEWING: "Viewing",
-  FURNITURE: "Furniture",
-  PAYMENT: "Payment",
-};
+const getTopicLabels = (isVi: boolean): Record<string, string> => ({
+  PRICE: isVi ? "Giá" : "Price",
+  LEGAL: isVi ? "Pháp lý" : "Legal",
+  LOCATION: isVi ? "Vị trí" : "Location",
+  NEGOTIATION: isVi ? "Đàm phán" : "Negotiation",
+  VIEWING: isVi ? "Xem nhà" : "Viewing",
+  FURNITURE: isVi ? "Nội thất" : "Furniture",
+  PAYMENT: isVi ? "Thanh toán" : "Payment",
+});
 
-const intentLabels: Record<string, string> = {
-  BUY_TO_LIVE: "Buy to live",
-  INVEST: "Investment",
-  RENT: "Rent",
-  CONSULTATION: "Consultation",
-};
+const getIntentLabels = (isVi: boolean): Record<string, string> => ({
+  BUY_TO_LIVE: isVi ? "Mua để ở" : "Buy to live",
+  INVEST: isVi ? "Đầu tư" : "Investment",
+  RENT: isVi ? "Thuê" : "Rent",
+  CONSULTATION: isVi ? "Tư vấn" : "Consultation",
+});
 
-const contactTimeLabels: Record<string, string> = {
-  ASAP: "ASAP",
-  TODAY: "Today",
-  NEXT_24_HOURS: "Within 24h",
-  THIS_WEEKEND: "This weekend",
-};
+const getContactTimeLabels = (isVi: boolean): Record<string, string> => ({
+  ASAP: isVi ? "Càng sớm càng tốt" : "ASAP",
+  TODAY: isVi ? "Hôm nay" : "Today",
+  NEXT_24_HOURS: isVi ? "Trong 24 giờ" : "Within 24h",
+  THIS_WEEKEND: isVi ? "Cuối tuần này" : "This weekend",
+});
 
-const contactChannelLabels: Record<string, string> = {
-  PHONE: "Phone",
+const getContactChannelLabels = (isVi: boolean): Record<string, string> => ({
+  PHONE: isVi ? "Điện thoại" : "Phone",
   CHAT: "Chat",
   ZALO: "Zalo",
   EMAIL: "Email",
-};
+});
 
-const leadSourceMeta: Record<string, { label: string; className: string }> = {
+const getLeadSourceMeta = (
+  isVi: boolean,
+): Record<string, { label: string; className: string }> => ({
   PROPERTY_CALL: {
-    label: "Call",
+    label: isVi ? "Gọi" : "Call",
     className: "bg-emerald-50 text-emerald-700",
   },
   PROPERTY_CHAT: {
@@ -102,36 +106,38 @@ const leadSourceMeta: Record<string, { label: string; className: string }> = {
     className: "bg-blue-50 text-blue-700",
   },
   PROPERTY_REQUEST: {
-    label: "Request",
+    label: isVi ? "Yêu cầu" : "Request",
     className: "bg-amber-50 text-amber-700",
   },
-};
+});
 
-const scheduleStatusMeta: Record<
+const getScheduleStatusMeta = (
+  isVi: boolean,
+): Record<
   SCHEDULE_STATUS,
   { label: string; className: string }
-> = {
+> => ({
   PENDING: {
-    label: "Pending approval",
+    label: isVi ? "Chờ duyệt" : "Pending approval",
     className: "bg-amber-50 text-amber-700",
   },
   CONFIRMED: {
-    label: "Confirmed",
+    label: isVi ? "Đã xác nhận" : "Confirmed",
     className: "bg-blue-50 text-blue-700",
   },
   CANCELLED: {
-    label: "Cancelled",
+    label: isVi ? "Đã hủy" : "Cancelled",
     className: "bg-rose-50 text-rose-700",
   },
   COMPLETED: {
-    label: "Completed",
+    label: isVi ? "Hoàn thành" : "Completed",
     className: "bg-emerald-50 text-emerald-700",
   },
   EXPIRED: {
-    label: "Expired",
+    label: isVi ? "Quá hạn" : "Expired",
     className: "bg-gray-100 text-gray-700",
   },
-};
+});
 
 type CRMHistoryEvent = {
   id: string;
@@ -197,20 +203,11 @@ const getListingImage = (listing: CRMListing) => {
   );
 };
 
-const formatDateTime = (value?: string | Date) => {
-  if (!value) {
-    return "-";
-  }
-
-  const dateValue = new Date(value);
-  if (Number.isNaN(dateValue.getTime())) {
-    return "-";
-  }
-
-  return format(dateValue, "dd MMM, yyyy HH:mm");
-};
-
 export const CRMFeature = () => {
+  const locale = useLocale();
+  const isVi = locale.toLowerCase().startsWith("vi");
+  const { formatDateTime: formatDateTimeByLocale, formatDate } =
+    useDateTimeFormatter();
   const { data: scheduleLeadsResponse, isLoading: isLoadingSchedules } =
     useGetLeads();
   const { data: inquiryLeadsResponse, isLoading: isLoadingInquiryLeads } =
@@ -224,6 +221,137 @@ export const CRMFeature = () => {
   const inquiryLeads = inquiryLeadsResponse?.data || [];
 
   const [searchTerm, setSearchTerm] = useState("");
+  const copy = {
+    header: {
+      title: isVi ? "Khách hàng & CRM" : "Leads & CRM",
+      description: isVi
+        ? "Thu thập lead từ trang chi tiết tin đăng, theo dõi nhanh và chuyển đổi khách hàng tiềm năng thành lịch hẹn."
+        : "Capture fresh inquiries from listing pages, follow up quickly, and turn qualified prospects into appointments.",
+      export: isVi ? "Xuất CSV" : "Export CSV",
+    },
+    stats: {
+      total: isVi ? "Tổng lead" : "Total Leads",
+      inquiries: isVi ? "Lead mới" : "New Inquiries",
+      completed: isVi ? "Buổi xem đã hoàn thành" : "Completed Viewings",
+      upcoming: isVi ? "Lịch hẹn sắp tới" : "Upcoming Appointments",
+    },
+    searchTitle: isVi
+      ? "Tìm trên toàn bộ inquiry và lịch hẹn"
+      : "Search across inquiries and appointments",
+    searchPlaceholder: isVi
+      ? "Tìm khách hàng, email hoặc bất động sản..."
+      : "Search customers, emails or properties...",
+    sectionTitle: isVi ? "Mục CRM" : "CRM Sections",
+    sectionDescription: isVi
+      ? "Chuyển tab để xem lịch sử liên hệ, inquiry mới và lead từ lịch hẹn mà không làm trang quá dài."
+      : "Switch between tabs to review contact history, new inquiries, and appointment leads without stretching the page.",
+    tabs: {
+      history: isVi ? "Lịch sử liên hệ" : "Contact history",
+      inquiries: isVi ? "Inquiry mới" : "New inquiries",
+      appointments: isVi ? "Lịch hẹn" : "Appointments",
+    },
+    panels: {
+      historyTitle: isVi
+        ? "Lịch sử liên hệ theo khách mua và tin đăng"
+        : "Contact history by buyer and listing",
+      historyDescription: isVi
+        ? "Dòng thời gian hợp nhất cho biết khách nào đã gọi, chat, gửi yêu cầu hoặc đặt lịch xem từ từng tin đăng."
+        : "Unified timeline showing which buyer called, chatted, sent a request, or booked a viewing from each listing.",
+      historyEmpty: isVi
+        ? "Chưa có lịch sử liên hệ. Cuộc gọi, chat, yêu cầu và đặt lịch xem sẽ xuất hiện tại đây."
+        : "No contact history yet. Calls, chats, requests, and viewing bookings will appear here.",
+      inquiriesTitle: isVi ? "Inquiry mới" : "New inquiries",
+      inquiriesDescription: isVi
+        ? "Lead được ghi nhận từ các hành động Gọi, Chat và Gửi yêu cầu trên trang chi tiết bất động sản."
+        : "Leads tracked from the property detail Call, Chat, and Send request actions.",
+      inquiriesEmpty: isVi
+        ? "Chưa có inquiry nào. Các biểu mẫu yêu cầu mới sẽ xuất hiện tại đây."
+        : "No inquiries yet. New request-info submissions will appear here.",
+      appointmentsTitle: isVi
+        ? "Lead đủ điều kiện từ lịch hẹn"
+        : "Qualified leads from appointments",
+      appointmentsDescription: isVi
+        ? "Các yêu cầu xem nhà đã xác nhận hoặc hoàn thành và đã đi sâu hơn trong phễu chuyển đổi."
+        : "Confirmed or completed viewing requests that have already moved deeper into the funnel.",
+      appointmentsEmpty: isVi
+        ? "Chưa có lead từ lịch hẹn. Các yêu cầu xem nhà đã xác nhận sẽ xuất hiện tại đây."
+        : "No appointment leads yet. Confirmed viewing requests will appear here.",
+    },
+    columns: {
+      buyer: isVi ? "Khách mua" : "Buyer",
+      listing: isVi ? "Tin đăng" : "Listing",
+      contactHistory: isVi ? "Lịch sử liên hệ" : "Contact history",
+      lastTouch: isVi ? "Tương tác gần nhất" : "Last touch",
+      actions: isVi ? "Thao tác" : "Actions",
+      customer: isVi ? "Khách hàng" : "Customer",
+      property: isVi ? "Bất động sản" : "Property",
+      source: isVi ? "Nguồn" : "Source",
+      inquiry: isVi ? "Nhu cầu" : "Inquiry",
+      followUp: isVi ? "Theo dõi" : "Follow-up",
+      status: isVi ? "Trạng thái" : "Status",
+      customerInfo: isVi ? "Thông tin khách hàng" : "Customer Info",
+      propertyOfInterest: isVi
+        ? "Bất động sản quan tâm"
+        : "Property of Interest",
+      appointmentDetails: isVi ? "Chi tiết lịch hẹn" : "Appointment Details",
+      notes: isVi ? "Ghi chú" : "Notes",
+    },
+    labels: {
+      unknownBuyer: isVi ? "Khách mua chưa rõ" : "Unknown buyer",
+      noPhone: isVi ? "Chưa có số điện thoại" : "No phone",
+      propertyListing: isVi ? "Tin bất động sản" : "Property listing",
+      addressHidden: isVi ? "Địa chỉ đang ẩn" : "Address hidden",
+      noPropertyLinked: isVi
+        ? "Chưa liên kết bất động sản"
+        : "No property linked",
+      trackedFromProperty: isVi
+        ? "Ghi nhận từ trang chi tiết tin đăng"
+        : "Tracked from property detail",
+      budget: isVi ? "Ngân sách" : "Budget",
+      resubmitted: isVi ? "Gửi lại" : "Re-submitted",
+      times: isVi ? "lần" : "times",
+      earlierActions: isVi
+        ? "hoạt động liên hệ trước đó"
+        : "earlier contact actions",
+      trackedTouchpoint: isVi
+        ? "điểm chạm đã ghi nhận"
+        : "tracked touchpoint",
+      trackedTouchpoints: isVi
+        ? "điểm chạm đã ghi nhận"
+        : "tracked touchpoints",
+      bookedViewing: isVi ? "Đặt lịch xem" : "Booked viewing",
+      noNotes: isVi ? "Không có ghi chú" : "No notes",
+      customerShort: isVi ? "Khách" : "Cust",
+      youShort: isVi ? "Bạn" : "You",
+    },
+    actions: {
+      call: isVi ? "Gọi khách hàng" : "Call customer",
+      zalo: isVi ? "Nhắn qua Zalo" : "Message via Zalo",
+      email: isVi ? "Gửi email" : "Send email",
+      complete: isVi ? "Đánh dấu hoàn thành" : "Mark as completed",
+    },
+    toasts: {
+      leadUpdated: isVi
+        ? "Cập nhật trạng thái lead thành công."
+        : "Lead status updated.",
+      leadError: isVi
+        ? "Không thể cập nhật trạng thái lead."
+        : "Could not update lead status.",
+      appointmentCompleted: isVi
+        ? "Đã đánh dấu lịch hẹn là hoàn thành."
+        : "Appointment marked as completed.",
+      appointmentError: isVi
+        ? "Không thể cập nhật trạng thái lịch hẹn."
+        : "Could not update appointment status.",
+    },
+  };
+  const leadStatusMeta = getLeadStatusMeta(isVi);
+  const topicLabels = getTopicLabels(isVi);
+  const intentLabels = getIntentLabels(isVi);
+  const contactTimeLabels = getContactTimeLabels(isVi);
+  const contactChannelLabels = getContactChannelLabels(isVi);
+  const leadSourceMeta = getLeadSourceMeta(isVi);
+  const scheduleStatusMeta = getScheduleStatusMeta(isVi);
 
   const filteredInquiryLeads = useMemo(() => {
     if (!searchTerm) {
@@ -291,7 +419,7 @@ export const CRMFeature = () => {
       if (!current) {
         current = {
           id: key,
-          customerName: customerName || "Unknown buyer",
+          customerName: customerName || copy.labels.unknownBuyer,
           customerPhone: customerPhone || "",
           customerEmail: customerEmail || "",
           listing: listing || null,
@@ -301,8 +429,11 @@ export const CRMFeature = () => {
         };
         grouped.set(key, current);
       }
-      if (!current.customerName || current.customerName === "Unknown buyer") {
-        current.customerName = customerName || "Unknown buyer";
+      if (
+        !current.customerName ||
+        current.customerName === copy.labels.unknownBuyer
+      ) {
+        current.customerName = customerName || copy.labels.unknownBuyer;
       }
       if (!current.customerPhone) {
         current.customerPhone = customerPhone || "";
@@ -335,7 +466,7 @@ export const CRMFeature = () => {
       row.historyItems.push({
         id: `${lead._id}-${lead.source}`,
         label: sourceMeta.label,
-        detail: formatDateTime(timestampSource),
+        detail: formatDateTimeByLocale(timestampSource),
         occurredAt: timestampSource,
         timestamp: Number.isNaN(eventTimestamp) ? 0 : eventTimestamp,
         className: sourceMeta.className,
@@ -344,7 +475,7 @@ export const CRMFeature = () => {
         note:
           lead.message ||
           (lead.submissionCount > 1
-            ? `Re-submitted ${lead.submissionCount} times`
+            ? `${copy.labels.resubmitted} ${lead.submissionCount} ${copy.labels.times}`
             : undefined),
       });
     });
@@ -363,8 +494,8 @@ export const CRMFeature = () => {
 
       row.historyItems.push({
         id: `${schedule._id || schedule.id}-booking`,
-        label: "Booked viewing",
-        detail: `${formatDateTime(schedule.createdAt || schedule.date)} | ${format(new Date(schedule.date), "dd MMM, yyyy")} | ${schedule.startTime} - ${schedule.endTime}`,
+        label: copy.labels.bookedViewing,
+        detail: `${formatDateTimeByLocale(schedule.createdAt || schedule.date)} | ${formatDate(schedule.date)} | ${schedule.startTime} - ${schedule.endTime}`,
         occurredAt: String(schedule.createdAt || schedule.date),
         timestamp: Number.isNaN(eventTimestamp) ? 0 : eventTimestamp,
         className: "bg-violet-50 text-violet-700",
@@ -422,7 +553,7 @@ export const CRMFeature = () => {
 
   const contactHistoryColumns: TableColumn<CRMContactHistoryRow>[] = [
     {
-      title: "Buyer",
+      title: copy.columns.buyer,
       dataIndex: "customerName",
       key: "customerName",
       render: (_: unknown, record: CRMContactHistoryRow) => (
@@ -436,7 +567,7 @@ export const CRMFeature = () => {
             </span>
             <div className="mt-1 flex items-center gap-2 text-sm text-gray-500">
               <Phone className="h-3.5 w-3.5" />
-              <span>{record.customerPhone || "No phone"}</span>
+              <span>{record.customerPhone || copy.labels.noPhone}</span>
             </div>
             {record.customerEmail && (
               <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -449,7 +580,7 @@ export const CRMFeature = () => {
       ),
     },
     {
-      title: "Listing",
+      title: copy.columns.listing,
       dataIndex: "listing",
       key: "listing",
       render: (_: unknown, record: CRMContactHistoryRow) =>
@@ -469,7 +600,7 @@ export const CRMFeature = () => {
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gray-200">
               <Image
                 src={getListingImage(record.listing)}
-                alt={getListingTitle(record.listing) || "Property listing"}
+                alt={getListingTitle(record.listing) || copy.labels.propertyListing}
                 width={48}
                 height={48}
                 className="h-full w-full object-cover"
@@ -477,22 +608,22 @@ export const CRMFeature = () => {
             </div>
             <div className="flex flex-col">
               <span className="line-clamp-1 max-w-[220px] font-medium text-gray-900">
-                {getListingTitle(record.listing) || "Property listing"}
+                {getListingTitle(record.listing) || copy.labels.propertyListing}
               </span>
               <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
                 <MapPin className="h-3 w-3 shrink-0" />
                 <span className="line-clamp-1">
-                  {getListingAddress(record.listing) || "Address hidden"}
+                  {getListingAddress(record.listing) || copy.labels.addressHidden}
                 </span>
               </div>
             </div>
           </button>
         ) : (
-          <span className="italic text-gray-400">No property linked</span>
+          <span className="italic text-gray-400">{copy.labels.noPropertyLinked}</span>
         ),
     },
     {
-      title: "Contact history",
+      title: copy.columns.contactHistory,
       dataIndex: "historyItems",
       key: "historyItems",
       render: (_: unknown, record: CRMContactHistoryRow) => (
@@ -526,14 +657,14 @@ export const CRMFeature = () => {
           ))}
           {record.historyItems.length > 3 && (
             <p className="text-xs text-gray-500">
-              +{record.historyItems.length - 3} earlier contact actions
+              +{record.historyItems.length - 3} {copy.labels.earlierActions}
             </p>
           )}
         </div>
       ),
     },
     {
-      title: "Last touch",
+      title: copy.columns.lastTouch,
       dataIndex: "latestActivityAt",
       key: "latestActivityAt",
       render: (_: unknown, record: CRMContactHistoryRow) => (
@@ -542,14 +673,16 @@ export const CRMFeature = () => {
             {record.latestActivityAt}
           </p>
           <p className="text-xs text-gray-500">
-            {record.historyItems.length} tracked touchpoint
-            {record.historyItems.length > 1 ? "s" : ""}
+            {record.historyItems.length}{" "}
+            {record.historyItems.length > 1
+              ? copy.labels.trackedTouchpoints
+              : copy.labels.trackedTouchpoint}
           </p>
         </div>
       ),
     },
     {
-      title: "Actions",
+      title: copy.columns.actions,
       dataIndex: "id",
       key: "actions",
       align: "center",
@@ -560,7 +693,7 @@ export const CRMFeature = () => {
               <a
                 href={`tel:${record.customerPhone}`}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100"
-                title="Call customer"
+                title={copy.actions.call}
               >
                 <Phone className="h-4 w-4" />
               </a>
@@ -569,7 +702,7 @@ export const CRMFeature = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition-colors hover:bg-indigo-100"
-                title="Message via Zalo"
+                title={copy.actions.zalo}
               >
                 <MessageCircle className="h-4 w-4" />
               </a>
@@ -579,7 +712,7 @@ export const CRMFeature = () => {
             <a
               href={`mailto:${record.customerEmail}`}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100"
-              title="Send email"
+              title={copy.actions.email}
             >
               <Mail className="h-4 w-4" />
             </a>
@@ -591,7 +724,7 @@ export const CRMFeature = () => {
 
   const inquiryColumns: any[] = [
     {
-      title: "Customer",
+      title: copy.columns.customer,
       dataIndex: "customer",
       key: "customer",
       render: (_: unknown, record: ILeadDto) => (
@@ -618,7 +751,7 @@ export const CRMFeature = () => {
       ),
     },
     {
-      title: "Property",
+      title: copy.columns.property,
       dataIndex: "property",
       key: "property",
       render: (_: unknown, record: ILeadDto) =>
@@ -636,7 +769,7 @@ export const CRMFeature = () => {
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gray-200">
               <Image
                 src={getListingImage(record.listingId)}
-                alt={record.listingId.title || "Property listing"}
+                alt={record.listingId.title || copy.labels.propertyListing}
                 width={48}
                 height={48}
                 className="h-full w-full object-cover"
@@ -655,11 +788,11 @@ export const CRMFeature = () => {
             </div>
           </button>
         ) : (
-          <span className="italic text-gray-400">No property linked</span>
+          <span className="italic text-gray-400">{copy.labels.noPropertyLinked}</span>
         ),
     },
     {
-      title: "Source",
+      title: copy.columns.source,
       dataIndex: "source",
       key: "source",
       render: (_: unknown, record: ILeadDto) => {
@@ -676,14 +809,14 @@ export const CRMFeature = () => {
               {sourceMeta.label}
             </span>
             <p className="text-xs text-gray-500">
-              Tracked from property detail
+              {copy.labels.trackedFromProperty}
             </p>
           </div>
         );
       },
     },
     {
-      title: "Inquiry",
+      title: copy.columns.inquiry,
       dataIndex: "inquiry",
       key: "inquiry",
       render: (_: unknown, record: ILeadDto) => (
@@ -702,7 +835,7 @@ export const CRMFeature = () => {
             ))}
           </div>
           <p className="text-xs text-gray-500">
-            Budget:{" "}
+            {copy.labels.budget}:{" "}
             <span className="font-medium text-gray-700">
               {record.budgetRange}
             </span>
@@ -716,7 +849,7 @@ export const CRMFeature = () => {
       ),
     },
     {
-      title: "Follow-up",
+      title: copy.columns.followUp,
       dataIndex: "followUp",
       key: "followUp",
       render: (_: unknown, record: ILeadDto) => (
@@ -730,18 +863,19 @@ export const CRMFeature = () => {
               record.preferredContactChannel}
           </span>
           <p className="text-xs text-gray-500">
-            {format(new Date(record.createdAt), "dd MMM, yyyy HH:mm")}
+            {formatDateTimeByLocale(record.createdAt)}
           </p>
           {record.submissionCount > 1 && (
             <p className="text-xs text-amber-600">
-              Re-submitted {record.submissionCount} times
+              {copy.labels.resubmitted} {record.submissionCount}{" "}
+              {copy.labels.times}
             </p>
           )}
         </div>
       ),
     },
     {
-      title: "Status",
+      title: copy.columns.status,
       dataIndex: "status",
       key: "status",
       render: (_: unknown, record: ILeadDto) => (
@@ -762,9 +896,9 @@ export const CRMFeature = () => {
                   id: record._id,
                   status: event.target.value as LeadStatus,
                 });
-                toast.success("Lead status updated.");
+                toast.success(copy.toasts.leadUpdated);
               } catch (_error) {
-                toast.error("Could not update lead status.");
+                toast.error(copy.toasts.leadError);
               }
             }}
             disabled={isUpdatingLeadStatus}
@@ -779,7 +913,7 @@ export const CRMFeature = () => {
       ),
     },
     {
-      title: "Actions",
+      title: copy.columns.actions,
       dataIndex: "actions",
       key: "actions",
       align: "center",
@@ -788,7 +922,7 @@ export const CRMFeature = () => {
           <a
             href={`tel:${record.customerPhone}`}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100"
-            title="Call customer"
+            title={copy.actions.call}
           >
             <Phone className="h-4 w-4" />
           </a>
@@ -797,7 +931,7 @@ export const CRMFeature = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition-colors hover:bg-indigo-100"
-            title="Message via Zalo"
+            title={copy.actions.zalo}
           >
             <MessageCircle className="h-4 w-4" />
           </a>
@@ -805,7 +939,7 @@ export const CRMFeature = () => {
             <a
               href={`mailto:${record.customerEmail}`}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100"
-              title="Send email"
+              title={copy.actions.email}
             >
               <Mail className="h-4 w-4" />
             </a>
@@ -817,7 +951,7 @@ export const CRMFeature = () => {
 
   const appointmentColumns: any[] = [
     {
-      title: "Customer Info",
+      title: copy.columns.customerInfo,
       dataIndex: "customerInfo",
       key: "customerInfo",
       render: (_: any, record: any) => (
@@ -842,7 +976,7 @@ export const CRMFeature = () => {
       ),
     },
     {
-      title: "Property of Interest",
+      title: copy.columns.propertyOfInterest,
       dataIndex: "property",
       key: "property",
       render: (_: any, record: any) =>
@@ -860,7 +994,7 @@ export const CRMFeature = () => {
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-gray-200">
               <Image
                 src={getListingImage(record.listingId)}
-                alt={record.listingId.title || "Property listing"}
+                alt={record.listingId.title || copy.labels.propertyListing}
                 width={48}
                 height={48}
                 className="h-full w-full object-cover"
@@ -879,18 +1013,18 @@ export const CRMFeature = () => {
             </div>
           </button>
         ) : (
-          <span className="italic text-gray-400">No property linked</span>
+          <span className="italic text-gray-400">{copy.labels.noPropertyLinked}</span>
         ),
     },
     {
-      title: "Appointment Details",
+      title: copy.columns.appointmentDetails,
       dataIndex: "appointment",
       key: "appointment",
       render: (_: any, record: any) => (
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
             <Calendar className="h-4 w-4 text-blue-500" />
-            <span>{format(new Date(record.date), "dd MMM, yyyy")}</span>
+            <span>{formatDate(record.date)}</span>
             <span className="rounded-md bg-gray-100 px-2 py-0.5 text-xs">
               {record.startTime} - {record.endTime}
             </span>
@@ -901,42 +1035,46 @@ export const CRMFeature = () => {
           </div>
           {record.status === "COMPLETED" ? (
             <span className="mt-1 inline-flex w-max items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
-              Completed
+              {isVi ? "Hoàn thành" : "Completed"}
             </span>
           ) : (
             <span className="mt-1 inline-flex w-max items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
-              Confirmed
+              {isVi ? "Đã xác nhận" : "Confirmed"}
             </span>
           )}
         </div>
       ),
     },
     {
-      title: "Notes",
+      title: copy.columns.notes,
       dataIndex: "notes",
       key: "notes",
       render: (_: any, record: any) => (
         <div className="max-w-[250px] space-y-1">
           {record.customerNote && (
             <p className="line-clamp-2 text-xs text-gray-600">
-              <span className="font-medium text-gray-800">Cust:</span>{" "}
+              <span className="font-medium text-gray-800">
+                {copy.labels.customerShort}:
+              </span>{" "}
               {record.customerNote}
             </p>
           )}
           {record.agentNote && (
             <p className="mt-1 line-clamp-2 text-xs text-blue-600">
-              <span className="font-medium text-blue-800">You:</span>{" "}
+              <span className="font-medium text-blue-800">
+                {copy.labels.youShort}:
+              </span>{" "}
               {record.agentNote}
             </p>
           )}
           {!record.customerNote && !record.agentNote && (
-            <span className="text-sm italic text-gray-400">No notes</span>
+            <span className="text-sm italic text-gray-400">{copy.labels.noNotes}</span>
           )}
         </div>
       ),
     },
     {
-      title: "Actions",
+      title: copy.columns.actions,
       dataIndex: "actions",
       key: "actions",
       align: "center",
@@ -966,13 +1104,13 @@ export const CRMFeature = () => {
                       color: record.color,
                     },
                   });
-                  toast.success("Appointment marked as completed.");
+                  toast.success(copy.toasts.appointmentCompleted);
                 } catch (_error) {
-                  toast.error("Could not update appointment status.");
+                  toast.error(copy.toasts.appointmentError);
                 }
               }}
               className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
-              title="Mark as completed"
+              title={copy.actions.complete}
             >
               <CheckCircle2 className="h-4 w-4" />
             </button>
@@ -980,7 +1118,7 @@ export const CRMFeature = () => {
           <a
             href={`tel:${record.customerPhone}`}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-colors hover:bg-blue-100"
-            title="Call customer"
+            title={copy.actions.call}
           >
             <Phone className="h-4 w-4" />
           </a>
@@ -989,14 +1127,14 @@ export const CRMFeature = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition-colors hover:bg-indigo-100"
-            title="Message via Zalo"
+            title={copy.actions.zalo}
           >
             <MessageCircle className="h-4 w-4" />
           </a>
           <a
             href={`mailto:${record.customerEmail}`}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 transition-colors hover:bg-emerald-100"
-            title="Send Email"
+            title={copy.actions.email}
           >
             <Mail className="h-4 w-4" />
           </a>
@@ -1008,17 +1146,16 @@ export const CRMFeature = () => {
   const crmTabs = [
     {
       value: "history",
-      label: `Contact history (${filteredContactHistory.length})`,
+      label: `${copy.tabs.history} (${filteredContactHistory.length})`,
       content: (
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="border-b border-gray-100 bg-gray-50/50 p-5">
             <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
               <History className="h-5 w-5 text-gray-400" />
-              Contact history by buyer and listing
+              {copy.panels.historyTitle}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Unified timeline showing which buyer called, chatted, sent a
-              request, or booked a viewing from each listing.
+              {copy.panels.historyDescription}
             </p>
           </div>
           <div className="p-1">
@@ -1028,7 +1165,7 @@ export const CRMFeature = () => {
               loading={isLoadingInquiryLeads || isLoadingSchedules}
               rowKey={(record: CRMContactHistoryRow) => record.id}
               pagination={false}
-              emptyText="No contact history yet. Calls, chats, requests, and viewing bookings will appear here."
+              emptyText={copy.panels.historyEmpty}
             />
           </div>
         </div>
@@ -1036,16 +1173,15 @@ export const CRMFeature = () => {
     },
     {
       value: "inquiries",
-      label: `New inquiries (${filteredInquiryLeads.length})`,
+      label: `${copy.tabs.inquiries} (${filteredInquiryLeads.length})`,
       content: (
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="border-b border-gray-100 bg-gray-50/50 p-5">
             <h3 className="text-lg font-semibold text-gray-800">
-              New inquiries
+              {copy.panels.inquiriesTitle}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Leads tracked from the property detail Call, Chat, and Send
-              request actions.
+              {copy.panels.inquiriesDescription}
             </p>
           </div>
           <div className="p-1">
@@ -1055,7 +1191,7 @@ export const CRMFeature = () => {
               loading={isLoadingInquiryLeads}
               rowKey={(record: ILeadDto) => record._id}
               pagination={false}
-              emptyText="No inquiries yet. New request-info submissions will appear here."
+              emptyText={copy.panels.inquiriesEmpty}
             />
           </div>
         </div>
@@ -1063,16 +1199,15 @@ export const CRMFeature = () => {
     },
     {
       value: "appointments",
-      label: `Appointments (${filteredLeads.length})`,
+      label: `${copy.tabs.appointments} (${filteredLeads.length})`,
       content: (
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="border-b border-gray-100 bg-gray-50/50 p-5">
             <h3 className="text-lg font-semibold text-gray-800">
-              Qualified leads from appointments
+              {copy.panels.appointmentsTitle}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Confirmed or completed viewing requests that have already moved
-              deeper into the funnel.
+              {copy.panels.appointmentsDescription}
             </p>
           </div>
           <div className="p-1">
@@ -1082,7 +1217,7 @@ export const CRMFeature = () => {
               loading={isLoadingSchedules}
               rowKey={(record: any) => record._id}
               pagination={false}
-              emptyText="No appointment leads yet. Confirmed viewing requests will appear here."
+              emptyText={copy.panels.appointmentsEmpty}
             />
           </div>
         </div>
@@ -1095,11 +1230,10 @@ export const CRMFeature = () => {
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900">
-            Leads & CRM
+            {copy.header.title}
           </h1>
           <p className="max-w-2xl text-sm text-gray-500 md:text-base">
-            Capture fresh inquiries from listing detail pages, follow up fast,
-            and convert qualified prospects into appointments.
+            {copy.header.description}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -1108,7 +1242,7 @@ export const CRMFeature = () => {
             className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900"
           >
             <Download className="h-4 w-4" />
-            Export CSV
+            {copy.header.export}
           </button>
         </div>
       </div>
@@ -1119,7 +1253,7 @@ export const CRMFeature = () => {
             <Users className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500">Total Leads</p>
+            <p className="text-sm font-medium text-gray-500">{copy.stats.total}</p>
             <h3 className="text-2xl font-bold text-gray-900">
               {scheduleContacts.length + inquiryLeads.length}
             </h3>
@@ -1130,7 +1264,7 @@ export const CRMFeature = () => {
             <UserRoundPlus className="h-6 w-6 text-amber-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-500">New Inquiries</p>
+            <p className="text-sm font-medium text-gray-500">{copy.stats.inquiries}</p>
             <h3 className="text-2xl font-bold text-gray-900">
               {newInquiryCount}
             </h3>
@@ -1142,7 +1276,7 @@ export const CRMFeature = () => {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">
-              Completed Viewings
+              {copy.stats.completed}
             </p>
             <h3 className="text-2xl font-bold text-gray-900">
               {completedCount}
@@ -1155,7 +1289,7 @@ export const CRMFeature = () => {
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">
-              Upcoming Appointments
+              {copy.stats.upcoming}
             </p>
             <h3 className="text-2xl font-bold text-gray-900">
               {confirmedCount}
@@ -1168,11 +1302,11 @@ export const CRMFeature = () => {
         <div className="flex flex-col items-center justify-between gap-4 border-b border-gray-100 bg-gray-50/50 p-5 sm:flex-row">
           <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
             <Users className="h-5 w-5 text-gray-400" />
-            Search across inquiries and appointments
+            {copy.searchTitle}
           </h3>
           <div className="relative w-full sm:w-72">
             <Input
-              placeholder="Search customers, emails or properties..."
+              placeholder={copy.searchPlaceholder}
               className="w-full rounded-xl border-gray-200 bg-white py-2 pl-10 pr-4 focus:border-blue-500"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -1184,10 +1318,9 @@ export const CRMFeature = () => {
 
       <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-800">CRM sections</h3>
+          <h3 className="text-lg font-semibold text-gray-800">{copy.sectionTitle}</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Switch between tabs to review contact history, new inquiries, and
-            appointment leads without making the page too long.
+            {copy.sectionDescription}
           </p>
         </div>
         <CsTabs item={crmTabs} defaultValue="history" />

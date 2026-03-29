@@ -9,6 +9,7 @@ import {
   Rotate3d,
   Video,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
@@ -24,6 +25,7 @@ import type { ListingFormData } from "../../dto/listingformdata.dto";
 import PropertyService from "../../services/service";
 
 const MediaContent = () => {
+  const t = useTranslations("ListingForm");
   const dispatch = useDispatch();
   const { mutateAsync: uploadImages, isPending: isUploadingImages } =
     useUploadImages();
@@ -62,7 +64,7 @@ const MediaContent = () => {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 min-w-[700px]">
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           <Images />
-          Step 4: Media
+          {t("media.title")}
         </h2>
 
         <Controller
@@ -70,7 +72,7 @@ const MediaContent = () => {
           control={control}
           render={({ field }) => (
             <ImageUpload
-              description="Upload high-quality images of your property. You can upload multiple images at once."
+              description={t("media.images.description")}
               accept="image/*"
               multiple
               maxSizeMB={10}
@@ -101,14 +103,14 @@ const MediaContent = () => {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <LayoutGrid className="w-5 h-5" />
-              Thumbnail Image
+              {t("media.thumbnail.title")}
             </h3>
             <Controller
               name="thumbnail"
               control={control}
               render={({ field }) => (
                 <ImageUpload
-                  description="Upload a cover image that will be displayed on the listing card."
+                  description={t("media.thumbnail.description")}
                   accept="image/*"
                   multiple={false}
                   maxSizeMB={5}
@@ -137,15 +139,15 @@ const MediaContent = () => {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Video className="w-5 h-5" />
-              Video URL (Optional)
+              {t("media.video.title")}
             </h3>
             <Controller
               name="videoLink"
               control={control}
               render={({ field }) => (
                 <Input
-                  label="Youtube/Vimeo Link"
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  label={t("media.video.label")}
+                  placeholder={t("media.video.placeholder")}
                   preIcon={<Video className="w-4 h-4" />}
                   {...field}
                 />
@@ -159,14 +161,14 @@ const MediaContent = () => {
             <div className="md:col-span-2">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Rotate3d className="w-5 h-5" />
-                360° Virtual Tour Images
+                {t("media.virtualTour.title")}
               </h3>
               <Controller
                 name="virtualTourUrls"
                 control={control}
                 render={({ field }) => (
                   <ImageUpload
-                    description="Upload 360° panorama images (equirectangular projection)."
+                    description={t("media.virtualTour.description")}
                     accept="image/*"
                     multiple={true}
                     maxSizeMB={10}
@@ -198,7 +200,7 @@ const MediaContent = () => {
 
             <div className="md:col-span-1">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex justify-between items-center">
-                <span>Preview</span>
+                <span>{t("media.preview.title")}</span>
                 {virtualTourUrls && virtualTourUrls.length > 1 && (
                   <span className="text-xs text-muted-foreground">
                     {active360Index + 1} / {virtualTourUrls.length}
@@ -236,7 +238,9 @@ const MediaContent = () => {
                 ) : (
                   <div className="absolute inset-0 flex gap-2 items-center justify-center text-gray-400">
                     <Box className="w-8 h-8 opacity-50" />
-                    <span className="text-lg font-semibold">Preview 360</span>
+                    <span className="text-lg font-semibold">
+                      {t("media.preview.empty")}
+                    </span>
                   </div>
                 )}
               </div>
@@ -254,7 +258,7 @@ const MediaContent = () => {
                     >
                       <img
                         src={url}
-                        alt={`360 thumbnail ${idx}`}
+                        alt={t("media.preview.thumbnailAlt", { index: idx + 1 })}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -266,18 +270,18 @@ const MediaContent = () => {
         )}
         <div className="flex justify-between pt-10">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
-            Back
+            {t("actions.back")}
           </CsButton>
           <div className="flex gap-4">
             <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
-              Save Draft
+              {t("actions.saveDraft")}
             </CsButton>
             <CsButton
               onClick={handleContinue}
               type="button"
               loading={isUploadingImages}
             >
-              Continue
+              {t("actions.continue")}
               <ArrowRight className="w-5 h-5 ml-2" />
             </CsButton>
           </div>

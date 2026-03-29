@@ -1,3 +1,6 @@
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
+import { useLocale } from "next-intl";
+
 type ProfileCompletionCardProps = {
   completion: number;
   completedItems: number;
@@ -10,6 +13,7 @@ const ProfileCompletionCard = ({
   totalItems,
 }: ProfileCompletionCardProps) => {
   const normalizedCompletion = Math.max(0, Math.min(100, completion));
+  const copy = getAgentCmsCopy(useLocale()).profile.completion;
 
   return (
     <div className="w-full rounded-[18px] bg-white p-5 md:p-6">
@@ -44,7 +48,7 @@ const ProfileCompletionCard = ({
               {normalizedCompletion}%
             </span>
             <span className="cs-paragraph-gray text-[11px]! font-bold! uppercase tracking-[0.16em]">
-              Complete
+              {copy.complete}
             </span>
           </div>
         </div>
@@ -52,22 +56,20 @@ const ProfileCompletionCard = ({
         <div className="grid gap-2.5">
           <div className="grid gap-1">
             <span className="cs-paragraph-gray text-[11px]! font-bold! uppercase tracking-[0.16em]">
-              Profile Completion
+              {copy.eyebrow}
             </span>
             <h3 className="cs-typography text-[22px]! font-bold! text-black md:text-[24px]!">
-              Complete your profile
+              {copy.title}
             </h3>
           </div>
           <p className="cs-paragraph-gray text-[14px]! leading-6">
-            You have completed {completedItems}/{totalItems} profile
-            checkpoints. Fill in the missing information to make your profile
-            look stronger to clients and appear more complete across the
-            platform.
+            {copy.descriptionPrefix} {completedItems}/{totalItems}{" "}
+            {copy.descriptionMiddle} {copy.descriptionSuffix}
           </p>
           <div className="flex flex-wrap gap-2.5">
             <div className="rounded-xl bg-black px-3 py-2.5 text-white">
               <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/70">
-                Completed
+                {copy.completed}
               </div>
               <div className="mt-1 text-[20px] font-black">
                 {completedItems}
@@ -75,7 +77,7 @@ const ProfileCompletionCard = ({
             </div>
             <div className="rounded-xl bg-black/5 px-3 py-2.5 text-black">
               <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-black/50">
-                Remaining
+                {copy.remaining}
               </div>
               <div className="mt-1 text-[20px] font-black">
                 {Math.max(totalItems - completedItems, 0)}

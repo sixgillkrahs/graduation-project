@@ -9,6 +9,11 @@ import {
 } from "@tanstack/react-query";
 import axios from "axios";
 
+const shouldShowErrorSource = import.meta.env.ENVIRONMENT === "development";
+
+const formatErrorMessage = (errorSource: string, errorMessage: string) =>
+  shouldShowErrorSource ? `${errorSource}: ${errorMessage}` : errorMessage;
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,11 +32,18 @@ export const queryClient = new QueryClient({
     onError: (error: any, query: Query<unknown, unknown, unknown, QueryKey>): void => {
       if (axios.isAxiosError(error) && query.meta?.ERROR_SOURCE) {
         // toast.error(`${query.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
-        console.error(`${query.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
+        console.error(
+          formatErrorMessage(
+            String(query.meta.ERROR_SOURCE),
+            error.response?.data?.message || error.message,
+          ),
+        );
       }
       if (error instanceof Error && query.meta?.ERROR_SOURCE) {
         // toast.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
-        console.error(`${query.meta.ERROR_SOURCE}: ${error.message}`);
+        console.error(
+          formatErrorMessage(String(query.meta.ERROR_SOURCE), error.message),
+        );
       }
       if (error?.response && error.response.status === 404) {
         MessageService.error(`${error?.response?.data?.message}`);
@@ -46,15 +58,26 @@ export const queryClient = new QueryClient({
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ): void => {
       if (axios.isAxiosError(error) && mutation.meta?.ERROR_SOURCE) {
-        MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.response?.data?.message}`);
+        MessageService.error(
+          formatErrorMessage(
+            String(mutation.meta.ERROR_SOURCE),
+            error.response?.data?.message || error.message,
+          ),
+        );
       }
       if (error instanceof Error && mutation.meta?.ERROR_SOURCE) {
-        MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.message}`);
+        MessageService.error(
+          formatErrorMessage(String(mutation.meta.ERROR_SOURCE), error.message),
+        );
       }
       //@ts-expect-error  Error type 'AxiosError' is not assignable to type 'Error'.
       if (error.code === "ERR_BAD_REQUEST" && mutation.meta?.ERROR_SOURCE) {
-        //@ts-expect-error  Object is of type 'unknown'.
-        MessageService.error(`${mutation.meta.ERROR_SOURCE}: ${error.response.data.message}`);
+        MessageService.error(
+          formatErrorMessage(
+            String(mutation.meta.ERROR_SOURCE),
+            (error as any).response?.data?.message,
+          ),
+        );
       }
     },
     onSuccess: (

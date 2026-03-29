@@ -6,6 +6,7 @@ import toJSON from "./plugins/toJSON.plugin";
 export interface IAuth {
   password: string;
   username: string;
+  isActive?: boolean;
   passwordHistories?: {
     password: string;
     createdAt: Date;
@@ -67,6 +68,10 @@ const authSchema = new mongoose.Schema<IAuth, AuthModel, IAuthMethods>(
       required: true,
       unique: true,
       trim: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,

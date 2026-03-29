@@ -11,10 +11,13 @@ import ModalAdd from "./components/ModalAdd";
 import { useLandlords } from "./services/query";
 import { useDeleteLandlord } from "./services/mutate";
 import { CsAlert } from "@/components/custom/alert";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { ROUTES } from "@/const/routes";
 
 export const Landlord = () => {
+  const copy = getAgentCmsCopy(useLocale()).landlord;
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [openAlert, setOpenAlert] = useState(false);
@@ -47,22 +50,22 @@ export const Landlord = () => {
 
   const columns: TableColumn<any>[] = [
     {
-      title: "Name",
+      title: copy.columns.name,
       dataIndex: "name",
       key: "name",
     },
     {
-      title: "Email",
+      title: copy.columns.email,
       dataIndex: "email",
       key: "email",
     },
     {
-      title: "Phone",
+      title: copy.columns.phone,
       dataIndex: "phoneNumber",
       key: "phoneNumber",
     },
     {
-      title: "Action",
+      title: copy.columns.action,
       dataIndex: "action",
       key: "action",
       render(_value, record, _index) {
@@ -117,21 +120,21 @@ export const Landlord = () => {
     <div className="grid gap-6">
       <div className="flex justify-between items-center ">
         <div>
-          <h1 className="cs-typography text-2xl">List Landlord</h1>
-          <span className="cs-paragraph-gray"> Landlord</span>
+          <h1 className="cs-typography text-2xl">{copy.pageTitle}</h1>
+          <span className="cs-paragraph-gray">{copy.pageSubtitle}</span>
         </div>
         <CsButton
           className="cs-bg-black text-white"
           onClick={handleOpen}
           icon={<Plus className="text-white! text-2xl" />}
         >
-          Add Landlord
+          {copy.addLandlord}
         </CsButton>
       </div>
       <div className="grid gap-4">
         <div className="flex justify-end p-2 rounded-2xl border border-input">
           <Input
-            placeholder="Search"
+            placeholder={copy.searchPlaceholder}
             className="max-w-xs"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -142,7 +145,7 @@ export const Landlord = () => {
           dataSource={landlords?.data.results || []}
           rowKey={(record: any) => record.id}
           loading={isLoading || isDeleting}
-          emptyText="No landlords found"
+          emptyText={copy.empty}
           key={"id"}
           pagination={{
             current: pagination.page,
@@ -166,10 +169,10 @@ export const Landlord = () => {
       <CsAlert
         open={openAlert}
         onOpenChange={setOpenAlert}
-        title="Delete"
-        description="Are you sure you want to delete this landlord?"
-        action="Delete"
-        cancel="Cancel"
+        title={copy.alert.title}
+        description={copy.alert.description}
+        action={copy.alert.action}
+        cancel={copy.alert.cancel}
         actionClick={handleConfirmDelete}
         cancelClick={handleClose}
         actionClassName="bg-red-600 hover:bg-red-700"

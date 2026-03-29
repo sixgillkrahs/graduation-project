@@ -75,6 +75,11 @@ export class AgentController extends BaseController {
     ).join(", ");
   }
 
+  private async restoreAgentAccess(userId: string) {
+    await this.userService.clearUserLock(userId);
+    await this.authService.setAuthActiveByUserId(userId, true);
+  }
+
   application = (
     req: Request<
       {},
@@ -285,7 +290,7 @@ export class AgentController extends BaseController {
         );
 
       if (lockState.isExpired) {
-        await this.userService.clearUserLock(String(user._id));
+        await this.restoreAgentAccess(String(user._id));
       }
 
       return {
@@ -418,6 +423,10 @@ export class AgentController extends BaseController {
         lockedUntil:
           lockType === ACCOUNT_LOCK_TYPE.TEMPORARY ? parsedLockUntil : null,
       });
+      await this.authService.setAuthActiveByUserId(
+        String(agentRegistration.userId),
+        false,
+      );
       await this.userService.clearUnlockRequest(
         String(agentRegistration.userId),
       );
@@ -502,7 +511,7 @@ export class AgentController extends BaseController {
           )
         : null;
 
-      await this.userService.clearUserLock(String(agentRegistration.userId));
+      await this.restoreAgentAccess(String(agentRegistration.userId));
       await this.userService.clearUnlockRequest(
         String(agentRegistration.userId),
       );
@@ -665,7 +674,7 @@ export class AgentController extends BaseController {
         const lockState = getAccountLockState(user.lockInfo);
 
         if (lockState.isExpired) {
-          await this.userService.clearUserLock(String(user._id));
+          await this.restoreAgentAccess(String(user._id));
           await this.userService.clearUnlockRequest(String(user._id));
           continue;
         }
@@ -980,6 +989,7 @@ export class AgentController extends BaseController {
         password: ENV.PASS_INIT || "no-password",
         username: agentRegistration.basicInfo?.email!,
         roleId: role.id,
+        isActive: false,
       });
       const verifyToken = this.authService.generateAccessToken(
         {
@@ -1137,7 +1147,7 @@ export class AgentController extends BaseController {
           const lockState = getAccountLockState(user.lockInfo);
 
           if (lockState.isExpired) {
-            await this.userService.clearUserLock(String(user._id));
+            await this.restoreAgentAccess(String(user._id));
           }
 
           return {
@@ -1192,7 +1202,7 @@ export class AgentController extends BaseController {
       const lockState = getAccountLockState(userProfile.lockInfo);
 
       if (lockState.isExpired) {
-        await this.userService.clearUserLock(String(userProfile._id));
+        await this.restoreAgentAccess(String(userProfile._id));
       } else if (lockState.isLocked) {
         throw new AppError(
           lang === "vi" ? "MÃ´i giá»›i khÃ´ng tá»“n táº¡i" : "Agent not found",

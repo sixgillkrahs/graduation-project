@@ -5,14 +5,18 @@ import { CsButton } from "@/components/custom";
 import { IPropertyDto } from "@/components/features/my-listings/dto/property.dto";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
 import { formatPropertyPrice } from "@/lib/property-price";
 import { ArrowLeft, Building, Mail, MapPin, Phone } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useState } from "react";
 import { useLandlordDetail, useLandlordProperties } from "../services/query";
 
 const DetailLandlord = () => {
   const { id } = useParams();
+  const locale = useLocale();
+  const copy = getAgentCmsCopy(locale).landlord.detail;
   const router = useRouter();
   const landlordId = (id as string) || "";
   const { formatDate } = useDateTimeFormatter();
@@ -39,7 +43,7 @@ const DetailLandlord = () => {
 
   const columns: TableColumn<IPropertyDto>[] = [
     {
-      title: "Title",
+      title: copy.columns.title,
       dataIndex: "title",
       key: "title",
       render: (value, record) => (
@@ -54,7 +58,7 @@ const DetailLandlord = () => {
       ),
     },
     {
-      title: "Type",
+      title: copy.columns.type,
       dataIndex: "propertyType",
       key: "propertyType",
       render: (value, record) => (
@@ -63,13 +67,15 @@ const DetailLandlord = () => {
             {(value as string)?.toLowerCase().replace("_", " ")}
           </span>
           <span className="text-xs text-gray-500">
-            {record.demandType === "SALE" ? "For Sale" : "For Rent"}
+            {record.demandType === "SALE"
+              ? copy.statuses.sale
+              : copy.statuses.rent}
           </span>
         </div>
       ),
     },
     {
-      title: "Location",
+      title: copy.columns.location,
       dataIndex: "location",
       key: "location",
       render: (value) => {
@@ -82,7 +88,7 @@ const DetailLandlord = () => {
       },
     },
     {
-      title: "Price",
+      title: copy.columns.price,
       dataIndex: "features",
       key: "price",
       render: (value) => {
@@ -93,14 +99,14 @@ const DetailLandlord = () => {
               feat?.price,
               feat?.priceUnit,
               feat?.currency,
-              "vi",
+              locale,
             )}
           </span>
         );
       },
     },
     {
-      title: "Status",
+      title: copy.columns.status,
       dataIndex: "status",
       key: "status",
       render: (value) => {
@@ -121,7 +127,7 @@ const DetailLandlord = () => {
       },
     },
     {
-      title: "Date",
+      title: copy.columns.date,
       dataIndex: "createdAt",
       key: "createdAt",
       render: (value) => (
@@ -148,10 +154,10 @@ const DetailLandlord = () => {
           onClick={handleBack}
           className="bg-white border hover:bg-gray-50 text-gray-700"
         >
-          Back
+          {copy.back}
         </CsButton>
         <div className="p-8 text-center bg-gray-50 rounded-lg">
-          Landlord not found
+          {copy.notFound}
         </div>
       </div>
     );
@@ -166,9 +172,9 @@ const DetailLandlord = () => {
           className="bg-white border hover:bg-gray-50 text-gray-700"
         ></CsButton>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Landlord Details</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{copy.title}</h1>
           <p className="text-sm text-gray-500">
-            View information and real estate holdings
+            {copy.subtitle}
           </p>
         </div>
       </div>
@@ -184,7 +190,7 @@ const DetailLandlord = () => {
                 {landlord.name}
               </h2>
               <p className="text-sm text-gray-500">
-                Member since {new Date(landlord.createdAt || "").getFullYear()}
+                {copy.memberSince} {new Date(landlord.createdAt || "").getFullYear()}
               </p>
             </div>
 
@@ -213,7 +219,7 @@ const DetailLandlord = () => {
           <div className="flex items-center gap-2">
             <Building className="w-5 h-5 text-primary" />
             <h3 className="font-semibold text-lg text-gray-900">
-              Real Estate ({totalProperties})
+              {copy.realEstate} ({totalProperties})
             </h3>
           </div>
         </div>
@@ -224,7 +230,7 @@ const DetailLandlord = () => {
             dataSource={properties}
             rowKey={(record) => record.id}
             loading={isLoadingProperties}
-            emptyText="No real estate properties found for this landlord."
+            emptyText={copy.emptyProperties}
             pagination={{
               current: pagination.page,
               pageSize: pagination.limit,

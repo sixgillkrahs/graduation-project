@@ -4,11 +4,14 @@ import { AlertCircle, MessageSquareMore } from "lucide-react";
 import { useParams } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import StateSurface from "@/components/ui/state-surface";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
+import { useLocale } from "next-intl";
 import { useGetMe } from "@/shared/auth/query";
 import ChatDetail from "./components/ChatDetail";
 import { useConversationDetail, useConversations } from "./services/query";
 
 const Message = () => {
+  const copy = getAgentCmsCopy(useLocale()).messages;
   const params = useParams();
   const conversationId = params.conversationId as string;
   const { data: me } = useGetMe();
@@ -31,10 +34,10 @@ const Message = () => {
         <StateSurface
           size="compact"
           tone="brand"
-          eyebrow="Conversation"
+          eyebrow={copy.title}
           icon={<Spinner className="h-5 w-5" />}
-          title="Loading conversation"
-          description="Fetching message history and participant details."
+          title={copy.loadingConversationTitle}
+          description={copy.loadingConversationDescription}
         />
       </div>
     );
@@ -46,12 +49,12 @@ const Message = () => {
         <StateSurface
           size="compact"
           tone="danger"
-          eyebrow="Conversation"
+          eyebrow={copy.title}
           icon={<AlertCircle className="h-5 w-5" />}
-          title="Could not load this conversation"
-          description="The chat service is temporarily unavailable. Retry to restore the thread."
+          title={copy.conversationErrorTitle}
+          description={copy.conversationErrorDescription}
           primaryAction={{
-            label: "Try again",
+            label: copy.tryAgain,
             onClick: () => {
               void refetchMessages();
               void refetchConversations();
@@ -72,10 +75,10 @@ const Message = () => {
         <StateSurface
           size="compact"
           tone="brand"
-          eyebrow="Conversation"
+          eyebrow={copy.title}
           icon={<MessageSquareMore className="h-5 w-5" />}
-          title="Conversation not found"
-          description="This thread may have been removed or you may no longer have access to it."
+          title={copy.conversationNotFoundTitle}
+          description={copy.conversationNotFoundDescription}
         />
       </div>
     );
@@ -101,7 +104,7 @@ const Message = () => {
               {conversation.displayName}
             </h3>
             <p className="text-xs text-gray-500 flex items-center gap-1">
-              Active now
+              {copy.activeNow}
             </p>
           </div>
         </div>

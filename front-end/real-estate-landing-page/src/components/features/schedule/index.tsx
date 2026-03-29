@@ -1,8 +1,9 @@
 "use client";
 
-import { CsButton } from "@/components/custom";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 import { addHours, format, isSameDay } from "date-fns";
+import { enUS, vi } from "date-fns/locale";
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
@@ -15,13 +16,13 @@ import {
   User,
   XCircle,
 } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import CalendarArea from "./components/CalendarArea";
 import { SCHEDULE_STATUS, SCHEDULE_TYPE } from "./dto/schedule.dto";
 import { reducer } from "./hooks/useReduce";
 import { useGetSchedulesMe } from "./services/query";
 import { useUpdateSchedule } from "./services/mutation";
-import { toast } from "@/lib/toast";
 
 /** Convert "10:00 AM" / "02:00 PM" to "10:00" / "14:00". Already-24h strings pass through. */
 const parseTo24h = (time: string): string => {
@@ -38,6 +39,9 @@ const parseTo24h = (time: string): string => {
 };
 
 const Schedule = () => {
+  const locale = useLocale();
+  const isVi = locale.toLowerCase().startsWith("vi");
+  const dateLocale = isVi ? vi : enUS;
   const [state, dispatch] = useReducer(reducer, {
     events: [],
     filterType: "ALL",
@@ -55,6 +59,60 @@ const Schedule = () => {
     new Date().toISOString().split("T")[0],
   );
   const selectedDateObj = new Date(selectedDate);
+  const copy = {
+    title: isVi ? "Quản lý lịch hẹn" : "Schedule Management",
+    summaryPrefix: isVi ? "Hôm nay bạn có" : "Today you have",
+    appointments: isVi ? "lịch hẹn" : "appointments",
+    pendingPrefix: isVi ? "trong đó có" : "including",
+    pendingSuffix: isVi ? "yêu cầu chờ duyệt" : "pending requests",
+    filters: {
+      all: isVi ? "Tất cả" : "All",
+      viewing: isVi ? "Xem nhà" : "Viewing",
+      meeting: isVi ? "Họp" : "Meeting",
+      call: isVi ? "Gọi" : "Call",
+    },
+    typeLabels: {
+      [SCHEDULE_TYPE.VIEWING]: isVi ? "Xem nhà" : "Viewing",
+      [SCHEDULE_TYPE.MEETING]: isVi ? "Họp" : "Meeting",
+      [SCHEDULE_TYPE.CALL]: isVi ? "Gọi" : "Call",
+    },
+    statuses: {
+      confirmed: isVi ? "Đã xác nhận" : "Confirmed",
+      cancelled: isVi ? "Đã từ chối" : "Rejected",
+      completed: isVi ? "Hoàn thành" : "Completed",
+      expired: isVi ? "Quá hạn" : "Expired",
+      pending: isVi ? "Chờ duyệt" : "Pending approval",
+    },
+    note: isVi ? "Ghi chú:" : "Note:",
+    approve: isVi ? "Chấp nhận" : "Approve",
+    reject: isVi ? "Từ chối" : "Reject",
+    confirmationSent: isVi
+      ? "Email xác nhận đã gửi"
+      : "Confirmation email sent",
+    sections: {
+      pending: isVi ? "Yêu cầu đặt lịch" : "Viewing requests",
+      handled: isVi ? "Đã xử lý" : "Handled",
+      mine: isVi ? "Lịch của tôi" : "My schedule",
+    },
+    emptyTitle: isVi ? "Không có lịch hẹn" : "No appointments",
+    emptyDescription: isVi
+      ? "Ngày này chưa có sự kiện nào."
+      : "There are no events scheduled for this day yet.",
+    toast: {
+      confirmSuccess: isVi
+        ? "Xác nhận lịch hẹn thành công và đã gửi email."
+        : "Schedule confirmed successfully and email sent.",
+      confirmError: isVi
+        ? "Không thể xác nhận lịch hẹn."
+        : "Failed to confirm schedule.",
+      cancelSuccess: isVi
+        ? "Đã hủy lịch hẹn thành công."
+        : "Schedule cancelled successfully.",
+      cancelError: isVi
+        ? "Không thể hủy lịch hẹn."
+        : "Failed to cancel schedule.",
+    },
+  };
 
   useEffect(() => {
     if (schedulesData?.data) {
@@ -178,10 +236,10 @@ const Schedule = () => {
           color: event.color,
         } as any,
       });
-      toast.success("Schedule confirmed successfully and email sent!");
+      toast.success(copy.toast.confirmSuccess);
     } catch (e) {
       console.error(e);
-      toast.error("Failed to confirm schedule.");
+      toast.error(copy.toast.confirmError);
     }
   };
 
@@ -205,10 +263,10 @@ const Schedule = () => {
           color: event.color,
         } as any,
       });
-      toast.success("Schedule cancelled successfully.");
+      toast.success(copy.toast.cancelSuccess);
     } catch (e) {
       console.error(e);
-      toast.error("Failed to cancel schedule.");
+      toast.error(copy.toast.cancelError);
     }
   };
 
@@ -229,31 +287,31 @@ const Schedule = () => {
       { label: string; color: string; bg: string; border: string }
     > = {
       [SCHEDULE_STATUS.CONFIRMED]: {
-        label: "Đã xác nhận",
+        label: copy.statuses.confirmed,
         color: "text-emerald-700",
         bg: "bg-emerald-50",
         border: "border-emerald-200",
       },
       [SCHEDULE_STATUS.CANCELLED]: {
-        label: "Đã từ chối",
+        label: copy.statuses.cancelled,
         color: "text-red-700",
         bg: "bg-red-50",
         border: "border-red-200",
       },
       [SCHEDULE_STATUS.COMPLETED]: {
-        label: "Hoàn thành",
+        label: copy.statuses.completed,
         color: "text-blue-700",
         bg: "bg-blue-50",
         border: "border-blue-200",
       },
       [SCHEDULE_STATUS.EXPIRED]: {
-        label: "Quá hạn",
+        label: copy.statuses.expired,
         color: "text-orange-700",
         bg: "bg-orange-50",
         border: "border-orange-200",
       },
       [SCHEDULE_STATUS.PENDING]: {
-        label: "Chờ duyệt",
+        label: copy.statuses.pending,
         color: "text-amber-700",
         bg: "bg-amber-50",
         border: "border-amber-200",
@@ -299,7 +357,7 @@ const Schedule = () => {
               </span>
               <span className="text-[10px] text-gray-400">•</span>
               <span className="text-[10px] text-gray-500 uppercase font-medium">
-                {event.type}
+                {copy.typeLabels[event.type as SCHEDULE_TYPE] || event.type}
               </span>
             </div>
             <span
@@ -356,7 +414,7 @@ const Schedule = () => {
           {/* Customer note */}
           {event.customerNote && (
             <div className="mt-2.5 bg-slate-50 rounded-lg px-3 py-2 text-xs text-gray-600 border border-slate-100">
-              <span className="text-gray-400 font-medium">Ghi chú: </span>
+              <span className="text-gray-400 font-medium">{copy.note} </span>
               {event.customerNote}
             </div>
           )}
@@ -373,7 +431,7 @@ const Schedule = () => {
                 }}
               >
                 <CheckCircle2 size={14} />
-                Chấp nhận
+                {copy.approve}
               </button>
               <button
                 className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-lg bg-white text-red-600 text-xs font-bold hover:bg-red-50 active:scale-[0.98] border border-red-200 transition-all disabled:opacity-50"
@@ -384,7 +442,7 @@ const Schedule = () => {
                 }}
               >
                 <XCircle size={14} />
-                Từ chối
+                {copy.reject}
               </button>
             </div>
           )}
@@ -393,7 +451,7 @@ const Schedule = () => {
           {event.status === SCHEDULE_STATUS.CONFIRMED && (
             <div className="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-600 font-medium">
               <CheckCircle2 size={12} />
-              Email xác nhận đã gửi
+              {copy.confirmationSent}
             </div>
           )}
         </div>
@@ -407,20 +465,20 @@ const Schedule = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Quản lý lịch hẹn
+            {copy.title}
           </h1>
           <p className="text-gray-500 text-sm mt-0.5">
-            Hôm nay bạn có{" "}
+            {copy.summaryPrefix}{" "}
             <span className="font-semibold text-gray-900">
-              {dailyEvents.length} lịch hẹn
+              {dailyEvents.length} {copy.appointments}
             </span>
             {pendingRequests.length > 0 && (
               <>
-                , trong đó{" "}
+                , {copy.pendingPrefix}{" "}
                 <span className="font-semibold text-amber-600">
-                  {pendingRequests.length} yêu cầu
+                  {pendingRequests.length}
                 </span>{" "}
-                chờ duyệt
+                {copy.pendingSuffix}
               </>
             )}
           </p>
@@ -440,7 +498,7 @@ const Schedule = () => {
                   : "text-gray-500 hover:text-gray-700",
               )}
             >
-              Tất cả
+              {copy.filters.all}
             </button>
             <button
               onClick={() =>
@@ -456,7 +514,7 @@ const Schedule = () => {
                   : "text-gray-500 hover:text-gray-700",
               )}
             >
-              <MapPin size={12} /> Xem nhà
+              <MapPin size={12} /> {copy.filters.viewing}
             </button>
             <button
               onClick={() =>
@@ -472,7 +530,7 @@ const Schedule = () => {
                   : "text-gray-500 hover:text-gray-700",
               )}
             >
-              <User size={12} /> Họp
+              <User size={12} /> {copy.filters.meeting}
             </button>
             <button
               onClick={() =>
@@ -488,7 +546,7 @@ const Schedule = () => {
                   : "text-gray-500 hover:text-gray-700",
               )}
             >
-              <Phone size={12} /> Gọi
+              <Phone size={12} /> {copy.filters.call}
             </button>
           </div>
         </div>
@@ -504,15 +562,17 @@ const Schedule = () => {
                 {format(selectedDateObj, "dd")}
               </span>
               <span className="text-[10px] uppercase font-medium tracking-wider opacity-80">
-                {format(selectedDateObj, "MMM")}
+                {format(selectedDateObj, "MMM", { locale: dateLocale })}
               </span>
             </div>
             <div>
               <h2 className="text-sm font-bold text-gray-900">
-                {format(selectedDateObj, "EEEE")}
+                {format(selectedDateObj, "EEEE", { locale: dateLocale })}
               </h2>
               <p className="text-xs text-gray-500">
-                {format(selectedDateObj, "dd MMMM yyyy")}
+                {format(selectedDateObj, "dd MMMM yyyy", {
+                  locale: dateLocale,
+                })}
               </p>
             </div>
           </div>
@@ -527,7 +587,7 @@ const Schedule = () => {
                     <Inbox size={11} className="text-amber-600" />
                   </div>
                   <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                    Yêu cầu đặt lịch ({pendingRequests.length})
+                    {copy.sections.pending} ({pendingRequests.length})
                   </h3>
                 </div>
                 <div className="space-y-3 pr-1 max-h-[calc(100vh-24rem)] overflow-y-auto custom-scrollbar">
@@ -544,7 +604,7 @@ const Schedule = () => {
                     <CheckCircle2 size={11} className="text-gray-500" />
                   </div>
                   <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                    Đã xử lý ({handledRequests.length})
+                    {copy.sections.handled} ({handledRequests.length})
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -561,7 +621,7 @@ const Schedule = () => {
                     <CalendarIcon size={11} className="text-blue-600" />
                   </div>
                   <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">
-                    Lịch của tôi ({mySchedules.length})
+                    {copy.sections.mine} ({mySchedules.length})
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -577,10 +637,10 @@ const Schedule = () => {
                   <CalendarIcon className="w-8 h-8 text-gray-300" />
                 </div>
                 <p className="text-sm font-semibold text-gray-400">
-                  Không có lịch hẹn
+                  {copy.emptyTitle}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Ngày này chưa có sự kiện nào
+                  {copy.emptyDescription}
                 </p>
               </div>
             )}
@@ -592,6 +652,7 @@ const Schedule = () => {
           filteredEvents={filteredEvents}
           handleDateClick={handleDateClick}
           handleDatesSet={handleDatesSet}
+          isVi={isVi}
         />
       </div>
     </div>

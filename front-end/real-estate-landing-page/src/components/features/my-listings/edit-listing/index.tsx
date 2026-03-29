@@ -2,13 +2,13 @@
 
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { ListingDraftProvider } from "@/components/features/my-listings/components/ListingDraftContext";
 import { CsStep } from "@/components/ui/stepper";
 import { ROUTES } from "@/const/routes";
-import { getPropertyAmenityLabel } from "@/lib/property-amenities";
 import { toast } from "@/lib/toast";
 import type { ListingState } from "@/models/listing.model";
 import type { RootState } from "@/store";
@@ -28,6 +28,7 @@ import MediaContent from "./components/MediaContent";
 import Review from "./components/Review";
 
 const EditListing = () => {
+  const t = useTranslations("ListingForm");
   const dispatch = useDispatch();
   const router = useRouter();
   const currentStep = useSelector(
@@ -53,58 +54,17 @@ const EditListing = () => {
     if (propertyResponse?.data) {
       const p = propertyResponse.data;
 
-      const hydratedData = {
-        demandType: p.demandType,
-        propertyType: p.propertyType,
-        projectName: p.projectName || "",
-        title: p.title || "",
-        description: p.description || "",
-        province: p.location?.province || "",
-        ward: p.location?.ward || "",
-        address: p.location?.address || "",
-        latitude: p.location?.coordinates?.lat || null,
-        longitude: p.location?.coordinates?.long || null,
-        area: p.features?.area || "",
-        price: p.features?.price || "",
-        currency: p.features?.currency || "VND",
-        priceUnit: p.features?.priceUnit || "MILLION",
-        bedrooms: p.features?.bedrooms || 1,
-        bathrooms: p.features?.bathrooms || 1,
-        direction: p.features?.direction || "",
-        legalStatus: p.features?.legalStatus || "",
-        furniture: p.features?.furniture || "",
-        amenities: (p.amenities || []).map(getPropertyAmenityLabel),
-        images: p.media?.images || [],
-        thumbnail: p.media?.thumbnail || "",
-        videoLink: p.media?.videoLink || "",
-        virtualTourUrls: p.media?.virtualTourUrls || [],
-      } as Partial<ListingFormData>;
+      const hydratedData = PropertyService.getFormValuesFromProperty(p);
 
       // Hydrate via RHF reset
-      methods.reset(hydratedData as ListingFormData);
-
-      // Narrow propertyType: the API can return "OTHER" but the Redux store
-      // only accepts the four concrete types defined in ListingState.
-      const VALID_PROPERTY_TYPES = [
-        "APARTMENT",
-        "HOUSE",
-        "VILLA",
-        "LAND",
-        "STREET_HOUSE",
-      ] as const;
-      type ValidPropertyType = (typeof VALID_PROPERTY_TYPES)[number];
-      const validPropertyType: ValidPropertyType = (
-        VALID_PROPERTY_TYPES as readonly string[]
-      ).includes(p.propertyType)
-        ? (p.propertyType as ValidPropertyType)
-        : "APARTMENT";
+      methods.reset(hydratedData);
 
       // Sync into Redux
       // Map to Redux structure (which has location/features/media objects)
       dispatch(
         updateListingData({
           demandType: p.demandType,
-          propertyType: validPropertyType,
+          propertyType: hydratedData.propertyType,
           projectName: p.projectName,
           title: p.title,
           description: p.description,
@@ -145,7 +105,7 @@ const EditListing = () => {
     console.log("Final submission:", data);
   };
 
-  const saveDraft = async () => {
+  const saveDraft = useCallback(async () => {
     try {
       await updateProperty({
         id: propertyId,
@@ -154,34 +114,42 @@ const EditListing = () => {
           status: "DRAFT",
         },
       });
-      toast.success("Draft saved successfully.");
+      toast.success(t("toast.draftSaved"));
       dispatch(resetListing());
       router.push(ROUTES.AGENT_LISTINGS);
     } catch (error) {
-      toast.error("Failed to save draft. Please try again.");
+      toast.error(t("toast.draftSaveFailed"));
       console.error(error);
     }
-  };
+  }, [dispatch, methods, propertyId, router, t, updateProperty]);
 
-  const steps = [
-    { title: "Basic Info", content: <BasicInfo /> },
-    { title: "Location", content: <Location /> },
-    { title: "Features & Pricing", content: <FeaturesPricing /> },
-    { title: "Media", content: <MediaContent /> },
-    { title: "Review", content: <Review propertyId={propertyId} /> },
-  ];
+  const steps = useMemo(
+    () => [
+      { title: t("steps.basicInfo"), content: <BasicInfo /> },
+      { title: t("steps.location"), content: <Location /> },
+      { title: t("steps.featuresPricing"), content: <FeaturesPricing /> },
+      { title: t("steps.media"), content: <MediaContent /> },
+      { title: t("steps.review"), content: <Review propertyId={propertyId} /> },
+    ],
+    [propertyId, t],
+  );
+
+  const draftContextValue = useMemo(
+    () => ({ saveDraft, isSavingDraft }),
+    [isSavingDraft, saveDraft],
+  );
 
   if (isLoading || !isReady) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-        <p className="text-gray-500">Loading property details...</p>
+        <p className="text-gray-500">{t("edit.loading")}</p>
       </div>
     );
   }
 
   return (
-    <ListingDraftProvider value={{ saveDraft, isSavingDraft }}>
+    <ListingDraftProvider value={draftContextValue}>
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onFinalSubmit)}>
           <div className="max-w-7xl mx-auto p-8 pb-24">

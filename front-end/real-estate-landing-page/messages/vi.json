@@ -73,6 +73,11 @@
     "logout": "Đăng xuất",
     "login": "Đăng nhập"
   },
+  "AgentHeader": {
+    "language": "Ngôn ngữ",
+    "workspace": "CMS môi giới",
+    "switchLanguage": "Chuyển ngôn ngữ sang"
+  },
   "Banner": {
     "title": "Bắt đầu tìm kiếm ngay hôm nay",
     "rent": "Thuê",
@@ -385,14 +390,14 @@
       "filters": {
         "searchPlaceholder": "Nhập khu vực, quận huyện hoặc dự án",
         "allTypes": "Tất cả loại",
-          "allPrices": "Mọi mức giá",
-          "maxPrice": "Dưới {price} tỷ",
-          "anyBedrooms": "Mọi số phòng ngủ",
-          "bedroomCount": "{count} phòng ngủ",
-          "bedroomPlus": "Từ 4 phòng ngủ",
-          "search": "Tìm kiếm",
-          "reset": "Đặt lại"
-        },
+        "allPrices": "Mọi mức giá",
+        "maxPrice": "Dưới {price} tỷ",
+        "anyBedrooms": "Mọi số phòng ngủ",
+        "bedroomCount": "{count} phòng ngủ",
+        "bedroomPlus": "Từ 4 phòng ngủ",
+        "search": "Tìm kiếm",
+        "reset": "Đặt lại"
+      },
       "list": {
         "eyebrow": "Danh sách bất động sản",
         "title": "Kết quả phù hợp",
@@ -847,5 +852,266 @@
       }
     },
     "footnote": "Mọi báo cáo sẽ được đội kiểm duyệt xem xét trước khi có bất kỳ hành động nào."
+  },
+  "ListingForm": {
+    "steps": {
+      "basicInfo": "Thông tin cơ bản",
+      "location": "Vị trí",
+      "featuresPricing": "Đặc điểm & giá",
+      "media": "Hình ảnh & media",
+      "review": "Xem lại"
+    },
+    "actions": {
+      "cancel": "Hủy",
+      "back": "Quay lại",
+      "continue": "Tiếp tục",
+      "saveDraft": "Lưu nháp",
+      "publish": "Đăng tin"
+    },
+    "toast": {
+      "draftSaved": "Đã lưu bản nháp thành công.",
+      "draftSaveFailed": "Lưu bản nháp thất bại. Vui lòng thử lại.",
+      "createSuccess": "Đăng tin thành công. Vui lòng chờ phê duyệt.",
+      "createFailed": "Tạo bất động sản thất bại. Vui lòng thử lại.",
+      "updateSuccess": "Cập nhật tin đăng thành công. Vui lòng chờ phê duyệt.",
+      "updateFailed": "Cập nhật bất động sản thất bại. Vui lòng thử lại.",
+      "descriptionBlocked": "Vui lòng chỉnh sửa lại mô tả trước khi tiếp tục.",
+      "aiMissingInputs": "Hãy nhập tiêu đề và chọn loại bất động sản trước khi tạo nội dung bằng AI.",
+      "aiGenerated": "Đã tạo mô tả bằng AI thành công."
+    },
+    "validation": {
+      "titleRequired": "Vui lòng nhập tiêu đề tin đăng",
+      "descriptionRequired": "Vui lòng nhập mô tả tin đăng",
+      "areaRequired": "Vui lòng nhập diện tích",
+      "priceRequired": "Vui lòng nhập giá",
+      "currencyRequired": "Vui lòng chọn loại tiền",
+      "priceUnitRequired": "Vui lòng chọn đơn vị giá",
+      "directionRequired": "Vui lòng chọn hướng",
+      "legalStatusRequired": "Vui lòng chọn tình trạng pháp lý",
+      "furnitureRequired": "Vui lòng chọn nội thất",
+      "provinceRequired": "Vui lòng chọn tỉnh / thành phố",
+      "wardRequired": "Vui lòng chọn đơn vị hành chính"
+    },
+    "edit": {
+      "loading": "Đang tải thông tin bất động sản..."
+    },
+    "basicInfo": {
+      "title": "Bước 1: Thông tin cơ bản",
+      "aiButtonTitle": "Tạo nội dung bằng AI (PRO)",
+      "aiGeneratedDescription": "Khám phá cơ hội {demandType} nổi bật với bất động sản loại {propertyType} mang tên \"{title}\". Bất động sản sở hữu bố cục hợp lý, ánh sáng tự nhiên tốt và không gian sống thoải mái, phù hợp với nhu cầu hiện đại. Vị trí, tiện ích và tổng thể trình bày tạo nên một lựa chọn hấp dẫn cho người mua hoặc khách thuê nghiêm túc.",
+      "demandTypes": {
+        "rent": "Cho thuê",
+        "sale": "Cần bán"
+      },
+      "propertyTypes": {
+        "apartment": "Căn hộ",
+        "house": "Nhà riêng",
+        "villa": "Biệt thự",
+        "land": "Đất",
+        "street_house": "Nhà phố"
+      },
+      "fields": {
+        "title": {
+          "label": "Tiêu đề tin đăng",
+          "placeholder": "Nhập tiêu đề tin đăng"
+        },
+        "description": {
+          "label": "Mô tả tin đăng",
+          "placeholder": "Nhập mô tả tin đăng"
+        },
+        "demandType": "Loại nhu cầu",
+        "propertyType": "Loại bất động sản",
+        "projectName": {
+          "label": "Tên dự án (không bắt buộc)",
+          "placeholder": "Nhập tên dự án"
+        }
+      }
+    },
+    "location": {
+      "title": "Bước 2: Vị trí",
+      "search": {
+        "label": "Tìm vị trí",
+        "placeholder": "Tìm địa chỉ bất động sản...",
+        "hint": "Tìm kiếm để đặt ghim và điền nhanh địa chỉ, sau đó kiểm tra lại thông tin hành chính bên dưới.",
+        "searching": "Đang tìm..."
+      },
+      "map": {
+        "label": "Đánh dấu trên bản đồ",
+        "hint": "Nhấp hoặc kéo ghim để đặt vị trí chính xác."
+      },
+      "fields": {
+        "province": {
+          "label": "Tỉnh / Thành phố",
+          "placeholder": "Chọn tỉnh / thành phố"
+        },
+        "ward": {
+          "label": "Phường / Xã / Đặc khu",
+          "placeholder": "Chọn đơn vị hành chính",
+          "placeholderSelectProvince": "Vui lòng chọn tỉnh trước"
+        },
+        "address": {
+          "label": "Địa chỉ chi tiết",
+          "placeholder": "Ví dụ: 208 Nguyễn Hữu Cảnh"
+        }
+      }
+    },
+    "featuresPricing": {
+      "title": "Bước 3: Đặc điểm & giá",
+      "badges": {
+        "rent": "Cho thuê - Giá theo tháng",
+        "sale": "Cần bán"
+      },
+      "fields": {
+        "area": {
+          "label": "Diện tích (m²)",
+          "placeholder": "Ví dụ: 120"
+        },
+        "price": {
+          "label": "Giá",
+          "placeholder": "Ví dụ: 500000"
+        },
+        "pricePerMonth": {
+          "label": "Giá / tháng",
+          "suffix": "/tháng"
+        },
+        "currency": {
+          "label": "Loại tiền",
+          "placeholder": "Chọn loại tiền"
+        },
+        "priceUnit": {
+          "label": "Đơn vị giá",
+          "placeholder": "Chọn đơn vị"
+        },
+        "bedrooms": {
+          "label": "Phòng ngủ"
+        },
+        "bathrooms": {
+          "label": "Phòng tắm"
+        },
+        "direction": {
+          "label": "Hướng",
+          "placeholder": "Chọn hướng"
+        },
+        "legalStatus": {
+          "label": "Pháp lý",
+          "placeholder": "Chọn tình trạng"
+        },
+        "furniture": {
+          "label": "Nội thất",
+          "placeholder": "Chọn nội thất"
+        }
+      },
+      "priceUnits": {
+        "vnd": "VND",
+        "million": "Triệu VND",
+        "billion": "Tỷ VND",
+        "millionPerSquareMeter": "Triệu VND / m²",
+        "vndPerMonth": "VND / tháng",
+        "millionPerMonth": "Triệu VND / tháng"
+      },
+      "directionOptions": {
+        "north": "Bắc",
+        "south": "Nam",
+        "east": "Đông",
+        "west": "Tây",
+        "northEast": "Đông Bắc",
+        "northWest": "Tây Bắc",
+        "southEast": "Đông Nam",
+        "southWest": "Tây Nam"
+      },
+      "legalStatusOptions": {
+        "pinkBook": "Sổ hồng",
+        "redBook": "Sổ đỏ",
+        "salesContract": "Hợp đồng mua bán",
+        "waiting": "Chờ cấp sổ",
+        "other": "Khác"
+      },
+      "furnitureOptions": {
+        "full": "Đầy đủ",
+        "basic": "Cơ bản",
+        "none": "Không có"
+      },
+      "amenities": {
+        "label": "Tiện ích",
+        "placeholder": "Nhập tiện ích rồi nhấn Enter",
+        "description": "Bạn có thể thêm các tiện ích riêng cho bất động sản này.",
+        "suggested": "Gợi ý"
+      }
+    },
+    "media": {
+      "title": "Bước 4: Hình ảnh & media",
+      "images": {
+        "description": "Tải lên hình ảnh chất lượng cao của bất động sản. Bạn có thể tải nhiều ảnh cùng lúc."
+      },
+      "thumbnail": {
+        "title": "Ảnh đại diện",
+        "description": "Tải lên ảnh bìa sẽ hiển thị trên thẻ tin đăng."
+      },
+      "video": {
+        "title": "Liên kết video (không bắt buộc)",
+        "label": "Link YouTube / Vimeo",
+        "placeholder": "https://www.youtube.com/watch?v=..."
+      },
+      "virtualTour": {
+        "title": "Ảnh tham quan 360°",
+        "description": "Tải lên ảnh panorama 360° (equirectangular projection)."
+      },
+      "preview": {
+        "title": "Xem trước",
+        "empty": "Xem trước 360°",
+        "thumbnailAlt": "Ảnh thu nhỏ 360 {index}"
+      }
+    },
+    "review": {
+      "title": "Xem lại tin đăng",
+      "description": "Vui lòng kiểm tra lại toàn bộ thông tin trước khi đăng tin.",
+      "notSpecified": "Chưa cập nhật",
+      "na": "N/A",
+      "ready": "Sẵn sàng đăng",
+      "previewMode": "Chế độ xem trước",
+      "noImages": "Chưa có hình ảnh",
+      "watchVideo": "Xem video",
+      "imageAlt": "Hình ảnh bất động sản {index}",
+      "thumbnailAlt": "Ảnh đại diện bất động sản",
+      "virtualTourThumbnailAlt": "Ảnh thu nhỏ 360 {index}",
+      "demandType": {
+        "rent": "Cho thuê",
+        "sale": "Cần bán"
+      },
+      "fields": {
+        "listingType": "Loại tin đăng",
+        "propertyType": "Loại bất động sản",
+        "projectName": "Tên dự án",
+        "province": "Tỉnh / Thành phố",
+        "administrativeUnit": "Đơn vị hành chính",
+        "address": "Địa chỉ",
+        "area": "Diện tích",
+        "price": "Giá",
+        "bedrooms": "Phòng ngủ",
+        "bathrooms": "Phòng tắm",
+        "direction": "Hướng",
+        "legalStatus": "Pháp lý",
+        "furniture": "Nội thất"
+      },
+      "sections": {
+        "overview": "Tổng quan",
+        "location": "Vị trí",
+        "propertyDetails": "Thông tin bất động sản",
+        "amenities": "Tiện ích",
+        "images": "Hình ảnh ({count})",
+        "thumbnail": "Ảnh đại diện",
+        "video": "Video giới thiệu",
+        "virtualTour": "Tham quan 360° ({count})",
+        "confirm": "Xem lại & xác nhận"
+      },
+      "badges": {
+        "virtualTour": "Tour 360°",
+        "video": "Video"
+      },
+      "card": {
+        "beds": "{count} phòng ngủ",
+        "baths": "{count} phòng tắm"
+      }
+    }
   }
 }

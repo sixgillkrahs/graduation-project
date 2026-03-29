@@ -23,6 +23,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useLocale } from "next-intl";
 import { useSelector } from "react-redux";
 import {
   useApplyAutoReply,
@@ -35,43 +36,36 @@ import { useGetMyReviews } from "../reviews/services/query";
 
 const ITEMS_PER_PAGE = 6;
 
-const FILTERS: Array<{
-  label: string;
-  value: IReviewService.ReviewFilter;
-}> = [
-  { label: "Tat ca", value: "all" },
-  { label: "5 sao", value: "5star" },
-  { label: "1-3 sao", value: "1-3star" },
-  { label: "Chua phan hoi", value: "unanswered" },
-];
-
-const getStatusLabel = (status: IReviewService.ReviewStatus) => {
+const getStatusLabel = (
+  status: IReviewService.ReviewStatus,
+  isVi: boolean,
+) => {
   switch (status) {
     case "PENDING":
       return {
-        label: "Dang cho AI quet",
+        label: isVi ? "Đang chờ AI quét" : "Waiting for AI scan",
         className:
           "border-[color:var(--color-border-primary)] bg-[color:var(--color-bg-primary)]/10 text-[color:var(--color-text-primary)]",
       };
     case "AWAITING_ADMIN":
       return {
-        label: "Cho Admin duyet",
+        label: isVi ? "Chờ admin duyệt" : "Waiting for admin approval",
         className:
           "border-[color:var(--color-border-primary)] bg-[color:var(--color-bg-primary)]/10 text-[color:var(--color-text-primary)]",
       };
     case "REPORTED":
       return {
-        label: "Da bao cao Admin",
+        label: isVi ? "Đã báo cáo admin" : "Reported to admin",
         className: "border-red-200 bg-red-50 text-red-600",
       };
     case "HIDDEN":
       return {
-        label: "Da bi an boi AI",
+        label: isVi ? "Đã bị AI ẩn" : "Hidden by AI",
         className: "border-amber-200 bg-amber-50 text-amber-700",
       };
     case "PUBLISHED":
       return {
-        label: "Dang hien thi",
+        label: isVi ? "Đang hiển thị" : "Published",
         className: "border-emerald-200 bg-emerald-50 text-emerald-600",
       };
     default:
@@ -118,6 +112,7 @@ const ReviewCard = ({
   isApplyingAutoReply,
   isDiscardingAutoReply,
   formatDate,
+  isVi,
 }: {
   review: IReviewService.ReviewItem;
   isPro: boolean;
@@ -132,13 +127,14 @@ const ReviewCard = ({
   isApplyingAutoReply: boolean;
   isDiscardingAutoReply: boolean;
   formatDate: (value?: string | number | Date | null) => string;
+  isVi: boolean;
 }) => {
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [autoReplyText, setAutoReplyText] = useState(
     review.autoReply?.draft || "",
   );
-  const statusMeta = getStatusLabel(review.status);
+  const statusMeta = getStatusLabel(review.status, isVi);
   const canReply =
     ["PUBLISHED", "REPORTED"].includes(review.status) && !review.agentReply;
   const canReport = review.status === "PUBLISHED";
@@ -188,13 +184,15 @@ const ReviewCard = ({
           ) : (
             <Flag className="size-4" />
           )}
-          <span className="ml-2">Report to Admin</span>
+          <span className="ml-2">
+            {isVi ? "Báo cáo admin" : "Report to Admin"}
+          </span>
         </button>
       </div>
 
       <div className="mt-4 rounded-2xl border border-border/70 bg-muted/20 p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          Buoi xem nha
+          {isVi ? "Buổi xem nhà" : "Viewing session"}
         </p>
         <p className="mt-2 text-sm font-medium text-foreground">
           {review.propertyName}
@@ -215,32 +213,47 @@ const ReviewCard = ({
       )}
 
       <p className="mt-4 text-sm leading-7 text-foreground/85">
-        {review.comment || "Khach hang khong de lai nhan xet chi tiet."}
+        {review.comment ||
+          (isVi
+            ? "Khách hàng không để lại nhận xét chi tiết."
+            : "The customer did not leave a detailed review.")}
       </p>
 
       {review.status === "PENDING" && (
         <div className="mt-4 flex items-start gap-2 rounded-2xl border border-[color:var(--color-border-primary)] bg-[color:var(--color-bg-primary)]/10 px-4 py-3 text-sm text-[color:var(--color-text-primary)]">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" />
-          <p>Review nay dang cho batch AI quet truoc khi chuyen den admin.</p>
+          <p>
+            {isVi
+              ? "Review này đang chờ batch AI quét trước khi chuyển đến admin."
+              : "This review is waiting for the AI batch scan before reaching admin."}
+          </p>
         </div>
       )}
 
       {review.status === "AWAITING_ADMIN" && (
         <div className="mt-4 flex items-start gap-2 rounded-2xl border border-[color:var(--color-border-primary)] bg-[color:var(--color-bg-primary)]/10 px-4 py-3 text-sm text-[color:var(--color-text-primary)]">
           <ShieldAlert className="mt-0.5 size-4 shrink-0" />
-          <p>AI da quet xong va review nay dang cho admin duyet.</p>
+          <p>
+            {isVi
+              ? "AI đã quét xong và review này đang chờ admin duyệt."
+              : "The AI scan is complete and this review is waiting for admin approval."}
+          </p>
         </div>
       )}
 
       {review.status === "REPORTED" && (
         <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-          Review da bi an tam thoi de admin kiem tra.
+          {isVi
+            ? "Review đang bị ẩn tạm thời để admin kiểm tra."
+            : "This review is temporarily hidden while admin reviews it."}
         </div>
       )}
 
       {review.status === "HIDDEN" && (
         <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Review da bi an sau khi batch AI danh gia noi dung la khong phu hop.
+          {isVi
+            ? "Review đã bị ẩn sau khi batch AI đánh giá nội dung không phù hợp."
+            : "This review was hidden after the AI batch flagged the content as inappropriate."}
         </div>
       )}
 
@@ -249,10 +262,12 @@ const ReviewCard = ({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-text-primary)]">
-                AI Reply Assistant
+                {isVi ? "Trợ lý phản hồi AI" : "AI Reply Assistant"}
               </p>
               <p className="mt-2 text-sm leading-6 text-foreground/80">
-                Chi agent PRO moi co the tao goi y AI cho phan hoi review.
+                {isVi
+                  ? "Chỉ agent PRO mới có thể tạo gợi ý AI cho phản hồi review."
+                  : "Only PRO agents can generate AI suggestions for review replies."}
               </p>
             </div>
 
@@ -271,7 +286,13 @@ const ReviewCard = ({
               ) : (
                 <Sparkles className="mr-2 size-4" />
               )}
-              {hasReadyAutoReply ? "Tao lai goi y AI" : "Tao goi y AI"}
+              {hasReadyAutoReply
+                ? isVi
+                  ? "Tạo lại gợi ý AI"
+                  : "Regenerate AI suggestion"
+                : isVi
+                  ? "Tạo gợi ý AI"
+                  : "Generate AI suggestion"}
             </CsButton>
           </div>
 
@@ -287,7 +308,11 @@ const ReviewCard = ({
                 rows={4}
                 value={autoReplyText}
                 onChange={(event) => setAutoReplyText(event.target.value)}
-                placeholder="AI se de xuat cau tra loi de ban xem lai truoc khi dang."
+                placeholder={
+                  isVi
+                    ? "AI sẽ đề xuất câu trả lời để bạn xem lại trước khi đăng."
+                    : "AI will draft a reply for you to review before posting."
+                }
                 className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
               />
               <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -302,7 +327,7 @@ const ReviewCard = ({
                   ) : (
                     <X className="mr-2 size-4" />
                   )}
-                  Bo qua
+                  {isVi ? "Bỏ qua" : "Discard"}
                 </button>
                 <button
                   type="button"
@@ -315,7 +340,7 @@ const ReviewCard = ({
                   ) : (
                     <Sparkles className="mr-2 size-4" />
                   )}
-                  Dang phan hoi AI
+                  {isVi ? "Dùng phản hồi AI" : "Use AI Reply"}
                 </button>
               </div>
             </div>
@@ -326,14 +351,18 @@ const ReviewCard = ({
       {canReply && !isPro && review.status === "PUBLISHED" && (
         <div className="mt-4 flex items-start gap-3 rounded-2xl border border-dashed border-border bg-muted/20 px-4 py-4 text-sm text-muted-foreground">
           <Lock className="mt-0.5 size-4 shrink-0" />
-          <p>AI Reply Assistant chi mo cho agent dang dung Havenly PRO.</p>
+          <p>
+            {isVi
+              ? "Trợ lý phản hồi AI chỉ mở cho agent đang dùng Havenly PRO."
+              : "AI Reply Assistant is only available for agents on Havenly PRO."}
+          </p>
         </div>
       )}
 
       {review.agentReply ? (
         <div className="mt-4 rounded-2xl border border-border bg-background px-4 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Phan hoi cua ban
+            {isVi ? "Phản hồi của bạn" : "Your Reply"}
           </p>
           <p className="mt-2 text-sm leading-7 text-foreground/85">
             {review.agentReply.content}
@@ -350,7 +379,11 @@ const ReviewCard = ({
                 rows={4}
                 value={replyText}
                 onChange={(event) => setReplyText(event.target.value)}
-                placeholder="Cam on anh chi da tin tuong. Hay de lai mot phan hoi chuyen nghiep."
+                placeholder={
+                  isVi
+                    ? "Cảm ơn anh chị đã tin tưởng. Hãy để lại một phản hồi chuyên nghiệp."
+                    : "Thank you for your trust. Leave a professional and thoughtful reply."
+                }
                 className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
               />
               <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -363,7 +396,7 @@ const ReviewCard = ({
                   className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
                 >
                   <X className="mr-2 size-4" />
-                  Huy
+                  {isVi ? "Hủy" : "Cancel"}
                 </button>
                 <button
                   type="button"
@@ -380,7 +413,7 @@ const ReviewCard = ({
                   ) : (
                     <Send className="mr-2 size-4" />
                   )}
-                  Gui phan hoi
+                  {isVi ? "Gửi phản hồi" : "Send Reply"}
                 </button>
               </div>
             </div>
@@ -391,7 +424,7 @@ const ReviewCard = ({
               variant="secondary"
             >
               <MessageSquareReply className="mr-2 size-4" />
-              Tra loi khach hang
+              {isVi ? "Trả lời khách hàng" : "Reply to customer"}
             </CsButton>
           )}
         </div>
@@ -401,6 +434,8 @@ const ReviewCard = ({
 };
 
 const MyReviews = () => {
+  const locale = useLocale();
+  const isVi = locale.toLowerCase().startsWith("vi");
   const { formatDate } = useDateTimeFormatter();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<IReviewService.ReviewFilter>("all");
@@ -435,6 +470,18 @@ const MyReviews = () => {
   const reviews = reviewData?.results || [];
   const summary = reviewData?.summary;
   const totalPages = reviewData?.totalPages || 1;
+  const filters: Array<{
+    label: string;
+    value: IReviewService.ReviewFilter;
+  }> = [
+    { label: isVi ? "Tất cả" : "All", value: "all" },
+    { label: isVi ? "5 sao" : "5 stars", value: "5star" },
+    { label: isVi ? "1-3 sao" : "1-3 stars", value: "1-3star" },
+    {
+      label: isVi ? "Chưa phản hồi" : "Unanswered",
+      value: "unanswered",
+    },
+  ];
 
   const handleReply = async (reviewId: string, reply: string) => {
     await replyReview({
@@ -472,23 +519,24 @@ const MyReviews = () => {
     <section className="space-y-6">
       <div className="rounded-[32px] border border-border bg-card p-6 shadow-sm md:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-primary">
-          Agent Space
+          {isVi ? "Không gian agent" : "Agent Space"}
         </p>
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              My Reviews
+              {isVi ? "Đánh giá của tôi" : "My Reviews"}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">
-              Theo doi review da publish, review dang kiem duyet, phan hoi cua
-              ban va tinh nang AI goi y danh rieng cho agent PRO.
+              {isVi
+                ? "Theo dõi review đã hiển thị, review đang kiểm duyệt, phản hồi của bạn và gợi ý AI dành riêng cho agent PRO."
+                : "Track published reviews, pending reviews, your replies, and AI-assisted drafts reserved for PRO agents."}
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-border bg-background px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Diem cong khai
+                {isVi ? "Điểm công khai" : "Public Rating"}
               </p>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {summary?.averageRating?.toFixed(1) || "0.0"}
@@ -496,7 +544,7 @@ const MyReviews = () => {
             </div>
             <div className="rounded-2xl border border-border bg-background px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Tong review
+                {isVi ? "Tổng review" : "Total Reviews"}
               </p>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {summary?.totalReviews || 0}
@@ -504,7 +552,7 @@ const MyReviews = () => {
             </div>
             <div className="rounded-2xl border border-border bg-background px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Dang cho xu ly
+                {isVi ? "Đang chờ xử lý" : "Pending Review"}
               </p>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {summary?.pendingCount || 0}
@@ -512,7 +560,7 @@ const MyReviews = () => {
             </div>
             <div className="rounded-2xl border border-border bg-background px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Chua phan hoi
+                {isVi ? "Chưa phản hồi" : "Unanswered"}
               </p>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {summary?.unansweredCount || 0}
@@ -535,13 +583,17 @@ const MyReviews = () => {
                   setPage(1);
                 });
               }}
-              placeholder="Tim theo khach hang, noi dung hoac bat dong san"
+              placeholder={
+                isVi
+                  ? "Tìm theo khách hàng, nội dung hoặc bất động sản"
+                  : "Search by customer, comment, or property"
+              }
               className="h-12 w-full rounded-2xl border border-border bg-background pl-11 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-primary/10"
             />
           </label>
 
           <div className="flex flex-wrap gap-2">
-            {FILTERS.map((item) => {
+            {filters.map((item) => {
               const active = filter === item.value;
 
               return (
@@ -569,11 +621,12 @@ const MyReviews = () => {
 
         <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
           <p>
-            Hien thi {reviews.length} / {reviewData?.totalResults || 0} review
+            {isVi ? "Hiển thị" : "Showing"} {reviews.length} {isVi ? "/" : "of"}{" "}
+            {reviewData?.totalResults || 0} {isVi ? "review" : "reviews"}
           </p>
           <p>
-            {(summary?.hiddenCount || 0) + (summary?.reportedCount || 0)} review
-            dang bi an
+            {(summary?.hiddenCount || 0) + (summary?.reportedCount || 0)}{" "}
+            {isVi ? "review đang bị ẩn" : "reviews are hidden"}
           </p>
         </div>
 
@@ -584,11 +637,12 @@ const MyReviews = () => {
         ) : reviews.length === 0 ? (
           <div className="mt-6 rounded-[28px] border border-dashed border-border bg-muted/20 px-6 py-14 text-center">
             <p className="text-lg font-semibold text-foreground">
-              Chua co review phu hop
+              {isVi ? "Chưa có review phù hợp" : "No matching reviews"}
             </p>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Khi khach hang hoan tat buoi xem nha va gui danh gia, review se
-              xuat hien tai day.
+              {isVi
+                ? "Khi khách hàng hoàn tất buổi xem nhà và gửi đánh giá, review sẽ xuất hiện tại đây."
+                : "Once customers complete a viewing and submit a review, it will appear here."}
             </p>
           </div>
         ) : (
@@ -609,6 +663,7 @@ const MyReviews = () => {
                 isApplyingAutoReply={isApplyingAutoReply}
                 isDiscardingAutoReply={isDiscardingAutoReply}
                 formatDate={formatDate}
+                isVi={isVi}
               />
             ))}
           </div>
@@ -617,7 +672,8 @@ const MyReviews = () => {
         {totalPages > 1 && (
           <div className="mt-6 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
-              Trang {reviewData?.page || page} / {totalPages}
+              {isVi ? "Trang" : "Page"} {reviewData?.page || page} /{" "}
+              {totalPages}
             </p>
             <div className="flex gap-2">
               <button
@@ -628,7 +684,7 @@ const MyReviews = () => {
                 }
                 className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Truoc
+                {isVi ? "Trước" : "Previous"}
               </button>
               <button
                 type="button"
@@ -638,7 +694,7 @@ const MyReviews = () => {
                 }
                 className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Sau
+                {isVi ? "Sau" : "Next"}
               </button>
             </div>
           </div>

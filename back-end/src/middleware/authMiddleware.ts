@@ -152,6 +152,7 @@ export const requireAuth = async (
       if (lockState.isExpired) {
         const userService = new UserService();
         await userService.clearUserLock(user.userId._id);
+        await authService.setAuthActiveByUserId(String(user.userId._id), true);
       } else if (lockState.isLocked) {
         throw new AppError("Account is locked", 403, ErrorCode.FORBIDDEN);
       }
@@ -287,6 +288,7 @@ export const optionalAuth = async (
         if (lockState.isExpired) {
           const userService = new UserService();
           await userService.clearUserLock(user.userId._id);
+          await authService.setAuthActiveByUserId(String(user.userId._id), true);
           req.user = {
             ...user,
             userId: {

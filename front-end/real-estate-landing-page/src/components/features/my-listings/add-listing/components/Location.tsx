@@ -1,4 +1,5 @@
 import { ArrowLeft, ArrowRight, MapPin, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -28,6 +29,7 @@ const createFallbackOption = (value: string): AdministrativeUnitOption => ({
 });
 
 const Location = () => {
+  const t = useTranslations("ListingForm");
   const dispatch = useDispatch();
   const { control, setValue, trigger, watch } =
     useFormContext<ListingFormData>();
@@ -230,7 +232,7 @@ const Location = () => {
     <div className="animate-in fade-in slide-in-from-bottom-4 space-y-8 duration-500">
       <div className="min-w-[700px] rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         <h2 className="mb-6 flex items-center gap-2 text-xl font-bold text-gray-900">
-          <MapPin className="w-6 h-6" /> Step 2: Location
+          <MapPin className="w-6 h-6" /> {t("location.title")}
         </h2>
 
         <div className="space-y-6">
@@ -239,7 +241,7 @@ const Location = () => {
               htmlFor="property-location-search"
               className="cs-paragraph-black mb-2 block text-[16px] font-semibold"
             >
-              Search Location
+              {t("location.search.label")}
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -250,7 +252,7 @@ const Location = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onFocus={() => setShowResults(true)}
-                placeholder="Search for your property address..."
+                placeholder={t("location.search.placeholder")}
                 className="w-full rounded-xl border border-gray-200 py-3 pl-10 pr-10 transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-black"
               />
               {searchQuery && (
@@ -264,8 +266,7 @@ const Location = () => {
               )}
             </div>
             <p className="mt-1 text-xs text-gray-500">
-              Search to quickly set the pin and address, then verify the
-              administrative details below.
+              {t("location.search.hint")}
             </p>
 
             {showResults && (searchResults.length > 0 || isSearching) && (
@@ -273,7 +274,7 @@ const Location = () => {
                 {isSearching ? (
                   <div className="p-4 text-center text-gray-500">
                     <div className="mr-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-black" />
-                    Searching...
+                    {t("location.search.searching")}
                   </div>
                 ) : (
                   <ul>
@@ -309,10 +310,10 @@ const Location = () => {
 
           <div>
             <p className="cs-paragraph-black mb-2 text-[16px] font-semibold">
-              Pin Location on Map
+              {t("location.map.label")}
             </p>
             <p className="mb-2 text-xs text-gray-500">
-              Click or drag the marker to set the exact location.
+              {t("location.map.hint")}
             </p>
             <div className="overflow-hidden rounded-xl border border-gray-200">
               <Controller
@@ -365,12 +366,12 @@ const Location = () => {
             <Controller
               name="province"
               control={control}
-              rules={{ required: "Province is required" }}
+              rules={{ required: t("validation.provinceRequired") }}
               render={({ field, fieldState: { error } }) => (
                 <CsSelect
-                  label="Province / City"
+                  label={t("location.fields.province.label")}
                   name={field.name}
-                  placeholder="Select province / city"
+                  placeholder={t("location.fields.province.placeholder")}
                   options={provinceSelectOptions}
                   value={field.value}
                   onChange={({ target }) => {
@@ -385,15 +386,15 @@ const Location = () => {
             <Controller
               name="ward"
               control={control}
-              rules={{ required: "Ward is required" }}
+              rules={{ required: t("validation.wardRequired") }}
               render={({ field, fieldState: { error } }) => (
                 <CsSelect
-                  label="Ward / Commune / Special Zone"
+                  label={t("location.fields.ward.label")}
                   name={field.name}
                   placeholder={
                     selectedProvince
-                      ? "Select administrative unit"
-                      : "Select province first"
+                      ? t("location.fields.ward.placeholder")
+                      : t("location.fields.ward.placeholderSelectProvince")
                   }
                   options={localUnitSelectOptions}
                   value={field.value}
@@ -410,8 +411,8 @@ const Location = () => {
             control={control}
             render={({ field }) => (
               <Input
-                label="Street Address"
-                placeholder="Ex: 208 Nguyen Huu Canh"
+                label={t("location.fields.address.label")}
+                placeholder={t("location.fields.address.placeholder")}
                 {...field}
               />
             )}
@@ -420,14 +421,14 @@ const Location = () => {
 
         <div className="flex justify-between pt-10">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
-            Back
+            {t("actions.back")}
           </CsButton>
           <div className="flex gap-4">
             <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
-              Save Draft
+              {t("actions.saveDraft")}
             </CsButton>
             <CsButton onClick={handleContinue} type="button">
-              Continue
+              {t("actions.continue")}
               <ArrowRight className="ml-2 h-5 w-5" />
             </CsButton>
           </div>

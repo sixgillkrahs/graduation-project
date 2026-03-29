@@ -1,12 +1,13 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { ListingDraftProvider } from "@/components/features/my-listings/components/ListingDraftContext";
 import { CsStep } from "@/components/ui/stepper";
 import { ROUTES } from "@/const/routes";
-import { getPropertyAmenityLabel } from "@/lib/property-amenities";
 import { toast } from "@/lib/toast";
 import type { RootState } from "@/store";
 import { resetListing, setStep } from "@/store/listing.store";
@@ -20,6 +21,7 @@ import MediaContent from "./components/MediaContent";
 import Review from "./components/Review";
 
 const AddListing = () => {
+  const t = useTranslations("ListingForm");
   const dispatch = useDispatch();
   const router = useRouter();
   const currentStep = useSelector(
@@ -28,74 +30,13 @@ const AddListing = () => {
   const listingData = useSelector((state: RootState) => state.listing.data);
   const { mutateAsync: createProperty, isPending: isSavingDraft } =
     useCreateProperty();
+  const defaultValues = useMemo(
+    () => PropertyService.getFormValuesFromListingState(listingData),
+    [listingData],
+  );
 
   const methods = useForm<ListingFormData>({
-    defaultValues: {
-      ...PropertyService.defaultFormValues,
-      // Merge with any existing Redux data
-      demandType:
-        listingData.demandType || PropertyService.defaultFormValues.demandType,
-      propertyType:
-        listingData.propertyType ||
-        PropertyService.defaultFormValues.propertyType,
-      projectName:
-        listingData.projectName ||
-        PropertyService.defaultFormValues.projectName,
-      province:
-        listingData.location?.province ||
-        PropertyService.defaultFormValues.province,
-
-      ward:
-        listingData.location?.ward || PropertyService.defaultFormValues.ward,
-      address:
-        listingData.location?.address ||
-        PropertyService.defaultFormValues.address,
-      latitude:
-        listingData.location?.latitude ||
-        PropertyService.defaultFormValues.latitude,
-      longitude:
-        listingData.location?.longitude ||
-        PropertyService.defaultFormValues.longitude,
-      area: String(
-        listingData.features?.area || PropertyService.defaultFormValues.area,
-      ),
-      price: String(
-        listingData.features?.price || PropertyService.defaultFormValues.price,
-      ),
-      currency:
-        listingData.features?.currency ||
-        PropertyService.defaultFormValues.currency,
-      priceUnit:
-        listingData.features?.priceUnit ||
-        PropertyService.defaultFormValues.priceUnit,
-      bedrooms:
-        listingData.features?.bedrooms ||
-        PropertyService.defaultFormValues.bedrooms,
-      bathrooms:
-        listingData.features?.bathrooms ||
-        PropertyService.defaultFormValues.bathrooms,
-      direction:
-        listingData.features?.direction ||
-        PropertyService.defaultFormValues.direction,
-      legalStatus:
-        listingData.features?.legalStatus ||
-        PropertyService.defaultFormValues.legalStatus,
-      furniture:
-        listingData.features?.furniture ||
-        PropertyService.defaultFormValues.furniture,
-      amenities: (listingData.amenities || []).map(getPropertyAmenityLabel),
-      images:
-        listingData.media?.images || PropertyService.defaultFormValues.images,
-      thumbnail:
-        listingData.media?.thumbnail ||
-        PropertyService.defaultFormValues.thumbnail,
-      videoLink:
-        listingData.media?.videoLink ||
-        PropertyService.defaultFormValues.videoLink,
-      virtualTourUrls:
-        listingData.media?.virtualTourUrls ||
-        PropertyService.defaultFormValues.virtualTourUrls,
-    },
+    defaultValues,
     mode: "onChange",
   });
 
@@ -103,31 +44,39 @@ const AddListing = () => {
     console.log("Final submission:", data);
   };
 
-  const saveDraft = async () => {
+  const saveDraft = useCallback(async () => {
     try {
       await createProperty({
         ...methods.getValues(),
         status: "DRAFT",
       });
-      toast.success("Draft saved successfully.");
+      toast.success(t("toast.draftSaved"));
       dispatch(resetListing());
       router.push(ROUTES.AGENT_LISTINGS);
     } catch (error) {
-      toast.error("Failed to save draft. Please try again.");
+      toast.error(t("toast.draftSaveFailed"));
       console.error(error);
     }
-  };
+  }, [createProperty, dispatch, methods, router, t]);
 
-  const steps = [
-    { title: "Basic Info", content: <BasicInfo /> },
-    { title: "Location", content: <Location /> },
-    { title: "Features & Pricing", content: <FeaturesPricing /> },
-    { title: "Media", content: <MediaContent /> },
-    { title: "Review", content: <Review /> },
-  ];
+  const steps = useMemo(
+    () => [
+      { title: t("steps.basicInfo"), content: <BasicInfo /> },
+      { title: t("steps.location"), content: <Location /> },
+      { title: t("steps.featuresPricing"), content: <FeaturesPricing /> },
+      { title: t("steps.media"), content: <MediaContent /> },
+      { title: t("steps.review"), content: <Review /> },
+    ],
+    [t],
+  );
+
+  const draftContextValue = useMemo(
+    () => ({ saveDraft, isSavingDraft }),
+    [isSavingDraft, saveDraft],
+  );
 
   return (
-    <ListingDraftProvider value={{ saveDraft, isSavingDraft }}>
+    <ListingDraftProvider value={draftContextValue}>
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onFinalSubmit)}>
           <div className="max-w-7xl mx-auto p-8 pb-24">

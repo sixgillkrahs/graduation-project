@@ -3,6 +3,7 @@
 import { CsButton } from "@/components/custom";
 import { Icon, Modal, useModal } from "@/components/ui";
 import { Check, X } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,6 +19,8 @@ import {
 } from "./services/mutate";
 
 const AgentUpgrade = () => {
+  const locale = useLocale();
+  const isVi = locale.toLowerCase().startsWith("vi");
   const [isAnnual, setIsAnnual] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { open, show, hide } = useModal();
@@ -83,14 +86,20 @@ const AgentUpgrade = () => {
   const handleDowngrade = async () => {
     if (
       !window.confirm(
-        "Are you sure you want to cancel your PRO plan? You will immediately lose access to premium features.",
+        isVi
+          ? "Bạn có chắc muốn hủy gói PRO không? Bạn sẽ mất quyền truy cập vào các tính năng cao cấp ngay lập tức."
+          : "Are you sure you want to cancel your PRO plan? You will immediately lose access to premium features.",
       )
     )
       return;
 
     try {
       await downgradeReq();
-      toast.success("Successfully downgraded to Basic plan");
+      toast.success(
+        isVi
+          ? "Đã hạ xuống gói Cơ bản thành công"
+          : "Successfully downgraded to Basic plan",
+      );
       dispatch(fetchProfileItem());
     } catch (err: any) {}
   };
@@ -102,13 +111,21 @@ const AgentUpgrade = () => {
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
             {isPro
-              ? "Your Subscription Details"
-              : "Supercharge Your Real Estate Business"}
+              ? isVi
+                ? "Chi tiết gói hiện tại"
+                : "Your Subscription Details"
+              : isVi
+                ? "Tăng tốc công việc môi giới"
+                : "Supercharge Your Real Estate Business"}
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto">
             {isPro
-              ? "You are currently enjoying all the exclusive privileges of Havenly PRO."
-              : "Upgrade to Pro to unlock 3D Virtual Tours, AI tools, and unlimited listings."}
+              ? isVi
+                ? "Bạn đang sử dụng toàn bộ quyền lợi độc quyền của Havenly PRO."
+                : "You are currently enjoying all the exclusive privileges of Havenly PRO."
+              : isVi
+                ? "Nâng cấp PRO để mở khóa tour 3D, công cụ AI và số lượng tin đăng không giới hạn."
+                : "Upgrade to Pro to unlock 3D Virtual Tours, AI tools, and unlimited listings."}
           </p>
 
           {/* Billing Toggle */}
@@ -123,7 +140,7 @@ const AgentUpgrade = () => {
                 }`}
                 onClick={() => setIsAnnual(false)}
               >
-                Monthly
+                {isVi ? "Theo tháng" : "Monthly"}
               </button>
               <button
                 type="button"
@@ -134,9 +151,9 @@ const AgentUpgrade = () => {
                 }`}
                 onClick={() => setIsAnnual(true)}
               >
-                Annually
+                {isVi ? "Theo năm" : "Annually"}
                 <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
-                  Save 20%
+                  {isVi ? "Tiết kiệm 20%" : "Save 20%"}
                 </span>
               </button>
             </div>
@@ -150,50 +167,64 @@ const AgentUpgrade = () => {
             <div className="w-full flex justify-between items-start mb-6">
               <div>
                 <h3 className="text-xl font-bold text-gray-900">Basic</h3>
-                <div className="mt-2 text-gray-500">Essential tools</div>
+                <div className="mt-2 text-gray-500">
+                  {isVi ? "Công cụ thiết yếu" : "Essential tools"}
+                </div>
               </div>
               {!isPro && (
                 <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
-                  Current Plan
+                  {isVi ? "Gói hiện tại" : "Current Plan"}
                 </span>
               )}
             </div>
 
             <div className="my-6 text-center w-full">
               <span className="text-4xl font-extrabold text-gray-900">
-                Free
+                {isVi ? "Miễn phí" : "Free"}
               </span>
             </div>
 
             <ul className="w-full space-y-4 mb-8 grow">
               <li className="flex items-start gap-3 text-gray-700">
                 <Check className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <span>Up to 3 active listings/month</span>
+                <span>
+                  {isVi
+                    ? "Tối đa 3 tin đăng hoạt động mỗi tháng"
+                    : "Up to 3 active listings/month"}
+                </span>
               </li>
               <li className="flex items-start gap-3 text-gray-700">
                 <Check className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <span>Standard photo uploads</span>
+                <span>
+                  {isVi ? "Tải ảnh tiêu chuẩn" : "Standard photo uploads"}
+                </span>
               </li>
               <li className="flex items-start gap-3 text-gray-700">
                 <Check className="w-5 h-5 text-gray-400 shrink-0 mt-0.5" />
-                <span>Basic Lead Management</span>
-              </li>
-              <li className="flex items-start gap-3 text-gray-400">
-                <X className="w-5 h-5 text-gray-300 shrink-0 mt-0.5" />
-                <span className="line-through decoration-gray-300">
-                  No 3D Virtual Tours
+                <span>
+                  {isVi ? "Quản lý lead cơ bản" : "Basic Lead Management"}
                 </span>
               </li>
               <li className="flex items-start gap-3 text-gray-400">
                 <X className="w-5 h-5 text-gray-300 shrink-0 mt-0.5" />
                 <span className="line-through decoration-gray-300">
-                  No AI Auto-Descriptions
+                  {isVi ? "Không có tour 3D" : "No 3D Virtual Tours"}
                 </span>
               </li>
               <li className="flex items-start gap-3 text-gray-400">
                 <X className="w-5 h-5 text-gray-300 shrink-0 mt-0.5" />
                 <span className="line-through decoration-gray-300">
-                  No AI Lead Scoring
+                  {isVi
+                    ? "Không có tạo nội dung bằng AI"
+                    : "No AI Auto-Descriptions"}
+                </span>
+              </li>
+              <li className="flex items-start gap-3 text-gray-400">
+                <X className="w-5 h-5 text-gray-300 shrink-0 mt-0.5" />
+                <span className="line-through decoration-gray-300">
+                  {isVi
+                    ? "Không có chấm điểm lead bằng AI"
+                    : "No AI Lead Scoring"}
                 </span>
               </li>
             </ul>
@@ -209,10 +240,16 @@ const AgentUpgrade = () => {
               }`}
             >
               {isDowngrading
-                ? "Processing..."
+                ? isVi
+                  ? "Đang xử lý..."
+                  : "Processing..."
                 : !isPro
-                  ? "Your Active Plan"
-                  : "Downgrade to Basic"}
+                  ? isVi
+                    ? "Gói đang dùng"
+                    : "Your Active Plan"
+                  : isVi
+                    ? "Hạ xuống gói Cơ bản"
+                    : "Downgrade to Basic"}
             </button>
           </div>
 
@@ -223,11 +260,13 @@ const AgentUpgrade = () => {
             <div className="absolute top-0 transform -translate-y-1/2">
               {isPro ? (
                 <span className="bg-amber-400 text-black text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5" /> Active Plan
+                  <Check className="w-3.5 h-3.5" />{" "}
+                  {isVi ? "Đang hoạt động" : "Active Plan"}
                 </span>
               ) : (
                 <span className="bg-amber-400 text-black text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-                  <Icon.Star className="w-3.5 h-3.5" /> Most Popular
+                  <Icon.Star className="w-3.5 h-3.5" />{" "}
+                  {isVi ? "Phổ biến nhất" : "Most Popular"}
                 </span>
               )}
             </div>
@@ -235,7 +274,9 @@ const AgentUpgrade = () => {
             <div className="w-full flex justify-between items-start mb-6">
               <div>
                 <h3 className="text-xl font-bold text-gray-900">Havenly PRO</h3>
-                <div className="mt-2 text-gray-500">Everything you need</div>
+                <div className="mt-2 text-gray-500">
+                  {isVi ? "Mọi thứ bạn cần" : "Everything you need"}
+                </div>
               </div>
             </div>
 
@@ -244,29 +285,51 @@ const AgentUpgrade = () => {
                 {isAnnual ? "400,000" : "500,000"}{" "}
                 <span className="text-xl text-gray-500 font-medium">VND</span>
               </span>
-              <div className="text-gray-500 font-medium">/ month</div>
+              <div className="text-gray-500 font-medium">
+                {isVi ? "/ tháng" : "/ month"}
+              </div>
             </div>
 
             <ul className="w-full space-y-4 mb-8 grow">
               <li className="flex items-start gap-3 text-gray-900 font-medium">
                 <Check className="w-5 h-5 text-black shrink-0 mt-0.5" />
-                <span>Unlimited active listings</span>
+                <span>
+                  {isVi
+                    ? "Tin đăng hoạt động không giới hạn"
+                    : "Unlimited active listings"}
+                </span>
               </li>
               <li className="flex items-start gap-3 text-gray-900">
                 <Check className="w-5 h-5 text-black shrink-0 mt-0.5" />
-                <span>3D Virtual Tour (Panorama) uploads</span>
+                <span>
+                  {isVi
+                    ? "Đăng tour 3D Virtual Tour"
+                    : "3D Virtual Tour (Panorama) uploads"}
+                </span>
               </li>
               <li className="flex items-start gap-3 text-gray-900">
                 <Check className="w-5 h-5 text-black shrink-0 mt-0.5" />
-                <span>AI Content Generator (Write listings instantly)</span>
+                <span>
+                  {isVi
+                    ? "AI tạo nội dung cho tin đăng"
+                    : "AI Content Generator (Write listings instantly)"}
+                </span>
               </li>
               <li className="flex items-start gap-3 text-gray-900">
                 <Check className="w-5 h-5 text-black shrink-0 mt-0.5" />
-                <span>Advanced CRM with AI Lead Scoring</span>
+                <span>
+                  {isVi
+                    ? "CRM nâng cao với AI lead scoring"
+                    : "Advanced CRM with AI Lead Scoring"}
+                </span>
               </li>
               <li className="flex items-start gap-3 text-gray-900">
                 <Check className="w-5 h-5 text-black shrink-0 mt-0.5" />
-                <span>"PRO Agent" verified badge on profile</span>
+                <span>
+                  {isVi
+                    ? 'Huy hiệu "PRO Agent" xác minh trên hồ sơ'
+                    : '"PRO Agent" verified badge on profile'}
+                </span>
               </li>
             </ul>
 
@@ -276,7 +339,7 @@ const AgentUpgrade = () => {
                 type="button"
                 className="w-full py-3.5 rounded-xl font-bold text-center bg-black text-white hover:bg-gray-900 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 duration-200"
               >
-                Upgrade Now
+                {isVi ? "Nâng cấp ngay" : "Upgrade Now"}
               </button>
             ) : (
               <button
@@ -284,10 +347,12 @@ const AgentUpgrade = () => {
                 type="button"
                 className="w-full py-3.5 rounded-xl font-bold text-center bg-gray-100 text-gray-600 cursor-not-allowed shadow-none"
               >
-                Expires:{" "}
+                {isVi ? "Hết hạn:" : "Expires:"}{" "}
                 {profile?.planInfo?.endDate
                   ? formatDate(profile.planInfo.endDate)
-                  : "N/A"}
+                  : isVi
+                    ? "Không có"
+                    : "N/A"}
               </button>
             )}
           </div>
@@ -296,8 +361,10 @@ const AgentUpgrade = () => {
         {/* FAQ Section */}
         <div className="text-center pt-8">
           <p className="text-gray-500 flex items-center justify-center gap-2">
-            <Icon.ShieldCheck className="w-5 h-5" /> Cancel anytime. Secure
-            payment processing.
+            <Icon.ShieldCheck className="w-5 h-5" />{" "}
+            {isVi
+              ? "Hủy bất cứ lúc nào. Thanh toán được bảo mật."
+              : "Cancel anytime. Secure payment processing."}
           </p>
         </div>
       </div>
@@ -309,20 +376,35 @@ const AgentUpgrade = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Complete Your Upgrade
+                  {isVi ? "Hoàn tất nâng cấp" : "Complete Your Upgrade"}
                 </h2>
                 <p className="text-gray-500 mt-2">
-                  Choose a payment method to proceed.
+                  {isVi
+                    ? "Chọn phương thức thanh toán để tiếp tục."
+                    : "Choose a payment method to proceed."}
                 </p>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex justify-between items-center shadow-inner">
                 <div>
                   <div className="font-semibold text-gray-900">
-                    Havenly PRO - 1 {isAnnual ? "Year" : "Month"}
+                    Havenly PRO - 1{" "}
+                    {isAnnual
+                      ? isVi
+                        ? "Năm"
+                        : "Year"
+                      : isVi
+                        ? "Tháng"
+                        : "Month"}
                   </div>
                   <div className="text-sm text-gray-500">
-                    Billed {isAnnual ? "annually" : "monthly"}
+                    {isAnnual
+                      ? isVi
+                        ? "Thanh toán theo năm"
+                        : "Billed annually"
+                      : isVi
+                        ? "Thanh toán theo tháng"
+                        : "Billed monthly"}
                   </div>
                 </div>
                 <div className="text-xl font-bold text-black border-l pl-4 border-gray-200">
@@ -332,7 +414,7 @@ const AgentUpgrade = () => {
 
               <div className="space-y-3">
                 <div className="text-sm font-semibold text-gray-900 mb-2">
-                  Payment Method
+                  {isVi ? "Phương thức thanh toán" : "Payment Method"}
                 </div>
                 <label className="flex items-center justify-between p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-black transition-colors bg-white">
                   <div className="flex items-center gap-3">
@@ -360,7 +442,9 @@ const AgentUpgrade = () => {
                       onChange={() => setPaymentMethod("momo")}
                       className="w-4 h-4 text-pink-600 border-gray-300 focus:ring-pink-600"
                     />
-                    <span className="font-medium text-gray-900">Ví MoMo</span>
+                    <span className="font-medium text-gray-900">
+                      {isVi ? "Ví MoMo" : "MoMo Wallet"}
+                    </span>
                   </div>
                   <div className="bg-pink-50 text-pink-600 px-2 py-1 rounded text-xs font-bold">
                     MoMo
@@ -381,7 +465,7 @@ const AgentUpgrade = () => {
                     : "cs-bg-black hover:bg-gray-900"
                 }`}
               >
-                Proceed to Payment (
+                {isVi ? "Tiến hành thanh toán" : "Proceed to Payment"} (
                 {paymentMethod === "vnpay" ? "VNPay" : "MoMo"} Sandbox)
               </CsButton>
             </div>
@@ -392,15 +476,19 @@ const AgentUpgrade = () => {
               </div>
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Payment Successful!
+                  {isVi ? "Thanh toán thành công!" : "Payment Successful!"}
                 </h2>
-                <p className="text-gray-500 text-lg">Welcome to Havenly PRO.</p>
+                <p className="text-gray-500 text-lg">
+                  {isVi
+                    ? "Chào mừng bạn đến với Havenly PRO."
+                    : "Welcome to Havenly PRO."}
+                </p>
               </div>
               <CsButton
                 onClick={handleGoToDashboard}
                 className="w-full cs-bg-black text-white hover:bg-gray-900 py-6 font-semibold rounded-xl"
               >
-                Go to Dashboard
+                {isVi ? "Đến trang tổng quan" : "Go to Dashboard"}
               </CsButton>
             </div>
           )}

@@ -1,8 +1,153 @@
 {
-  "activeAgents": "Active Agents",
-  "quickActions": "Quick Actions",
-  "addList": "Add List",
-  "marketingMaterial": "Marketing Material",
-  "scheduleShowing": "Schedule Showing",
-  "commissionCalc": "Commission Calc"
+  "actions": {
+    "refresh": "Refresh dashboard",
+    "open": "Open"
+  },
+  "hero": {
+    "badge": "Operations snapshot",
+    "title": "Admin control center",
+    "description": "Track moderation pressure, platform queues, and background processing from one operational view.",
+    "workload": {
+      "title": "Pending workload",
+      "description": "Items currently waiting across registrations, listings, reviews, reports, unlock requests, and failed jobs."
+    },
+    "publishHealth": {
+      "title": "Publishing health",
+      "description": "{{published}} published out of {{total}} tracked listings"
+    },
+    "processingJobs": {
+      "title": "Jobs processing",
+      "description": "Background tasks running now"
+    },
+    "unreadReports": {
+      "title": "Unread reports",
+      "description": "Fresh alerts from the report inbox"
+    }
+  },
+  "errors": {
+    "partialData": {
+      "title": "Some dashboard data could not be loaded",
+      "description": "The dashboard is showing partial information. You can still use the available cards and queues while retrying the refresh."
+    }
+  },
+  "stats": {
+    "activeAgents": {
+      "title": "Active agents",
+      "description": "Approved agents currently operating on the platform"
+    },
+    "pendingRegistrations": {
+      "title": "Pending registrations",
+      "description": "Agent applications still waiting for first review"
+    },
+    "unlockRequests": {
+      "title": "Unlock requests",
+      "description": "Locked agent accounts asking for manual review"
+    },
+    "pendingProperties": {
+      "title": "Pending listings",
+      "description": "Listings waiting for approval before going live"
+    },
+    "reviewQueue": {
+      "title": "Review queue",
+      "description": "Customer reviews requiring moderation attention"
+    },
+    "unreadReports": {
+      "title": "Unread reports",
+      "description": "Report notices that have not been opened yet"
+    },
+    "failedJobs": {
+      "title": "Failed jobs",
+      "description": "Background jobs that need retry or investigation",
+      "footer": "{{count}} processing"
+    },
+    "publishedProperties": {
+      "title": "Published listings",
+      "description": "Listings currently visible to buyers and renters"
+    }
+  },
+  "sections": {
+    "activity": {
+      "title": "Recent activity",
+      "description": "Latest signals across registrations, unlock requests, listings, reviews, reports, and background jobs."
+    },
+    "queues": {
+      "title": "Attention queues",
+      "description": "Queues that should be checked first when workload starts building up."
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "description": "Jump directly into the admin workflows that most often need action."
+    }
+  },
+  "queues": {
+    "registrations": {
+      "title": "Agent registrations",
+      "description": "Review new applications from prospective agents"
+    },
+    "properties": {
+      "title": "Property moderation",
+      "description": "Approve or reject listings waiting to go live"
+    },
+    "reports": {
+      "title": "Report inbox",
+      "description": "Check new notices about listings or agents"
+    },
+    "jobs": {
+      "title": "Background jobs",
+      "description": "Inspect failed tasks and recover processing flow"
+    }
+  },
+  "queueStatus": {
+    "clear": "Clear",
+    "watch": "Watch",
+    "critical": "Critical"
+  },
+  "quickActions": {
+    "registrations": {
+      "title": "Review registrations",
+      "description": "Open the pending agent application queue."
+    },
+    "unlockRequests": {
+      "title": "Review unlock requests",
+      "description": "Handle appeals from locked agent accounts."
+    },
+    "pendingProperties": {
+      "title": "Moderate pending listings",
+      "description": "Approve or reject new listings before publication."
+    },
+    "reviews": {
+      "title": "Moderate reviews",
+      "description": "Review customer feedback waiting for admin action."
+    },
+    "reports": {
+      "title": "Open report inbox",
+      "description": "Investigate new report notices from the platform."
+    },
+    "jobs": {
+      "title": "Inspect failed jobs",
+      "description": "Review background job failures and retry where needed."
+    }
+  },
+  "activity": {
+    "empty": "No recent operational activity yet.",
+    "labels": {
+      "genericError": "Unknown error"
+    },
+    "types": {
+      "registration": "New agent registration",
+      "unlock": "Unlock request submitted",
+      "property": "Listing pending approval",
+      "report": "New report notice",
+      "review": "Review entered moderation",
+      "job": "Background job failed"
+    },
+    "descriptions": {
+      "registration": "{{name}} • {{email}}",
+      "unlock": "{{name}} • {{email}}",
+      "property": "{{title}} • {{province}}",
+      "report": "{{title}}",
+      "review": "{{customer}} • {{property}}",
+      "job": "{{type}} • {{error}}"
+    }
+  }
 }

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import NextImage from "next/image";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
@@ -31,18 +32,21 @@ import { Icon } from "@/components/ui";
 import { Badge } from "@/components/ui/badge";
 import { Map as ListingMap } from "@/components/ui/Map";
 import { ROUTES } from "@/const/routes";
-import { getPropertyAmenityLabel } from "@/lib/property-amenities";
+import { getPropertyAmenityDisplay } from "@/lib/property-amenities";
 import { formatPropertyPrice } from "@/lib/property-price";
 import { toast } from "@/lib/toast";
 import { prevStep, resetListing } from "@/store/listing.store";
 import type { ListingFormData } from "../../dto/listingformdata.dto";
 import { useUpdateProperty } from "../../services/mutate";
+import PropertyService from "../../services/service";
 
 interface ReviewProps {
   propertyId: string;
 }
 
 const Review = ({ propertyId }: ReviewProps) => {
+  const t = useTranslations("ListingForm");
+  const propertyDetailT = useTranslations("PropertiesPage");
   const dispatch = useDispatch();
   const router = useRouter();
   const { mutateAsync: updateProperty, isPending: isUpdatingProperty } =
@@ -50,6 +54,9 @@ const Review = ({ propertyId }: ReviewProps) => {
   const { getValues, handleSubmit } = useFormContext<ListingFormData>();
   const data = getValues();
   const { saveDraft, isSavingDraft } = useListingDraft();
+  const showLegalStatus = PropertyService.canShowLegalStatus(data.demandType);
+  const showRoomFields = PropertyService.canShowRoomFields(data.propertyType);
+  const showFurniture = PropertyService.canShowFurniture(data.propertyType);
 
   // Create preview URLs for images
   const imageUrls = useMemo(() => {
@@ -68,12 +75,12 @@ const Review = ({ propertyId }: ReviewProps) => {
       { id: propertyId, data: formData },
       {
         onSuccess: () => {
-          toast.success("Listing updated successfully! Wait for approval.");
+          toast.success(t("toast.updateSuccess"));
           dispatch(resetListing());
           router.push(ROUTES.AGENT_LISTINGS);
         },
         onError: (error) => {
-          toast.error("Failed to update property. Please try again.");
+          toast.error(t("toast.updateFailed"));
           console.error(error);
         },
       },
@@ -82,24 +89,52 @@ const Review = ({ propertyId }: ReviewProps) => {
 
   // Format helpers
   const formatPropertyType = (type: string) => {
-    const types: Record<string, string> = {
-      APARTMENT: "Apartment",
-      HOUSE: "House",
-      VILLA: "Villa",
-      LAND: "Land",
-      STREET_HOUSE: "Street House",
-    };
-    return types[type] || type;
+    return t(`basicInfo.propertyTypes.${type.toLowerCase()}`);
   };
 
   const formatDemandType = (type: string) => {
-    return type === "RENT" ? "For Rent" : "For Sale";
+    return type === "RENT"
+      ? t("review.demandType.rent")
+      : t("review.demandType.sale");
+  };
+
+  const formatDirection = (direction?: string) =>
+    direction
+      ? t(`featuresPricing.directionOptions.${direction
+          .toLowerCase()
+          .replace(/_([a-z])/g, (_, char) => char.toUpperCase())}`)
+      : t("review.na");
+
+  const formatLegalStatus = (legalStatus?: string) =>
+    legalStatus
+      ? t(
+          `featuresPricing.legalStatusOptions.${legalStatus
+            .toLowerCase()
+            .replace("sale_contract", "salesContract")
+            .replace("pink_book", "pinkBook")
+            .replace("red_book", "redBook")}`,
+        )
+      : t("review.na");
+
+  const formatFurniture = (furniture?: string) =>
+    furniture
+      ? t(
+          `featuresPricing.furnitureOptions.${furniture === "EMPTY" ? "none" : furniture.toLowerCase()}`,
+        )
+      : t("review.na");
+
+  const formatAmenity = (amenity: string) => {
+    const display = getPropertyAmenityDisplay(amenity);
+
+    return display.translationKey
+      ? propertyDetailT(display.translationKey)
+      : display.label;
   };
 
   const fullAddress = useMemo(() => {
     const parts = [data.address].filter(Boolean);
-    return parts.join(", ") || "Not specified";
-  }, [data.address]);
+    return parts.join(", ") || t("review.notSpecified");
+  }, [data.address, t]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -108,10 +143,10 @@ const Review = ({ propertyId }: ReviewProps) => {
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <CheckCircle className="w-6 h-6 text-green-600" />
-            Review Your Listing
+            {t("review.title")}
           </h2>
           <p className="text-gray-500 mt-1">
-            Please review all the information before publishing your listing.
+            {t("review.description")}
           </p>
         </div>
 
@@ -119,12 +154,12 @@ const Review = ({ propertyId }: ReviewProps) => {
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <Building2 className="w-5 h-5" />
-            Overview
+            {t("review.sections.overview")}
           </h3>
           <div className="bg-gray-50 rounded-xl p-5 grid grid-cols-3 gap-6">
             <div>
               <span className="text-sm text-gray-500 block mb-1">
-                Listing Type
+                {t("review.fields.listingType")}
               </span>
               <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-black text-white rounded-full text-sm font-medium">
                 <Tag className="w-4 h-4" />
@@ -133,7 +168,7 @@ const Review = ({ propertyId }: ReviewProps) => {
             </div>
             <div>
               <span className="text-sm text-gray-500 block mb-1">
-                Property Type
+                {t("review.fields.propertyType")}
               </span>
               <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">
                 <Home className="w-4 h-4" />
@@ -142,10 +177,10 @@ const Review = ({ propertyId }: ReviewProps) => {
             </div>
             <div>
               <span className="text-sm text-gray-500 block mb-1">
-                Project Name
+                {t("review.fields.projectName")}
               </span>
               <span className="text-gray-900 font-medium">
-                {data.projectName || "Not specified"}
+                {data.projectName || t("review.notSpecified")}
               </span>
             </div>
           </div>
@@ -155,29 +190,29 @@ const Review = ({ propertyId }: ReviewProps) => {
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <MapPin className="w-5 h-5" />
-            Location
+            {t("review.sections.location")}
           </h3>
           <div className="bg-gray-50 rounded-xl p-5 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-sm text-gray-500 block mb-1">
-                  Province / City
+                  {t("review.fields.province")}
                 </span>
                 <span className="text-gray-900 font-medium">
-                  {data.province || "Not specified"}
+                  {data.province || t("review.notSpecified")}
                 </span>
               </div>
               <div>
                 <span className="text-sm text-gray-500 block mb-1">
-                  Administrative Unit
+                  {t("review.fields.administrativeUnit")}
                 </span>
                 <span className="text-gray-900 font-medium">
-                  {data.ward || "Not specified"}
+                  {data.ward || t("review.notSpecified")}
                 </span>
               </div>
               <div className="col-span-2">
                 <span className="text-sm text-gray-500 block mb-1">
-                  Address
+                  {t("review.fields.address")}
                 </span>
                 <span className="text-gray-900 font-medium">{fullAddress}</span>
               </div>
@@ -199,7 +234,7 @@ const Review = ({ propertyId }: ReviewProps) => {
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <Home className="w-5 h-5" />
-            Property Details
+            {t("review.sections.propertyDetails")}
           </h3>
           <div className="bg-gray-50 rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="flex items-center gap-3">
@@ -207,9 +242,11 @@ const Review = ({ propertyId }: ReviewProps) => {
                 <Ruler className="w-5 h-5 text-gray-600" />
               </div>
               <div>
-                <span className="text-sm text-gray-500 block">Area</span>
+                <span className="text-sm text-gray-500 block">
+                  {t("review.fields.area")}
+                </span>
                 <span className="text-gray-900 font-semibold">
-                  {data.area ? `${data.area} m²` : "N/A"}
+                  {data.area ? `${data.area} m²` : t("review.na")}
                 </span>
               </div>
             </div>
@@ -218,7 +255,9 @@ const Review = ({ propertyId }: ReviewProps) => {
                 <Tag className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <span className="text-sm text-gray-500 block">Price</span>
+                <span className="text-sm text-gray-500 block">
+                  {t("review.fields.price")}
+                </span>
                 <span className="text-gray-900 font-semibold">
                   {formatPropertyPrice(
                     data.price,
@@ -228,70 +267,86 @@ const Review = ({ propertyId }: ReviewProps) => {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Bed className="w-5 h-5 text-gray-600" />
+            {showRoomFields && (
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <Bed className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500 block">
+                    {t("review.fields.bedrooms")}
+                  </span>
+                  <span className="text-gray-900 font-semibold">
+                    {data.bedrooms}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-sm text-gray-500 block">Bedrooms</span>
-                <span className="text-gray-900 font-semibold">
-                  {data.bedrooms}
-                </span>
+            )}
+            {showRoomFields && (
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <Bath className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500 block">
+                    {t("review.fields.bathrooms")}
+                  </span>
+                  <span className="text-gray-900 font-semibold">
+                    {data.bathrooms}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Bath className="w-5 h-5 text-gray-600" />
-              </div>
-              <div>
-                <span className="text-sm text-gray-500 block">Bathrooms</span>
-                <span className="text-gray-900 font-semibold">
-                  {data.bathrooms}
-                </span>
-              </div>
-            </div>
+            )}
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white rounded-lg shadow-sm">
                 <Compass className="w-5 h-5 text-gray-600" />
               </div>
               <div>
-                <span className="text-sm text-gray-500 block">Direction</span>
-                <span className="text-gray-900 font-semibold">
-                  {data.direction || "N/A"}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <FileText className="w-5 h-5 text-gray-600" />
-              </div>
-              <div>
                 <span className="text-sm text-gray-500 block">
-                  Legal Status
+                  {t("review.fields.direction")}
                 </span>
                 <span className="text-gray-900 font-semibold">
-                  {data.legalStatus || "N/A"}
+                  {formatDirection(data.direction)}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <Sofa className="w-5 h-5 text-gray-600" />
+            {showLegalStatus && (
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500 block">
+                    {t("review.fields.legalStatus")}
+                  </span>
+                  <span className="text-gray-900 font-semibold">
+                    {formatLegalStatus(data.legalStatus)}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-sm text-gray-500 block">Furniture</span>
-                <span className="text-gray-900 font-semibold">
-                  {data.furniture || "N/A"}
-                </span>
+            )}
+            {showFurniture && (
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  <Sofa className="w-5 h-5 text-gray-600" />
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500 block">
+                    {t("review.fields.furniture")}
+                  </span>
+                  <span className="text-gray-900 font-semibold">
+                    {formatFurniture(data.furniture)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         {data.amenities?.length > 0 && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Amenities
+              {t("review.sections.amenities")}
             </h3>
             <div className="bg-gray-50 rounded-xl p-5 flex flex-wrap gap-3">
               {data.amenities.map((amenity) => (
@@ -300,7 +355,7 @@ const Review = ({ propertyId }: ReviewProps) => {
                   variant="secondary"
                   className="px-3 py-1.5"
                 >
-                  {getPropertyAmenityLabel(amenity)}
+                  {formatAmenity(amenity)}
                 </Badge>
               ))}
             </div>
@@ -310,7 +365,7 @@ const Review = ({ propertyId }: ReviewProps) => {
         <div className="mb-0">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <Images className="w-5 h-5" />
-            Images ({imageUrls.length})
+            {t("review.sections.images", { count: imageUrls.length })}
           </h3>
           {imageUrls.length > 0 ? (
             <PhotoProvider>
@@ -320,7 +375,7 @@ const Review = ({ propertyId }: ReviewProps) => {
                     <div className="relative aspect-square overflow-hidden rounded-lg border bg-muted cursor-pointer hover:opacity-90 transition-opacity">
                       <NextImage
                         src={url}
-                        alt={`Property image ${index + 1}`}
+                        alt={t("review.imageAlt", { index: index + 1 })}
                         fill
                         className="object-cover"
                       />
@@ -331,7 +386,7 @@ const Review = ({ propertyId }: ReviewProps) => {
             </PhotoProvider>
           ) : (
             <div className="bg-gray-50 rounded-xl p-8 text-center text-gray-500">
-              No images uploaded
+              {t("review.noImages")}
             </div>
           )}
         </div>
@@ -343,12 +398,12 @@ const Review = ({ propertyId }: ReviewProps) => {
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                   <LayoutGrid className="w-5 h-5" />
-                  Thumbnail Image
+                  {t("review.sections.thumbnail")}
                 </h3>
                 <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-gray-200">
                   <NextImage
                     src={data.thumbnail}
-                    alt="Property thumbnail"
+                    alt={t("review.thumbnailAlt")}
                     fill
                     className="object-cover"
                   />
@@ -360,7 +415,7 @@ const Review = ({ propertyId }: ReviewProps) => {
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                   <Video className="w-5 h-5" />
-                  Video Tour
+                  {t("review.sections.video")}
                 </h3>
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 h-full flex flex-col justify-center">
                   <div className="flex items-center gap-3 mb-2">
@@ -377,7 +432,7 @@ const Review = ({ propertyId }: ReviewProps) => {
                     rel="noopener noreferrer"
                     className="text-sm text-blue-600 hover:text-blue-700 hover:underline pl-12"
                   >
-                    Watch Video Tour &rarr;
+                    {t("review.watchVideo")}
                   </a>
                 </div>
               </div>
@@ -390,7 +445,9 @@ const Review = ({ propertyId }: ReviewProps) => {
           <div className="mt-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <Rotate3d className="w-5 h-5" />
-              360° Virtual Tour ({virtualTourUrls.length})
+              {t("review.sections.virtualTour", {
+                count: virtualTourUrls.length,
+              })}
             </h3>
             <div className="bg-gray-50 rounded-xl p-0 overflow-hidden border border-gray-200">
               <div className="aspect-video w-full relative">
@@ -418,7 +475,9 @@ const Review = ({ propertyId }: ReviewProps) => {
                         <span className="relative block h-full w-full">
                           <NextImage
                             src={url}
-                            alt={`360 thumbnail ${idx}`}
+                            alt={t("review.virtualTourThumbnailAlt", {
+                              index: idx + 1,
+                            })}
                             fill
                             className="object-cover"
                           />
@@ -436,7 +495,7 @@ const Review = ({ propertyId }: ReviewProps) => {
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
-            Review & Confirm
+            {t("review.sections.confirm")}
           </h3>
           <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white hover:shadow-lg transition-shadow duration-300">
             <div className="flex flex-col md:flex-row">
@@ -444,7 +503,7 @@ const Review = ({ propertyId }: ReviewProps) => {
               <div className="relative w-full md:w-[320px] h-[240px] md:h-auto shrink-0">
                 <NextImage
                   src={data.thumbnail}
-                  alt="Property thumbnail"
+                  alt={t("review.thumbnailAlt")}
                   fill
                   className="object-cover"
                 />
@@ -458,7 +517,9 @@ const Review = ({ propertyId }: ReviewProps) => {
                       className="bg-white/90 backdrop-blur-sm text-gray-900 shadow-sm border-none gap-1.5 pl-2 pr-3"
                     >
                       <Rotate3d className="w-3.5 h-3.5 text-blue-600" />
-                      <span className="text-xs font-semibold">360° Tour</span>
+                      <span className="text-xs font-semibold">
+                        {t("review.badges.virtualTour")}
+                      </span>
                     </Badge>
                   )}
                   {data.videoLink && (
@@ -467,7 +528,9 @@ const Review = ({ propertyId }: ReviewProps) => {
                       className="bg-white/90 backdrop-blur-sm text-gray-900 shadow-sm border-none gap-1.5 pl-2 pr-3"
                     >
                       <Video className="w-3.5 h-3.5 text-red-600" />
-                      <span className="text-xs font-semibold">Video</span>
+                      <span className="text-xs font-semibold">
+                        {t("review.badges.video")}
+                      </span>
                     </Badge>
                   )}
                 </div>
@@ -503,28 +566,36 @@ const Review = ({ propertyId }: ReviewProps) => {
                   </div>
 
                   <div className="flex items-center gap-4 py-4 border-y border-gray-100">
-                    <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
-                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <Icon.HotelBed className="w-5 h-5" />
+                    {showRoomFields && (
+                      <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                          <Icon.HotelBed className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {t("review.card.beds", { count: data.bedrooms })}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {t("review.fields.bedrooms")}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {data.bedrooms} Beds
-                        </p>
-                        <p className="text-xs text-gray-500">Bedroom</p>
+                    )}
+                    {showRoomFields && (
+                      <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                          <Icon.BathRoom className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
+                            {t("review.card.baths", { count: data.bathrooms })}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {t("review.fields.bathrooms")}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 pr-4 border-r border-gray-100">
-                      <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                        <Icon.BathRoom className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {data.bathrooms} Baths
-                        </p>
-                        <p className="text-xs text-gray-500">Bathroom</p>
-                      </div>
-                    </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                         <Icon.Shape className="w-5 h-5" />
@@ -533,7 +604,9 @@ const Review = ({ propertyId }: ReviewProps) => {
                         <p className="text-sm font-medium text-gray-900">
                           {data.area} m²
                         </p>
-                        <p className="text-xs text-gray-500">Area</p>
+                          <p className="text-xs text-gray-500">
+                            {t("review.fields.area")}
+                          </p>
                       </div>
                     </div>
                   </div>
@@ -542,10 +615,10 @@ const Review = ({ propertyId }: ReviewProps) => {
                 <div className="mt-4 pt-4 flex items-center justify-between text-sm text-gray-500">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                    Ready to publish
+                    {t("review.ready")}
                   </div>
                   <div className="text-xs uppercase tracking-wider font-semibold text-gray-400">
-                    Preview Mode
+                    {t("review.previewMode")}
                   </div>
                 </div>
               </div>
@@ -556,11 +629,11 @@ const Review = ({ propertyId }: ReviewProps) => {
         {/* Footer */}
         <div className="flex justify-between pt-6">
           <CsButton onClick={onBack} icon={<ArrowLeft />} type="button">
-            Back
+            {t("actions.back")}
           </CsButton>
           <div className="flex gap-4">
             <CsButton onClick={saveDraft} type="button" loading={isSavingDraft}>
-              Save Draft
+              {t("actions.saveDraft")}
             </CsButton>
             <CsButton
               onClick={handleSubmit(onPublish)}
@@ -569,7 +642,7 @@ const Review = ({ propertyId }: ReviewProps) => {
               loading={isUpdatingProperty}
             >
               <CheckCircle className="w-5 h-5 mr-2" />
-              Publish Listing
+              {t("actions.publish")}
             </CsButton>
           </div>
         </div>

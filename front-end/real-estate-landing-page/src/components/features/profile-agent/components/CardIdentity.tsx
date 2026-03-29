@@ -1,7 +1,9 @@
 import { Icon } from "@/components/ui";
-import RenderField from "./RenderField";
-import { useState } from "react";
+import { getAgentCmsCopy } from "@/lib/agent-cms-copy";
 import { Eye, EyeClosed } from "lucide-react";
+import { useLocale } from "next-intl";
+import { useState } from "react";
+import RenderField from "./RenderField";
 
 const CardIdentity = ({
   identityInfo,
@@ -9,6 +11,7 @@ const CardIdentity = ({
   identityInfo: IProfileService.IdentityInfo | undefined;
 }) => {
   const [visible, setVisible] = useState(false);
+  const copy = getAgentCmsCopy(useLocale()).profile;
   return (
     <div className="bg-white rounded-[18px]">
       <div className="cs-typography text-[16px]! font-bold! border-b border-b-black/10 py-4  px-8 flex items-center gap-2 justify-between">
@@ -17,10 +20,10 @@ const CardIdentity = ({
             <Icon.IdCard className="size-5" />
           </div>{" "}
           <div>
-            Legal Identity{" "}
+            {copy.identity.title}{" "}
             <div className="text-[12px]! font-bold! text-black/50">
               {" "}
-              Sensitive Information
+              {copy.identity.sensitive}
             </div>
           </div>
         </div>
@@ -39,10 +42,13 @@ const CardIdentity = ({
         </div>
       </div>
       <div className="grid gap-4 py-4 px-8">
-        <RenderField label="Full Name" value={identityInfo?.fullName || ""} />
+        <RenderField
+          label={copy.identity.fullName}
+          value={identityInfo?.fullName || ""}
+        />
         <div className="flex gap-20">
           <RenderField
-            label="ID Number"
+            label={copy.identity.idNumber}
             value={
               visible
                 ? identityInfo?.IDNumber || ""
@@ -51,10 +57,13 @@ const CardIdentity = ({
                   identityInfo?.IDNumber?.substring(12)
             }
           />
-          <RenderField label="Gender" value={identityInfo?.gender || ""} />
+          <RenderField
+            label={copy.identity.gender}
+            value={identityInfo?.gender || ""}
+          />
         </div>
         <RenderField
-          label="Date of Birth"
+          label={copy.identity.dateOfBirth}
           value={identityInfo?.dateOfBirth || ""}
         />
       </div>

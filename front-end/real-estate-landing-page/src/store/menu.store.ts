@@ -18,12 +18,12 @@ const menuSlice = createSlice({
       state,
       action: PayloadAction<{ title: string; href: string }>,
     ) => {
-      state.info = state.info.map((item) => ({
-        ...item,
-        active:
-          item.title === action.payload.title &&
-          item.href === action.payload.href,
-      }));
+      state.info = [
+        {
+          title: action.payload.title,
+          href: action.payload.href,
+        },
+      ];
     },
   },
 });
