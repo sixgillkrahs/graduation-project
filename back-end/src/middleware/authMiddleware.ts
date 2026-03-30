@@ -137,6 +137,8 @@ export const requireAuth = async (
     }
     try {
       const decoded = jwt.verify(token, ENV.JWT_SECRET) as JwtPayload;
+      console.log(decoded);
+
       const authService = new AuthService();
       const user = (await authService.getAuthByUserId(
         decoded.user._id,

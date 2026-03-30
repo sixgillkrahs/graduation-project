@@ -1,5 +1,6 @@
 import { Input, Modal, message } from "antd";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface RejectPropertyModalProps {
   isOpen: boolean;
@@ -11,10 +12,15 @@ interface RejectPropertyModalProps {
 const RejectPropertyModal: React.FC<RejectPropertyModalProps> = React.memo(
   ({ isOpen, onClose, onConfirm, isRejecting }) => {
     const [rejectReason, setRejectReason] = useState("");
+    const { t } = useTranslation();
 
     const handleOk = () => {
       if (!rejectReason.trim()) {
-        message.warning("Vui lòng nhập lý do từ chối");
+        message.warning(
+          t("properties.rejectReasonValidation", {
+            defaultValue: "Please enter a rejection reason",
+          }),
+        );
         return;
       }
       onConfirm(rejectReason.trim());
@@ -27,19 +33,21 @@ const RejectPropertyModal: React.FC<RejectPropertyModalProps> = React.memo(
 
     return (
       <Modal
-        title="Lý do từ chối"
+        title={t("properties.rejectReasonTitle", { defaultValue: "Rejection reason" })}
         open={isOpen}
         onOk={handleOk}
         onCancel={handleCancel}
         confirmLoading={isRejecting}
-        okText="Gửi từ chối"
-        cancelText="Hủy"
+        okText={t("properties.rejectReasonSubmit", { defaultValue: "Submit rejection" })}
+        cancelText={t("button.cancel", { defaultValue: "Cancel" })}
         okButtonProps={{ danger: true }}
       >
         <div className="pt-4">
           <Input.TextArea
             rows={4}
-            placeholder="Nhập lý do chi tiết tại sao từ chối tin đăng này..."
+            placeholder={t("properties.rejectReasonPlaceholder", {
+              defaultValue: "Enter the detailed reason for rejecting this listing...",
+            })}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
           />

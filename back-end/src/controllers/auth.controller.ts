@@ -268,7 +268,7 @@ export class AuthController extends BaseController {
       if (!token) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-            "Refresh token not exist",
+          "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -277,7 +277,7 @@ export class AuthController extends BaseController {
       if (!decoded) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-            "Refresh token not exist",
+          "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -310,7 +310,7 @@ export class AuthController extends BaseController {
       const accessToken = this.authService.generateAccessToken(
         {
           user: user,
-          roleId: userAuth.roleId,
+          role: userAuth.roleId,
         },
         15 * 1000 * 60,
       );

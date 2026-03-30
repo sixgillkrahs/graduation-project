@@ -53,7 +53,24 @@ const PropertyDetail = () => {
   const property = propertyResp?.data;
   const saleLabel = t("common.sale");
   const rentLabel = t("common.rent");
+  const notAvailableLabel = t("common.notAvailable");
+  const unknownLabel = t("common.unknown");
   const agentUserId = property?.userId?._id || property?.userId?.id;
+
+  const translatePropertyType = (value?: string) =>
+    value ? t(`properties.propertyTypeOptions.${value}`, { defaultValue: value }) : notAvailableLabel;
+
+  const translateStatus = (value?: string) =>
+    value ? t(`properties.statusOptions.${value}`, { defaultValue: value }) : notAvailableLabel;
+
+  const translateDirection = (value?: string) =>
+    value ? t(`properties.directionOptions.${value}`, { defaultValue: value }) : notAvailableLabel;
+
+  const translateFurniture = (value?: string) =>
+    value ? t(`properties.furnitureOptions.${value}`, { defaultValue: value }) : notAvailableLabel;
+
+  const translateLegalStatus = (value?: string) =>
+    value ? t(`properties.legalStatusOptions.${value}`, { defaultValue: value }) : notAvailableLabel;
 
   const handleUpdateStatus = (status: "PUBLISHED" | "REJECTED") => {
     if (!id) return;
@@ -150,7 +167,7 @@ const PropertyDetail = () => {
             {property.projectName || t("properties.propertyDetail")}
           </Title> */}
           <Tag color={getStatusColor(property.status)} className="ml-2">
-            {property.status}
+            {translateStatus(property.status)}
           </Tag>
         </Space>
         {property.status === "PENDING" && (
@@ -185,7 +202,7 @@ const PropertyDetail = () => {
               <div className="col-span-2">
                 <Image
                   src={property?.media?.thumbnail || property?.media?.images[0]}
-                  alt="Property Thumbnail"
+                  alt={t("properties.detail.thumbnailAlt")}
                   className="h-[400px] w-full rounded-lg object-cover"
                   fallback="https://placehold.co/600x400?text=No+Image"
                 />
@@ -195,7 +212,7 @@ const PropertyDetail = () => {
                 <div key={index} className="col-span-1">
                   <Image
                     src={img}
-                    alt={`Property ${index}`}
+                    alt={t("properties.detail.galleryAlt", { index: index + 1 })}
                     className="h-[200px] w-full rounded-lg object-cover"
                   />
                 </div>
@@ -203,7 +220,7 @@ const PropertyDetail = () => {
             </div>
           </Card>
 
-          <Card title="Chùm ảnh 360 độ (Virtual Tour)" className="mb-6 shadow-sm">
+          <Card title={t("properties.detail.virtualTourTitle")} className="mb-6 shadow-sm">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {property?.media?.virtualTourUrls && property.media.virtualTourUrls.length > 0 ? (
                 property.media.virtualTourUrls.map((url: string, index: number) => (
@@ -222,20 +239,22 @@ const PropertyDetail = () => {
                 ))
               ) : (
                 <div className="col-span-1 flex h-[200px] items-center justify-center rounded-lg bg-gray-100 text-center text-gray-500 md:col-span-2">
-                  <p>Không có dữ liệu 360 độ cho bất động sản này.</p>
+                  <p>{t("properties.detail.virtualTourEmpty")}</p>
                 </div>
               )}
             </div>
           </Card>
 
           <Card title={t("properties.description")} className="mb-6 shadow-sm">
-            <Paragraph>{property?.description}</Paragraph>
+            <Paragraph className="mb-0! whitespace-pre-line">
+              {property?.description || notAvailableLabel}
+            </Paragraph>
           </Card>
 
           <Card title={t("properties.features")} className="shadow-sm">
             <Descriptions column={{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }}>
               <Descriptions.Item label={t("properties.propertyType")}>
-                {property.propertyType}
+                {translatePropertyType(property.propertyType)}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.demandType")}>
                 {renderDemandTypeTag(property.demandType, saleLabel, rentLabel)}
@@ -244,19 +263,19 @@ const PropertyDetail = () => {
                 {property?.features?.area} m²
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.bedrooms")}>
-                {property?.features?.bedrooms || "N/A"}
+                {property?.features?.bedrooms || notAvailableLabel}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.bathrooms")}>
-                {property?.features?.bathrooms || "N/A"}
+                {property?.features?.bathrooms || notAvailableLabel}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.direction")}>
-                {property?.features?.direction || "N/A"}
+                {translateDirection(property?.features?.direction)}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.furniture")}>
-                {property?.features?.furniture || "N/A"}
+                {translateFurniture(property?.features?.furniture)}
               </Descriptions.Item>
               <Descriptions.Item label={t("properties.legalStatus")}>
-                {property?.features?.legalStatus || "N/A"}
+                {translateLegalStatus(property?.features?.legalStatus)}
               </Descriptions.Item>
             </Descriptions>
           </Card>
@@ -283,7 +302,7 @@ const PropertyDetail = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Home className="text-gray-400" size={20} />
-                <Text>{property?.propertyType}</Text>
+                <Text>{translatePropertyType(property?.propertyType)}</Text>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="text-gray-400" size={20} />
@@ -318,7 +337,7 @@ const PropertyDetail = () => {
               <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
                 <User size={32} className="text-blue-500" />
               </div>
-              <Title level={5}>{property?.userId?.fullName || "Unknown"}</Title>
+              <Title level={5}>{property?.userId?.fullName || unknownLabel}</Title>
               {agentUserId ? (
                 <Button type="link" className="px-0">
                   {t("properties.viewAgentDetail")}
@@ -329,15 +348,15 @@ const PropertyDetail = () => {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <User size={16} className="text-gray-400" />
-                <Text>{property?.userId?.fullName || "Unknown"}</Text>
+                <Text>{property?.userId?.fullName || unknownLabel}</Text>
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={16} className="text-gray-400" />
-                <Text>{property?.userId?.phone || "N/A"}</Text>
+                <Text>{property?.userId?.phone || notAvailableLabel}</Text>
               </div>
               <div className="flex items-center gap-2">
                 <Mail size={16} className="text-gray-400" />
-                <Text>{property?.userId?.email || "N/A"}</Text>
+                <Text>{property?.userId?.email || notAvailableLabel}</Text>
               </div>
             </div>
           </Card>

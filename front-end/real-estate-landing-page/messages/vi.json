@@ -853,6 +853,74 @@
     },
     "footnote": "Mọi báo cáo sẽ được đội kiểm duyệt xem xét trước khi có bất kỳ hành động nào."
   },
+  "MyListingsPage": {
+    "header": {
+      "title": "Bất động sản của tôi",
+      "description": "Quản lý các tin đăng đang hoạt động và lịch sử tin đăng",
+      "createNew": "Tạo tin đăng mới"
+    },
+    "filters": {
+      "searchLabel": "Tìm kiếm",
+      "searchPlaceholder": "Tiêu đề, địa chỉ, tỉnh/thành phố...",
+      "statusLabel": "Trạng thái",
+      "demandLabel": "Nhu cầu",
+      "propertyTypeLabel": "Loại bất động sản",
+      "apply": "Áp dụng",
+      "reset": "Đặt lại",
+      "noneApplied": "Chưa áp dụng bộ lọc nào",
+      "activeCount": "Đang áp dụng {count} bộ lọc",
+      "statusOptions": {
+        "all": "Tất cả trạng thái"
+      },
+      "demandOptions": {
+        "all": "Tất cả nhu cầu"
+      },
+      "propertyTypeOptions": {
+        "all": "Tất cả loại bất động sản"
+      }
+    },
+    "table": {
+      "propertyDetails": "Thông tin bất động sản",
+      "propertyImageAlt": "Bất động sản",
+      "viewDetailsTitle": "Nhấn để xem chi tiết",
+      "propertyFallbackTitle": "{propertyType} - {province}",
+      "status": "Trạng thái",
+      "performance": "Hiệu suất",
+      "views": "lượt xem",
+      "priceDate": "Giá & ngày đăng",
+      "reason": "Lý do",
+      "noReason": "-",
+      "action": "Thao tác"
+    },
+    "statuses": {
+      "published": "Đã đăng",
+      "pending": "Chờ duyệt",
+      "rejected": "Bị từ chối",
+      "sold": "Đã bán",
+      "expired": "Hết hạn",
+      "draft": "Bản nháp"
+    },
+    "propertyTypes": {
+      "apartment": "Căn hộ",
+      "house": "Nhà riêng",
+      "streetHouse": "Nhà phố",
+      "villa": "Biệt thự",
+      "land": "Đất",
+      "other": "Khác"
+    },
+    "demandTypes": {
+      "sale": "Cần bán",
+      "rent": "Cho thuê"
+    },
+    "actions": {
+      "pendingDisabledTitle": "Tin đang chờ duyệt, chưa thể thao tác",
+      "dropdownTitle": "Thao tác khác",
+      "viewDetails": "Xem chi tiết",
+      "edit": "Chỉnh sửa",
+      "submitForApproval": "Gửi duyệt",
+      "delete": "Xóa"
+    }
+  },
   "ListingForm": {
     "steps": {
       "basicInfo": "Thông tin cơ bản",

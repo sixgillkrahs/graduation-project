@@ -124,6 +124,8 @@ const SignIn = () => {
             <Input
               label={t("emailLabel")}
               placeholder="john.doe@example.com"
+              autoComplete="email"
+              inputMode="email"
               suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
               error={errors.email?.message}
               {...field}
@@ -140,6 +142,7 @@ const SignIn = () => {
             <Password
               label={t("passwordLabel")}
               placeholder={t("passwordLabel")}
+              autoComplete="current-password"
               error={errors.password?.message}
               {...field}
             />
@@ -175,23 +178,24 @@ const SignIn = () => {
         </CsButton>
         <div className="space-y-4">
           <Separator />
-          <CsButton
-            type="button"
-            className="w-full"
-            icon={<Icon.Google className="w-5 h-5" />}
-            onClick={handleGoogleSignIn}
-          >
-            {t("continueWithGoogle")}
-          </CsButton>
+          <div className="flex justify-center gap-4">
+            <CsButton
+              type="button"
+              icon={<Icon.Google className="w-5 h-5" />}
+              onClick={handleGoogleSignIn}
+            ></CsButton>
+            <CsButton
+              type="button"
+              icon={<Icon.Facebook className="w-5 h-5" />}
+              onClick={handleGoogleSignIn}
+            ></CsButton>
+            <CsButton
+              type="button"
+              icon={<Icon.Fingerprint className="w-5 h-5" />}
+              onClick={onSubmitPasskey}
+            ></CsButton>
+          </div>
         </div>
-        <CsButton
-          type="button"
-          className="w-full"
-          icon={<Icon.Fingerprint className="w-5 h-5" />}
-          onClick={onSubmitPasskey}
-        >
-          {t("signInPasskey")}
-        </CsButton>
       </form>
       <div className="mt-4 text-center">
         <span className="cs-typography-gray text-sm!">
@@ -206,4 +210,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-

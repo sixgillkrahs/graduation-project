@@ -133,7 +133,7 @@ const AgentUpgrade = () => {
             <div className="relative flex items-center p-1 bg-gray-100 rounded-full border border-gray-200">
               <button
                 type="button"
-                className={`w-32 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${
+                className={`${isVi ? "w-36" : "w-32"} py-2 text-sm font-semibold rounded-full whitespace-nowrap transition-all duration-200 ${
                   !isAnnual
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-900"
@@ -144,7 +144,7 @@ const AgentUpgrade = () => {
               </button>
               <button
                 type="button"
-                className={`w-40 py-2 text-sm font-semibold rounded-full transition-all duration-200 flex items-center justify-center gap-2 ${
+                className={`${isVi ? "w-56" : "w-40"} py-2 text-sm font-semibold rounded-full whitespace-nowrap transition-all duration-200 flex items-center justify-center gap-2 ${
                   isAnnual
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-900"

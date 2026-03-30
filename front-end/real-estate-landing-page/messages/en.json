@@ -809,6 +809,74 @@
     },
     "footnote": "Reports are reviewed by the moderation team before any action is taken."
   },
+  "MyListingsPage": {
+    "header": {
+      "title": "My Properties",
+      "description": "Manage your active and past listings",
+      "createNew": "Create New Listing"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Title, address, province...",
+      "statusLabel": "Status",
+      "demandLabel": "Demand",
+      "propertyTypeLabel": "Property Type",
+      "apply": "Apply",
+      "reset": "Reset",
+      "noneApplied": "No filters applied",
+      "activeCount": "{count} active filters",
+      "statusOptions": {
+        "all": "All statuses"
+      },
+      "demandOptions": {
+        "all": "All demands"
+      },
+      "propertyTypeOptions": {
+        "all": "All property types"
+      }
+    },
+    "table": {
+      "propertyDetails": "Property details",
+      "propertyImageAlt": "Property",
+      "viewDetailsTitle": "Click to view details",
+      "propertyFallbackTitle": "{propertyType} - {province}",
+      "status": "Status",
+      "performance": "Performance",
+      "views": "views",
+      "priceDate": "Price & Date",
+      "reason": "Reason",
+      "noReason": "-",
+      "action": "Action"
+    },
+    "statuses": {
+      "published": "Published",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "sold": "Sold",
+      "expired": "Expired",
+      "draft": "Draft"
+    },
+    "propertyTypes": {
+      "apartment": "Apartment",
+      "house": "House",
+      "streetHouse": "Street House",
+      "villa": "Villa",
+      "land": "Land",
+      "other": "Other"
+    },
+    "demandTypes": {
+      "sale": "Sale",
+      "rent": "Rent"
+    },
+    "actions": {
+      "pendingDisabledTitle": "Pending approval, action unavailable",
+      "dropdownTitle": "More actions",
+      "viewDetails": "View details",
+      "edit": "Edit",
+      "submitForApproval": "Submit for approval",
+      "delete": "Delete"
+    }
+  },
   "ListingForm": {
     "steps": {
       "basicInfo": "Basic Info",

@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { CsTable, TableColumn } from "@/components/ui/table";
 import { ROUTES } from "@/const/routes";
 import { useDateTimeFormatter } from "@/hooks/useDateTimeFormatter";
+import { formatPropertyPrice } from "@/lib/property-price";
 import { LIST_PROVINCE, LIST_WARD, findOptionLabel } from "gra-helper";
 import { Building2, Eye, Plus, Search, Send, Trash2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { IPropertyDto } from "./dto/property.dto";
 import { useGetMyProperties } from "./services/query";
-import { formatPropertyPrice } from "@/lib/property-price";
 
 type ListingFilters = {
   query: string;
@@ -29,34 +30,10 @@ const defaultFilters: ListingFilters = {
   demandType: "",
 };
 
-const statusOptions = [
-  { label: "All statuses", value: "" },
-  { label: "Published", value: "PUBLISHED" },
-  { label: "Pending", value: "PENDING" },
-  { label: "Rejected", value: "REJECTED" },
-  { label: "Sold", value: "SOLD" },
-  { label: "Expired", value: "EXPIRED" },
-  { label: "Draft", value: "DRAFT" },
-];
-
-const propertyTypeOptions = [
-  { label: "All property types", value: "" },
-  { label: "Apartment", value: "APARTMENT" },
-  { label: "House", value: "HOUSE" },
-  { label: "Street House", value: "STREET_HOUSE" },
-  { label: "Villa", value: "VILLA" },
-  { label: "Land", value: "LAND" },
-  { label: "Other", value: "OTHER" },
-];
-
-const demandTypeOptions = [
-  { label: "All demands", value: "" },
-  { label: "Sale", value: "SALE" },
-  { label: "Rent", value: "RENT" },
-];
-
 const MyListings = () => {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("MyListingsPage");
   const { formatDate } = useDateTimeFormatter();
   const [pagination, setPagination] = useState({
     current: 1,
@@ -113,9 +90,68 @@ const MyListings = () => {
 
   const activeFilterCount = Object.values(filters).filter(Boolean).length;
 
+  const statusLabelMap = useMemo(
+    () => ({
+      PUBLISHED: t("statuses.published"),
+      PENDING: t("statuses.pending"),
+      REJECTED: t("statuses.rejected"),
+      SOLD: t("statuses.sold"),
+      EXPIRED: t("statuses.expired"),
+      DRAFT: t("statuses.draft"),
+    }),
+    [t],
+  );
+
+  const propertyTypeLabelMap = useMemo(
+    () => ({
+      APARTMENT: t("propertyTypes.apartment"),
+      HOUSE: t("propertyTypes.house"),
+      STREET_HOUSE: t("propertyTypes.streetHouse"),
+      VILLA: t("propertyTypes.villa"),
+      LAND: t("propertyTypes.land"),
+      OTHER: t("propertyTypes.other"),
+    }),
+    [t],
+  );
+
+  const statusOptions = useMemo(
+    () => [
+      { label: t("filters.statusOptions.all"), value: "" },
+      { label: t("statuses.published"), value: "PUBLISHED" },
+      { label: t("statuses.pending"), value: "PENDING" },
+      { label: t("statuses.rejected"), value: "REJECTED" },
+      { label: t("statuses.sold"), value: "SOLD" },
+      { label: t("statuses.expired"), value: "EXPIRED" },
+      { label: t("statuses.draft"), value: "DRAFT" },
+    ],
+    [t],
+  );
+
+  const propertyTypeOptions = useMemo(
+    () => [
+      { label: t("filters.propertyTypeOptions.all"), value: "" },
+      { label: t("propertyTypes.apartment"), value: "APARTMENT" },
+      { label: t("propertyTypes.house"), value: "HOUSE" },
+      { label: t("propertyTypes.streetHouse"), value: "STREET_HOUSE" },
+      { label: t("propertyTypes.villa"), value: "VILLA" },
+      { label: t("propertyTypes.land"), value: "LAND" },
+      { label: t("propertyTypes.other"), value: "OTHER" },
+    ],
+    [t],
+  );
+
+  const demandTypeOptions = useMemo(
+    () => [
+      { label: t("filters.demandOptions.all"), value: "" },
+      { label: t("demandTypes.sale"), value: "SALE" },
+      { label: t("demandTypes.rent"), value: "RENT" },
+    ],
+    [t],
+  );
+
   const columns: TableColumn<IPropertyDto>[] = [
     {
-      title: "Property details",
+      title: t("table.propertyDetails"),
       dataIndex: "title",
       width: "30%",
       render: (_, record) => (
@@ -124,7 +160,7 @@ const MyListings = () => {
             {record.media?.thumbnail ? (
               <Image
                 src={record.media.thumbnail}
-                alt="Property"
+                alt={t("table.propertyImageAlt")}
                 fill
                 className="object-cover"
               />
@@ -138,10 +174,17 @@ const MyListings = () => {
             <h4
               className="font-semibold text-gray-900 line-clamp-1 cursor-pointer hover:text-blue-600 transition"
               onClick={() => router.push(`/agent/listings/${record.id}`)}
-              title="Click to view details"
+              title={t("table.viewDetailsTitle")}
             >
               {record.title ||
-                `${record.propertyType} - ${record.location.province}`}
+                t("table.propertyFallbackTitle", {
+                  propertyType:
+                    propertyTypeLabelMap[record.propertyType] ||
+                    record.propertyType,
+                  province:
+                    findOptionLabel(record.location.province, LIST_PROVINCE) ||
+                    record.location.province,
+                })}
             </h4>
             <p className="text-sm text-gray-500 line-clamp-2 mt-1">
               {record.location.address},{" "}
@@ -153,10 +196,11 @@ const MyListings = () => {
       ),
     },
     {
-      title: "Status",
+      title: t("table.status"),
       dataIndex: "status",
       width: "15%",
-      render: (status: any) => {
+      render: (value) => {
+        const status = value as IPropertyDto["status"];
         const colorMap: Record<string, string> = {
           PUBLISHED: "text-green-600 bg-green-50",
           PENDING: "text-yellow-600 bg-yellow-50",
@@ -171,51 +215,59 @@ const MyListings = () => {
               colorMap[status] || "text-gray-600 bg-gray-50"
             }`}
           >
-            {status}
+            {statusLabelMap[status] || status}
           </span>
         );
       },
     },
     {
-      title: "Performance",
+      title: t("table.performance"),
       dataIndex: "viewCount",
       width: "10%",
-      render: (viewCount) => (
+      render: (value) => {
+        const viewCount = Number(value) || 0;
+        return (
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-gray-400" />
-          <span className="font-medium text-gray-700">
-            {viewCount?.toLocaleString() || 0}
-          </span>
-          <span className="text-xs text-gray-400">views</span>
+          <span className="font-medium text-gray-700">{viewCount.toLocaleString()}</span>
+          <span className="text-xs text-gray-400">{t("table.views")}</span>
         </div>
-      ),
+        );
+      },
     },
     {
-      title: "Price & Date",
+      title: t("table.priceDate"),
       dataIndex: "features",
       width: "15%",
-      render: (features: any, record) => (
-        <div className="flex flex-col gap-1">
-          <div className="font-semibold text-gray-900">
-            {formatPropertyPrice(
-              features?.price,
-              features?.priceUnit,
-              features?.currency,
-            )}
+      render: (value, record) => {
+        const features = value as IPropertyDto["features"] | undefined;
+
+        return (
+          <div className="flex flex-col gap-1">
+            <div className="font-semibold text-gray-900">
+              {formatPropertyPrice(
+                features?.price,
+                features?.priceUnit,
+                features?.currency,
+                locale,
+              )}
+            </div>
+            <div className="text-xs text-gray-500">
+              {formatDate(record.createdAt)}
+            </div>
           </div>
-          <div className="text-xs text-gray-500">
-            {formatDate(record.createdAt)}
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
-      title: "Reason",
+      title: t("table.reason"),
       dataIndex: "rejectReason",
       width: "15%",
-      render: (reason: any, record) => {
+      render: (value, record) => {
+        const reason = typeof value === "string" ? value : undefined;
+
         if (record.status !== "REJECTED" || !reason) {
-          return <span className="text-gray-400 text-sm">-</span>;
+          return <span className="text-gray-400 text-sm">{t("table.noReason")}</span>;
         }
         return (
           <div
@@ -228,17 +280,15 @@ const MyListings = () => {
       },
     },
     {
-      title: "Action",
+      title: t("table.action"),
       dataIndex: "id",
       align: "center",
       width: "15%",
       render: (_, record, rowIndex) => {
-        console.log(record);
         const isPending = record.status === "PENDING";
         const canSubmitApproval =
           record.status === "REJECTED" || record.status === "DRAFT";
 
-        // Detect if it's the last or second to last item to flip the dropdown upward
         const isBottomRow =
           rowIndex !== undefined && data?.data?.results?.length
             ? data.data.results.length > 3 &&
@@ -256,8 +306,8 @@ const MyListings = () => {
                   disabled={isPending}
                   title={
                     isPending
-                      ? "Đang chờ duyệt, không thể thao tác"
-                      : "Hành động khác"
+                      ? t("actions.pendingDisabledTitle")
+                      : t("actions.dropdownTitle")
                   }
                 />
               }
@@ -267,7 +317,7 @@ const MyListings = () => {
                   icon={<Eye className="w-4 h-4" />}
                   onClick={() => router.push(`/agent/listings/${record.id}`)}
                 >
-                  Xem chi tiết
+                  {t("actions.viewDetails")}
                 </DropdownItem>
                 <DropdownItem
                   icon={<Icon.Edit className="w-4 h-4" />}
@@ -275,17 +325,17 @@ const MyListings = () => {
                     router.push(`/agent/listings/edit/${record.id}`)
                   }
                 >
-                  Chỉnh sửa
+                  {t("actions.edit")}
                 </DropdownItem>
 
                 {canSubmitApproval && (
                   <DropdownItem icon={<Send className="w-4 h-4" />}>
-                    Gửi duyệt
+                    {t("actions.submitForApproval")}
                   </DropdownItem>
                 )}
 
                 <DropdownItem icon={<Trash2 className="w-4 h-4" />} danger>
-                  Xóa
+                  {t("actions.delete")}
                 </DropdownItem>
               </div>
             </Dropdown>
@@ -299,10 +349,10 @@ const MyListings = () => {
     <div className="grid gap-8">
       <div className="flex justify-between items-center">
         <div>
-          <div className="cs-typography font-bold text-2xl">My Properties</div>
-          <div className="cs-paragraph-gray mt-1">
-            Manage your active and past listings
+          <div className="cs-typography font-bold text-2xl">
+            {t("header.title")}
           </div>
+          <div className="cs-paragraph-gray mt-1">{t("header.description")}</div>
         </div>
         <div>
           <CsButton
@@ -310,7 +360,7 @@ const MyListings = () => {
             className="cs-bg-black text-white px-4"
             onClick={() => router.push(ROUTES.AGENT_LISTINGS_ADD)}
           >
-            Create New Listing
+            {t("header.createNew")}
           </CsButton>
         </div>
       </div>
@@ -323,8 +373,8 @@ const MyListings = () => {
           }}
         >
           <Input
-            label="Search"
-            placeholder="Title, address, province..."
+            label={t("filters.searchLabel")}
+            placeholder={t("filters.searchPlaceholder")}
             preIcon={<Search className="h-4 w-4" />}
             value={draftFilters.query}
             onChange={(event) =>
@@ -333,7 +383,7 @@ const MyListings = () => {
           />
 
           <label className="grid gap-2 text-sm font-medium text-gray-700">
-            <span>Status</span>
+            <span>{t("filters.statusLabel")}</span>
             <select
               className="h-11 rounded-xl border border-gray-200 bg-transparent px-3 text-sm outline-none transition focus:border-black"
               value={draftFilters.status}
@@ -350,7 +400,7 @@ const MyListings = () => {
           </label>
 
           <label className="grid gap-2 text-sm font-medium text-gray-700">
-            <span>Demand</span>
+            <span>{t("filters.demandLabel")}</span>
             <select
               className="h-11 rounded-xl border border-gray-200 bg-transparent px-3 text-sm outline-none transition focus:border-black"
               value={draftFilters.demandType}
@@ -367,7 +417,7 @@ const MyListings = () => {
           </label>
 
           <label className="grid gap-2 text-sm font-medium text-gray-700">
-            <span>Property Type</span>
+            <span>{t("filters.propertyTypeLabel")}</span>
             <select
               className="h-11 rounded-xl border border-gray-200 bg-transparent px-3 text-sm outline-none transition focus:border-black"
               value={draftFilters.propertyType}
@@ -384,7 +434,7 @@ const MyListings = () => {
           </label>
 
           <CsButton type="submit" className="h-11 px-5 cs-bg-black text-white">
-            Apply
+            {t("filters.apply")}
           </CsButton>
 
           <CsButton
@@ -392,14 +442,14 @@ const MyListings = () => {
             className="h-11 px-5"
             onClick={handleResetFilters}
           >
-            Reset
+            {t("filters.reset")}
           </CsButton>
         </form>
 
         <div className="mt-3 text-sm text-gray-500">
           {activeFilterCount > 0
-            ? `${activeFilterCount} active filter${activeFilterCount > 1 ? "s" : ""}`
-            : "No filters applied"}
+            ? t("filters.activeCount", { count: activeFilterCount })
+            : t("filters.noneApplied")}
         </div>
       </div>
       <CsTable

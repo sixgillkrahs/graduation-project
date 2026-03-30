@@ -130,11 +130,68 @@
     "bathrooms": "Phòng tắm",
     "direction": "Hướng",
     "furniture": "Nội thất",
-    "legalStatus": "Pháp lý"
+    "legalStatus": "Pháp lý",
+    "approveNoteTitle": "Ghi chú phê duyệt",
+    "approveNotePlaceholder": "Nhập ghi chú cho admin (không bắt buộc)...",
+    "rejectReasonTitle": "Lý do từ chối",
+    "rejectReasonPlaceholder": "Nhập lý do chi tiết tại sao từ chối tin đăng này...",
+    "rejectReasonSubmit": "Gửi từ chối",
+    "rejectReasonValidation": "Vui lòng nhập lý do từ chối",
+    "units": {
+      "million": "triệu",
+      "billion": "tỷ",
+      "millionPerSquareMeter": "triệu/m²"
+    },
+    "detail": {
+      "thumbnailAlt": "Ảnh đại diện bất động sản",
+      "galleryAlt": "Ảnh bất động sản {{index}}",
+      "virtualTourTitle": "Chùm ảnh 360 độ (Virtual Tour)",
+      "virtualTourEmpty": "Không có dữ liệu 360 độ cho bất động sản này."
+    },
+    "statusOptions": {
+      "DRAFT": "Bản nháp",
+      "PENDING": "Chờ duyệt",
+      "PUBLISHED": "Đã duyệt",
+      "REJECTED": "Bị từ chối",
+      "EXPIRED": "Hết hạn",
+      "SOLD": "Đã bán"
+    },
+    "propertyTypeOptions": {
+      "APARTMENT": "Căn hộ",
+      "HOUSE": "Nhà ở",
+      "STREET_HOUSE": "Nhà mặt phố",
+      "VILLA": "Biệt thự",
+      "LAND": "Đất",
+      "OTHER": "Khác"
+    },
+    "directionOptions": {
+      "NORTH": "Bắc",
+      "SOUTH": "Nam",
+      "EAST": "Đông",
+      "WEST": "Tây",
+      "NORTH_EAST": "Đông Bắc",
+      "NORTH_WEST": "Tây Bắc",
+      "SOUTH_EAST": "Đông Nam",
+      "SOUTH_WEST": "Tây Nam"
+    },
+    "furnitureOptions": {
+      "FULL": "Đầy đủ",
+      "BASIC": "Cơ bản",
+      "EMPTY": "Trống"
+    },
+    "legalStatusOptions": {
+      "PINK_BOOK": "Sổ hồng",
+      "RED_BOOK": "Sổ đỏ",
+      "SALE_CONTRACT": "Hợp đồng mua bán",
+      "WAITING": "Đang chờ",
+      "OTHER": "Khác"
+    }
   },
   "common": {
     "sale": "Bán",
-    "rent": "Thuê"
+    "rent": "Thuê",
+    "notAvailable": "N/A",
+    "unknown": "Không xác định"
   },
   "settings": {
     "general": {

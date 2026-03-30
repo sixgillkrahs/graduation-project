@@ -128,11 +128,68 @@
     "bathrooms": "Bathrooms",
     "direction": "Direction",
     "furniture": "Furniture",
-    "legalStatus": "Legal Status"
+    "legalStatus": "Legal Status",
+    "approveNoteTitle": "Approval note",
+    "approveNotePlaceholder": "Enter an internal admin note (optional)...",
+    "rejectReasonTitle": "Rejection reason",
+    "rejectReasonPlaceholder": "Enter the detailed reason for rejecting this listing...",
+    "rejectReasonSubmit": "Submit rejection",
+    "rejectReasonValidation": "Please enter a rejection reason",
+    "units": {
+      "million": "million",
+      "billion": "billion",
+      "millionPerSquareMeter": "million/m²"
+    },
+    "detail": {
+      "thumbnailAlt": "Property thumbnail",
+      "galleryAlt": "Property image {{index}}",
+      "virtualTourTitle": "360 tour gallery (Virtual Tour)",
+      "virtualTourEmpty": "No 360 tour data is available for this property."
+    },
+    "statusOptions": {
+      "DRAFT": "Draft",
+      "PENDING": "Pending review",
+      "PUBLISHED": "Published",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "SOLD": "Sold"
+    },
+    "propertyTypeOptions": {
+      "APARTMENT": "Apartment",
+      "HOUSE": "House",
+      "STREET_HOUSE": "Townhouse",
+      "VILLA": "Villa",
+      "LAND": "Land",
+      "OTHER": "Other"
+    },
+    "directionOptions": {
+      "NORTH": "North",
+      "SOUTH": "South",
+      "EAST": "East",
+      "WEST": "West",
+      "NORTH_EAST": "Northeast",
+      "NORTH_WEST": "Northwest",
+      "SOUTH_EAST": "Southeast",
+      "SOUTH_WEST": "Southwest"
+    },
+    "furnitureOptions": {
+      "FULL": "Fully furnished",
+      "BASIC": "Basic furnished",
+      "EMPTY": "Unfurnished"
+    },
+    "legalStatusOptions": {
+      "PINK_BOOK": "Pink book",
+      "RED_BOOK": "Red book",
+      "SALE_CONTRACT": "Sale contract",
+      "WAITING": "Pending",
+      "OTHER": "Other"
+    }
   },
   "common": {
     "sale": "Sale",
-    "rent": "Rent"
+    "rent": "Rent",
+    "notAvailable": "N/A",
+    "unknown": "Unknown"
   },
   "settings": {
     "general": {

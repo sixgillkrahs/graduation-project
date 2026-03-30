@@ -81,7 +81,9 @@ const PropertyDetailOverview = ({
           {t("detail.description")}
         </h3>
         <div className="prose prose-emerald max-w-none leading-relaxed text-muted-foreground">
-          <p>{property.description}</p>
+          <p className="whitespace-pre-wrap break-words">
+            {property.description}
+          </p>
         </div>
         <div className="mt-4 flex items-center gap-2 border-t border-gray-50 pt-3 text-xs italic text-gray-400">
           <span>{t("detail.aiEnhanced")}</span>

@@ -25,6 +25,18 @@ const LEGACY_COOKIE_NAMES: AuthCookieNames = {
   refreshToken: "refreshToken",
 };
 
+const getCookieOptions = () => {
+  const isProduction = ENV.NODE_ENV === "production";
+  const sameSite: "none" | "lax" = isProduction ? "none" : "lax";
+
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite,
+    path: "/",
+  };
+};
+
 export const resolveAuthApp = (req: Request): AuthApp => {
   const explicitApp = req.headers["x-auth-app"];
 
@@ -79,12 +91,7 @@ export const setAuthCookies = (
 ) => {
   const { accessToken: accessCookieName, refreshToken: refreshCookieName } =
     getAuthCookieNames(req);
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none" as const,
-    path: "/",
-  };
+  const cookieOptions = getCookieOptions();
 
   res.cookie(
     accessCookieName,
@@ -116,14 +123,12 @@ export const clearAuthCookies = (req: Request, res: Response) => {
     LEGACY_COOKIE_NAMES.accessToken,
     LEGACY_COOKIE_NAMES.refreshToken,
   ];
+  const cookieOptions = getCookieOptions();
 
   for (const cookieName of cookieNames) {
     res.cookie(cookieName, "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      ...cookieOptions,
       expires: new Date(0),
-      path: "/",
     });
   }
 };
