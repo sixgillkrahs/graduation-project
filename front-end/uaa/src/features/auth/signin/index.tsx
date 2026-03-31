@@ -1,7 +1,9 @@
+import { useGetPublicGeneralSettings } from "@/features/app/settings/setting/services/query";
 import { useSignIn } from "./services/mutation";
 import logo from "@/assets/logo.svg";
 import { Button, Form, Image, Input, Switch } from "antd";
 import { useForm } from "antd/es/form/Form";
+import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const { Item } = Form;
@@ -12,8 +14,14 @@ const SignIn = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [form] = useForm<ISignInService.SignInRequest>();
+  const { data: publicSettings } = useGetPublicGeneralSettings();
   const redirectPath =
     (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || "/dashboard";
+  const adminPortalTitle = publicSettings?.data?.adminPortalTitle || "UAA Portal";
+
+  useEffect(() => {
+    document.title = adminPortalTitle;
+  }, [adminPortalTitle]);
 
   const onSubmit = async (values: ISignInService.SignInRequest) => {
     const resp = await signIn(values);
@@ -27,7 +35,7 @@ const SignIn = () => {
       <div className="flex flex-col-reverse gap-12 sm:flex-col">
         <div className="text-black-900 flex items-center justify-center gap-2 text-2xl font-bold sm:justify-start">
           <Image src={logo} alt="logo" />
-          <span>UAA Portal</span>
+          <span>{adminPortalTitle}</span>
         </div>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-8">
@@ -88,9 +96,9 @@ const SignIn = () => {
       <div className="mt-auto flex items-center justify-between gap-2 text-sm">
         <div className="flex items-center gap-2">
           <Image src={logo} alt="logo" width={24} height={24} />
-          <span className="text-black-900 text-center text-sm">UAA Portal</span>
+          <span className="text-black-900 text-center text-sm">{adminPortalTitle}</span>
         </div>
-        <span className="text-black-900 text-center text-sm">© 2023 UAA Portal</span>
+        <span className="text-black-900 text-center text-sm">© 2023 {adminPortalTitle}</span>
       </div>
     </div>
   );

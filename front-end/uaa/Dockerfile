@@ -35,7 +35,13 @@ WORKDIR /workspace/front-end/uaa
 ARG APP_DIR=front-end/uaa
 ARG LIB_DIR=library/gra-helper
 ARG BUILD_SCRIPT=build:prod
+ARG VITE_BASEURL=http://localhost:8080/api/
+ARG VITE_BASEURL_AI=http://localhost:8082/
+ARG ENVIRONMENT=production
 ENV NODE_ENV=production
+ENV VITE_BASEURL=${VITE_BASEURL}
+ENV VITE_BASEURL_AI=${VITE_BASEURL_AI}
+ENV ENVIRONMENT=${ENVIRONMENT}
 
 COPY ${APP_DIR}/package.json ./package.json
 COPY ${APP_DIR}/pnpm-lock.yaml ./pnpm-lock.yaml
@@ -49,8 +55,6 @@ RUN --mount=type=cache,id=uaa-pnpm-store,target=/pnpm/store,sharing=locked \
 COPY ${APP_DIR}/index.html ./index.html
 COPY ${APP_DIR}/public ./public
 COPY ${APP_DIR}/src ./src
-COPY ${APP_DIR}/.env.production ./.env.production
-COPY ${APP_DIR}/.env.staging ./.env.staging
 COPY ${APP_DIR}/tailwind.config.js ./tailwind.config.js
 COPY ${APP_DIR}/tsconfig.json ./tsconfig.json
 COPY ${APP_DIR}/tsconfig.app.json ./tsconfig.app.json

@@ -196,6 +196,10 @@
       "badge": "Admin General Settings",
       "title": "General Settings",
       "description": "Configure the core platform identity, regional defaults, and day-to-day operating switches for the admin portal.",
+      "tabs": {
+        "landing": "Landing page",
+        "uaa": "UAA portal"
+      },
       "actions": {
         "reset": "Reset to defaults"
       },
@@ -207,12 +211,22 @@
       },
       "preview": {
         "title": "Portal Preview",
-        "live": "Live mode",
-        "maintenance": "Maintenance mode",
+        "landingTitle": "Landing page",
+        "uaaTitle": "UAA portal",
+        "live": "Landing live",
+        "maintenance": "Landing in maintenance",
         "language": "Default language",
         "support": "Support channel"
       },
       "sections": {
+        "landing": {
+          "title": "Landing page",
+          "description": "Manage the public brand name, public-facing tagline, URL, and brand color used across the customer website."
+        },
+        "uaa": {
+          "title": "UAA portal",
+          "description": "Set up a distinct identity for the internal admin portal so it is clearly separated from the landing page."
+        },
         "platform": {
           "title": "Platform identity",
           "description": "Define the primary branding and URLs used across the admin workspace."
@@ -222,13 +236,18 @@
           "description": "Control the default language, timezone, currency, and date formatting."
         },
         "operations": {
-          "title": "Operations and support",
-          "description": "Set the public support contacts and a few platform-wide operating switches."
+          "title": "Landing operations and support",
+          "description": "Set support contacts and operating switches that apply only to the public landing page.",
+          "scopeTitle": "Scope",
+          "scopeDescription": "Maintenance mode here affects only the public landing page. The UAA portal remains accessible for administrators."
         }
       },
       "fields": {
         "systemName": "System name",
         "adminPortalTitle": "Admin portal title",
+        "adminPortalTagline": "Admin portal tagline",
+        "adminPortalUrl": "UAA portal URL",
+        "adminBrandColor": "UAA brand color",
         "systemTagline": "System tagline",
         "websiteUrl": "Landing page URL",
         "brandColor": "Primary brand color",
@@ -238,13 +257,15 @@
         "dateFormat": "Date format",
         "supportEmail": "Support email",
         "supportPhone": "Support phone",
-        "maintenanceMode": "Maintenance mode",
+        "maintenanceMode": "Landing page maintenance",
         "allowPublicRegistration": "Allow public registration",
         "enableListingReviews": "Enable listing reviews"
       },
       "placeholders": {
         "systemName": "Enter the public system name",
         "adminPortalTitle": "Enter the admin workspace title",
+        "adminPortalTagline": "Write a short description for the internal admin workspace",
+        "adminPortalUrl": "https://admin.example.com",
         "systemTagline": "Write a short operational description for the platform",
         "websiteUrl": "https://example.com",
         "supportEmail": "support@example.com",
@@ -253,6 +274,11 @@
       "validation": {
         "systemName": "System name is required",
         "adminPortalTitle": "Admin portal title is required",
+        "adminPortalTagline": "Admin portal tagline is required",
+        "adminPortalUrl": "UAA portal URL is required",
+        "adminPortalUrlInvalid": "Please enter a valid UAA portal URL",
+        "adminBrandColor": "UAA brand color is required",
+        "adminBrandColorInvalid": "Please enter a valid hex color in the format #RRGGBB",
         "systemTagline": "System tagline is required",
         "websiteUrl": "Landing page URL is required",
         "websiteUrlInvalid": "Please enter a valid URL",
@@ -278,6 +304,33 @@
         "actions": {
           "title": "Actions",
           "description": "Save the current configuration snapshot or restore the default values."
+        }
+      },
+      "password": {
+        "title": "Change admin password",
+        "description": "Update the current admin account password directly from the UAA portal tab.",
+        "fields": {
+          "oldPassword": "Current password",
+          "newPassword": "New password",
+          "confirmPassword": "Confirm new password"
+        },
+        "placeholders": {
+          "oldPassword": "Enter current password",
+          "newPassword": "Enter new password",
+          "confirmPassword": "Re-enter new password"
+        },
+        "validation": {
+          "oldPassword": "Current password is required",
+          "newPassword": "New password is required",
+          "newPasswordMin": "New password must be at least 6 characters",
+          "confirmPassword": "Please confirm the new password",
+          "confirmPasswordMatch": "Confirmation password does not match"
+        },
+        "actions": {
+          "submit": "Change password"
+        },
+        "messages": {
+          "success": "Password changed successfully"
         }
       }
     }

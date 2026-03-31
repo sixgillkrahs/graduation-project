@@ -13,6 +13,15 @@ export default class GeneralSettingsService {
     });
   };
 
+  public static readonly GetPublicGeneralSettings = (): Promise<
+    IResp<ISettingService.GeneralSettingsDTO>
+  > => {
+    return request({
+      url: GeneralSettingsEndpoint.GetPublicGeneralSettings(),
+      method: AxiosMethod.GET,
+    });
+  };
+
   public static readonly UpdateGeneralSettings = (
     payload: ISettingService.UpdateGeneralSettingsDTO,
   ): Promise<IResp<ISettingService.GeneralSettingsDTO>> => {

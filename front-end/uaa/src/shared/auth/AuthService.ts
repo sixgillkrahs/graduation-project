@@ -13,6 +13,12 @@ interface IUser {
   roleId: string;
 }
 
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export default class AuthService {
   public static readonly refresh = (): Promise<IResp<void>> => {
     return request({
@@ -32,6 +38,16 @@ export default class AuthService {
     return request({
       url: "/auth/me",
       method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly changePassword = (
+    data: ChangePasswordPayload,
+  ): Promise<IResp<void>> => {
+    return request({
+      url: "/auth/change-password",
+      method: AxiosMethod.PUT,
+      data,
     });
   };
 }

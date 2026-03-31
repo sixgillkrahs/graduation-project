@@ -11,3 +11,13 @@ export const useGetGeneralSettings = () => {
     },
   });
 };
+
+export const useGetPublicGeneralSettings = () => {
+  return useQuery({
+    queryKey: [GeneralSettingsQueryKey.GetPublicGeneralSettings],
+    queryFn: GeneralSettingsService.GetPublicGeneralSettings,
+    meta: {
+      ERROR_SOURCE: "[Load public settings failed]",
+    },
+  });
+};

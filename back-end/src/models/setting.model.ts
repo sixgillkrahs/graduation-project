@@ -9,6 +9,9 @@ export interface IGeneralSettings {
   key: "general";
   systemName: string;
   adminPortalTitle: string;
+  adminPortalTagline: string;
+  adminPortalUrl: string;
+  adminBrandColor: string;
   systemTagline: string;
   websiteUrl: string;
   brandColor: string;
@@ -54,6 +57,24 @@ const settingSchema = new mongoose.Schema<IGeneralSettings, SettingModel>(
       type: String,
       required: true,
       trim: true,
+    },
+    adminPortalTagline: {
+      type: String,
+      required: true,
+      trim: true,
+      default: "Operations center for listings, agents, reviews, and platform health.",
+    },
+    adminPortalUrl: {
+      type: String,
+      required: true,
+      trim: true,
+      default: "http://localhost:5173",
+    },
+    adminBrandColor: {
+      type: String,
+      required: true,
+      trim: true,
+      default: "#14532d",
     },
     systemTagline: {
       type: String,

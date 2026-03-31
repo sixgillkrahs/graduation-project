@@ -1,5 +1,6 @@
 import logo from "@/assets/logo.svg";
 import routes from "@/shared/routeConfig";
+import { useGeneralSettings } from "@shared/providers/GeneralSettingsProvider";
 import { Image } from "antd";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import React, { useState, type ComponentType } from "react";
@@ -105,6 +106,7 @@ const filterMenuRoutes = (routes: any[], parentPath: string = ""): any[] => {
 const Menu = ({ isOpen }: { isOpen: boolean }) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { adminPortalTitle, adminBrandColor } = useGeneralSettings();
   const root = routes[0].childRoutes;
   const menuItems = filterMenuRoutes(root!)[0]?.children;
 
@@ -113,8 +115,6 @@ const Menu = ({ isOpen }: { isOpen: boolean }) => {
   const toggleSubMenu = (path: string) => {
     setOpenKeys((prev) => ({ ...prev, [path]: !prev[path] }));
   };
-
-  console.log(menuItems);
 
   return (
     <div
@@ -130,8 +130,12 @@ const Menu = ({ isOpen }: { isOpen: boolean }) => {
             preview={false}
             className="h-6 w-auto object-contain transition-transform duration-500 hover:scale-110"
           />
-          <span className="text-2xl font-bold whitespace-nowrap text-[#1890FF] transition-all duration-300 hover:tracking-wider">
-            UAA
+          <span
+            className="max-w-[160px] truncate text-lg font-bold whitespace-nowrap transition-all duration-300 hover:tracking-wider"
+            style={{ color: adminBrandColor }}
+            title={adminPortalTitle}
+          >
+            {adminPortalTitle}
           </span>
         </div>
 

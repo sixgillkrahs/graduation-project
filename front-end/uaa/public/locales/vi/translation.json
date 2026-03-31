@@ -198,6 +198,10 @@
       "badge": "Cài đặt chung admin",
       "title": "Cài đặt chung",
       "description": "Thiết lập thông tin nhận diện hệ thống, các giá trị mặc định theo khu vực và các công tắc vận hành chung cho cổng admin.",
+      "tabs": {
+        "landing": "Landing page",
+        "uaa": "UAA portal"
+      },
       "actions": {
         "reset": "Khôi phục mặc định"
       },
@@ -209,12 +213,22 @@
       },
       "preview": {
         "title": "Xem trước cổng admin",
-        "live": "Đang hoạt động",
-        "maintenance": "Bảo trì",
+        "landingTitle": "Landing page",
+        "uaaTitle": "UAA portal",
+        "live": "Landing đang hoạt động",
+        "maintenance": "Landing đang bảo trì",
         "language": "Ngôn ngữ mặc định",
         "support": "Kênh hỗ trợ"
       },
       "sections": {
+        "landing": {
+          "title": "Landing page",
+          "description": "Quản lý tên thương hiệu, mô tả công khai, URL và màu nhận diện dành cho website người dùng cuối."
+        },
+        "uaa": {
+          "title": "UAA portal",
+          "description": "Thiết lập nhận diện riêng cho cổng quản trị nội bộ để tách bạch với landing page."
+        },
         "platform": {
           "title": "Nhận diện hệ thống",
           "description": "Khai báo tên hệ thống, tên cổng admin, URL và màu nhận diện chính."
@@ -224,13 +238,18 @@
           "description": "Quản lý ngôn ngữ, múi giờ, tiền tệ và định dạng ngày mặc định."
         },
         "operations": {
-          "title": "Vận hành và hỗ trợ",
-          "description": "Thiết lập kênh hỗ trợ và các công tắc vận hành chung cho toàn hệ thống."
+          "title": "Vận hành landing và hỗ trợ",
+          "description": "Thiết lập kênh hỗ trợ và các công tắc chỉ áp dụng cho landing page công khai.",
+          "scopeTitle": "Phạm vi áp dụng",
+          "scopeDescription": "Chế độ bảo trì ở đây chỉ ảnh hưởng landing page công khai. UAA portal vẫn truy cập bình thường để quản trị hệ thống."
         }
       },
       "fields": {
         "systemName": "Tên hệ thống",
         "adminPortalTitle": "Tiêu đề cổng admin",
+        "adminPortalTagline": "Mô tả ngắn cổng admin",
+        "adminPortalUrl": "URL UAA portal",
+        "adminBrandColor": "Màu nhận diện UAA",
         "systemTagline": "Mô tả ngắn",
         "websiteUrl": "URL landing page",
         "brandColor": "Màu thương hiệu chính",
@@ -240,13 +259,15 @@
         "dateFormat": "Định dạng ngày",
         "supportEmail": "Email hỗ trợ",
         "supportPhone": "Số điện thoại hỗ trợ",
-        "maintenanceMode": "Chế độ bảo trì",
+        "maintenanceMode": "Bảo trì landing page",
         "allowPublicRegistration": "Cho phép đăng ký công khai",
         "enableListingReviews": "Bật đánh giá tin đăng"
       },
       "placeholders": {
         "systemName": "Nhập tên hiển thị công khai của hệ thống",
         "adminPortalTitle": "Nhập tên hiển thị cho workspace admin",
+        "adminPortalTagline": "Nhập mô tả ngắn cho cổng quản trị nội bộ",
+        "adminPortalUrl": "https://admin.example.com",
         "systemTagline": "Nhập mô tả ngắn cho cổng quản trị",
         "websiteUrl": "https://example.com",
         "supportEmail": "support@example.com",
@@ -255,6 +276,11 @@
       "validation": {
         "systemName": "Vui lòng nhập tên hệ thống",
         "adminPortalTitle": "Vui lòng nhập tiêu đề cổng admin",
+        "adminPortalTagline": "Vui lòng nhập mô tả cho cổng admin",
+        "adminPortalUrl": "Vui lòng nhập URL UAA portal",
+        "adminPortalUrlInvalid": "URL UAA portal không hợp lệ",
+        "adminBrandColor": "Vui lòng chọn màu nhận diện UAA",
+        "adminBrandColorInvalid": "Vui lòng nhập mã màu hex đúng định dạng #RRGGBB",
         "systemTagline": "Vui lòng nhập mô tả ngắn",
         "websiteUrl": "Vui lòng nhập URL landing page",
         "websiteUrlInvalid": "URL không hợp lệ",
@@ -280,6 +306,33 @@
         "actions": {
           "title": "Thao tác",
           "description": "Lưu trạng thái cấu hình hiện tại hoặc khôi phục về giá trị mặc định."
+        }
+      },
+      "password": {
+        "title": "Đổi mật khẩu admin",
+        "description": "Đổi mật khẩu của tài khoản admin hiện tại ngay trong tab UAA portal.",
+        "fields": {
+          "oldPassword": "Mật khẩu hiện tại",
+          "newPassword": "Mật khẩu mới",
+          "confirmPassword": "Xác nhận mật khẩu mới"
+        },
+        "placeholders": {
+          "oldPassword": "Nhập mật khẩu hiện tại",
+          "newPassword": "Nhập mật khẩu mới",
+          "confirmPassword": "Nhập lại mật khẩu mới"
+        },
+        "validation": {
+          "oldPassword": "Vui lòng nhập mật khẩu hiện tại",
+          "newPassword": "Vui lòng nhập mật khẩu mới",
+          "newPasswordMin": "Mật khẩu mới phải có ít nhất 6 ký tự",
+          "confirmPassword": "Vui lòng xác nhận mật khẩu mới",
+          "confirmPasswordMatch": "Mật khẩu xác nhận không khớp"
+        },
+        "actions": {
+          "submit": "Đổi mật khẩu"
+        },
+        "messages": {
+          "success": "Đổi mật khẩu thành công"
         }
       }
     }

@@ -2,6 +2,7 @@ import EnglandFlag from "@/assets/images/icons/EnglandFlag.svg";
 import VietNamFlag from "@/assets/images/icons/VietNamFlag.svg";
 import { useLogout } from "@shared/auth/mutation";
 import { useGetMe } from "@shared/auth/query";
+import { useGeneralSettings } from "@shared/providers/GeneralSettingsProvider";
 import { Avatar, Badge, Dropdown, Select } from "antd";
 import { Bell, ChevronDown, LogOut, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -39,6 +40,7 @@ const Header = ({
   const navigate = useNavigate();
   const currentLang = i18n.language?.startsWith("vi") ? "vi" : "en";
   const { data: me } = useGetMe();
+  const { adminPortalTitle, adminPortalTagline, adminBrandColor } = useGeneralSettings();
   const { mutateAsync: logout, isPending: isLoggingOut } = useLogout();
   const fullName = me?.data?.user?.fullName?.trim() || "User";
   const avatarFallback = fullName
@@ -71,8 +73,22 @@ const Header = ({
 
   return (
     <div className="flex h-[70px] items-center justify-between bg-white px-[31px] py-[13px]">
-      <div className="cursor-pointer">
-        <Menu onClick={() => setIsMenuOpen(!isMenuOpen)} />
+      <div className="flex items-center gap-4">
+        <div className="cursor-pointer">
+          <Menu onClick={() => setIsMenuOpen(!isMenuOpen)} />
+        </div>
+        <div className="hidden min-w-0 lg:block">
+          <div
+            className="truncate text-base font-semibold"
+            style={{ color: adminBrandColor }}
+            title={adminPortalTitle}
+          >
+            {adminPortalTitle}
+          </div>
+          <div className="truncate text-xs text-gray-500" title={adminPortalTagline}>
+            {adminPortalTagline}
+          </div>
+        </div>
       </div>
       <div className="flex items-center gap-6">
         <Badge color="danger" content="3">

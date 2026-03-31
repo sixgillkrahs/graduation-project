@@ -12,6 +12,13 @@ export const validateUpdateGeneralSettingsSchema = (
       adminPortalTitle: z
         .string()
         .min(1, { message: t.required("Admin portal title") }),
+      adminPortalTagline: z
+        .string()
+        .min(1, { message: t.required("Admin portal tagline") }),
+      adminPortalUrl: z.string().url({ message: t.invalidPath }),
+      adminBrandColor: z.string().regex(/^#([0-9a-fA-F]{6})$/, {
+        message: t.invalidDescription,
+      }),
       systemTagline: z.string().min(1, { message: t.required("System tagline") }),
       websiteUrl: z.string().url({ message: t.invalidPath }),
       brandColor: z.string().regex(/^#([0-9a-fA-F]{6})$/, {

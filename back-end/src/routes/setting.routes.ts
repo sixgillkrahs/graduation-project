@@ -17,7 +17,7 @@ router.use(requireAuth);
  * @swagger
  * /settings/general:
  *   get:
- *     summary: Get general platform settings
+ *     summary: Get general platform settings for landing page and UAA portal
  *     tags: [Settings]
  *     security:
  *       - bearerAuth: []
@@ -83,12 +83,15 @@ router.use(requireAuth);
  *                       example: +84 28 9999 8888
  *                     maintenanceMode:
  *                       type: boolean
+ *                       description: Controls maintenance mode for the public landing page only. Does not block the UAA portal.
  *                       example: false
  *                     allowPublicRegistration:
  *                       type: boolean
+ *                       description: Controls whether public users can register from the landing page.
  *                       example: true
  *                     enableListingReviews:
  *                       type: boolean
+ *                       description: Controls whether listing and agent review features are visible on the landing page.
  *                       example: true
  *                     createdAt:
  *                       type: string
@@ -120,7 +123,7 @@ router.get("/general", settingController.getGeneralSettings);
  * @swagger
  * /settings/general:
  *   put:
- *     summary: Update general platform settings
+ *     summary: Update general platform settings for landing page and UAA portal
  *     tags: [Settings]
  *     security:
  *       - bearerAuth: []
@@ -185,12 +188,15 @@ router.get("/general", settingController.getGeneralSettings);
  *                 example: +84 28 9999 8888
  *               maintenanceMode:
  *                 type: boolean
+ *                 description: Enables maintenance mode for the public landing page only. The UAA portal remains accessible.
  *                 example: false
  *               allowPublicRegistration:
  *                 type: boolean
+ *                 description: Enables or disables public registration on the landing page.
  *                 example: true
  *               enableListingReviews:
  *                 type: boolean
+ *                 description: Enables or disables review surfaces on the landing page.
  *                 example: true
  *     responses:
  *       200:
@@ -254,12 +260,15 @@ router.get("/general", settingController.getGeneralSettings);
  *                       example: +84 28 9999 8888
  *                     maintenanceMode:
  *                       type: boolean
+ *                       description: Controls maintenance mode for the public landing page only. Does not block the UAA portal.
  *                       example: false
  *                     allowPublicRegistration:
  *                       type: boolean
+ *                       description: Controls whether public users can register from the landing page.
  *                       example: true
  *                     enableListingReviews:
  *                       type: boolean
+ *                       description: Controls whether listing and agent review features are visible on the landing page.
  *                       example: true
  *                     createdAt:
  *                       type: string

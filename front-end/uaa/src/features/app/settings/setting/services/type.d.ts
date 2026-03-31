@@ -4,6 +4,9 @@ namespace ISettingService {
     key: "general";
     systemName: string;
     adminPortalTitle: string;
+    adminPortalTagline: string;
+    adminPortalUrl: string;
+    adminBrandColor: string;
     systemTagline: string;
     websiteUrl: string;
     brandColor: string;
@@ -23,6 +26,9 @@ namespace ISettingService {
   export interface UpdateGeneralSettingsDTO {
     systemName: string;
     adminPortalTitle: string;
+    adminPortalTagline: string;
+    adminPortalUrl: string;
+    adminBrandColor: string;
     systemTagline: string;
     websiteUrl: string;
     brandColor: string;

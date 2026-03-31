@@ -1,0 +1,152 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: graduation-project-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --eval \"db.adminCommand('ping').ok\" localhost:27017/test | grep 1",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: graduation-project-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass 123456
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a 123456 ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  api:
+    image: graduation-project/backend:latest
+    container_name: graduation-project-backend
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: back-end/Dockerfile
+    env_file:
+      - back-end/.env.prod
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      SERVER_URL: http://localhost:${API_PORT:-8080}
+      FRONTEND_URL: http://localhost:${UAA_PORT:-5173}
+      FRONTEND_URLLANDINGPAGE: http://localhost:${LANDING_PORT:-3000}
+      DATABASE_URL: mongodb://mongo:27017/graduation
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASS: 123456
+      REDIS_DB: 0
+      REDIS_URL: redis://:123456@redis:6379/0
+      GOOGLE_REDIRECT_URI: http://localhost:${API_PORT:-8080}/api/auth/google/callback
+      AI_SERVICE_URL: http://host.docker.internal:8082
+      RUN_STARTUP_SEEDS: "true"
+      VNP_RETURN_URL: http://localhost:${LANDING_PORT:-3000}/agent/upgrade/success
+      MOMO_RETURN_URL: http://localhost:${LANDING_PORT:-3000}/agent/upgrade/success
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./back-end/logs:/app/logs
+      - ./back-end/uploads:/app/uploads
+    networks:
+      - app-network
+
+  uaa:
+    image: graduation-project/uaa:latest
+    container_name: graduation-project-uaa
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: front-end/uaa/Dockerfile
+      target: runner
+      args:
+        APP_DIR: front-end/uaa
+        LIB_DIR: library/gra-helper
+        BUILD_SCRIPT: build:prod
+        VITE_BASEURL: http://localhost:${API_PORT:-8080}/api/
+        VITE_BASEURL_AI: http://localhost:8082/
+        ENVIRONMENT: production
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "${UAA_PORT:-5173}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-network
+
+  landing-page:
+    image: graduation-project/landing-page:latest
+    container_name: graduation-project-landing-page
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: front-end/real-estate-landing-page/Dockerfile
+      args:
+        APP_DIR: front-end/real-estate-landing-page
+        LIB_DIR: library/gra-helper
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8080}/api
+        NEXT_PUBLIC_API_BASE_SOCKET: http://localhost:${API_PORT:-8080}
+        INTERNAL_API_BASE_URL: http://api:8080/api
+        NEXT_PUBLIC_BASEURLAI: http://localhost:8082
+        INTERNAL_AI_BASE_URL: http://host.docker.internal:8082
+        NEXT_PUBLIC_ENVIRONMENT: production
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8080}/api
+      NEXT_PUBLIC_API_BASE_SOCKET: http://localhost:${API_PORT:-8080}
+      INTERNAL_API_BASE_URL: http://api:8080/api
+      NEXT_PUBLIC_BASEURLAI: http://localhost:8082
+      INTERNAL_AI_BASE_URL: http://host.docker.internal:8082
+      NEXT_PUBLIC_ENVIRONMENT: production
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "${LANDING_PORT:-3000}:3000"
+    networks:
+      - app-network
+
+volumes:
+  mongo_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
