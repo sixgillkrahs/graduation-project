@@ -4,9 +4,11 @@ import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import {
   AlertCircle,
   BookmarkPlus,
+  ChevronDown,
   Heart,
   House,
   Loader2,
+  MapPin,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
@@ -14,8 +16,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { IParamsPagination } from "@/@types/service";
-import { CsPagination } from "@/components/custom";
+import { CsButton, CsPagination } from "@/components/custom";
 import { CsDialog } from "@/components/custom/dialog";
+import { ROUTES } from "@/const/routes";
 import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
 import StateSurface from "@/components/ui/state-surface";
@@ -58,6 +61,29 @@ const PROPERTY_SKELETON_KEYS = [
   "property-skeleton-5",
   "property-skeleton-6",
 ] as const;
+
+const FEATURED_PROVINCE_QUERIES = [
+  "ha noi",
+  "ho chi minh",
+  "da nang",
+  "hai phong",
+  "can tho",
+  "khanh hoa",
+  "lam dong",
+  "quang ninh",
+  "binh duong",
+  "dong nai",
+  "ba ria vung tau",
+  "thua thien hue",
+] as const;
+
+const normalizeProvinceQuery = (value?: string) =>
+  (value || "")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/đ/gu, "d")
+    .toLowerCase()
+    .trim();
 
 const getSortValue = (params: IParamsPagination) =>
   params.sortField === "features.price"
@@ -136,6 +162,9 @@ const Properties = () => {
   const [savedSearchesHydrated, setSavedSearchesHydrated] = useState(false);
   const [isSaveSearchDialogOpen, setIsSaveSearchDialogOpen] = useState(false);
   const [savedSearchName, setSavedSearchName] = useState("");
+  const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] =
+    useState(false);
+  const [isProvinceListCollapsed, setIsProvinceListCollapsed] = useState(false);
   const {
     items: recentlyViewedItems,
     clearAll: clearRecentlyViewed,
@@ -242,6 +271,33 @@ const Properties = () => {
     [params],
   );
   const canSaveCurrentSearch = savedSearchQueryString.length > 0;
+  const provinceQuickOptions = useMemo(
+    () => {
+      const allProvinceOptions = LIST_PROVINCE.map((province) => ({
+        label: province.label,
+        value: province.value,
+      }));
+
+      const featuredOptions = allProvinceOptions.filter((province) => {
+        const normalizedLabel = normalizeProvinceQuery(province.label);
+        const normalizedValue = normalizeProvinceQuery(province.value);
+
+        return FEATURED_PROVINCE_QUERIES.some(
+          (query) =>
+            normalizedLabel.includes(query) || normalizedValue.includes(query),
+        );
+      });
+
+      return featuredOptions.length > 0
+        ? featuredOptions
+        : allProvinceOptions.slice(0, 12);
+    },
+    [],
+  );
+  const activeProvinceQuery = useMemo(
+    () => normalizeProvinceQuery(params.query?.toString()),
+    [params.query],
+  );
 
   const replacePropertiesRoute = (
     nextParams: IParamsPagination,
@@ -369,6 +425,31 @@ const Properties = () => {
     });
   };
 
+  const handleProvinceQuickSearch = (provinceLabel?: string) => {
+    const nextSearchParams: PropertyFilters = {
+      ...searchFiltersRef.current,
+    };
+
+    if (provinceLabel) {
+      nextSearchParams.query = provinceLabel;
+    } else {
+      delete nextSearchParams.query;
+    }
+
+    searchFiltersRef.current = nextSearchParams;
+    setParams((prev) => {
+      const { limit } = prev;
+      const nextParams = {
+        page: 1,
+        limit,
+        ...sidebarFiltersRef.current,
+        ...nextSearchParams,
+      };
+      replacePropertiesRoute(nextParams);
+      return nextParams;
+    });
+  };
+
   const handleSortChange = (val: string) => {
     switch (val) {
       case "price_asc":
@@ -469,12 +550,97 @@ const Properties = () => {
 
       <main className="container mx-auto px-4 py-8 md:px-20">
         <div className="flex flex-col gap-8 lg:flex-row">
-          <FilterSidebar
-            className="hidden lg:block lg:w-1/4"
-            onReset={handleResetFilters}
-            onFilterChange={handleFilterChange}
-            initialFilters={initialSidebarFilters}
-          />
+          <div className="hidden lg:sticky lg:top-32 lg:flex lg:w-1/4 lg:self-start lg:flex-col lg:gap-6">
+            <FilterSidebar
+              sticky={false}
+              className="lg:block"
+              onReset={handleResetFilters}
+              onFilterChange={handleFilterChange}
+              initialFilters={initialSidebarFilters}
+              collapsible
+              collapsed={isFilterSidebarCollapsed}
+              onCollapsedChange={setIsFilterSidebarCollapsed}
+            />
+
+            {isAllTab ? (
+              <section className="overflow-hidden rounded-[28px] border border-stone-200 bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
+                        {t("quickLocations.eyebrow")}
+                      </p>
+                      <h2 className="mt-2 flex items-center gap-2 text-lg font-semibold tracking-tight text-stone-900">
+                        <MapPin className="h-4 w-4 text-stone-500" />
+                        {t("quickLocations.title")}
+                      </h2>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setIsProvinceListCollapsed((prev) => !prev)
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50"
+                    >
+                      {isProvinceListCollapsed
+                        ? t("quickLocations.expand")
+                        : t("quickLocations.collapse")}
+                      <ChevronDown
+                        className={`h-3.5 w-3.5 transition-transform ${isProvinceListCollapsed ? "" : "rotate-180"}`}
+                      />
+                    </button>
+                  </div>
+
+                  {!isProvinceListCollapsed ? (
+                    <p className="text-sm leading-6 text-stone-600">
+                      {t("quickLocations.description")}
+                    </p>
+                  ) : null}
+                </div>
+
+                {!isProvinceListCollapsed ? (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleProvinceQuickSearch()}
+                      className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+                        !activeProvinceQuery
+                          ? "border-stone-900 bg-stone-900 text-white"
+                          : "border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-300 hover:bg-stone-100"
+                      }`}
+                    >
+                      {t("quickLocations.all")}
+                    </button>
+
+                    {provinceQuickOptions.map((province) => {
+                      const isActive =
+                        normalizeProvinceQuery(province.label) ===
+                          activeProvinceQuery ||
+                        normalizeProvinceQuery(province.value) ===
+                          activeProvinceQuery;
+
+                      return (
+                        <button
+                          key={province.value}
+                          type="button"
+                          onClick={() =>
+                            handleProvinceQuickSearch(province.label)
+                          }
+                          className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+                            isActive
+                              ? "border-red-200 bg-red-50 text-red-600"
+                              : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                          }`}
+                        >
+                          {province.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+          </div>
 
           <div className="flex-1" ref={gridRef}>
             <section className="mb-6 overflow-hidden rounded-[28px] border border-stone-200 bg-[linear-gradient(135deg,#f8f5ef_0%,#ffffff_58%,#efe7dc_100%)] p-6 shadow-sm">
@@ -559,6 +725,15 @@ const Properties = () => {
             ) : null}
 
             <div className="mb-6 grid grid-cols-1 gap-3 lg:hidden">
+              <CsButton
+                type="button"
+                onClick={() => router.push(ROUTES.PROPERTY_MAP_SEARCH)}
+                className="h-11 rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white hover:bg-stone-800"
+                icon={<SlidersHorizontal className="h-4 w-4" />}
+              >
+                {t("heading.mapSearch")}
+              </CsButton>
+
               <button
                 type="button"
                 onClick={() => setIsMobileFiltersOpen(true)}
@@ -610,6 +785,15 @@ const Properties = () => {
               </div>
 
               <div className="hidden items-center gap-3 lg:flex">
+                <CsButton
+                  type="button"
+                  onClick={() => router.push(ROUTES.PROPERTY_MAP_SEARCH)}
+                  className="rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white hover:bg-stone-800"
+                  icon={<SlidersHorizontal className="h-4 w-4" />}
+                >
+                  {t("heading.mapSearch")}
+                </CsButton>
+
                 <span className="text-sm font-medium text-gray-500">
                   {t("sort.label")}
                 </span>

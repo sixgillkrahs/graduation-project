@@ -1,6 +1,6 @@
 "use client";
 
-import { FilterX } from "lucide-react";
+import { ChevronDown, FilterX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { CsCheckbox } from "@/components/custom";
@@ -26,6 +26,9 @@ interface FilterSidebarProps {
   className?: string;
   sticky?: boolean;
   initialFilters?: FilterValues;
+  collapsible?: boolean;
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
 }
 
 const INITIAL_STATE = {
@@ -71,6 +74,9 @@ const FilterSidebar = ({
   className,
   sticky = true,
   initialFilters,
+  collapsible = false,
+  collapsed = false,
+  onCollapsedChange,
 }: FilterSidebarProps) => {
   const [bedrooms, setBedrooms] = useState(INITIAL_STATE.bedrooms);
   const [bathrooms, setBathrooms] = useState(INITIAL_STATE.bathrooms);
@@ -158,21 +164,35 @@ const FilterSidebar = ({
         className,
       )}
     >
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <FilterX className="w-5 h-5 main-color-red" />
-          {t("title")}
-        </h2>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+            <FilterX className="w-5 h-5 main-color-red" />
+            {t("title")}
+          </h2>
+          {collapsible ? (
+            <button
+              type="button"
+              onClick={() => onCollapsedChange?.(!collapsed)}
+              className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50"
+            >
+              {collapsed ? t("expand") : t("collapse")}
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${collapsed ? "" : "rotate-180"}`}
+              />
+            </button>
+          ) : null}
+        </div>
         <button
           type="button"
           onClick={handleResetAll}
-          className="text-sm font-medium text-red-500 hover:text-red-600 hover:underline transition-colors"
+          className="text-sm font-medium text-red-500 transition-colors hover:text-red-600 hover:underline"
         >
           {t("resetAll")}
         </button>
       </div>
 
-      <div className="space-y-8">
+      <div className={collapsed ? "hidden" : "space-y-8"}>
         {/* Bedrooms Section */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">

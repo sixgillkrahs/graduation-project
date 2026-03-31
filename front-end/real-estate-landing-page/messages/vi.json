@@ -208,11 +208,21 @@
       "allProperties": "Tất cả bất động sản",
       "myFavorites": "Yêu thích của tôi"
     },
-    "heading": {
-      "allTitle": "Bất động sản đang bán",
-      "favTitle": "Bất động sản yêu thích",
-      "showing": "Hiển thị {count} trên {total} kết quả"
-    },
+      "heading": {
+        "allTitle": "Bất động sản đang bán",
+        "favTitle": "Bất động sản yêu thích",
+        "showing": "Hiển thị {count} trên {total} kết quả",
+        "mapSearch": "Tìm kiếm trên bản đồ"
+      },
+      "quickLocations": {
+        "eyebrow": "Tìm nhanh theo khu vực",
+        "title": "Khám phá bất động sản theo tỉnh, thành phố",
+        "description": "Chọn nhanh khu vực bạn quan tâm để lọc danh sách bất động sản trên toàn quốc mà không cần nhập lại từ đầu.",
+        "collapse": "Thu gọn",
+        "expand": "Mở rộng",
+        "count": "{count} tỉnh, thành phố",
+        "all": "Toàn quốc"
+      },
     "sort": {
       "label": "Sắp xếp:",
       "placeholder": "Sắp xếp",
@@ -269,6 +279,8 @@
     "filter": {
       "title": "Bộ lọc",
       "resetAll": "Đặt lại",
+      "collapse": "Thu gọn",
+      "expand": "Mở rộng",
       "bedrooms": "Phòng ngủ",
       "bathrooms": "Phòng tắm",
       "direction": "Hướng nhà",
@@ -383,11 +395,12 @@
       "furnitureBasic": "Cơ bản",
       "furnitureEmpty": "Trống"
     },
-    "advancedSearch": {
-      "eyebrow": "Tìm kiếm nâng cao",
-      "title": "Tìm bất động sản trên bản đồ",
-      "description": "Lọc listing theo khu vực, loại bất động sản, ngân sách và số phòng ngủ, sau đó đối chiếu trực tiếp với vị trí trên bản đồ.",
-      "filters": {
+      "advancedSearch": {
+        "eyebrow": "Bản đồ & danh sách",
+        "title": "Khám phá bất động sản theo khu vực",
+        "description": "Duyệt bất động sản đang bán và cho thuê, lọc theo khu vực, loại hình, ngân sách và số phòng ngủ rồi đối chiếu trực tiếp với vị trí trên bản đồ.",
+        "backToList": "Quay về danh sách bất động sản",
+        "filters": {
         "searchPlaceholder": "Nhập khu vực, quận huyện hoặc dự án",
         "allTypes": "Tất cả loại",
         "allPrices": "Mọi mức giá",

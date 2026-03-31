@@ -208,11 +208,21 @@
       "allProperties": "All Properties",
       "myFavorites": "My Favorites"
     },
-    "heading": {
-      "allTitle": "Properties for Sale",
-      "favTitle": "My Favorite Properties",
-      "showing": "Showing {count} of {total} results"
-    },
+      "heading": {
+        "allTitle": "Properties for Sale",
+        "favTitle": "My Favorite Properties",
+        "showing": "Showing {count} of {total} results",
+        "mapSearch": "Search on map"
+      },
+      "quickLocations": {
+        "eyebrow": "Quick area finder",
+        "title": "Browse listings by province and city",
+        "description": "Jump into the area you care about and filter the national property list without rebuilding the search from scratch.",
+        "collapse": "Collapse",
+        "expand": "Expand",
+        "count": "{count} provinces and cities",
+        "all": "Nationwide"
+      },
     "sort": {
       "label": "Sort by:",
       "placeholder": "Sort",
@@ -269,6 +279,8 @@
     "filter": {
       "title": "Filters",
       "resetAll": "Reset All",
+      "collapse": "Collapse",
+      "expand": "Expand",
       "bedrooms": "Bedrooms",
       "bathrooms": "Bathrooms",
       "direction": "Property Direction",
@@ -383,11 +395,12 @@
       "furnitureBasic": "Basic furnished",
       "furnitureEmpty": "Unfurnished"
     },
-    "advancedSearch": {
-      "eyebrow": "Advanced Search",
-      "title": "Search properties on the map",
-      "description": "Filter listings by area, property type, budget, and bedroom count, then review each option directly against its map location.",
-      "filters": {
+      "advancedSearch": {
+        "eyebrow": "Map and listings",
+        "title": "Explore properties by area",
+        "description": "Browse sale and rental properties, refine the list by area, property type, budget, and bedroom count, then compare each listing directly on the map.",
+        "backToList": "Back to property list",
+        "filters": {
         "searchPlaceholder": "Search by area, district, or project",
         "allTypes": "All types",
         "allPrices": "Any price",

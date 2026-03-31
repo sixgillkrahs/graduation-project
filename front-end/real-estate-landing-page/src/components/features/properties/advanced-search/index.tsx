@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { findOptionLabel, LIST_PROVINCE, LIST_WARD } from "gra-helper";
 import {
   AlertCircle,
+  ArrowLeft,
   Grid3X3,
   House,
   MapPinned,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 import type { IParamsPagination } from "@/@types/service";
 import { CsButton, CsPagination } from "@/components/custom";
+import { ROUTES } from "@/const/routes";
 import StateSurface from "@/components/ui/state-surface";
 import { CsSelect } from "@/components/ui/select";
 import { formatPropertyPostedDate } from "@/lib/property-date";
@@ -35,6 +37,7 @@ const PropertyResultsMap = dynamic(() => import("./PropertyResultsMap"), {
 
 type SearchFormState = {
   query: string;
+  demandType: string;
   propertyType: string;
   priceRange: string;
   bedrooms: string;
@@ -43,15 +46,18 @@ type SearchFormState = {
   radiusKm: number;
 };
 
+const RESULTS_PER_PAGE = 6;
+
 const DEFAULT_PARAMS: IParamsPagination = {
   page: 1,
-  limit: 12,
+  limit: RESULTS_PER_PAGE,
 };
 
 const DEFAULT_RADIUS_KM = 20;
 
 const DEFAULT_FORM_STATE: SearchFormState = {
   query: "",
+  demandType: "all",
   propertyType: "all",
   priceRange: "all",
   bedrooms: "any",
@@ -66,14 +72,21 @@ type ParsedAdvancedSearchState = {
 };
 
 const normalizeParamsFromSearch = (searchParams: URLSearchParams) => {
+  const parsedPage = Number(searchParams.get("page"));
   const params: IParamsPagination = {
-    page: Number(searchParams.get("page") || DEFAULT_PARAMS.page),
-    limit: Number(searchParams.get("limit") || DEFAULT_PARAMS.limit),
+    page:
+      Number.isFinite(parsedPage) && parsedPage > 0
+        ? parsedPage
+        : DEFAULT_PARAMS.page,
+    limit: DEFAULT_PARAMS.limit,
   };
 
   const query = searchParams.get("query");
+  const demandType = searchParams.get("demandType");
   const propertyType = searchParams.get("propertyType");
   const maxPrice = searchParams.get("maxPrice");
+  const sortField = searchParams.get("sortField");
+  const sortOrder = searchParams.get("sortOrder");
   const exactBedrooms = searchParams.get("features.bedrooms");
   const minBedrooms = searchParams.get("minBedrooms");
   const latitude = searchParams.get("latitude");
@@ -82,8 +95,12 @@ const normalizeParamsFromSearch = (searchParams: URLSearchParams) => {
   const locationLabel = searchParams.get("locationLabel");
 
   if (query) params.query = query;
-  if (propertyType) params.propertyType = propertyType;
+  if (demandType && demandType !== "all") params.demandType = demandType;
+  if (propertyType && propertyType !== "all")
+    params.propertyType = propertyType;
   if (maxPrice) params.maxPrice = Number(maxPrice);
+  if (sortField) params.sortField = sortField;
+  if (sortOrder === "asc" || sortOrder === "desc") params.sortOrder = sortOrder;
   if (exactBedrooms) params["features.bedrooms"] = Number(exactBedrooms);
   if (minBedrooms) params.minBedrooms = Number(minBedrooms);
   if (latitude && longitude) {
@@ -132,12 +149,35 @@ const buildSearchString = (
     nextParams.set("query", params.query.trim());
   }
 
-  if (typeof params.propertyType === "string" && params.propertyType.trim()) {
+  if (
+    typeof params.demandType === "string" &&
+    params.demandType.trim() &&
+    params.demandType !== "all"
+  ) {
+    nextParams.set("demandType", params.demandType);
+  }
+
+  if (
+    typeof params.propertyType === "string" &&
+    params.propertyType.trim() &&
+    params.propertyType !== "all"
+  ) {
     nextParams.set("propertyType", params.propertyType);
   }
 
   if (typeof params.maxPrice === "number") {
     nextParams.set("maxPrice", String(params.maxPrice));
+  }
+
+  if (typeof params.sortField === "string" && params.sortField.trim()) {
+    nextParams.set("sortField", String(params.sortField));
+  }
+
+  if (
+    typeof params.sortOrder === "string" &&
+    ["asc", "desc"].includes(params.sortOrder)
+  ) {
+    nextParams.set("sortOrder", String(params.sortOrder));
   }
 
   if (typeof params["features.bedrooms"] === "number") {
@@ -176,6 +216,7 @@ const getFormStateFromParams = (
   locationLabel: string,
 ): SearchFormState => ({
   query: locationLabel,
+  demandType: typeof params.demandType === "string" ? params.demandType : "all",
   propertyType:
     typeof params.propertyType === "string" ? params.propertyType : "all",
   priceRange:
@@ -225,6 +266,13 @@ const mapToMapItem = (
     postedAt: formatPropertyPostedDate(property.createdAt, locale),
   };
 };
+
+const getSortValue = (params: IParamsPagination) =>
+  params.sortField === "features.price"
+    ? params.sortOrder === "asc"
+      ? "price_asc"
+      : "price_desc"
+    : "newest";
 
 const AdvancedPropertySearch = () => {
   const t = useTranslations("PropertiesPage.advancedSearch");
@@ -309,6 +357,15 @@ const AdvancedPropertySearch = () => {
     [t],
   );
 
+  const demandTypeOptions = useMemo(
+    () => [
+      { value: "all", label: sharedT("search.demandAll") },
+      { value: "RENT", label: sharedT("search.demandRent") },
+      { value: "SALE", label: sharedT("search.demandSale") },
+    ],
+    [sharedT],
+  );
+
   const mapItems = useMemo(
     () =>
       results
@@ -317,11 +374,31 @@ const AdvancedPropertySearch = () => {
     [locale, results],
   );
 
+  const sortOptions = useMemo(
+    () => [
+      { value: "newest", label: sharedT("sort.newest") },
+      { value: "price_asc", label: sharedT("sort.priceLowHigh") },
+      { value: "price_desc", label: sharedT("sort.priceHighLow") },
+    ],
+    [sharedT],
+  );
+
   const handleSearch = () => {
     const nextParams: IParamsPagination = {
       page: 1,
       limit: params.limit || DEFAULT_PARAMS.limit,
     };
+
+    if (typeof params.sortField === "string" && params.sortField.trim()) {
+      nextParams.sortField = params.sortField;
+    }
+
+    if (
+      typeof params.sortOrder === "string" &&
+      ["asc", "desc"].includes(params.sortOrder)
+    ) {
+      nextParams.sortOrder = params.sortOrder;
+    }
 
     if (
       formState.query.trim() &&
@@ -337,6 +414,10 @@ const AdvancedPropertySearch = () => {
 
     if (formState.propertyType !== "all") {
       nextParams.propertyType = formState.propertyType;
+    }
+
+    if (formState.demandType !== "all") {
+      nextParams.demandType = formState.demandType;
     }
 
     if (formState.priceRange !== "all") {
@@ -355,7 +436,7 @@ const AdvancedPropertySearch = () => {
 
     const queryString = buildSearchString(nextParams, formState.query);
     router.replace(
-      `/properties/advanced-search${queryString ? `?${queryString}` : ""}`,
+      `${ROUTES.PROPERTY_MAP_SEARCH}${queryString ? `?${queryString}` : ""}`,
       {
         scroll: false,
       },
@@ -372,7 +453,35 @@ const AdvancedPropertySearch = () => {
 
     const queryString = buildSearchString(nextParams, formState.query);
     router.replace(
-      `/properties/advanced-search${queryString ? `?${queryString}` : ""}`,
+      `${ROUTES.PROPERTY_MAP_SEARCH}${queryString ? `?${queryString}` : ""}`,
+      {
+        scroll: false,
+      },
+    );
+  };
+
+  const handleSortChange = (value: string | number) => {
+    const nextParams: IParamsPagination = {
+      ...params,
+      page: 1,
+    };
+
+    if (value === "price_asc") {
+      nextParams.sortField = "features.price";
+      nextParams.sortOrder = "asc";
+    } else if (value === "price_desc") {
+      nextParams.sortField = "features.price";
+      nextParams.sortOrder = "desc";
+    } else {
+      delete nextParams.sortField;
+      delete nextParams.sortOrder;
+    }
+
+    setParams(nextParams);
+
+    const queryString = buildSearchString(nextParams, formState.query);
+    router.replace(
+      `${ROUTES.PROPERTY_MAP_SEARCH}${queryString ? `?${queryString}` : ""}`,
       {
         scroll: false,
       },
@@ -403,7 +512,7 @@ const AdvancedPropertySearch = () => {
     setParams(DEFAULT_PARAMS);
     setFormState(DEFAULT_FORM_STATE);
     setActivePropertyId(null);
-    router.replace("/properties/advanced-search", {
+    router.replace(ROUTES.PROPERTY_MAP_SEARCH, {
       scroll: false,
     });
   };
@@ -412,7 +521,7 @@ const AdvancedPropertySearch = () => {
     <div className="min-h-screen bg-[linear-gradient(180deg,#f7f4ee_0%,#ffffff_28%,#fbfaf7_100%)] pb-16">
       <main className="container mx-auto px-4 py-6 md:px-10 xl:px-16">
         <section className="relative z-30 overflow-visible rounded-[32px] border border-stone-200 bg-white p-4 shadow-[0_30px_80px_-48px_rgba(15,23,42,0.28)] md:p-6">
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,2.2fr)_180px_180px_180px_132px_132px]">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,2.2fr)_148px_180px_180px_180px_132px_56px]">
             <div className="relative z-40 rounded-2xl border border-stone-200 bg-stone-50/70">
               <LocationAutocomplete
                 value={formState.query}
@@ -430,6 +539,18 @@ const AdvancedPropertySearch = () => {
                 className="!h-2"
               />
             </div>
+
+            <CsSelect
+              value={formState.demandType}
+              onChange={(value) =>
+                setFormState((current) => ({
+                  ...current,
+                  demandType: String(value),
+                }))
+              }
+              options={demandTypeOptions}
+              triggerClassName="rounded-2xl border-stone-200 bg-stone-50/70 px-4"
+            />
 
             <CsSelect
               value={formState.propertyType}
@@ -484,7 +605,7 @@ const AdvancedPropertySearch = () => {
           </div>
         </section>
 
-        <section className="relative z-10 mt-6 grid gap-6 xl:grid-cols-2">
+        <section className="relative z-10 mt-6 grid gap-6 xl:grid-cols-2 xl:items-start">
           <div className="rounded-[32px] border border-stone-200 bg-white p-4 shadow-sm md:p-5">
             <div className="mb-5 flex flex-col gap-3 border-b border-stone-100 pb-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -509,7 +630,16 @@ const AdvancedPropertySearch = () => {
                 <span className="text-sm font-medium text-stone-500">
                   {t("list.updating")}
                 </span>
-              ) : null}
+              ) : (
+                <div className="w-full sm:w-56">
+                  <CsSelect
+                    value={getSortValue(params)}
+                    onChange={handleSortChange}
+                    options={sortOptions}
+                    className="h-10 border-stone-200 bg-white"
+                  />
+                </div>
+              )}
             </div>
 
             {isLoading ? (
@@ -523,7 +653,7 @@ const AdvancedPropertySearch = () => {
             ) : isError ? (
               <StateSurface
                 tone="danger"
-                eyebrow="Properties"
+                eyebrow={t("list.eyebrow")}
                 icon={<AlertCircle className="h-5 w-5" />}
                 title={t("list.errorTitle")}
                 description={t("list.errorDescription")}
@@ -537,7 +667,7 @@ const AdvancedPropertySearch = () => {
             ) : results.length === 0 ? (
               <StateSurface
                 tone="brand"
-                eyebrow="Properties"
+                eyebrow={t("list.eyebrow")}
                 icon={<House className="h-5 w-5" />}
                 title={t("list.emptyTitle")}
                 description={t("list.emptyDescription")}
@@ -607,7 +737,22 @@ const AdvancedPropertySearch = () => {
             )}
           </div>
 
-          <div className="rounded-[32px] border border-stone-200 bg-white p-4 shadow-sm md:p-5">
+          <div className="self-start rounded-[32px] border border-stone-200 bg-white p-4 shadow-sm md:p-5 xl:sticky xl:top-24">
+            <div className="mb-5 border-b border-stone-100 pb-4">
+              <div className="flex items-center gap-2 text-stone-900">
+                <MapPinned className="h-4 w-4 text-red-500" />
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500">
+                  {t("map.eyebrow")}
+                </p>
+              </div>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-stone-900">
+                {t("map.title")}
+              </h2>
+              <p className="mt-1 text-sm text-stone-500">
+                {t("map.description")}
+              </p>
+            </div>
+
             <PropertyResultsMap
               items={mapItems}
               activeId={activePropertyId}

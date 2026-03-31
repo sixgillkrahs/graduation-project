@@ -25,7 +25,7 @@ const RecentlyViewedSection = ({
 }: RecentlyViewedSectionProps) => {
   const t = useTranslations("PropertiesPage.recentlyViewed");
   const locale = useLocale();
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (items.length === 0) {
     return null;
