@@ -11,11 +11,13 @@ import {
   Sparkles,
   UserPlus,
   Users,
+  Wallet,
   Workflow,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useGetUpgradeSummary } from "../payments/services/query";
 import { useGetAgents, useGetUnlockRequests } from "../agents/agent-manage/services/query";
 import { useGetAgentsRegistrations } from "../agents/agent-registration/services/query";
 import { useGetJobs } from "../jobs/services/query";
@@ -75,7 +77,7 @@ const metricToneStyles: Record<
 
 type MetricCardProps = {
   title: string;
-  value: number;
+  value: React.ReactNode;
   description: string;
   tone: MetricTone;
   icon: React.ReactNode;
@@ -126,7 +128,7 @@ const MetricCard = ({
 };
 
 const Dashboard = () => {
-  const { t } = useTranslation("dashboard");
+  const { t, i18n } = useTranslation("dashboard");
   const { formatDateTime } = useDateTimeFormatter();
   const navigate = useNavigate();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -144,6 +146,7 @@ const Dashboard = () => {
   const reportInboxQuery = useGetReportInbox(SNAPSHOT_PARAMS);
   const failedJobsQuery = useGetJobs({ ...SNAPSHOT_PARAMS, status: "FAILED" });
   const processingJobsQuery = useGetJobs({ ...COUNT_PARAMS, status: "PROCESSING" });
+  const paymentSummaryQuery = useGetUpgradeSummary();
 
   const refreshAll = async () => {
     setIsRefreshing(true);
@@ -159,6 +162,7 @@ const Dashboard = () => {
       reportInboxQuery.refetch(),
       failedJobsQuery.refetch(),
       processingJobsQuery.refetch(),
+      paymentSummaryQuery.refetch(),
     ]);
 
     setIsRefreshing(false);
@@ -174,6 +178,17 @@ const Dashboard = () => {
   const unreadReports = reportInboxQuery.data?.data.totalUnread || 0;
   const failedJobs = failedJobsQuery.data?.data.totalResults || 0;
   const processingJobs = processingJobsQuery.data?.data.totalResults || 0;
+  const proRevenue = paymentSummaryQuery.data?.data.totalRevenue || 0;
+  const proPurchases = paymentSummaryQuery.data?.data.totalPurchases || 0;
+  const formatRevenueValue = (value?: number) =>
+    new Intl.NumberFormat(i18n.language?.startsWith("en") ? "en-US" : "vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+  const proRevenueValue = paymentSummaryQuery.isLoading
+    ? "..."
+    : formatRevenueValue(proRevenue);
 
   const workloadCount =
     pendingRegistrations + unlockRequests + pendingProperties + reviewQueue + unreadReports + failedJobs;
@@ -191,6 +206,16 @@ const Dashboard = () => {
         tone: "success" as const,
         icon: <Users className="h-5 w-5" />,
         route: "/agents/manage",
+      },
+      {
+        key: "proRevenue",
+        title: t("stats.proRevenue.title"),
+        value: proRevenueValue,
+        description: t("stats.proRevenue.description"),
+        tone: "brand" as const,
+        icon: <Wallet className="h-5 w-5" />,
+        route: "/payments/pro-purchases",
+        footer: t("stats.proRevenue.footer", { count: proPurchases }),
       },
       {
         key: "pendingRegistrations",
@@ -263,6 +288,8 @@ const Dashboard = () => {
       pendingProperties,
       pendingRegistrations,
       processingJobs,
+      proPurchases,
+      proRevenueValue,
       publishedProperties,
       reviewQueue,
       t,
@@ -468,6 +495,7 @@ const Dashboard = () => {
     reportInboxQuery,
     failedJobsQuery,
     processingJobsQuery,
+    paymentSummaryQuery,
   ].some((query) => query.isError);
 
   return (

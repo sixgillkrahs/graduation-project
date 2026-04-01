@@ -1,6 +1,6 @@
 import MainLayout from "@/layouts/MainLayout";
 import { type RouterConfig } from "@shared/types/router";
-import { Settings, LayoutDashboard, UserCog, Building2, Users, ListTodo, Star } from "lucide-react";
+import { Settings, LayoutDashboard, UserCog, Building2, Users, ListTodo, Star, Wallet } from "lucide-react";
 import { lazy } from "react";
 
 const router: RouterConfig = {
@@ -107,6 +107,18 @@ const router: RouterConfig = {
           path: "/reports",
           component: lazy(() => import("./reviews/report-inbox")),
           name: "menu.reportInbox",
+        },
+      ],
+    },
+    {
+      path: "/payments",
+      name: "menu.payments",
+      icon: Wallet,
+      childRoutes: [
+        {
+          path: "/pro-purchases",
+          component: lazy(() => import("./payments")),
+          name: "menu.proPackageBuyers",
         },
       ],
     },

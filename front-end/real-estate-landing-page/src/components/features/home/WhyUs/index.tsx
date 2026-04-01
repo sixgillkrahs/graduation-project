@@ -1,20 +1,28 @@
 "use client";
 
-import { CsCard } from "@/components/custom/card";
-import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { CsCard } from "@/components/custom/card";
 
 const WhyUs = () => {
   const t = useTranslations("WhyUs");
 
   const cards = [
-    { image: "/icons/clock.svg", title: t("card1Title"), tag: t("card1Tag") },
     {
-      image: "/icons/handshake.svg",
+      image: "/images/home/whyus1.png",
+      title: t("card1Title"),
+      tag: t("card1Tag"),
+    },
+    {
+      image: "/images/home/whyus2.png",
       title: t("card2Title"),
       tag: t("card2Tag"),
     },
-    { image: "/icons/phone.svg", title: t("card3Title"), tag: t("card3Tag") },
+    {
+      image: "/images/home/whyus3.png",
+      title: t("card3Title"),
+      tag: t("card3Tag"),
+    },
   ];
 
   return (
@@ -41,7 +49,7 @@ const WhyUs = () => {
       <div className="w-full md:h-auto lg:h-[300px] grid grid-cols-1 md:grid-cols-3 gap-4 rounded-[16px] ">
         {cards.map((card, index) => (
           <motion.div
-            key={index}
+            key={card.image}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}

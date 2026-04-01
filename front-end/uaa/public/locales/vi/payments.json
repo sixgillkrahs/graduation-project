@@ -1,0 +1,54 @@
+{
+  "title": "Danh sách người mua gói PRO",
+  "description": "Theo dõi các giao dịch mua gói PRO của môi giới, bao gồm giao dịch thành công và đang chờ xử lý, trong một màn hình admin.",
+  "searchPlaceholder": "Tìm theo người mua, email, số điện thoại hoặc mã giao dịch",
+  "filters": {
+    "status": "Lọc theo trạng thái",
+    "duration": "Lọc theo thời hạn"
+  },
+  "summary": {
+    "totalRevenue": {
+      "title": "Tổng doanh thu",
+      "description": "Tổng doanh thu thành công thu được từ các giao dịch mua gói PRO."
+    },
+    "totalPurchases": {
+      "title": "Giao dịch thành công",
+      "description": "Số giao dịch mua gói PRO đã hoàn tất qua cổng thanh toán."
+    },
+    "totalBuyers": {
+      "title": "Người mua duy nhất",
+      "description": "Số người dùng khác nhau đã mua gói PRO thành công."
+    },
+    "activeProAgents": {
+      "title": "Môi giới PRO đang active",
+      "description": "Số môi giới đã duyệt và hiện vẫn còn thời hạn gói PRO."
+    }
+  },
+  "columns": {
+    "buyer": "Người mua",
+    "phone": "Số điện thoại",
+    "amount": "Số tiền",
+    "duration": "Thời hạn",
+    "status": "Trạng thái",
+    "transactionRef": "Mã giao dịch",
+    "purchasedAt": "Thời điểm mua",
+    "planEndDate": "Ngày hết hạn gói"
+  },
+  "status": {
+    "SUCCESS": "Thành công",
+    "PENDING": "Đang chờ",
+    "FAILED": "Thất bại",
+    "CANCELLED": "Đã hủy"
+  },
+  "durations": {
+    "1": "1 tháng",
+    "12": "12 tháng",
+    "fallback": "{{count}} tháng"
+  },
+  "errors": {
+    "summary": {
+      "title": "Không thể tải phần tổng hợp thanh toán",
+      "description": "Bảng giao dịch vẫn có thể sử dụng, nhưng các thẻ doanh thu ở phía trên có thể chưa đầy đủ."
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { PaymentController } from "@/controllers/payment.controller";
-import { requireAuth } from "@/middleware/authMiddleware";
+import { authorize, requireAuth } from "@/middleware/authMiddleware";
 
 const router = Router();
 const paymentController = new PaymentController();
@@ -10,9 +10,189 @@ router.use(requireAuth);
 
 /**
  * @swagger
+ * /payment/admin/transactions:
+ *   get:
+ *     summary: Get PRO package purchase transactions for admin
+ *     description: Returns a paginated admin list of agent PRO-package purchase transactions. Supports filtering by status, duration, free-text search, and server-side sorting.
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number.
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of records per page.
+ *       - in: query
+ *         name: sortField
+ *         schema:
+ *           type: string
+ *           default: createdAt
+ *         description: Field used for sorting.
+ *       - in: query
+ *         name: sortOrder
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: desc
+ *         description: Sort direction.
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [PENDING, SUCCESS, FAILED, CANCELLED]
+ *           default: SUCCESS
+ *         description: Filter by payment status.
+ *       - in: query
+ *         name: planDurationMonths
+ *         schema:
+ *           type: integer
+ *           enum: [1, 12]
+ *         description: Filter by purchased PRO package duration in months.
+ *       - in: query
+ *         name: query
+ *         schema:
+ *           type: string
+ *         description: Search by transaction reference, order info, buyer full name, email, or phone number.
+ *     responses:
+ *       200:
+ *         description: Paginated transaction list returned successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     results:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           transactionRef:
+ *                             type: string
+ *                           amount:
+ *                             type: number
+ *                           status:
+ *                             type: string
+ *                           planDurationMonths:
+ *                             type: integer
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                           user:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 nullable: true
+ *                               fullName:
+ *                                 type: string
+ *                               email:
+ *                                 type: string
+ *                               phone:
+ *                                 type: string
+ *                           agent:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                                 nullable: true
+ *                               status:
+ *                                 type: string
+ *                               currentPlan:
+ *                                 type: string
+ *                               currentPlanEndDate:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 nullable: true
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     totalResults:
+ *                       type: integer
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden. The current admin account does not have permission to read payments.
+ */
+router.get("/admin/transactions", authorize(), paymentController.getUpgradeTransactions);
+
+/**
+ * @swagger
+ * /payment/admin/summary:
+ *   get:
+ *     summary: Get PRO package payment summary for admin dashboard
+ *     description: Returns aggregated payment metrics for PRO package purchases, including total revenue, total successful purchases, unique buyers, current-month revenue, and active PRO agents.
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Payment summary returned successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Success
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalRevenue:
+ *                       type: number
+ *                       example: 12500000
+ *                     totalPurchases:
+ *                       type: integer
+ *                       example: 14
+ *                     totalBuyers:
+ *                       type: integer
+ *                       example: 11
+ *                     monthlyRevenue:
+ *                       type: number
+ *                       example: 4800000
+ *                     monthlyPurchases:
+ *                       type: integer
+ *                       example: 4
+ *                     activeProAgents:
+ *                       type: integer
+ *                       example: 9
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden. The current admin account does not have permission to read payments.
+ */
+router.get("/admin/summary", authorize(), paymentController.getUpgradeTransactionSummary);
+
+/**
+ * @swagger
  * tags:
  *   name: Payments
- *   description: Payment integration with VNPay
+ *   description: Payment integration and plan-upgrade transaction management for VNPay, MoMo, and admin reporting.
  */
 
 /**
@@ -20,6 +200,7 @@ router.use(requireAuth);
  * /payment/create_payment_url:
  *   post:
  *     summary: Create a VNPay payment URL for agent plan upgrade
+ *     description: Creates a VNPay redirect URL for upgrading an agent account to the PRO plan. A pending transaction record is stored before redirecting the user to VNPay.
  *     tags: [Payments]
  *     security:
  *       - bearerAuth: []
@@ -53,6 +234,8 @@ router.use(requireAuth);
  *                 data:
  *                   type: string
  *                   description: The VNPay URL to redirect to
+ *       401:
+ *         description: Unauthorized.
  */
 router.post("/create_payment_url", paymentController.createPaymentUrl);
 
@@ -61,6 +244,7 @@ router.post("/create_payment_url", paymentController.createPaymentUrl);
  * /payment/downgrade:
  *   post:
  *     summary: Downgrade from PRO plan to Basic plan
+ *     description: Downgrades the currently authenticated agent account from PRO back to BASIC by clearing the stored plan information.
  *     tags: [Payments]
  *     security:
  *       - bearerAuth: []
@@ -81,6 +265,10 @@ router.post("/create_payment_url", paymentController.createPaymentUrl);
  *                     message:
  *                       type: string
  *                       example: Successfully downgraded to Basic plan.
+ *       401:
+ *         description: Unauthorized.
+ *       400:
+ *         description: The plan could not be downgraded.
  */
 router.post("/downgrade", paymentController.downgradePlan);
 
@@ -89,6 +277,7 @@ router.post("/downgrade", paymentController.downgradePlan);
  * /payment/create_momo_payment_url:
  *   post:
  *     summary: Create a MoMo payment URL for agent plan upgrade
+ *     description: Creates a MoMo redirect URL for upgrading an agent account to the PRO plan. A pending transaction record is stored before redirecting the user to MoMo.
  *     tags: [Payments]
  *     security:
  *       - bearerAuth: []
@@ -116,6 +305,8 @@ router.post("/downgrade", paymentController.downgradePlan);
  *                 data:
  *                   type: string
  *                   description: The MoMo URL to redirect to
+ *       401:
+ *         description: Unauthorized.
  */
 router.post("/create_momo_payment_url", paymentController.createMomoPaymentUrl);
 
@@ -124,6 +315,7 @@ router.post("/create_momo_payment_url", paymentController.createMomoPaymentUrl);
  * /payment/momo_return:
  *   get:
  *     summary: Handle MoMo return webhook
+ *     description: Handles the return callback from MoMo after payment completion, updates the stored transaction status, and activates the PRO plan when the payment succeeds.
  *     tags: [Payments]
  *     security:
  *       - bearerAuth: []
@@ -209,8 +401,10 @@ router.post("/create_momo_payment_url", paymentController.createMomoPaymentUrl);
  *                   properties:
  *                     message:
  *                       type: string
+ *                       example: Payment Success
  *                     code:
  *                       type: string
+ *                       example: "00"
  */
 router.get("/momo_return", paymentController.momoReturn);
 
@@ -219,6 +413,7 @@ router.get("/momo_return", paymentController.momoReturn);
  * /payment/vnpay_return:
  *   get:
  *     summary: Handle VNPay return webhook
+ *     description: Handles the return callback from VNPay after payment completion, validates the VNPay signature, updates the stored transaction status, and activates the PRO plan when the payment succeeds.
  *     tags: [Payments]
  *     security:
  *       - bearerAuth: []
@@ -254,8 +449,12 @@ router.get("/momo_return", paymentController.momoReturn);
  *                   properties:
  *                     message:
  *                       type: string
+ *                       example: Payment Success
  *                     code:
  *                       type: string
+ *                       example: "00"
+ *       400:
+ *         description: Invalid callback payload or payment validation failed.
  */
 router.get("/vnpay_return", paymentController.vnpayReturn);
 

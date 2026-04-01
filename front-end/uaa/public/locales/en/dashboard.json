@@ -63,6 +63,11 @@
     "publishedProperties": {
       "title": "Published listings",
       "description": "Listings currently visible to buyers and renters"
+    },
+    "proRevenue": {
+      "title": "PRO package revenue",
+      "description": "Successful revenue collected from PRO package upgrades",
+      "footer": "{{count}} purchases"
     }
   },
   "sections": {

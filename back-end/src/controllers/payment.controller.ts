@@ -394,6 +394,62 @@ export class PaymentController extends BaseController {
     });
   };
 
+  getUpgradeTransactions = async (
+    req: Request<
+      {},
+      {},
+      {},
+      {
+        page?: string;
+        limit?: string;
+        sortField?: string;
+        sortOrder?: string;
+        status?: TransactionStatus;
+        planDurationMonths?: string;
+        query?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const {
+        page = "1",
+        limit = "10",
+        sortField,
+        sortOrder = "desc",
+        status = TransactionStatus.SUCCESS,
+        planDurationMonths,
+        query,
+      } = req.query;
+
+      return this.transactionService.getUpgradeTransactions(
+        {
+          page: Number(page),
+          limit: Number(limit),
+          sortBy: `${sortField || "createdAt"}:${sortOrder}`,
+        },
+        {
+          status,
+          planDurationMonths: planDurationMonths
+            ? Number(planDurationMonths)
+            : undefined,
+          query,
+        },
+      );
+    });
+  };
+
+  getUpgradeTransactionSummary = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      return this.transactionService.getUpgradeTransactionSummary();
+    });
+  };
+
   private sortObject(obj: any) {
     let sorted: any = {};
     let str = [];

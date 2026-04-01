@@ -44,6 +44,7 @@ const agentController = new AgentController(
  * /agents-registrations/application:
  *   post:
  *     summary: Agent application registration
+ *     description: Submits a new agent-registration application with identification, certificate, and specialization information.
  *     tags: [Agent Registrations]
  *     requestBody:
  *       required: true
@@ -182,6 +183,7 @@ router.post(
  * /agents-registrations/{token}/create-password:
  *   post:
  *     summary: Create password for agent registration
+ *     description: Completes the invited-agent onboarding flow by creating a password for a valid registration token.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
@@ -239,6 +241,7 @@ router.post("/:token/create-password", agentController.createPasswordAgent);
  * /agents-registrations/{token}:
  *   get:
  *     summary: Verify agent registration token
+ *     description: Validates an agent-registration token before the invited user creates a password.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
@@ -275,6 +278,7 @@ router.use(requireAuth);
  * /agents-registrations:
  *   get:
  *     summary: Get agent registrations
+ *     description: Returns a paginated list of submitted agent registrations for back-office review.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: query
@@ -368,6 +372,7 @@ router.get("/", authorize(), agentController.getAgentRegistrations);
  * /agents-registrations/unlock-requests:
  *   get:
  *     summary: Get pending unlock requests for locked agent accounts
+ *     description: Returns pending account-unlock requests submitted by locked agents for admin review.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: query
@@ -405,6 +410,7 @@ router.get("/unlock-requests", authorize(), agentController.getUnlockRequests);
  * /agents-registrations/{id}:
  *   get:
  *     summary: Get agent registration by ID
+ *     description: Returns the full application details for a specific agent-registration record.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
@@ -468,6 +474,48 @@ router.get(
   agentController.agentRegistrationDetail,
 );
 
+/**
+ * @swagger
+ * /agents-registrations/{id}/account-lock:
+ *   patch:
+ *     summary: Lock an approved agent account
+ *     description: Locks an approved agent account temporarily or permanently, disables login, and sends the lock notification email.
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Agent registration ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - lockType
+ *               - reason
+ *             properties:
+ *               lockType:
+ *                 type: string
+ *                 enum: [TEMPORARY, PERMANENT]
+ *               lockUntil:
+ *                 type: string
+ *                 format: date-time
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Agent account locked successfully
+ *       400:
+ *         description: Invalid lock payload
+ *       404:
+ *         description: Agent not found
+ *       409:
+ *         description: Agent account cannot be locked in its current state
+ */
 router.patch(
   "/:id/account-lock",
   authorize(),
@@ -475,6 +523,26 @@ router.patch(
   agentController.lockAgentAccount,
 );
 
+/**
+ * @swagger
+ * /agents-registrations/{id}/account-unlock:
+ *   patch:
+ *     summary: Unlock a locked agent account
+ *     description: Restores login access for a locked agent account and clears the pending unlock request state.
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Agent registration ID
+ *     responses:
+ *       200:
+ *         description: Agent account unlocked successfully
+ *       404:
+ *         description: Agent not found
+ */
 router.patch(
   "/:id/account-unlock",
   authorize(),
@@ -487,6 +555,7 @@ router.patch(
  * /agents-registrations/{id}/unlock-request/reject:
  *   patch:
  *     summary: Reject a pending unlock request while keeping the account locked
+ *     description: Rejects an agent's unlock request while leaving the account in its current locked state.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
@@ -508,6 +577,26 @@ router.patch(
   agentController.rejectUnlockRequest,
 );
 
+/**
+ * @swagger
+ * /agents-registrations/{id}:
+ *   delete:
+ *     summary: Delete agent registration by ID
+ *     description: Permanently deletes an agent-registration record from the system.
+ *     tags: [Agent Registrations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Agent registration ID
+ *     responses:
+ *       200:
+ *         description: Agent registration deleted successfully
+ *       404:
+ *         description: Agent registration not found
+ */
 router.delete(
   "/:id",
   authorize({
@@ -522,6 +611,7 @@ router.delete(
  * /agents-registrations/{id}/reject:
  *   patch:
  *     summary: Reject agent registration by ID
+ *     description: Rejects a submitted agent-registration application and stores the admin reason.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path
@@ -577,6 +667,7 @@ router.patch(
  * /agents-registrations/{id}/approve:
  *   patch:
  *     summary: Approve agent registration by ID
+ *     description: Approves an agent-registration application and continues the account activation flow.
  *     tags: [Agent Registrations]
  *     parameters:
  *       - in: path

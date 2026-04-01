@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,27 +22,31 @@ type BasicInfoFormValues = Omit<
   identityBack: File[];
 };
 
-const validateBasicInfo = (data: BasicInfoFormValues) => {
+const validateBasicInfo = (
+  data: BasicInfoFormValues,
+  t: (key: string) => string,
+) => {
   const errors: Record<string, string> = {};
   if (!data.nameRegister) {
-    errors.nameRegister = "Name register is required";
+    errors.nameRegister = t("validation.nameRequired");
   }
   if (!data.email) {
-    errors.email = "Email is required";
+    errors.email = t("validation.emailRequired");
   }
   if (!data.phoneNumber) {
-    errors.phoneNumber = "Phone number is required";
+    errors.phoneNumber = t("validation.phoneRequired");
   }
   if (!data.identityFront || data.identityFront.length === 0) {
-    errors.identityFront = "Identity front is required";
+    errors.identityFront = t("validation.identityFrontRequired");
   }
   if (!data.identityBack || data.identityBack.length === 0) {
-    errors.identityBack = "Identity back is required";
+    errors.identityBack = t("validation.identityBackRequired");
   }
   return errors;
 };
 
 const BasicInfo = () => {
+  const t = useTranslations("RecruitmentPage");
   const dispatch = useDispatch<AppDispatch>();
   const [uploadingCount, setUploadingCount] = useState(0);
   const { mutateAsync: uploadImages } = useUploadImages();
@@ -63,11 +68,11 @@ const BasicInfo = () => {
 
   const onSubmit = (data: BasicInfoFormValues) => {
     if (uploadingCount > 0) {
-      toast.error("Please wait until all documents finish uploading");
+      toast.error(t("toast.waitForUploads"));
       return;
     }
 
-    const errorsList = validateBasicInfo(data);
+    const errorsList = validateBasicInfo(data, (key) => t(key));
     if (Object.keys(errorsList).length > 0) return;
 
     const reduxPayload = {
@@ -116,7 +121,7 @@ const BasicInfo = () => {
       const uploadedImageUrl = response.data.files[0]?.url;
 
       if (!uploadedImageUrl) {
-        throw new Error("Upload did not return an image URL");
+        throw new Error(t("toast.uploadMissingUrl"));
       }
 
       dispatch(
@@ -125,7 +130,7 @@ const BasicInfo = () => {
         } as Partial<BasicInfoType>),
       );
     } catch (_error) {
-      toast.error("Document upload failed");
+      toast.error(t("toast.documentUploadFailed"));
     } finally {
       setUploadingCount((prev) => Math.max(0, prev - 1));
     }
@@ -137,12 +142,12 @@ const BasicInfo = () => {
         <Controller
           name="nameRegister"
           control={control}
-          rules={{ required: "Full name is required" }}
+          rules={{ required: t("validation.nameRequired") }}
           render={({ field }) => (
             <Input
               preIcon={<Icon.User className="main-color-gray w-5 h-5" />}
-              label="Full Name"
-              placeholder="e.g. 123 Main St"
+              label={t("basicInfo.fields.fullName.label")}
+              placeholder={t("basicInfo.fields.fullName.placeholder")}
               error={errors.nameRegister?.message}
               {...field}
             />
@@ -154,16 +159,16 @@ const BasicInfo = () => {
             name="email"
             control={control}
             rules={{
-              required: "Email is required",
+              required: t("validation.emailRequired"),
               pattern: {
                 value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: "Please enter a valid email address",
+                message: t("validation.emailInvalid"),
               },
             }}
             render={({ field }) => (
               <Input
-                label="Email Address"
-                placeholder="john.doe@example.com"
+                label={t("basicInfo.fields.email.label")}
+                placeholder={t("basicInfo.fields.email.placeholder")}
                 preIcon={<Icon.Mail className="main-color-gray w-5 h-5" />}
                 error={errors.email?.message}
                 {...field}
@@ -173,11 +178,11 @@ const BasicInfo = () => {
           <Controller
             name="phoneNumber"
             control={control}
-            rules={{ required: "Phone number is required" }}
+            rules={{ required: t("validation.phoneRequired") }}
             render={({ field }) => (
               <Input
-                label="Phone Number"
-                placeholder="0123456789"
+                label={t("basicInfo.fields.phone.label")}
+                placeholder={t("basicInfo.fields.phone.placeholder")}
                 preIcon={<Icon.Phone className="main-color-gray w-5 h-5" />}
                 error={errors.phoneNumber?.message}
                 {...field}
@@ -190,16 +195,17 @@ const BasicInfo = () => {
             name="identityFront"
             control={control}
             rules={{
-              required: "Identity front is required",
+              required: t("validation.identityFrontRequired"),
               validate: (val) =>
-                (val && val.length > 0) || "Identity front is required",
+                (val && val.length > 0) ||
+                t("validation.identityFrontRequired"),
             }}
             render={({
               field: { onChange, value, ...restField },
               fieldState: { error },
             }) => (
               <Upload
-                label="Identity Front"
+                label={t("basicInfo.fields.identityFront.label")}
                 accept="image/jpeg,image/png"
                 {...restField}
                 value={value || []}
@@ -216,16 +222,16 @@ const BasicInfo = () => {
             name="identityBack"
             control={control}
             rules={{
-              required: "Identity back is required",
+              required: t("validation.identityBackRequired"),
               validate: (val) =>
-                (val && val.length > 0) || "Identity back is required",
+                (val && val.length > 0) || t("validation.identityBackRequired"),
             }}
             render={({
               field: { onChange, value, ...restField },
               fieldState: { error },
             }) => (
               <Upload
-                label="Identity Back"
+                label={t("basicInfo.fields.identityBack.label")}
                 accept="image/jpeg,image/png"
                 {...restField}
                 value={value || []}
@@ -240,7 +246,7 @@ const BasicInfo = () => {
         </div>
 
         <div className="mt-4 text-sm text-gray-500">
-          Your information is automatically saved as you type.
+          {t("basicInfo.autoSave")}
         </div>
         <div className="flex justify-between pt-6">
           <CsButton
@@ -248,7 +254,7 @@ const BasicInfo = () => {
             type="button"
             icon={<Icon.ArrowLeft className="w-5 h-5" />}
           >
-            Back
+            {t("actions.back")}
           </CsButton>
           <CsButton
             className="cs-bg-black text-white px-6 py-2 rounded-full"
@@ -256,7 +262,7 @@ const BasicInfo = () => {
             loading={uploadingCount > 0}
             disabled={uploadingCount > 0}
           >
-            Next
+            {t("actions.next")}
           </CsButton>
         </div>
       </form>

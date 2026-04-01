@@ -1,12 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import request from "@/lib/axios/request";
+import { getClientTranslation } from "@/lib/i18n/getClientTranslation";
+import { toast } from "@/lib/toast";
+import type { RootState } from "..";
 import {
   submitFormFailure,
   submitFormStart,
   submitFormSuccess,
 } from "../store";
-import { RootState } from "..";
-import request from "@/lib/axios/request";
-import { toast } from "@/lib/toast";
 
 export const submitForm = createAsyncThunk(
   "form/submit",
@@ -35,17 +36,18 @@ export const submitForm = createAsyncThunk(
       });
 
       if (!response) {
-        throw new Error("Không nhận được phản hồi từ máy chủ");
+        throw new Error(
+          getClientTranslation("RecruitmentPage.validation.noServerResponse"),
+        );
       }
 
       dispatch(submitFormSuccess());
 
       return "";
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Đã có lỗi không xác định xảy ra";
+        getRequestErrorMessage(error) ||
+        getClientTranslation("notifications.unknownError");
 
       dispatch(submitFormFailure(errorMessage));
 
@@ -56,63 +58,81 @@ export const submitForm = createAsyncThunk(
   },
 );
 
-function validateForm(formData: any): string[] {
+function getRequestErrorMessage(error: unknown): string | undefined {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+
+  const candidate = error as {
+    message?: string;
+    response?: {
+      data?: {
+        message?: string;
+      };
+    };
+  };
+
+  return candidate.response?.data?.message || candidate.message;
+}
+
+function validateForm(formData: RootState["form"]): string[] {
+  const t = getClientTranslation;
   const errors: string[] = [];
 
   if (!formData.basicInfo?.nameRegister) {
-    errors.push("Full name is required");
+    errors.push(t("RecruitmentPage.validation.nameRequired"));
   }
 
   if (!formData.basicInfo?.email) {
-    errors.push("Email is required");
+    errors.push(t("RecruitmentPage.validation.emailRequired"));
   }
 
   if (!formData.basicInfo?.phoneNumber) {
-    errors.push("Phone number is required");
+    errors.push(t("RecruitmentPage.validation.phoneRequired"));
   }
 
   if (
     !formData.basicInfo?.identityFront ||
     formData.basicInfo.identityFront.length === 0
   ) {
-    errors.push("Identity front image is required");
+    errors.push(t("RecruitmentPage.validation.identityFrontRequired"));
   }
 
   if (
     !formData.basicInfo?.identityBack ||
     formData.basicInfo.identityBack.length === 0
   ) {
-    errors.push("Identity back image is required");
+    errors.push(t("RecruitmentPage.validation.identityBackRequired"));
   }
 
   if (!formData.businessInfo?.certificateNumber) {
-    errors.push("Certificate number is required");
+    errors.push(t("RecruitmentPage.validation.certificateNumberRequired"));
   }
 
   if (
     !formData.businessInfo?.specialization ||
     formData.businessInfo.specialization.length === 0
   ) {
-    errors.push("Specialization is required");
+    errors.push(t("RecruitmentPage.validation.specializationRequired"));
   }
 
   if (!formData.businessInfo?.taxCode) {
-    errors.push("Tax code is required");
+    errors.push(t("RecruitmentPage.validation.taxCodeRequired"));
   }
 
   if (
     !formData.businessInfo?.workingArea ||
     formData.businessInfo.workingArea.length === 0
   ) {
-    errors.push("Working area is required");
+    errors.push(t("RecruitmentPage.validation.workingAreaRequired"));
   }
 
   if (!formData.businessInfo?.yearsOfExperience) {
-    errors.push("Years of experience is required");
+    errors.push(t("RecruitmentPage.validation.yearsOfExperienceRequired"));
   }
 
   if (!formData.verification?.agreeToTerms) {
-    errors.push("You must agree to the terms");
+    errors.push(t("RecruitmentPage.validation.agreeToTermsRequired"));
   }
 
   return errors;

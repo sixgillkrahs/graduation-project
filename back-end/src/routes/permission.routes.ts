@@ -99,6 +99,7 @@ router.use(requireAuth);
  * /permissions:
  *   get:
  *     summary: Get all permissions
+ *     description: Returns a paginated list of permissions with optional filters for name, status, and operation.
  *     tags: [Permissions]
  *     security:
  *       - bearerAuth: []
@@ -159,6 +160,7 @@ router.get("/", permissionController.getPermissions);
  * /permissions/{id}:
  *   get:
  *     summary: Get permission by id
+ *     description: Returns a single permission record by identifier.
  *     tags: [Permissions]
  *     security:
  *       - bearerAuth: []
@@ -188,6 +190,7 @@ router.get(
  * /permissions:
  *   post:
  *     summary: Create a new permission
+ *     description: Creates a new permission that can later be assigned to roles.
  *     tags: [Permissions]
  *     security:
  *       - bearerAuth: []
@@ -230,6 +233,7 @@ router.post(
  * /permissions/{id}:
  *   put:
  *     summary: Update permission by id
+ *     description: Updates the metadata and linked resource or operation for an existing permission.
  *     tags: [Permissions]
  *     security:
  *       - bearerAuth: []
@@ -278,6 +282,7 @@ router.put(
  * /permissions/{id}:
  *   delete:
  *     summary: Delete permission by id
+ *     description: Deletes a permission by identifier.
  *     tags: [Permissions]
  *     security:
  *       - bearerAuth: []
@@ -303,6 +308,7 @@ router.delete(
  * /permissions/{id}:
  *   patch:
  *     summary: Update permission status by id
+ *     description: Enables or disables a permission without deleting it.
  *     tags: [Permissions]
  *     security:
  *       - bearerAuth: []

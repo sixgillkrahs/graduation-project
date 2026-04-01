@@ -95,6 +95,7 @@ router.use(requireAuth);
  * /roles:
  *   post:
  *     summary: Create a new role
+ *     description: Creates a new role and assigns the selected permissions to it.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []
@@ -140,6 +141,7 @@ router.post(
  * /roles:
  *   get:
  *     summary: Get all roles paginated
+ *     description: Returns a paginated list of roles for administrative management.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []
@@ -184,6 +186,7 @@ router.get("/", roleController.getRoles);
  * /roles/{id}:
  *   get:
  *     summary: Get a role by ID
+ *     description: Returns the details of a specific role, including its permissions.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []
@@ -215,6 +218,7 @@ router.get(
  * /roles/{id}:
  *   put:
  *     summary: Update a role
+ *     description: Updates the metadata and permission assignments for an existing role.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []
@@ -268,6 +272,7 @@ router.put(
  * /roles/{id}:
  *   delete:
  *     summary: Delete a role
+ *     description: Deletes a role by identifier.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []
@@ -320,6 +325,7 @@ router.delete(
  * /roles/{id}/status:
  *   patch:
  *     summary: Change role status
+ *     description: Enables or disables a role without removing its permission mapping.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []
@@ -356,6 +362,7 @@ router.patch("/:id/status", roleController.changeStatus);
  * /roles/{id}/default-status:
  *   patch:
  *     summary: Change role default status
+ *     description: Marks whether a role should be treated as a default role for new users.
  *     tags: [Roles]
  *     security:
  *       - bearerAuth: []

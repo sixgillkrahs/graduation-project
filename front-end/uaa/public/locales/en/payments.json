@@ -1,0 +1,54 @@
+{
+  "title": "PRO Package Buyers",
+  "description": "Review successful and pending PRO package transactions from agents in one admin workspace.",
+  "searchPlaceholder": "Search by buyer, email, phone, or transaction code",
+  "filters": {
+    "status": "Filter by status",
+    "duration": "Filter by duration"
+  },
+  "summary": {
+    "totalRevenue": {
+      "title": "Total revenue",
+      "description": "Total successful revenue collected from PRO package purchases."
+    },
+    "totalPurchases": {
+      "title": "Successful purchases",
+      "description": "Completed PRO package transactions recorded by the payment gateway."
+    },
+    "totalBuyers": {
+      "title": "Unique buyers",
+      "description": "Distinct users who have successfully purchased the PRO package."
+    },
+    "activeProAgents": {
+      "title": "Active PRO agents",
+      "description": "Approved agents whose PRO plan is still active right now."
+    }
+  },
+  "columns": {
+    "buyer": "Buyer",
+    "phone": "Phone",
+    "amount": "Amount",
+    "duration": "Duration",
+    "status": "Status",
+    "transactionRef": "Transaction code",
+    "purchasedAt": "Purchased at",
+    "planEndDate": "Plan end date"
+  },
+  "status": {
+    "SUCCESS": "Success",
+    "PENDING": "Pending",
+    "FAILED": "Failed",
+    "CANCELLED": "Cancelled"
+  },
+  "durations": {
+    "1": "1 month",
+    "12": "12 months",
+    "fallback": "{{count}} months"
+  },
+  "errors": {
+    "summary": {
+      "title": "Payment summary could not be loaded",
+      "description": "The transaction table is still available, but the revenue summary cards may be incomplete."
+    }
+  }
+}

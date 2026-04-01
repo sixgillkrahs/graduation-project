@@ -1,31 +1,33 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { memo, useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { CsButton } from "@/components/custom";
 import { Checkbox, Icon } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { CsSelect } from "@/components/ui/select";
-import {
+import { toast } from "@/lib/toast";
+import type {
   BasicInfo,
   Verification as VerificationType,
 } from "@/models/basicInfo.model";
-import { AppDispatch, RootState } from "@/store";
-import { prevStep, updateVerification } from "@/store/store";
+import type { AppDispatch, RootState } from "@/store";
+import { prevStep, updateBasicInfo, updateVerification } from "@/store/store";
 import { submitForm } from "@/store/thunks/formThunks";
-import { memo, useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "@/lib/toast";
 import ExtractService from "../../services/service";
 
 const Verification = () => {
+  const t = useTranslations("RecruitmentPage");
   const dispatch = useDispatch<AppDispatch>();
 
-  const { basicInfo, verification, businessInfo, isSubmitting } = useSelector(
+  const { basicInfo, verification, isSubmitting } = useSelector(
     (state: RootState) => state.form,
   );
-  console.log(businessInfo);
   const {
     control,
+    handleSubmit,
     reset,
     formState: { errors },
   } = useForm<BasicInfo & VerificationType>({
@@ -35,8 +37,6 @@ const Verification = () => {
     },
     mode: "onChange",
   });
-
-  console.log(basicInfo);
 
   useEffect(() => {
     reset({
@@ -49,10 +49,21 @@ const Verification = () => {
     dispatch(prevStep());
   };
 
-  const handleSubmitData = async () => {
+  const handleSubmitData = async (data: BasicInfo & VerificationType) => {
+    dispatch(
+      updateBasicInfo({
+        identityInfo: data.identityInfo,
+      }),
+    );
+    dispatch(
+      updateVerification({
+        agreeToTerms: data.agreeToTerms,
+      }),
+    );
+
     try {
       await dispatch(submitForm()).unwrap();
-      toast.success("Đăng ký thành công", { position: "top-center" });
+      toast.success(t("toast.submitSuccess"), { position: "top-center" });
     } catch (error) {
       console.error("Failed to submit form:", error);
     }
@@ -65,16 +76,16 @@ const Verification = () => {
           name="identityInfo.fullName"
           control={control}
           rules={{
-            required: "Agent name is required",
+            required: t("validation.agentNameRequired"),
             minLength: {
               value: 2,
-              message: "Agent name must be at least 2 characters",
+              message: t("validation.agentNameMin"),
             },
           }}
           render={({ field }) => (
             <Input
-              label="Full Name"
-              placeholder="e.g. John Doe"
+              label={t("verification.fields.fullName.label")}
+              placeholder={t("verification.fields.fullName.placeholder")}
               error={errors.identityInfo?.fullName?.message}
               {...field}
             />
@@ -85,16 +96,16 @@ const Verification = () => {
           name="identityInfo.IDNumber"
           control={control}
           rules={{
-            required: "ID Number is required",
+            required: t("validation.idNumberRequired"),
             minLength: {
               value: 12,
-              message: "ID Number must be 12 characters",
+              message: t("validation.idNumberLength"),
             },
           }}
           render={({ field }) => (
             <Input
-              label="ID Number"
-              placeholder="e.g. 124xxxxxxxx"
+              label={t("verification.fields.idNumber.label")}
+              placeholder={t("verification.fields.idNumber.placeholder")}
               error={errors.identityInfo?.IDNumber?.message}
               {...field}
             />
@@ -104,12 +115,21 @@ const Verification = () => {
         <Controller
           name="identityInfo.gender"
           control={control}
-          rules={{ required: "Please select gender" }}
+          rules={{ required: t("validation.genderRequired") }}
           render={({ field }) => (
             <CsSelect
-              label="Gender"
-              placeholder="Select gender"
-              options={ExtractService.options}
+              label={t("verification.fields.gender.label")}
+              placeholder={t("verification.fields.gender.placeholder")}
+              options={[
+                {
+                  value: ExtractService.options[0].value,
+                  label: t("verification.fields.gender.options.male"),
+                },
+                {
+                  value: ExtractService.options[1].value,
+                  label: t("verification.fields.gender.options.female"),
+                },
+              ]}
               error={errors.identityInfo?.gender?.message}
               {...field}
             />
@@ -119,11 +139,11 @@ const Verification = () => {
         <Controller
           name="identityInfo.dateOfBirth"
           control={control}
-          rules={{ required: "Birthday is required" }}
+          rules={{ required: t("validation.birthdayRequired") }}
           render={({ field }) => (
             <Input
-              label="Birthday"
-              placeholder="e.g. 01/01/2000"
+              label={t("verification.fields.birthday.label")}
+              placeholder={t("verification.fields.birthday.placeholder")}
               error={errors.identityInfo?.dateOfBirth?.message}
               {...field}
             />
@@ -133,11 +153,11 @@ const Verification = () => {
         <Controller
           name="identityInfo.nationality"
           control={control}
-          rules={{ required: "Nationality is required" }}
+          rules={{ required: t("validation.nationalityRequired") }}
           render={({ field }) => (
             <Input
-              label="Nationality"
-              placeholder="e.g. Vietnamese"
+              label={t("verification.fields.nationality.label")}
+              placeholder={t("verification.fields.nationality.placeholder")}
               error={errors.identityInfo?.nationality?.message}
               {...field}
             />
@@ -147,11 +167,11 @@ const Verification = () => {
         <Controller
           name="identityInfo.placeOfBirth"
           control={control}
-          rules={{ required: "Address is required" }}
+          rules={{ required: t("validation.addressRequired") }}
           render={({ field }) => (
             <Input
-              label="Address"
-              placeholder="e.g. 123 Main St"
+              label={t("verification.fields.address.label")}
+              placeholder={t("verification.fields.address.placeholder")}
               error={errors.identityInfo?.placeOfBirth?.message}
               {...field}
             />
@@ -164,13 +184,12 @@ const Verification = () => {
           name="agreeToTerms"
           control={control}
           rules={{
-            required:
-              "You must agree to the Terms and Conditions and Privacy Policy",
+            required: t("validation.agreeToTermsRequired"),
           }}
           render={({ field: { value, onChange, ...restField } }) => (
             <Checkbox
-              label="I agree to the Terms and Conditions and Privacy Policy"
-              subtext="I certify that all information I have provided is true and correct..."
+              label={t("verification.terms.label")}
+              subtext={t("verification.terms.subtext")}
               error={errors.agreeToTerms?.message}
               checked={value}
               {...restField}
@@ -191,15 +210,15 @@ const Verification = () => {
           icon={<Icon.ArrowLeft className="w-5 h-5" />}
           disabled={isSubmitting}
         >
-          Back
+          {t("actions.back")}
         </CsButton>
         <CsButton
           className="cs-bg-black text-white px-6 py-2 rounded-full"
-          onClick={handleSubmitData}
+          onClick={handleSubmit(handleSubmitData)}
           disabled={isSubmitting}
           // loading={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Submit Application"}
+          {isSubmitting ? t("actions.submitting") : t("actions.submit")}
         </CsButton>
       </div>
     </form>
@@ -207,4 +226,3 @@ const Verification = () => {
 };
 
 export default memo(Verification);
-

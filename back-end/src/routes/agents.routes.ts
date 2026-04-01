@@ -45,6 +45,7 @@ const agentController = new AgentController(
  * /agents:
  *   get:
  *     summary: Get agent
+ *     description: Returns a paginated list of agent records for listing or administrative management views.
  *     tags: [Agent]
  *     parameters:
  *       - in: query
@@ -122,6 +123,7 @@ router.get("/", agentController.getAgents);
  * /agents/account-lock/appeal/{token}:
  *   get:
  *     summary: Get account lock appeal context
+ *     description: Validates an account-lock appeal token and returns the locked-account context needed to render the appeal form.
  *     tags: [Agent]
  *     parameters:
  *       - in: path
@@ -173,6 +175,7 @@ router.get(
  * /agents/account-lock/appeal:
  *   post:
  *     summary: Submit account lock appeal
+ *     description: Submits an unlock appeal for a locked agent account using a valid email-issued appeal token.
  *     tags: [Agent]
  *     requestBody:
  *       required: true
@@ -222,6 +225,7 @@ router.post(
  * /agents/{agentId}/public-profile:
  *   get:
  *     summary: Get public profile of an approved agent
+ *     description: Returns the public-facing profile, review, and listing statistics for an approved agent.
  *     tags: [Agent]
  *     parameters:
  *       - in: path
@@ -294,6 +298,7 @@ router.get("/:agentId/public-profile", agentController.getPublicProfile);
  * /agents/me/properties/count:
  *   get:
  *     summary: Get total count of published properties by agent
+ *     description: Returns the number of published properties owned by the authenticated agent.
  *     tags: [Agent]
  *     responses:
  *       200:
@@ -318,6 +323,7 @@ router.get(
  * /agents/me/properties/count-view:
  *   get:
  *     summary: Get total count of views by agent
+ *     description: Returns the total listing-view count accumulated by the authenticated agent.
  *     tags: [Agent]
  *     responses:
  *       200:
@@ -342,6 +348,7 @@ router.get(
  * /agents/me/properties/count-sold:
  *   get:
  *     summary: Get total count of sold properties by agent
+ *     description: Returns the number of sold properties attributed to the authenticated agent.
  *     tags: [Agent]
  *     responses:
  *       200:
@@ -366,6 +373,7 @@ router.get(
  * /agents/me/analytics:
  *   get:
  *     summary: Get analytics for dashboard chart
+ *     description: Returns view and lead analytics grouped by month or year for the authenticated agent dashboard.
  *     tags: [Agent]
  *     parameters:
  *       - in: query
@@ -380,16 +388,140 @@ router.get(
 router.get("/me/analytics", requireAuth, agentController.getAnalytics);
 
 // Public leaderboard (no auth required)
+/**
+ * @swagger
+ * /agents/public/leaderboard:
+ *   get:
+ *     summary: Get public revenue leaderboard for agents
+ *     description: Returns the public-facing agent revenue leaderboard with optional period and currency filters.
+ *     tags: [Agent]
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Revenue leaderboard returned successfully
+ */
 router.get("/public/leaderboard", agentController.getRevenueLeaderboard);
 
+/**
+ * @swagger
+ * /agents/me/revenue-summary:
+ *   get:
+ *     summary: Get revenue summary for current agent
+ *     description: Returns revenue and deal totals for the authenticated agent, optionally filtered by month, year, and currency.
+ *     tags: [Agent]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Revenue summary returned successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get(
   "/me/revenue-summary",
   requireAuth,
   agentController.getRevenueSummary,
 );
 
+/**
+ * @swagger
+ * /agents/me/sales-log:
+ *   get:
+ *     summary: Get sales log for current agent
+ *     description: Returns a paginated sales log for the authenticated agent with optional month, year, and currency filters.
+ *     tags: [Agent]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sales log returned successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get("/me/sales-log", requireAuth, agentController.getMySalesLog);
 
+/**
+ * @swagger
+ * /agents/revenue-leaderboard:
+ *   get:
+ *     summary: Get revenue leaderboard for authorized users
+ *     description: Returns the revenue leaderboard for agents to authenticated users in back-office or internal views.
+ *     tags: [Agent]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: year
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: currency
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Revenue leaderboard returned successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get(
   "/revenue-leaderboard",
   requireAuth,

@@ -12,6 +12,7 @@ const noticeController = new NoticeController(noticeService);
  * /notices:
  *   post:
  *     summary: Create a new notice
+ *     description: Creates a notification entry for the authenticated user with optional notice type and metadata payload.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []
@@ -47,6 +48,7 @@ router.post("/", requireAuth, noticeController.createNotice);
  * /notices/me:
  *   get:
  *     summary: Get all notices for the current user
+ *     description: Returns paginated notifications for the currently authenticated user with optional filtering by notice type.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []
@@ -96,6 +98,7 @@ router.get("/me", requireAuth, noticeController.getMyNotices);
  * /notices/{id}:
  *   get:
  *     summary: Get notice details by ID
+ *     description: Returns a single notification if it belongs to the authenticated user.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []
@@ -125,6 +128,7 @@ router.get("/:id", requireAuth, noticeController.getNoticeById);
  * /notices/{id}/read:
  *   patch:
  *     summary: Mark notice as read
+ *     description: Marks a single notification as read for the authenticated user.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []
@@ -150,6 +154,7 @@ router.patch("/:id/read", requireAuth, noticeController.markAsRead);
  * /notices/me/read-all:
  *   patch:
  *     summary: Mark all notices as read for the current user
+ *     description: Marks every notification belonging to the authenticated user as read.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []
@@ -166,6 +171,7 @@ router.patch("/me/read-all", requireAuth, noticeController.markAllAsRead);
  * /notices/me/all:
  *   delete:
  *     summary: Delete all notices for the current user
+ *     description: Deletes every notification belonging to the authenticated user.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []
@@ -182,6 +188,7 @@ router.delete("/me/all", requireAuth, noticeController.deleteAllNotices);
  * /notices/{id}:
  *   delete:
  *     summary: Delete a notice
+ *     description: Deletes a single notification if it belongs to the authenticated user.
  *     tags: [Notices]
  *     security:
  *       - bearerAuth: []

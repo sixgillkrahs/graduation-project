@@ -63,6 +63,11 @@
     "publishedProperties": {
       "title": "Tin đã xuất bản",
       "description": "Tin đăng hiện đang hiển thị cho người mua và người thuê"
+    },
+    "proRevenue": {
+      "title": "Doanh thu gói PRO",
+      "description": "Doanh thu thành công thu được từ các giao dịch nâng cấp gói PRO",
+      "footer": "{{count}} giao dịch"
     }
   },
   "sections": {

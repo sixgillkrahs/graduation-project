@@ -24,6 +24,7 @@ router.use(requireAuth);
  * /users:
  *   post:
  *     summary: Create new user (Admin only)
+ *     description: Creates a new user account and associated profile data. This endpoint is restricted to authorized administrators.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -73,6 +74,7 @@ router.post(
  * /users/profile:
  *   get:
  *     summary: Get user profile
+ *     description: Returns the profile of the currently authenticated user.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -89,6 +91,7 @@ router.get("/profile", userController.profile);
  * /users/profile:
  *   patch:
  *     summary: Update user profile
+ *     description: Updates editable profile fields for the currently authenticated user.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -105,6 +108,7 @@ router.patch("/profile", userController.updateProfile);
  * /users:
  *   get:
  *     summary: Get all users with pagination
+ *     description: Returns a paginated user list for administrative management with search and sorting support.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -167,6 +171,7 @@ router.get(
  * /users/{id}:
  *   get:
  *     summary: Get user details by ID
+ *     description: Returns detailed account and role information for a specific user.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []

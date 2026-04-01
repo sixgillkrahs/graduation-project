@@ -1,5 +1,8 @@
+"use client";
+
 import { Icon } from "@/components/ui";
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 const Card = ({
   icon,
@@ -24,32 +27,33 @@ const Card = ({
 );
 
 const Benefit = () => {
+  const t = useTranslations("BecomeAgentPage.benefits");
+
   return (
     <section className="container mx-auto px-4 md:px-20 py-10 md:py-30">
       <div className="text-center">
         <div className="cs-typography font-black! text-2xl md:text-4xl! mb-2">
-          Why Top Agents Choose Havenly
+          {t("title")}
         </div>
         <div className="cs-typography-gray text-base! max-w-lg mx-auto font-medium!">
-          We provide the infrastructure so you can focus on what matters most:
-          building relationships and closing details.
+          {t("description")}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10 md:mt-20">
         <Card
           icon={<Icon.HeadGear />}
-          title="AI-Powered Leads"
-          description="Our proprietary algorithm matches you with high-intent buyers instantly, reducing cold calls and increasing conversion rates."
+          title={t("items.leads.title")}
+          description={t("items.leads.description")}
         />
         <Card
           icon={<Icon.BarChatBox />}
-          title="Market Insights"
-          description="Get real-time data to value properties accurately. Access neighborhood trends and predictive analytics at your fingertips"
+          title={t("items.insights.title")}
+          description={t("items.insights.description")}
         />
         <Card
           icon={<Icon.Safe2 />}
-          title="Competitive Commission"
-          description="Keep more of what you earn with our transparent tiered split. No hidden desk fees or franchise costs."
+          title={t("items.commission.title")}
+          description={t("items.commission.description")}
         />
       </div>
     </section>

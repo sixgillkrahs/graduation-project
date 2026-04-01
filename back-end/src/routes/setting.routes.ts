@@ -9,6 +9,19 @@ const settingService = new SettingService();
 const settingController = new SettingController(settingService);
 const router = Router();
 
+/**
+ * @swagger
+ * /settings/public/general:
+ *   get:
+ *     summary: Get public general platform settings
+ *     description: Returns the public-safe subset of general platform settings for the landing page without requiring authentication.
+ *     tags: [Settings]
+ *     responses:
+ *       200:
+ *         description: Public general settings fetched successfully
+ *       500:
+ *         description: Internal server error
+ */
 router.get("/public/general", settingController.getPublicGeneralSettings);
 
 router.use(requireAuth);
@@ -18,6 +31,7 @@ router.use(requireAuth);
  * /settings/general:
  *   get:
  *     summary: Get general platform settings for landing page and UAA portal
+ *     description: Returns the persisted platform-wide general settings used by the landing page and UAA portal.
  *     tags: [Settings]
  *     security:
  *       - bearerAuth: []
@@ -124,6 +138,7 @@ router.get("/general", settingController.getGeneralSettings);
  * /settings/general:
  *   put:
  *     summary: Update general platform settings for landing page and UAA portal
+ *     description: Updates the platform-wide general settings used by the landing page and UAA portal.
  *     tags: [Settings]
  *     security:
  *       - bearerAuth: []

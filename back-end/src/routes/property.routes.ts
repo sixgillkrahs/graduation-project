@@ -35,6 +35,7 @@ const propertyController = new PropertyController(
  * /properties:
  *   post:
  *     summary: Create a new property listing
+ *     description: Creates a new property listing owned by the authenticated user, including media, attributes, and sale context.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -141,6 +142,7 @@ router.post(
  * /properties:
  *   get:
  *     summary: Get all properties with pagination and filtering
+ *     description: Returns a paginated property list for the authenticated user with admin-style filtering and sorting options.
  *     tags: [Properties]
  *     parameters:
  *       - in: query
@@ -207,6 +209,7 @@ router.get("/", requireAuth, propertyController.getProperties);
  * /properties/me:
  *   get:
  *     summary: Get all properties owned by the current user
+ *     description: Returns the property listings created by the currently authenticated user.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -259,6 +262,7 @@ router.get("/me", requireAuth, propertyController.getMyProperties);
  * /properties/favorites:
  *   get:
  *     summary: Get all favorite properties of the current user
+ *     description: Returns the properties that the currently authenticated user has marked as favorites.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -314,6 +318,7 @@ router.get("/favorites", requireAuth, propertyController.getFavoriteProperties);
  * /properties/on-sale:
  *   get:
  *     summary: Get all properties on sale with pagination and filtering
+ *     description: Returns the public on-sale property catalogue with pagination, filtering, and optional personalization.
  *     tags: [Properties]
  *     parameters:
  *       - in: query
@@ -380,6 +385,7 @@ router.get(
  * /properties/agent/{agentId}/on-sale:
  *   get:
  *     summary: Get published sale properties by agent
+ *     description: Returns the published on-sale listings belonging to a specific agent.
  *     tags: [Properties]
  *     parameters:
  *       - in: path
@@ -451,6 +457,7 @@ router.get(
  * /properties/{id}:
  *   get:
  *     summary: Get property details by ID
+ *     description: Returns the authenticated property-detail view for a specific property identifier.
  *     tags: [Properties]
  *     parameters:
  *       - in: path
@@ -476,6 +483,7 @@ router.get("/:id", requireAuth, propertyController.getPropertyById);
  * /properties/{id}/recommended:
  *   get:
  *     summary: Get recommended properties based on a given property ID
+ *     description: Returns recommendation results related to a specific property.
  *     tags: [Properties]
  *     parameters:
  *       - in: path
@@ -510,6 +518,7 @@ router.get(
  * /properties/{id}/view:
  *   get:
  *     summary: Get property details by ID for landing page
+ *     description: Returns the public landing-page property detail payload for a specific listing.
  *     tags: [Properties]
  *     parameters:
  *       - in: path
@@ -539,6 +548,7 @@ router.get(
  * /properties/{id}:
  *   put:
  *     summary: Update property details
+ *     description: Updates an existing property listing owned by the authenticated user.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -599,6 +609,7 @@ router.put(
  * /properties/{id}/approve:
  *   patch:
  *     summary: Approve or Reject a property
+ *     description: Updates a property's review status during moderation, typically to approve it for publishing.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -636,6 +647,7 @@ router.patch("/:id/approve", requireAuth, propertyController.approveProperty);
  * /properties/{id}/status:
  *   patch:
  *     summary: Update property status (for owner)
+ *     description: Allows the property owner to update the listing status within the permitted owner workflow.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -671,6 +683,7 @@ router.patch(
  * /properties/{id}/reject:
  *   patch:
  *     summary: Reject a property
+ *     description: Rejects a property during moderation and stores the rejection reason.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -714,6 +727,7 @@ router.patch("/:id/reject", requireAuth, propertyController.rejectProperty);
  * /properties/{id}:
  *   delete:
  *     summary: Delete a property listing
+ *     description: Deletes a property listing owned by the authenticated user.
  *     tags: [Properties]
  *     security:
  *       - bearerAuth: []
@@ -741,6 +755,7 @@ router.delete("/:id", requireAuth, propertyController.deleteProperty);
  * /properties/status/pending:
  *   get:
  *     summary: Get all properties with pagination and filtering
+ *     description: Returns the paginated list of properties that are currently pending moderation.
  *     tags: [Properties]
  *     parameters:
  *       - in: query
@@ -811,6 +826,7 @@ router.get(
  * /properties/status/published:
  *   get:
  *     summary: Get all published properties with pagination and filtering
+ *     description: Returns the paginated list of properties that have already been published.
  *     tags: [Properties]
  *     parameters:
  *       - in: query
@@ -866,6 +882,7 @@ router.get(
  * /properties/status/rejected:
  *   get:
  *     summary: Get all rejected properties with pagination and filtering
+ *     description: Returns the paginated list of properties that were rejected during moderation.
  *     tags: [Properties]
  *     parameters:
  *       - in: query
@@ -921,6 +938,7 @@ router.get(
  * /properties/{id}/view:
  *   patch:
  *     summary: Increment view count of a property
+ *     description: Records a property-view event and increments the listing's view counter.
  *     tags: [Properties]
  *     parameters:
  *       - in: path
@@ -948,6 +966,7 @@ router.patch(
  * /properties/{id}/interact:
  *   post:
  *     summary: Record user interaction (Lead)
+ *     description: Records a lead or interaction event for a property, such as viewing a phone number or submitting contact intent.
  *     tags: [Properties]
  *     parameters:
  *       - in: path

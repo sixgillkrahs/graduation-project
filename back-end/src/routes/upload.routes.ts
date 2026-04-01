@@ -15,12 +15,111 @@ const uploadService = new UploadService();
 const uploadController = new UploadController(uploadService);
 
 // Legacy upload routes (local file system)
+/**
+ * @swagger
+ * /upload/upload-large:
+ *   post:
+ *     summary: Legacy large-file upload endpoint
+ *     description: Legacy placeholder endpoint for large-file uploads to the local filesystem.
+ *     tags: [Upload]
+ *     responses:
+ *       200:
+ *         description: Large-file upload handled successfully
+ */
 router.post("/upload-large", uploadController.uploadFileLarge);
+
+/**
+ * @swagger
+ * /upload/upload-large1:
+ *   post:
+ *     summary: Legacy large-file upload endpoint variant
+ *     description: Experimental legacy endpoint for large-file uploads to the local filesystem.
+ *     tags: [Upload]
+ *     responses:
+ *       200:
+ *         description: Large-file upload handled successfully
+ */
 router.post("/upload-large1", uploadController.uploadFileLarge1);
+
+/**
+ * @swagger
+ * /upload/video:
+ *   get:
+ *     summary: Stream sample video asset
+ *     description: Streams a sample video asset using HTTP range requests for testing media delivery.
+ *     tags: [Upload]
+ *     responses:
+ *       206:
+ *         description: Partial video content streamed successfully
+ */
 router.get("/video", uploadController.getVideo);
+
+/**
+ * @swagger
+ * /upload/audio:
+ *   get:
+ *     summary: Stream sample audio asset
+ *     description: Streams a sample audio asset using HTTP range requests for testing media delivery.
+ *     tags: [Upload]
+ *     responses:
+ *       206:
+ *         description: Partial audio content streamed successfully
+ */
 router.get("/audio", uploadController.getAudio);
+
+/**
+ * @swagger
+ * /upload/upload-trunk:
+ *   post:
+ *     summary: Upload file chunks to local storage
+ *     description: Receives chunked upload data, tracks the upload session, and appends file data to the local filesystem.
+ *     tags: [Upload]
+ *     responses:
+ *       200:
+ *         description: Chunk processed successfully
+ */
 router.post("/upload-trunk", uploadController.uploadTrunkFile);
+
+/**
+ * @swagger
+ * /upload/pause-upload/{sessionId}:
+ *   put:
+ *     summary: Pause a chunked upload session
+ *     description: Marks an active chunked upload session as paused.
+ *     tags: [Upload]
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Upload paused successfully
+ *       404:
+ *         description: Upload session not found
+ */
 router.put("/pause-upload/:sessionId", uploadController.pauseUpload);
+
+/**
+ * @swagger
+ * /upload/resume-upload/{sessionId}:
+ *   put:
+ *     summary: Resume a chunked upload session
+ *     description: Marks a paused chunked upload session as resumed so the client can continue sending chunks.
+ *     tags: [Upload]
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Upload resumed successfully
+ *       404:
+ *         description: Upload session not found
+ */
 router.put("/resume-upload/:sessionId", uploadController.resumeUpload);
 
 // Cloudinary upload routes
@@ -29,6 +128,7 @@ router.put("/resume-upload/:sessionId", uploadController.resumeUpload);
  * /upload/image:
  *   post:
  *     summary: Upload a single image to Cloudinary
+ *     description: Uploads one image file to Cloudinary and returns the hosted asset metadata.
  *     tags: [Upload]
  *     parameters:
  *       - in: query
@@ -78,6 +178,7 @@ router.post("/image", uploadSingle("image"), uploadController.uploadImage);
  * /upload/images:
  *   post:
  *     summary: Upload multiple images to Cloudinary
+ *     description: Uploads multiple image files to Cloudinary and returns the metadata for each stored asset.
  *     tags: [Upload]
  *     parameters:
  *       - in: query
@@ -138,6 +239,7 @@ router.post(
  * /upload/image/{publicId}:
  *   delete:
  *     summary: Delete an image from Cloudinary
+ *     description: Deletes a Cloudinary asset by its public identifier.
  *     tags: [Upload]
  *     parameters:
  *       - in: path
@@ -161,6 +263,7 @@ router.delete("/image/:publicId", uploadController.deleteImage);
  * /upload/image/{publicId}:
  *   get:
  *     summary: Get image details from Cloudinary
+ *     description: Retrieves metadata for a Cloudinary image asset by its public identifier.
  *     tags: [Upload]
  *     parameters:
  *       - in: path

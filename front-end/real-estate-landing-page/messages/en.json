@@ -150,6 +150,99 @@
     "email": "Email",
     "phone": "Phone"
   },
+  "BecomeAgentPage": {
+    "notice": {
+      "title": "Agent applications are temporarily closed",
+      "description": "This recruitment flow has been turned off from platform settings. Please check back later or contact support for assistance."
+    },
+    "hero": {
+      "badge": "New AI Features Live",
+      "title": "Supercharge Your Real Estate Career with <accent>AI</accent>",
+      "description": "Join the fastest-growing network. Access exclusive AI tools to close deals faster, price accurately, and manage clients effortlessly.",
+      "joinNow": "Join Now",
+      "learnMore": "Learn More",
+      "trustedPrefix": "Trusted by over",
+      "trustedHighlight": "1000+ agents",
+      "trustedSuffix": "like you",
+      "imageAlt": "Become an agent hero banner"
+    },
+    "stats": {
+      "items": {
+        "activeAgents": {
+          "number": "1000+",
+          "text": "ACTIVE AGENTS"
+        },
+        "commissions": {
+          "number": "$10M+",
+          "text": "PAID IN COMMISSIONS"
+        },
+        "support": {
+          "number": "24/7",
+          "text": "AGENT SUPPORT"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Why Top Agents Choose Havenly",
+      "description": "We provide the infrastructure so you can focus on what matters most: building relationships and closing deals.",
+      "items": {
+        "leads": {
+          "title": "AI-Powered Leads",
+          "description": "Our proprietary algorithm matches you with high-intent buyers instantly, reducing cold calls and increasing conversion rates."
+        },
+        "insights": {
+          "title": "Market Insights",
+          "description": "Get real-time data to value properties accurately. Access neighborhood trends and predictive analytics at your fingertips."
+        },
+        "commission": {
+          "title": "Competitive Commission",
+          "description": "Keep more of what you earn with our transparent tiered split. No hidden desk fees or franchise costs."
+        }
+      }
+    },
+    "earnings": {
+      "title": "Estimate Your Potential Earnings",
+      "description": "See how much you could earn with Havenly's commission structure.",
+      "homesSoldPerMonth": "Homes sold per month",
+      "homesSoldValue": "4",
+      "range": {
+        "start": "0 Homes",
+        "middle": "5 Homes",
+        "end": "10+ Homes"
+      },
+      "estimatedYearlyIncome": "ESTIMATED YEARLY INCOME",
+      "disclaimer": "*Based on avg. home price of {price}",
+      "incomeSuffix": "/yr"
+    },
+    "howToJoin": {
+      "title": "How to Join Havenly",
+      "description": "Three simple steps to launch your upgraded agent workflow.",
+      "steps": {
+        "account": {
+          "title": "1. Create Account",
+          "description": "Sign up in minutes. Tell us about your experience and goals."
+        },
+        "verify": {
+          "title": "2. Verify License",
+          "description": "Upload your active real estate license for quick verification by our team."
+        },
+        "start": {
+          "title": "3. Start Selling",
+          "description": "Get immediate access to the AI dashboard and start receiving leads."
+        }
+      }
+    },
+    "review": {
+      "quote": "\"The dashboard changed how I work. I used to spend hours prospecting, now the AI brings qualified leads straight to my inbox. My commission doubled in 6 months.\"",
+      "author": "John Doe",
+      "role": "Top Agent, Chicago IL"
+    },
+    "cta": {
+      "title": "Ready to start your journey?",
+      "description": "Join the network that empowers agents with technology, not paperwork.",
+      "button": "Apply Now"
+    }
+  },
   "SignIn": {
     "welcomeBack": "Welcome Back",
     "enterDetails": "Please enter your details.",
@@ -202,6 +295,165 @@
     "signIn": "Sign In",
     "areYouAgent": "Are you an Agent?",
     "registerHere": "Register here"
+  },
+  "RecruitmentPage": {
+    "hero": {
+      "title": "Agent Application",
+      "description": "Complete your profile to join the fastest-growing AI real estate network"
+    },
+    "status": {
+      "label": "APPLICATION STATUS",
+      "step": "Step {current} of {total}: {stepTitle}"
+    },
+    "steps": {
+      "basic": {
+        "title": "Personal Information",
+        "description": "We need your basic details to create your agent profile"
+      },
+      "business": {
+        "title": "Business Information",
+        "description": "We need your business details to create your agent profile"
+      },
+      "verification": {
+        "title": "Verification",
+        "description": "Verify your identity to create your agent profile"
+      }
+    },
+    "basicInfo": {
+      "autoSave": "Your information is automatically saved as you type.",
+      "fields": {
+        "fullName": {
+          "label": "Full Name",
+          "placeholder": "e.g. John Doe"
+        },
+        "email": {
+          "label": "Email Address",
+          "placeholder": "john.doe@example.com"
+        },
+        "phone": {
+          "label": "Phone Number",
+          "placeholder": "0123456789"
+        },
+        "identityFront": {
+          "label": "Identity Front"
+        },
+        "identityBack": {
+          "label": "Identity Back"
+        }
+      }
+    },
+    "businessInfo": {
+      "fields": {
+        "certificateNumber": {
+          "label": "Certificate Number",
+          "placeholder": "CCHN-HN-123456"
+        },
+        "taxCode": {
+          "label": "Tax Code",
+          "placeholder": "Please enter number"
+        },
+        "yearsOfExperience": {
+          "label": "Years Of Experience",
+          "placeholder": "Please enter number",
+          "suffix": "Year"
+        },
+        "specialization": {
+          "label": "Specialization",
+          "options": {
+            "apartment": "Apartment",
+            "land": "Land"
+          }
+        },
+        "workingArea": {
+          "label": "Working Area"
+        },
+        "certificateImage": {
+          "label": "Certificate Image"
+        }
+      }
+    },
+    "verification": {
+      "fields": {
+        "fullName": {
+          "label": "Full Name",
+          "placeholder": "e.g. John Doe"
+        },
+        "idNumber": {
+          "label": "ID Number",
+          "placeholder": "e.g. 124xxxxxxxx"
+        },
+        "gender": {
+          "label": "Gender",
+          "placeholder": "Select gender",
+          "options": {
+            "male": "Male",
+            "female": "Female"
+          }
+        },
+        "birthday": {
+          "label": "Birthday",
+          "placeholder": "e.g. 01/01/2000"
+        },
+        "nationality": {
+          "label": "Nationality",
+          "placeholder": "e.g. Vietnamese"
+        },
+        "address": {
+          "label": "Address",
+          "placeholder": "e.g. 123 Main St"
+        }
+      },
+      "terms": {
+        "label": "I agree to the Terms and Conditions and Privacy Policy",
+        "subtext": "I certify that all information I have provided is true and correct..."
+      }
+    },
+    "actions": {
+      "back": "Back",
+      "next": "Next",
+      "submit": "Submit Application",
+      "submitting": "Submitting..."
+    },
+    "success": {
+      "title": "Application Successful!",
+      "description": "Thank you for applying to become an agent. We have received your information and will review it.",
+      "reviewTime": "The results will be sent to your email within <strong>24-48 hours</strong> working hours.",
+      "applyAnother": "Apply for Another Agent",
+      "goHome": "Go to Home Page"
+    },
+    "toast": {
+      "waitForUploads": "Please wait until all documents finish uploading",
+      "uploadMissingUrl": "Upload did not return an image URL",
+      "documentUploadFailed": "Document upload failed",
+      "uploadError": "Upload error",
+      "uploadFailed": "Upload failed",
+      "submitSuccess": "Application submitted successfully"
+    },
+    "validation": {
+      "nameRequired": "Full name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required",
+      "identityFrontRequired": "Identity front image is required",
+      "identityBackRequired": "Identity back image is required",
+      "certificateNumberRequired": "Certificate number is required",
+      "taxCodeRequired": "Tax code is required",
+      "yearsOfExperienceRequired": "Years of experience is required",
+      "numberOnly": "Please enter number",
+      "specializationRequired": "Specialization is required",
+      "workingAreaRequired": "Working area is required",
+      "certificateImageRequired": "Certificate image is required",
+      "agentNameRequired": "Agent name is required",
+      "agentNameMin": "Agent name must be at least 2 characters",
+      "idNumberRequired": "ID Number is required",
+      "idNumberLength": "ID Number must be 12 characters",
+      "genderRequired": "Please select gender",
+      "birthdayRequired": "Birthday is required",
+      "nationalityRequired": "Nationality is required",
+      "addressRequired": "Address is required",
+      "agreeToTermsRequired": "You must agree to the Terms and Conditions and Privacy Policy",
+      "noServerResponse": "No response received from the server"
+    }
   },
   "PropertiesPage": {
     "tabs": {

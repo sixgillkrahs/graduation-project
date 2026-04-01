@@ -3,9 +3,10 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
+const isStandaloneBuild = process.env.NEXT_OUTPUT_MODE === "standalone";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  ...(isStandaloneBuild ? { output: "standalone" } : {}),
   outputFileTracingRoot: path.join(process.cwd(), "../.."),
   images: {
     remotePatterns: [

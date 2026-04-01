@@ -28,6 +28,7 @@ const reviewController = new ReviewController(new ReviewService());
  * /reviews/invitations/{token}:
  *   get:
  *     summary: Get review invitation preview by token
+ *     description: Validates a one-time invitation token and returns the review form preview for the invited customer.
  *     tags: [Reviews]
  *     parameters:
  *       - in: path
@@ -66,6 +67,7 @@ router.get(
  * /reviews:
  *   post:
  *     summary: Submit a customer review from invitation token
+ *     description: Creates a new customer review by consuming a valid invitation token and storing the submitted rating, tags, and comment.
  *     tags: [Reviews]
  *     requestBody:
  *       required: true
@@ -112,6 +114,29 @@ router.post(
   reviewController.createReview,
 );
 
+/**
+ * @swagger
+ * /reviews/agents/{agentUserId}/eligibility:
+ *   get:
+ *     summary: Check review eligibility for an agent
+ *     description: Returns whether the authenticated user is eligible to submit a direct review for the specified agent.
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: agentUserId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Review eligibility returned successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Review eligibility not found
+ */
 router.get(
   "/agents/:agentUserId/eligibility",
   requireAuth,
@@ -119,6 +144,47 @@ router.get(
   reviewController.getAgentReviewEligibility,
 );
 
+/**
+ * @swagger
+ * /reviews/agents/{agentUserId}:
+ *   post:
+ *     summary: Create a direct review for an agent
+ *     description: Creates a direct customer review for an agent when the authenticated user is eligible to submit one.
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: agentUserId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rating
+ *               - tags
+ *             properties:
+ *               rating:
+ *                 type: number
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Review created successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Review eligibility not found
+ */
 router.post(
   "/agents/:agentUserId",
   requireAuth,
@@ -131,6 +197,7 @@ router.post(
  * /reviews/agents/{agentUserId}/public:
  *   get:
  *     summary: Get published public reviews for an agent
+ *     description: Returns the published public reviews and rating summary for a specific agent profile.
  *     tags: [Reviews]
  *     parameters:
  *       - in: path
@@ -174,6 +241,7 @@ router.get(
  * /reviews/me:
  *   get:
  *     summary: Get reviews for the current agent
+ *     description: Returns paginated review records and summary metrics for the currently authenticated agent.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -226,6 +294,7 @@ router.get(
  * /reviews/admin/queue:
  *   get:
  *     summary: Get review moderation queue for admin
+ *     description: Returns the moderation queue of reviews awaiting admin review, filtering, and search.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -278,6 +347,7 @@ router.get(
  * /reviews/admin/{reviewId}/approve:
  *   patch:
  *     summary: Approve a moderated review and publish it
+ *     description: Approves a queued review, optionally stores an admin note, and publishes the review.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -330,6 +400,7 @@ router.patch(
  * /reviews/admin/{reviewId}/reject:
  *   patch:
  *     summary: Reject a moderated review
+ *     description: Rejects a queued review, optionally stores an admin note, and keeps it from being published.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -382,6 +453,7 @@ router.patch(
  * /reviews/{reviewId}/auto-reply/generate:
  *   post:
  *     summary: Generate an AI reply draft for a PRO agent review
+ *     description: Generates an AI-assisted reply draft for a review owned by the current PRO agent.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -413,6 +485,7 @@ router.post(
  * /reviews/{reviewId}/auto-reply/apply:
  *   patch:
  *     summary: Apply an AI reply draft to a review as the current PRO agent
+ *     description: Saves an AI-generated reply draft as the official agent reply for the selected review.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -453,6 +526,7 @@ router.patch(
  * /reviews/{reviewId}/auto-reply/discard:
  *   patch:
  *     summary: Discard an AI reply draft for the current PRO agent
+ *     description: Removes the pending AI reply draft for a review without publishing a reply.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -484,6 +558,7 @@ router.patch(
  * /reviews/{reviewId}/reply:
  *   patch:
  *     summary: Reply to a customer review as the current agent
+ *     description: Saves or updates a manual reply from the current agent on a customer review.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
@@ -536,6 +611,7 @@ router.patch(
  * /reviews/{reviewId}/report:
  *   patch:
  *     summary: Report a review to admin
+ *     description: Flags a review for administrator follow-up and stores the report reason.
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []

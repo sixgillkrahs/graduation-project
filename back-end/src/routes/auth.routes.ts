@@ -30,6 +30,7 @@ const authController = new AuthController(
  * /auth/login:
  *   post:
  *     summary: Login
+ *     description: Authenticates a user with username and password, then returns the session token and current user payload.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -79,6 +80,7 @@ router.post(
  * /auth/signup:
  *   post:
  *     summary: Signup
+ *     description: Creates a new end-user account with the provided registration information.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -118,6 +120,7 @@ router.post(
  * /auth/me:
  *   get:
  *     summary: Get current user
+ *     description: Returns the authenticated user's current account and profile information.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -132,6 +135,7 @@ router.get("/me", requireAuth, authController.me);
  * /auth/refresh-token:
  *   post:
  *     summary: Refresh token
+ *     description: Exchanges a valid refresh token or refresh context for a new access token.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -146,6 +150,7 @@ router.post("/refresh-token", authController.refreshToken);
  * /auth/logout:
  *   post:
  *     summary: Logout
+ *     description: Signs the current user out and invalidates the active authentication session.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -160,6 +165,7 @@ router.post("/logout", authController.logout);
  * /auth/change-password:
  *   put:
  *     summary: Change password
+ *     description: Updates the password for the currently authenticated user after validating the old password.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -188,6 +194,7 @@ router.put("/change-password", requireAuth, authController.changePassword);
  * /auth/forgot-password:
  *   post:
  *     summary: Forgot password
+ *     description: Starts the password-reset flow by sending a verification code or reset instructions to the user's email.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -212,6 +219,7 @@ router.post("/forgot-password", authController.forgotPassword);
  * /auth/verify-otp:
  *   post:
  *     summary: Verify OTP
+ *     description: Verifies the one-time password generated during the password-reset flow.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -238,6 +246,7 @@ router.post("/verify-otp", authController.verifyOTP);
  * /auth/reset-password:
  *   post:
  *     summary: Reset password
+ *     description: Sets a new password after the reset token or verification flow has been validated.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -268,6 +277,7 @@ router.post(
  * /auth/register-passkey:
  *   post:
  *     summary: Register passkey
+ *     description: Starts the WebAuthn passkey registration flow for the authenticated user.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -282,6 +292,7 @@ router.post("/register-passkey", requireAuth, authController.registerPasskey);
  * /auth/verify-passkey:
  *   post:
  *     summary: Verify passkey
+ *     description: Verifies the WebAuthn registration response and saves the passkey for future logins.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -296,6 +307,7 @@ router.post("/verify-passkey", requireAuth, authController.verifyPasskey);
  * /auth/login-passkey:
  *   post:
  *     summary: Login passkey
+ *     description: Starts a passwordless login flow by generating WebAuthn assertion options.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -310,6 +322,7 @@ router.post("/login-passkey", authController.loginPasskey);
  * /auth/verify-login-passkey:
  *   post:
  *     summary: Verify login passkey
+ *     description: Verifies the WebAuthn login assertion and returns an authenticated session payload.
  *     tags: [Auth]
  *     responses:
  *       200:
@@ -328,7 +341,41 @@ router.post("/login-passkey", authController.loginPasskey);
  */
 router.post("/verify-login-passkey", authController.verifyLoginPasskey);
 
+/**
+ * @swagger
+ * /auth/google:
+ *   get:
+ *     summary: Redirect to Google OAuth login
+ *     description: Starts the Google OAuth authentication flow by redirecting the user to Google's consent screen.
+ *     tags: [Auth]
+ *     responses:
+ *       302:
+ *         description: Redirects to Google OAuth consent page
+ */
 router.get("/google", authController.googleAuth);
+
+/**
+ * @swagger
+ * /auth/google/callback:
+ *   get:
+ *     summary: Handle Google OAuth callback
+ *     description: Completes the Google OAuth login flow after the user returns from Google's consent screen.
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Authorization code returned by Google
+ *     responses:
+ *       200:
+ *         description: Google login handled successfully
+ *       302:
+ *         description: Redirects to the configured frontend callback destination
+ *       400:
+ *         description: Invalid Google OAuth callback payload
+ */
 router.get("/google/callback", authController.googleAuthCallback);
 
 export default router;

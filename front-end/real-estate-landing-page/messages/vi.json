@@ -150,6 +150,99 @@
     "email": "Email",
     "phone": "Điện thoại"
   },
+  "BecomeAgentPage": {
+    "notice": {
+      "title": "Tạm thời đóng đăng ký ứng tuyển môi giới",
+      "description": "Luồng tuyển dụng này hiện đã bị tắt trong phần cài đặt nền tảng. Vui lòng quay lại sau hoặc liên hệ hỗ trợ để được trợ giúp."
+    },
+    "hero": {
+      "badge": "Tính năng AI mới đã ra mắt",
+      "title": "Bứt phá sự nghiệp môi giới bất động sản với <accent>AI</accent>",
+      "description": "Tham gia mạng lưới phát triển nhanh nhất. Truy cập bộ công cụ AI độc quyền để chốt giao dịch nhanh hơn, định giá chính xác hơn và quản lý khách hàng dễ dàng hơn.",
+      "joinNow": "Tham gia ngay",
+      "learnMore": "Tìm hiểu thêm",
+      "trustedPrefix": "Được tin dùng bởi hơn",
+      "trustedHighlight": "1000+ môi giới",
+      "trustedSuffix": "giống như bạn",
+      "imageAlt": "Banner tuyển môi giới"
+    },
+    "stats": {
+      "items": {
+        "activeAgents": {
+          "number": "1000+",
+          "text": "MÔI GIỚI ĐANG HOẠT ĐỘNG"
+        },
+        "commissions": {
+          "number": "$10M+",
+          "text": "HOA HỒNG ĐÃ CHI TRẢ"
+        },
+        "support": {
+          "number": "24/7",
+          "text": "HỖ TRỢ MÔI GIỚI"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Vì sao môi giới hàng đầu chọn Havenly",
+      "description": "Chúng tôi cung cấp hạ tầng để bạn tập trung vào điều quan trọng nhất: xây dựng quan hệ và chốt giao dịch.",
+      "items": {
+        "leads": {
+          "title": "Lead bằng AI",
+          "description": "Thuật toán riêng của chúng tôi ghép bạn với người mua có nhu cầu cao ngay lập tức, giảm gọi lạnh và tăng tỷ lệ chuyển đổi."
+        },
+        "insights": {
+          "title": "Phân tích thị trường",
+          "description": "Nhận dữ liệu thời gian thực để định giá bất động sản chính xác. Xu hướng khu vực và phân tích dự báo luôn trong tầm tay."
+        },
+        "commission": {
+          "title": "Hoa hồng cạnh tranh",
+          "description": "Giữ lại nhiều hơn từ thu nhập của bạn với cơ chế chia hoa hồng minh bạch. Không phí bàn làm việc hay phí nhượng quyền ẩn."
+        }
+      }
+    },
+    "earnings": {
+      "title": "Ước tính thu nhập tiềm năng của bạn",
+      "description": "Xem bạn có thể kiếm được bao nhiêu với cơ chế hoa hồng của Havenly.",
+      "homesSoldPerMonth": "Số căn bán mỗi tháng",
+      "homesSoldValue": "4",
+      "range": {
+        "start": "0 căn",
+        "middle": "5 căn",
+        "end": "10+ căn"
+      },
+      "estimatedYearlyIncome": "THU NHẬP ƯỚC TÍNH HÀNG NĂM",
+      "disclaimer": "*Dựa trên giá nhà trung bình {price}",
+      "incomeSuffix": "/năm"
+    },
+    "howToJoin": {
+      "title": "Cách tham gia Havenly",
+      "description": "Ba bước đơn giản để bắt đầu hành trình môi giới nâng cấp với AI.",
+      "steps": {
+        "account": {
+          "title": "1. Tạo tài khoản",
+          "description": "Đăng ký chỉ trong vài phút. Hãy cho chúng tôi biết kinh nghiệm và mục tiêu của bạn."
+        },
+        "verify": {
+          "title": "2. Xác minh chứng chỉ",
+          "description": "Tải lên chứng chỉ hành nghề bất động sản còn hiệu lực để đội ngũ của chúng tôi xác minh nhanh."
+        },
+        "start": {
+          "title": "3. Bắt đầu bán hàng",
+          "description": "Truy cập ngay dashboard AI và bắt đầu nhận lead chất lượng."
+        }
+      }
+    },
+    "review": {
+      "quote": "\"Dashboard đã thay đổi hoàn toàn cách tôi làm việc. Trước đây tôi mất hàng giờ để tìm khách, giờ AI đưa lead chất lượng thẳng vào hộp thư. Hoa hồng của tôi đã tăng gấp đôi chỉ sau 6 tháng.\"",
+      "author": "John Doe",
+      "role": "Môi giới top đầu, Chicago IL"
+    },
+    "cta": {
+      "title": "Sẵn sàng bắt đầu hành trình của bạn?",
+      "description": "Gia nhập mạng lưới trao quyền cho môi giới bằng công nghệ, không phải giấy tờ.",
+      "button": "Ứng tuyển ngay"
+    }
+  },
   "SignIn": {
     "welcomeBack": "Chào mừng trở lại",
     "enterDetails": "Vui lòng nhập thông tin của bạn.",
@@ -202,6 +295,165 @@
     "signIn": "Đăng nhập",
     "areYouAgent": "Bạn là đại lý?",
     "registerHere": "Đăng ký tại đây"
+  },
+  "RecruitmentPage": {
+    "hero": {
+      "title": "Đăng ký trở thành môi giới",
+      "description": "Hoàn thiện hồ sơ để tham gia mạng lưới bất động sản AI phát triển nhanh nhất"
+    },
+    "status": {
+      "label": "TRẠNG THÁI HỒ SƠ",
+      "step": "Bước {current} / {total}: {stepTitle}"
+    },
+    "steps": {
+      "basic": {
+        "title": "Thông tin cá nhân",
+        "description": "Chúng tôi cần thông tin cơ bản để tạo hồ sơ môi giới cho bạn"
+      },
+      "business": {
+        "title": "Thông tin nghề nghiệp",
+        "description": "Chúng tôi cần thông tin nghề nghiệp để hoàn thiện hồ sơ môi giới"
+      },
+      "verification": {
+        "title": "Xác minh",
+        "description": "Xác minh danh tính để hoàn tất hồ sơ môi giới"
+      }
+    },
+    "basicInfo": {
+      "autoSave": "Thông tin của bạn sẽ được tự động lưu trong lúc nhập.",
+      "fields": {
+        "fullName": {
+          "label": "Họ và tên",
+          "placeholder": "VD: Nguyễn Văn A"
+        },
+        "email": {
+          "label": "Địa chỉ email",
+          "placeholder": "nguyenvana@example.com"
+        },
+        "phone": {
+          "label": "Số điện thoại",
+          "placeholder": "0123456789"
+        },
+        "identityFront": {
+          "label": "Mặt trước CCCD"
+        },
+        "identityBack": {
+          "label": "Mặt sau CCCD"
+        }
+      }
+    },
+    "businessInfo": {
+      "fields": {
+        "certificateNumber": {
+          "label": "Số chứng chỉ",
+          "placeholder": "CCHN-HN-123456"
+        },
+        "taxCode": {
+          "label": "Mã số thuế",
+          "placeholder": "Vui lòng nhập số"
+        },
+        "yearsOfExperience": {
+          "label": "Số năm kinh nghiệm",
+          "placeholder": "Vui lòng nhập số",
+          "suffix": "Năm"
+        },
+        "specialization": {
+          "label": "Chuyên môn",
+          "options": {
+            "apartment": "Căn hộ",
+            "land": "Đất nền"
+          }
+        },
+        "workingArea": {
+          "label": "Khu vực hoạt động"
+        },
+        "certificateImage": {
+          "label": "Ảnh chứng chỉ"
+        }
+      }
+    },
+    "verification": {
+      "fields": {
+        "fullName": {
+          "label": "Họ và tên",
+          "placeholder": "VD: Nguyễn Văn A"
+        },
+        "idNumber": {
+          "label": "Số CCCD",
+          "placeholder": "VD: 0123xxxxxxxx"
+        },
+        "gender": {
+          "label": "Giới tính",
+          "placeholder": "Chọn giới tính",
+          "options": {
+            "male": "Nam",
+            "female": "Nữ"
+          }
+        },
+        "birthday": {
+          "label": "Ngày sinh",
+          "placeholder": "VD: 01/01/2000"
+        },
+        "nationality": {
+          "label": "Quốc tịch",
+          "placeholder": "VD: Việt Nam"
+        },
+        "address": {
+          "label": "Địa chỉ",
+          "placeholder": "VD: 123 Nguyễn Trãi"
+        }
+      },
+      "terms": {
+        "label": "Tôi đồng ý với Điều khoản và Điều kiện cùng Chính sách bảo mật",
+        "subtext": "Tôi xác nhận tất cả thông tin đã cung cấp là trung thực và chính xác..."
+      }
+    },
+    "actions": {
+      "back": "Quay lại",
+      "next": "Tiếp theo",
+      "submit": "Gửi hồ sơ",
+      "submitting": "Đang gửi..."
+    },
+    "success": {
+      "title": "Gửi hồ sơ thành công!",
+      "description": "Cảm ơn bạn đã đăng ký trở thành môi giới. Chúng tôi đã nhận được thông tin và sẽ tiến hành xét duyệt.",
+      "reviewTime": "Kết quả sẽ được gửi đến email của bạn trong vòng <strong>24-48 giờ</strong> làm việc.",
+      "applyAnother": "Nộp hồ sơ khác",
+      "goHome": "Về trang chủ"
+    },
+    "toast": {
+      "waitForUploads": "Vui lòng chờ tải xong toàn bộ tài liệu",
+      "uploadMissingUrl": "Không nhận được URL ảnh sau khi tải lên",
+      "documentUploadFailed": "Tải tài liệu thất bại",
+      "uploadError": "Có lỗi khi tải tệp lên",
+      "uploadFailed": "Tải tệp lên thất bại",
+      "submitSuccess": "Gửi hồ sơ thành công"
+    },
+    "validation": {
+      "nameRequired": "Họ và tên là bắt buộc",
+      "emailRequired": "Email là bắt buộc",
+      "emailInvalid": "Vui lòng nhập địa chỉ email hợp lệ",
+      "phoneRequired": "Số điện thoại là bắt buộc",
+      "identityFrontRequired": "Vui lòng tải ảnh mặt trước CCCD",
+      "identityBackRequired": "Vui lòng tải ảnh mặt sau CCCD",
+      "certificateNumberRequired": "Số chứng chỉ là bắt buộc",
+      "taxCodeRequired": "Mã số thuế là bắt buộc",
+      "yearsOfExperienceRequired": "Số năm kinh nghiệm là bắt buộc",
+      "numberOnly": "Vui lòng chỉ nhập số",
+      "specializationRequired": "Chuyên môn là bắt buộc",
+      "workingAreaRequired": "Khu vực hoạt động là bắt buộc",
+      "certificateImageRequired": "Vui lòng tải ảnh chứng chỉ",
+      "agentNameRequired": "Tên môi giới là bắt buộc",
+      "agentNameMin": "Tên môi giới phải có ít nhất 2 ký tự",
+      "idNumberRequired": "Số CCCD là bắt buộc",
+      "idNumberLength": "Số CCCD phải có 12 ký tự",
+      "genderRequired": "Vui lòng chọn giới tính",
+      "birthdayRequired": "Ngày sinh là bắt buộc",
+      "nationalityRequired": "Quốc tịch là bắt buộc",
+      "addressRequired": "Địa chỉ là bắt buộc",
+      "agreeToTermsRequired": "Bạn phải đồng ý với Điều khoản và Điều kiện cùng Chính sách bảo mật",
+      "noServerResponse": "Không nhận được phản hồi từ máy chủ"
+    }
   },
   "PropertiesPage": {
     "tabs": {

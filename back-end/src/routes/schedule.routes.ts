@@ -33,6 +33,7 @@ const scheduleController = new ScheduleController(
  * /schedules/availability:
  *   get:
  *     summary: Get public viewing slot availability for a listing on a specific date
+ *     description: Returns the booked and available viewing slots for a property on the requested date.
  *     tags: [Schedules]
  *     parameters:
  *       - in: query
@@ -64,7 +65,7 @@ router.use(requireAuth);
  * @swagger
  * tags:
  *   name: Schedules
- *   description: System monitoring and health check endpoints
+ *   description: Schedule booking, availability, and CRM timeline endpoints
  * components:
  *   schemas:
  *     Schedule:
@@ -124,6 +125,7 @@ router.use(requireAuth);
  * /schedules:
  *   post:
  *     summary: Create a new schedule
+ *     description: Creates a schedule entry for the authenticated agent with optional customer and property linkage.
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
@@ -243,6 +245,54 @@ router.post(
   scheduleController.createSchedule,
 );
 
+/**
+ * @swagger
+ * /schedules/request:
+ *   post:
+ *     summary: Request a public property viewing schedule
+ *     description: Creates a customer viewing request for a property after checking the selected time slot for conflicts.
+ *     tags: [Schedules]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - listingId
+ *               - customerName
+ *               - customerPhone
+ *               - customerEmail
+ *               - date
+ *               - startTime
+ *             properties:
+ *               listingId:
+ *                 type: string
+ *               customerName:
+ *                 type: string
+ *               customerPhone:
+ *                 type: string
+ *               customerEmail:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               startTime:
+ *                 type: string
+ *               customerNote:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Schedule request created successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Property not found
+ *       409:
+ *         description: Requested time slot conflicts with an existing booking
+ */
 router.post(
   "/request",
   validateRequest((lang) => validateRequestScheduleSchema(lang)),
@@ -254,6 +304,7 @@ router.post(
  * /schedules/me:
  *   get:
  *     summary: Get schedules for the current user
+ *     description: Returns schedules that belong to or are assigned to the currently authenticated user within the requested time range.
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
@@ -288,6 +339,7 @@ router.get("/me", scheduleController.getSchedulesMe);
  * /schedules/leads:
  *   get:
  *     summary: Get CRM schedule contacts for the current user
+ *     description: Returns contact-oriented schedule data used by the agent CRM view for the current user.
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
@@ -317,6 +369,7 @@ router.get("/leads", scheduleController.getLeads);
  * /schedules/{id}:
  *   delete:
  *     summary: Delete a schedule
+ *     description: Deletes a schedule entry if the authenticated user has access to it.
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
@@ -350,6 +403,7 @@ router.delete("/:id", scheduleController.deleteSchedule);
  * /schedules/{id}:
  *   put:
  *     summary: Update a schedule
+ *     description: Updates the details of a schedule entry if the authenticated user has access to it.
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []
@@ -394,6 +448,7 @@ router.put(
  * /schedules/{id}:
  *   get:
  *     summary: Get a schedule by id
+ *     description: Returns a single schedule entry by identifier if the authenticated user has access to it.
  *     tags: [Schedules]
  *     security:
  *       - bearerAuth: []

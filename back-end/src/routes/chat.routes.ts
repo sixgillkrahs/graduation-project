@@ -21,6 +21,7 @@ router.use(requireAuth);
  * /chat/conversations:
  *   get:
  *     summary: Get all conversations for current user
+ *     description: Returns all conversations that the authenticated user participates in, including basic participant and last-message metadata.
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
@@ -48,6 +49,7 @@ router.get("/conversations", chatController.getConversations);
  * /chat/conversations/{conversationId}/messages:
  *   get:
  *     summary: Get messages for a conversation
+ *     description: Returns paginated messages for a conversation that the authenticated user has access to.
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []
@@ -79,6 +81,7 @@ router.get(
  * /chat/conversations:
  *   post:
  *     summary: Create or retrieve a conversation
+ *     description: Creates a new conversation for the provided participants or returns the existing conversation when one already matches.
  *     tags: [Chat]
  *     security:
  *       - bearerAuth: []

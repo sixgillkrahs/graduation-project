@@ -15,6 +15,7 @@ router.use(requireAuth);
  * /jobs:
  *   get:
  *     summary: Get all jobs with pagination
+ *     description: Returns paginated background-job records so admins can inspect queue activity, filter jobs, and review execution status.
  *     tags: [Jobs]
  *     security:
  *       - bearerAuth: []
@@ -59,6 +60,7 @@ router.get("/", authorize(), jobController.getJobs);
  * /jobs/{jobId}/retry:
  *   post:
  *     summary: Retry a failed job
+ *     description: Re-queues a failed background job so it can be processed again.
  *     tags: [Jobs]
  *     security:
  *       - bearerAuth: []
@@ -92,6 +94,7 @@ router.post(
  * /jobs/{jobId}:
  *   delete:
  *     summary: Delete a job
+ *     description: Permanently removes a background job record from the queue storage.
  *     tags: [Jobs]
  *     security:
  *       - bearerAuth: []

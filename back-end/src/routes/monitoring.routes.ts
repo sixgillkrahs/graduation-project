@@ -18,6 +18,7 @@ const monitoringController = new MonitoringController(metricsService);
  * /monitoring/metrics:
  *   get:
  *     summary: Get system metrics
+ *     description: Exposes Prometheus-compatible metrics for application monitoring systems.
  *     tags: [Monitoring]
  *     responses:
  *       200:
@@ -34,6 +35,7 @@ router.get("/metrics", monitoringController.getMetrics);
  * /monitoring/health:
  *   get:
  *     summary: Check system health
+ *     description: Returns a high-level application health snapshot including uptime and memory usage.
  *     tags: [Monitoring]
  *     responses:
  *       200:
@@ -61,6 +63,7 @@ router.get("/health", monitoringController.getHealth);
  * /monitoring/readiness:
  *   get:
  *     summary: Check if application is ready to handle traffic
+ *     description: Indicates whether the application is fully initialized and ready to receive traffic.
  *     tags: [Monitoring]
  *     responses:
  *       200:
@@ -82,6 +85,7 @@ router.get("/readiness", monitoringController.getReadiness);
  * /monitoring/liveness:
  *   get:
  *     summary: Check if application is alive
+ *     description: Provides a lightweight liveness probe to confirm the process is still running.
  *     tags: [Monitoring]
  *     responses:
  *       200:
@@ -102,6 +106,7 @@ router.get("/liveness", monitoringController.getLiveness);
  * /monitoring/alerts:
  *   post:
  *     summary: Receive alerts from AlertManager
+ *     description: Receives Alertmanager webhook payloads so the application can process or log infrastructure alerts.
  *     tags: [Monitoring]
  *     security:
  *       - bearerAuth: []
@@ -130,6 +135,7 @@ router.post("/alerts", monitoringController.handleAlert);
  * /monitoring/simulate-error:
  *   get:
  *     summary: Simulate random errors (for testing)
+ *     description: Triggers a simulated application error response for monitoring and alerting tests.
  *     tags: [Monitoring]
  *     responses:
  *       400:
@@ -141,6 +147,19 @@ router.post("/alerts", monitoringController.handleAlert);
  */
 router.get("/simulate-error", monitoringController.simulateError);
 
+/**
+ * @swagger
+ * /monitoring/trigger-gc:
+ *   get:
+ *     summary: Trigger manual garbage collection
+ *     description: Triggers Node.js garbage collection when the process was started with the expose-gc flag.
+ *     tags: [Monitoring]
+ *     responses:
+ *       200:
+ *         description: Garbage collection triggered successfully
+ *       400:
+ *         description: Garbage collection is not available in the current runtime
+ */
 router.get("/trigger-gc", async (req, res) => {
     if (global.gc) {
         global.gc();
@@ -150,7 +169,17 @@ router.get("/trigger-gc", async (req, res) => {
     }
 });
 
-
+/**
+ * @swagger
+ * /monitoring/simulate-memory-leak:
+ *   get:
+ *     summary: Simulate memory pressure for testing
+ *     description: Allocates a large in-memory object graph to help test memory monitoring and alerting behavior.
+ *     tags: [Monitoring]
+ *     responses:
+ *       200:
+ *         description: Memory pressure simulation executed
+ */
 router.get("/simulate-memory-leak", (req, res) => {
     const arr: any[] = [];
     for (let i = 0; i < 1000000; i++) {

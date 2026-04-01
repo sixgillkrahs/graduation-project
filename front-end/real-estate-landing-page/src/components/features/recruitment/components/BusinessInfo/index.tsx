@@ -1,30 +1,35 @@
-import { CsButton } from "@/components/custom";
-import { Icon, Upload } from "@/components/ui";
-import { CsSelect } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { vietnamProvinces } from "@/const/vietnam-provinces";
-import { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
-import { AppDispatch, RootState } from "@/store";
-import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
+import { useTranslations } from "next-intl";
 import { memo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { CsButton } from "@/components/custom";
+import { Icon, Upload } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import { CsSelect } from "@/components/ui/select";
+import { vietnamProvinces } from "@/const/vietnam-provinces";
 import { toast } from "@/lib/toast";
+import type { BusinessInfo as BusinessInfoType } from "@/models/basicInfo.model";
 import { useUploadImages } from "@/shared/upload/mutate";
+import type { AppDispatch, RootState } from "@/store";
+import { nextStep, prevStep, updateBusinessInfo } from "@/store/store";
 
 type BusinessInfoFormType = Omit<BusinessInfoType, "certificateImage"> & {
   certificateImage: File[];
 };
 
-const validateBusinessInfo = (values: BusinessInfoFormType) => {
+const validateBusinessInfo = (
+  values: BusinessInfoFormType,
+  t: (key: string) => string,
+) => {
   const errors: Record<string, string> = {};
   if (!values.certificateImage?.length) {
-    errors.certificateImage = "Certificate image is required";
+    errors.certificateImage = t("validation.certificateImageRequired");
   }
   return errors;
 };
 
 const BusinessInfo = () => {
+  const t = useTranslations("RecruitmentPage");
   const dispatch = useDispatch<AppDispatch>();
   const [uploading, setUploading] = useState(false);
   const { mutateAsync: uploadImages } = useUploadImages();
@@ -44,7 +49,7 @@ const BusinessInfo = () => {
   });
 
   const onSubmit = (data: BusinessInfoFormType) => {
-    const errors = validateBusinessInfo(data);
+    const errors = validateBusinessInfo(data, (key) => t(key));
     if (Object.keys(errors).length > 0) return;
     const payload = {
       ...data,
@@ -71,10 +76,10 @@ const BusinessInfo = () => {
           }),
         );
       } else {
-        toast.error("Upload error");
+        toast.error(t("toast.uploadError"));
       }
-    } catch (err) {
-      toast.error("Upload failed");
+    } catch (_err) {
+      toast.error(t("toast.uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -92,12 +97,14 @@ const BusinessInfo = () => {
             name="certificateNumber"
             control={control}
             rules={{
-              required: "Certificate number is required",
+              required: t("validation.certificateNumberRequired"),
             }}
             render={({ field }) => (
               <Input
-                label="Certificate Number"
-                placeholder="CCHN-HN-123456"
+                label={t("businessInfo.fields.certificateNumber.label")}
+                placeholder={t(
+                  "businessInfo.fields.certificateNumber.placeholder",
+                )}
                 error={errors.certificateNumber?.message}
                 {...field}
               />
@@ -107,12 +114,12 @@ const BusinessInfo = () => {
             name="taxCode"
             control={control}
             rules={{
-              required: "Tax code is required",
+              required: t("validation.taxCodeRequired"),
             }}
             render={({ field }) => (
               <Input
-                label="Tax code"
-                placeholder="Please enter number"
+                label={t("businessInfo.fields.taxCode.label")}
+                placeholder={t("businessInfo.fields.taxCode.placeholder")}
                 error={errors.taxCode?.message}
                 {...field}
               />
@@ -124,17 +131,19 @@ const BusinessInfo = () => {
             name="yearsOfExperience"
             control={control}
             rules={{
-              required: "Year of experience is required",
+              required: t("validation.yearsOfExperienceRequired"),
               pattern: {
                 value: /^[0-9]{0,}$/,
-                message: "Please enter number",
+                message: t("validation.numberOnly"),
               },
             }}
             render={({ field }) => (
               <Input
-                label="Years Of Experience"
-                placeholder="Please enter number"
-                suffix="Year"
+                label={t("businessInfo.fields.yearsOfExperience.label")}
+                placeholder={t(
+                  "businessInfo.fields.yearsOfExperience.placeholder",
+                )}
+                suffix={t("businessInfo.fields.yearsOfExperience.suffix")}
                 error={errors.yearsOfExperience?.message}
                 {...field}
               />
@@ -144,21 +153,23 @@ const BusinessInfo = () => {
             name="specialization"
             control={control}
             rules={{
-              required: "Specialization is required",
+              required: t("validation.specializationRequired"),
             }}
             render={({ field }) => (
               <CsSelect
-                label="Specialization"
+                label={t("businessInfo.fields.specialization.label")}
                 error={errors.specialization?.message}
                 multiple
                 options={[
                   {
                     value: "APARTMENT",
-                    label: "APARTMENT",
+                    label: t(
+                      "businessInfo.fields.specialization.options.apartment",
+                    ),
                   },
                   {
                     value: "LAND",
-                    label: "LAND",
+                    label: t("businessInfo.fields.specialization.options.land"),
                   },
                 ]}
                 {...field}
@@ -171,12 +182,12 @@ const BusinessInfo = () => {
             name="workingArea"
             control={control}
             rules={{
-              required: "Working area is required",
+              required: t("validation.workingAreaRequired"),
             }}
             render={({ field }) => (
               <CsSelect
                 multiple
-                label="Working Area"
+                label={t("businessInfo.fields.workingArea.label")}
                 error={errors.workingArea?.message}
                 options={vietnamProvinces}
                 {...field}
@@ -189,16 +200,17 @@ const BusinessInfo = () => {
             name="certificateImage"
             control={control}
             rules={{
-              required: "Certificate image is required",
+              required: t("validation.certificateImageRequired"),
               validate: (val) =>
-                (val && val.length > 0) || "Certificate image is required",
+                (val && val.length > 0) ||
+                t("validation.certificateImageRequired"),
             }}
             render={({
               field: { onChange, value, ...restField },
               fieldState: { error },
             }) => (
               <Upload
-                label="Certificate Image"
+                label={t("businessInfo.fields.certificateImage.label")}
                 accept="image/jpeg,image/png"
                 {...restField}
                 value={value || []}
@@ -219,7 +231,7 @@ const BusinessInfo = () => {
             icon={<Icon.ArrowLeft className="w-5 h-5" />}
             disabled={isSubmitting}
           >
-            Back
+            {t("actions.back")}
           </CsButton>
           <CsButton
             className="cs-bg-black text-white px-6 py-2 rounded-full"
@@ -227,7 +239,7 @@ const BusinessInfo = () => {
             loading={uploading}
             disabled={uploading || isSubmitting}
           >
-            Next
+            {t("actions.next")}
           </CsButton>
         </div>
       </form>

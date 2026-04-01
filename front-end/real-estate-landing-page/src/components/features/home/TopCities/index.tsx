@@ -15,29 +15,25 @@ const TopCities = () => {
     {
       id: "hanoi",
       name: t("hanoi"),
-      image:
-        "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=800",
+      image: "/images/home/HN-web-1.jpg",
       query: "Hoan Kiem, Ha Noi",
     },
     {
       id: "hcmc",
       name: t("hcmc"),
-      image:
-        "https://images.unsplash.com/photo-1583417319070-4a69eb383306?auto=format&fit=crop&q=80&w=800",
+      image: "/images/home/HCM-web-1.jpg",
       query: "Quan 1, Ho Chi Minh",
     },
     {
       id: "danang",
       name: t("danang"),
-      image:
-        "https://images.unsplash.com/photo-1559508551-44bff1de756b?auto=format&fit=crop&q=80&w=800",
+      image: "/images/home/DDN-web-1.jpg",
       query: "Chau, Da Nang",
     },
     {
       id: "haiphong",
       name: t("haiphong"),
-      image:
-        "https://images.unsplash.com/photo-1528646033902-6c1e1ea25828?auto=format&fit=crop&q=80&w=800",
+      image: "/images/home/DNA-web-1.jpg",
       query: "Ngo Quyen, Hai Phong",
     },
   ];

@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { CsButton } from "@/components/custom";
 import { Icon } from "@/components/ui";
-import { useTranslations } from "next-intl";
 
 const BenefitItem = ({ title }: { title: string }) => {
   return (
@@ -41,8 +42,8 @@ const BenefitCard = ({
     </div>
 
     <div className="p-4 md:p-6 outline outline-1 outline-black/10 rounded-2xl flex flex-col gap-4 relative z-10">
-      {benefitItems.map((item, index) => (
-        <BenefitItem key={index} title={item} />
+      {benefitItems.map((item) => (
+        <BenefitItem key={item} title={item} />
       ))}
       <div className="mt-4">
         <CsButton className="cs-bg-black text-white">
@@ -68,26 +69,13 @@ const Benefit = () => {
     <section className="bg-black/10 py-10 md:py-30">
       <div className="px-4 md:px-20 container mx-auto flex flex-col gap-6">
         <div className="flex flex-col md:flex-row gap-6 items-stretch">
-          <div className="w-full md:w-7/12">
-            <img
-              src="https://placehold.co/600x300"
-              alt="100% Satisfaction Guarantee"
-              className="rounded-2xl w-full h-full object-cover"
-            />
-          </div>
-          <BenefitCard
-            titleNormal={t("titleNormal")}
-            titleItalic={t("titleItalic")}
-            benefitItems={benefitItems}
-            listMyPropertyText={t("listMyProperty")}
-          />
-        </div>
-        <div className="flex flex-col md:flex-row-reverse gap-6 items-stretch">
-          <div className="w-full md:w-7/12">
-            <img
-              src="https://placehold.co/600x300"
-              alt="100% Satisfaction Guarantee"
-              className="rounded-2xl w-full h-full object-cover"
+          <div className="relative w-full min-h-[280px] md:w-7/12 md:min-h-[520px] overflow-hidden rounded-2xl">
+            <Image
+              src="/images/home/whyus3.png"
+              alt={`${t("titleNormal")} ${t("titleItalic")}`}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 58vw"
             />
           </div>
           <BenefitCard

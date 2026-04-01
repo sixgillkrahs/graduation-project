@@ -14,6 +14,7 @@ const landlordController = new LandlordController(landlordService);
  * /landlords:
  *   get:
  *     summary: Get list of landlords
+ *     description: Returns a paginated landlord list for the authenticated user.
  *     tags: [Landlord]
  *     security:
  *       - bearerAuth: []
@@ -43,6 +44,7 @@ router.get("/", requireAuth, landlordController.getLandlords);
  * /landlords:
  *   post:
  *     summary: Create a new landlord
+ *     description: Creates a landlord record that can be linked to property management workflows.
  *     tags: [Landlord]
  *     security:
  *       - bearerAuth: []
@@ -77,6 +79,7 @@ router.post("/", requireAuth, landlordController.createLandlord);
  * /landlords/{id}:
  *   get:
  *     summary: Get landlord details
+ *     description: Returns the details of a single landlord record by identifier.
  *     tags: [Landlord]
  *     security:
  *       - bearerAuth: []
@@ -97,6 +100,7 @@ router.get("/:id", requireAuth, landlordController.getLandlord);
  * /landlords/{id}:
  *   put:
  *     summary: Update landlord
+ *     description: Updates the stored information for an existing landlord record.
  *     tags: [Landlord]
  *     security:
  *       - bearerAuth: []
@@ -131,6 +135,7 @@ router.put("/:id", requireAuth, landlordController.updateLandlord);
  * /landlords/{id}:
  *   delete:
  *     summary: Delete landlord
+ *     description: Deletes a landlord record by identifier.
  *     tags: [Landlord]
  *     security:
  *       - bearerAuth: []

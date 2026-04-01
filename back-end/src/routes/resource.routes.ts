@@ -81,6 +81,7 @@ router.use(authorize());
  * /resources:
  *   get:
  *     summary: Get all resources paginated
+ *     description: Returns a paginated list of permission resources available in the authorization system.
  *     tags: [Resources]
  *     security:
  *       - bearerAuth: []
@@ -125,6 +126,7 @@ router.get("/", resourcesController.getResourcesPaginated);
  * /resources/search:
  *   get:
  *     summary: Search resources by name or description
+ *     description: Searches permission resources by keyword against name and description fields.
  *     tags: [Resources]
  *     security:
  *       - bearerAuth: []
@@ -163,6 +165,7 @@ router.get("/search", resourcesController.searchResources);
  * /resources:
  *   post:
  *     summary: Create a new resource
+ *     description: Creates a new authorization resource that can be used when defining permissions.
  *     tags: [Resources]
  *     security:
  *       - bearerAuth: []
@@ -198,6 +201,7 @@ router.post(
  * /resources/{id}:
  *   get:
  *     summary: Get resource by id
+ *     description: Returns a single authorization resource by identifier.
  *     tags: [Resources]
  *     security:
  *       - bearerAuth: []
@@ -223,6 +227,7 @@ router.get("/:id", resourcesController.getResourceById);
  * /resources/{id}:
  *   put:
  *     summary: Update resource by id
+ *     description: Updates an existing authorization resource.
  *     tags: [Resources]
  *     security:
  *       - bearerAuth: []
@@ -265,6 +270,7 @@ router.put(
  * /resources/{id}:
  *   delete:
  *     summary: Delete resource by id
+ *     description: Deletes an authorization resource by identifier.
  *     tags: [Resources]
  *     security:
  *       - bearerAuth: []

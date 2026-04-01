@@ -11,7 +11,7 @@ const monitoringController = new HeroController(metricsService);
  * @swagger
  * tags:
  *   name: Hero
- *   description: System monitoring and health check endpoints
+ *   description: Hero-content management endpoints
  */
 
 // /**
