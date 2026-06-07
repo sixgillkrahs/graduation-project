@@ -11,6 +11,9 @@ services:
         APP_DIR: front-end/uaa
         LIB_DIR: library/gra-helper
         BUILD_SCRIPT: ${UAA_BUILD_SCRIPT:-build:prod}
+        VITE_BASEURL: ${UAA_VITE_BASEURL:-http://localhost:8080/api/}
+        VITE_BASEURL_AI: ${UAA_VITE_BASEURL_AI:-http://localhost:8082/}
+        ENVIRONMENT: ${UAA_ENVIRONMENT:-production}
     ports:
       - "${UAA_PORT:-5173}:8080"
     read_only: true

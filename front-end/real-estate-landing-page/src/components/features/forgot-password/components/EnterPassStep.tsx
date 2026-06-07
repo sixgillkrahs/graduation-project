@@ -8,11 +8,14 @@ import Link from "next/link";
 import { ROUTES } from "@/const/routes";
 import { CsButton } from "@/components/custom";
 import { Password } from "@/components/ui/password";
+import { useLocale } from "next-intl";
 
 const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
   const { token } = useSelector((state: RootState) => state.verifyOTP);
   const { mutateAsync: resetPassword, isPending } = useResetPassword();
   const [isSuccess, setIsSuccess] = useState(false);
+  const locale = useLocale();
+  const isVi = locale === "vi";
 
   const {
     control,
@@ -42,7 +45,7 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
         onClick={onBack}
       >
         <Icon.ArrowLeft className="main-color-gray w-5 h-5" />
-        Back
+        {isVi ? "Quay lại" : "Back"}
       </div>
 
       {isSuccess ? (
@@ -55,14 +58,35 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
           </div>
 
           <h2 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">
-            Password Reset Successful!
+            {isVi
+              ? "Đặt lại mật khẩu thành công!"
+              : "Password Reset Successful!"}
           </h2>
 
           <div className="max-w-md mx-auto space-y-2 text-gray-500 mb-8">
-            <p>Your password has been updated successfully.</p>
+            <p>
+              {isVi
+                ? "Mật khẩu của bạn đã được cập nhật thành công."
+                : "Your password has been updated successfully."}
+            </p>
             <p className="text-sm">
-              You can now sign in using your{" "}
-              <span className="font-medium text-gray-900">new password</span>.
+              {isVi ? (
+                <>
+                  Bây giờ bạn có thể đăng nhập bằng{" "}
+                  <span className="font-medium text-gray-900">
+                    mật khẩu mới
+                  </span>
+                  .
+                </>
+              ) : (
+                <>
+                  You can now sign in using your{" "}
+                  <span className="font-medium text-gray-900">
+                    new password
+                  </span>
+                  .
+                </>
+              )}
             </p>
           </div>
 
@@ -77,7 +101,7 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
             flex items-center justify-center
           "
             >
-              Back to Login
+              {isVi ? "Quay lại đăng nhập" : "Back to Login"}
             </Link>
 
             <Link
@@ -89,7 +113,7 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
             flex items-center justify-center
           "
             >
-              Go to Home Page
+              {isVi ? "Về trang chủ" : "Go to Home Page"}
             </Link>
           </div>
         </div>
@@ -97,10 +121,12 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
         <>
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-black mb-1">
-              Reset your password
+              {isVi ? "Đặt lại mật khẩu" : "Reset your password"}
             </h2>
             <p className="cs-typography-gray text-sm!">
-              Enter a new password for your account.
+              {isVi
+                ? "Nhập mật khẩu mới cho tài khoản của bạn."
+                : "Enter a new password for your account."}
             </p>
           </div>
 
@@ -109,17 +135,23 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
               name="password"
               control={control}
               rules={{
-                required: "Password is required",
+                required: isVi
+                  ? "Mật khẩu là bắt buộc"
+                  : "Password is required",
                 minLength: {
                   value: 8,
-                  message: "Password must be at least 8 characters",
+                  message: isVi
+                    ? "Mật khẩu phải có ít nhất 8 ký tự"
+                    : "Password must be at least 8 characters",
                 },
               }}
               render={({ field }) => (
                 <Password
                   {...field}
-                  label="New password"
-                  placeholder="Enter new password"
+                  label={isVi ? "Mật khẩu mới" : "New password"}
+                  placeholder={
+                    isVi ? "Nhập mật khẩu mới" : "Enter new password"
+                  }
                   error={errors.password?.message}
                 />
               )}
@@ -129,15 +161,22 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
               name="confirmPassword"
               control={control}
               rules={{
-                required: "Confirm password is required",
+                required: isVi
+                  ? "Xác nhận mật khẩu là bắt buộc"
+                  : "Confirm password is required",
                 validate: (val) =>
-                  val === watch("password") || "Passwords do not match",
+                  val === watch("password") ||
+                  (isVi
+                    ? "Mật khẩu xác nhận không khớp"
+                    : "Passwords do not match"),
               }}
               render={({ field }) => (
                 <Password
                   {...field}
-                  label="Confirm password"
-                  placeholder="Re-enter new password"
+                  label={isVi ? "Xác nhận mật khẩu" : "Confirm password"}
+                  placeholder={
+                    isVi ? "Nhập lại mật khẩu mới" : "Re-enter new password"
+                  }
                   error={errors.confirmPassword?.message}
                 />
               )}
@@ -148,7 +187,7 @@ const EnterPassStep = ({ onBack }: { onBack: () => void }) => {
               className="w-full cs-bg-red text-white mt-4"
               loading={isPending}
             >
-              Reset Password
+              {isVi ? "Đặt lại mật khẩu" : "Reset Password"}
             </CsButton>
           </form>
         </>

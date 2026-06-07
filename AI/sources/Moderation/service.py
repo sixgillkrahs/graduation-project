@@ -4,8 +4,6 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
-import joblib
-
 from sources.Moderation.hf_service import (
     HFModerationService,
     _normalize_text,
@@ -34,23 +32,34 @@ class ModerationService:
                     raise FileNotFoundError(
                         f"Moderation artifact not found: {self.artifact_path}"
                     )
+                try:
+                    import joblib
+                except ImportError as exc:
+                    raise RuntimeError(
+                        "joblib is not installed. Install moderation dependencies with "
+                        '".\\venv\\Scripts\\python.exe -m pip install -r requirements.moderation.txt".'
+                    ) from exc
+
                 self._bundle = joblib.load(self.artifact_path)
         return self._bundle
 
     def status(self) -> dict[str, Any]:
+        hf_status = self.hf_service.status()
         active_backend = (
             "hf_transformers"
-            if self.hf_service.available()
+            if hf_status["available"]
             else "sklearn_joblib" if self.artifact_path.exists() else None
         )
         return {
             "active_backend": active_backend,
             "artifact_path": str(self.artifact_path),
-            "loaded": self.artifact_path.exists() or self.hf_service.available(),
+            "loaded": self.artifact_path.exists() or hf_status["available"],
             "sklearn_available": self.artifact_path.exists(),
-            "hf_available": self.hf_service.available(),
-            "hf_model_dir": str(self.hf_service.model_dir),
-            "hf_zip_path": str(self.hf_service.zip_path),
+            "hf_available": hf_status["available"],
+            "hf_model_dir": hf_status["model_dir"],
+            "hf_resolved_model_dir": hf_status["resolved_model_dir"],
+            "hf_zip_path": hf_status["zip_path"],
+            "hf_missing_dependencies": hf_status["missing_dependencies"],
         }
 
     def predict(self, text: str) -> dict[str, Any]:

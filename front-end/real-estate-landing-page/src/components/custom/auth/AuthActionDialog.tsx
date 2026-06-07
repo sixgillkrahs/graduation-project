@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { LockKeyhole, LogIn } from "lucide-react";
+import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { ROUTES } from "@/const/routes";
 import { useState } from "react";
@@ -28,13 +29,19 @@ interface AuthActionDialogProps {
 export function AuthActionDialog({
   open,
   onOpenChange,
-  title = "Yêu cầu đăng nhập",
-  description = "Bạn cần đăng nhập để thực hiện tính năng này. Hãy đăng nhập ngay để trải nghiệm đầy đủ nhé!",
+  title,
+  description,
   redirectUrl,
 }: AuthActionDialogProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
+  const isVi = locale === "vi";
+  const defaultTitle = isVi ? "Yêu cầu đăng nhập" : "Sign in required";
+  const defaultDescription = isVi
+    ? "Bạn cần đăng nhập để thực hiện tính năng này. Hãy đăng nhập ngay để trải nghiệm đầy đủ nhé!"
+    : "You need to sign in to use this feature. Sign in now to unlock the full experience.";
 
   const handleLogin = () => {
     setIsLoading(true);
@@ -94,10 +101,10 @@ export function AuthActionDialog({
 
           <DialogHeader className="mt-6 text-center space-y-2">
             <DialogTitle className="text-2xl font-bold tracking-tight text-foreground text-center">
-              {title}
+              {title || defaultTitle}
             </DialogTitle>
             <DialogDescription className="text-base text-muted-foreground max-w-full mx-auto leading-relaxed text-center">
-              {description}
+              {description || defaultDescription}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -120,12 +127,12 @@ export function AuthActionDialog({
                   transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                   className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                 />
-                Đang chuyển hướng...
+                {isVi ? "Đang chuyển hướng..." : "Redirecting..."}
               </span>
             ) : (
               <span className="flex items-center gap-2">
                 <LogIn size={18} />
-                Đăng nhập ngay
+                {isVi ? "Đăng nhập ngay" : "Sign in now"}
               </span>
             )}
           </Button>
@@ -136,7 +143,9 @@ export function AuthActionDialog({
             className="w-full text-muted-foreground hover:text-foreground hover:bg-secondary/50"
             onClick={() => onOpenChange(false)}
           >
-            Để sau, tôi chỉ đang xem thôi
+            {isVi
+              ? "Để sau, tôi chỉ đang xem thôi"
+              : "Maybe later, I'm just browsing"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -8,6 +8,7 @@ import {
   DialogHeader,
 } from "@/components/ui/dialog";
 import { CheckCircle2, Mail } from "lucide-react";
+import { useLocale } from "next-intl";
 import { CsButton } from "@/components/custom";
 import { toast } from "@/lib/toast";
 
@@ -22,6 +23,9 @@ interface CelebrationModalProps {
 
 export const CelebrationModal = React.memo(
   ({ isOpen, onClose, customerData }: CelebrationModalProps) => {
+    const locale = useLocale();
+    const isVi = locale === "vi";
+
     useEffect(() => {
       if (isOpen) {
         const duration = 3 * 1000;
@@ -62,7 +66,9 @@ export const CelebrationModal = React.memo(
 
     const handleSendEmail = () => {
       toast.success(
-        `Congratulation email has been sent to ${customerData.email}! 📧`,
+        isVi
+          ? `Email chúc mừng đã được gửi tới ${customerData.email}! 📧`
+          : `A congratulation email has been sent to ${customerData.email}! 📧`,
       );
       onClose();
     };
@@ -71,9 +77,13 @@ export const CelebrationModal = React.memo(
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-md text-center flex flex-col items-center justify-center border-none bg-white rounded-3xl shadow-2xl px-8 pt-12 pb-10">
           <DialogHeader className="sr-only">
-            <DialogTitle>Celebration Success</DialogTitle>
+            <DialogTitle>
+              {isVi ? "Giao dịch đã hoàn tất" : "Celebration Success"}
+            </DialogTitle>
             <DialogDescription>
-              Property successfully marked as sold.
+              {isVi
+                ? "Bất động sản đã được đánh dấu là đã bán."
+                : "Property successfully marked as sold."}
             </DialogDescription>
           </DialogHeader>
 
@@ -82,11 +92,21 @@ export const CelebrationModal = React.memo(
           </div>
 
           <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
-            Deal Closed! 🚀
+            {isVi ? "Chốt giao dịch thành công! 🚀" : "Deal Closed! 🚀"}
           </h2>
           <p className="text-gray-500 mb-8 max-w-[280px]">
-            Congratulations! The property has been marked as{" "}
-            <strong>SOLD</strong> and removed from the active public listings.
+            {isVi ? (
+              <>
+                Bất động sản đã được đánh dấu là <strong>ĐÃ BÁN</strong> và gỡ
+                khỏi danh sách đang hiển thị công khai.
+              </>
+            ) : (
+              <>
+                Congratulations! The property has been marked as{" "}
+                <strong>SOLD</strong> and removed from the active public
+                listings.
+              </>
+            )}
           </p>
 
           {customerData.email && (
@@ -99,18 +119,36 @@ export const CelebrationModal = React.memo(
                 </div>
                 <div className="flex-1">
                   <p className="text-[15px] font-bold text-gray-900 mb-1">
-                    Email đã được gửi tự động
+                    {isVi
+                      ? "Email đã được gửi tự động"
+                      : "The email has been sent automatically"}
                   </p>
                   <p className="text-sm text-gray-500 leading-relaxed mb-4">
-                    Hệ thống đã tự động gửi email chúc mừng giao dịch thành công
-                    đến{" "}
-                    <strong>{customerData.name || customerData.email}</strong>.
+                    {isVi ? (
+                      <>
+                        Hệ thống đã tự động gửi email chúc mừng giao dịch thành
+                        công đến{" "}
+                        <strong>
+                          {customerData.name || customerData.email}
+                        </strong>
+                        .
+                      </>
+                    ) : (
+                      <>
+                        The system has automatically sent a closing
+                        congratulations email to{" "}
+                        <strong>
+                          {customerData.name || customerData.email}
+                        </strong>
+                        .
+                      </>
+                    )}
                   </p>
                   <CsButton
                     onClick={handleSendEmail}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md font-medium text-sm transition-all duration-300"
                   >
-                    Xác nhận & Đóng
+                    {isVi ? "Xác nhận & Đóng" : "Confirm & Close"}
                   </CsButton>
                 </div>
               </div>
@@ -121,7 +159,7 @@ export const CelebrationModal = React.memo(
             onClick={onClose}
             className="text-gray-400 hover:text-gray-700 text-sm font-semibold tracking-wide uppercase transition relative group"
           >
-            Close Dashboard
+            {isVi ? "Đóng" : "Close Dashboard"}
             <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gray-300 transition-all duration-300 group-hover:w-full"></span>
           </button>
         </DialogContent>
@@ -131,4 +169,3 @@ export const CelebrationModal = React.memo(
 );
 
 CelebrationModal.displayName = "CelebrationModal";
-

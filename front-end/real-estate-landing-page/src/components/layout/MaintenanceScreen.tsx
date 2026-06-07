@@ -1,13 +1,21 @@
 import type { LandingSettings } from "@/lib/landing-settings";
+import { getLocale } from "next-intl/server";
 
-const MaintenanceScreen = ({
+const MaintenanceScreen = async ({
   settings,
 }: {
   settings: Pick<
     LandingSettings,
-    "systemName" | "systemTagline" | "supportEmail" | "supportPhone" | "brandColor"
+    | "systemName"
+    | "systemTagline"
+    | "supportEmail"
+    | "supportPhone"
+    | "brandColor"
   >;
 }) => {
+  const locale = await getLocale();
+  const isVi = locale === "vi";
+
   return (
     <main className="min-h-[calc(100vh-80px)] bg-background px-4 py-16 text-foreground md:px-10">
       <div className="mx-auto flex min-h-[70vh] max-w-4xl items-center justify-center">
@@ -22,27 +30,32 @@ const MaintenanceScreen = ({
                 className="mb-4 inline-flex rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-white"
                 style={{ backgroundColor: settings.brandColor }}
               >
-                Maintenance Mode
+                {isVi ? "Bảo trì hệ thống" : "Maintenance Mode"}
               </p>
               <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                {settings.systemName} is temporarily unavailable
+                {isVi
+                  ? `${settings.systemName} đang tạm thời không khả dụng`
+                  : `${settings.systemName} is temporarily unavailable`}
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
                 {settings.systemTagline}
               </p>
               <p className="mt-6 max-w-2xl text-sm leading-6 text-muted-foreground">
-                We are applying updates and will reopen the landing experience as
-                soon as the platform is stable again.
+                {isVi
+                  ? "Chúng tôi đang cập nhật hệ thống và sẽ mở lại trải nghiệm landing ngay khi nền tảng ổn định."
+                  : "We are applying updates and will reopen the landing experience as soon as the platform is stable again."}
               </p>
             </div>
 
             <div className="rounded-[28px] border border-border bg-muted/20 p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Need help now?
+                {isVi ? "Cần hỗ trợ ngay?" : "Need help now?"}
               </p>
               <div className="mt-5 space-y-4 text-sm text-foreground">
                 <div>
-                  <div className="font-medium">Support email</div>
+                  <div className="font-medium">
+                    {isVi ? "Email hỗ trợ" : "Support email"}
+                  </div>
                   <a
                     href={`mailto:${settings.supportEmail}`}
                     className="text-muted-foreground transition-colors hover:text-foreground"
@@ -51,7 +64,9 @@ const MaintenanceScreen = ({
                   </a>
                 </div>
                 <div>
-                  <div className="font-medium">Support phone</div>
+                  <div className="font-medium">
+                    {isVi ? "Số điện thoại hỗ trợ" : "Support phone"}
+                  </div>
                   <a
                     href={`tel:${settings.supportPhone}`}
                     className="text-muted-foreground transition-colors hover:text-foreground"

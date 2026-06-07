@@ -20,7 +20,6 @@ import { CsButton, CsPagination } from "@/components/custom";
 import { CsDialog } from "@/components/custom/dialog";
 import { ROUTES } from "@/const/routes";
 import { Input } from "@/components/ui/input";
-import { CsSelect } from "@/components/ui/select";
 import StateSurface from "@/components/ui/state-surface";
 import { formatPropertyPostedDate } from "@/lib/property-date";
 import { mapPropertyToCompareItem } from "./compare/compare.utils";
@@ -30,6 +29,7 @@ import AdvancedSearch, {
 import FilterSidebar from "./components/FilterSidebar";
 import PropertyCard from "./components/PropertyCard";
 import PropertyCardSkeleton from "./components/PropertyCardSkeleton";
+import PropertySearchModeSwitch from "./components/PropertySearchModeSwitch";
 import RecentlyViewedSection from "./components/RecentlyViewedSection";
 import SavedSearchesPanel from "./components/SavedSearchesPanel";
 import { useRecentlyViewedProperties } from "./recently-viewed/useRecentlyViewedProperties";
@@ -42,6 +42,29 @@ import {
   upsertSavedSearch,
 } from "./saved-search/saved-search.utils";
 import {
+  SemanticSearchComposer,
+  SemanticSearchFilters,
+  SemanticSearchSummary,
+} from "./semantic-search/components";
+import type {
+  PropertySearchMode,
+  SemanticSearchUrlState,
+} from "./semantic-search/types";
+import {
+  buildSemanticSearchQueryString,
+  buildSemanticSearchRequest,
+  buildSemanticStateFromStandardParams,
+  hasSemanticQuery,
+  normalizeSemanticFilters,
+  parseSemanticSearchState,
+  SEMANTIC_SEARCH_MODE,
+} from "./semantic-search/url-state";
+import {
+  formatSemanticAddress,
+  formatSemanticScoreLabel,
+  normalizeSemanticProperty,
+} from "./semantic-search/utils";
+import {
   buildParamsFromSearchParams,
   buildPropertyQueryString,
   DEFAULT_PROPERTY_PARAMS,
@@ -49,7 +72,11 @@ import {
   extractSidebarFiltersFromParams,
   type PropertyTabType,
 } from "./search-state";
-import { useFavoriteProperties, useOnSale } from "./services/query";
+import {
+  useFavoriteProperties,
+  useOnSale,
+  useSemanticPropertySearch,
+} from "./services/query";
 
 type PropertyFilters = Partial<IParamsPagination>;
 
@@ -92,52 +119,108 @@ const getSortValue = (params: IParamsPagination) =>
       : "price_desc"
     : "newest";
 
-const getContextContent = (params: IParamsPagination) => {
+const getContextContent = (
+  params: IParamsPagination,
+  t: ReturnType<typeof useTranslations<"PropertiesPage">>,
+) => {
   if (params.hasVirtualTour === "true" || params.hasVirtualTour === true) {
     return {
-      eyebrow: "Immersive Search",
-      title: "Homes with 3D virtual tours",
-      description:
-        "Browse listings you can inspect remotely before booking an in-person visit.",
-      badge: "3D tours only",
+      eyebrow: t("standardSearch.virtualTour.eyebrow"),
+      title: t("standardSearch.virtualTour.title"),
+      description: t("standardSearch.virtualTour.description"),
+      badge: t("standardSearch.virtualTour.badge"),
     };
   }
 
   if (params.demandType === "SALE") {
     return {
-      eyebrow: "Buy With Clarity",
-      title: "Homes for sale",
-      description:
-        "Focus on ownership-ready listings, compare pricing, and shortlist the right neighborhoods faster.",
-      badge: "For sale",
+      eyebrow: t("standardSearch.sale.eyebrow"),
+      title: t("standardSearch.sale.title"),
+      description: t("standardSearch.sale.description"),
+      badge: t("standardSearch.sale.badge"),
     };
   }
 
   if (params.demandType === "RENT") {
     return {
-      eyebrow: "Rent Smarter",
-      title: "Rental properties",
-      description:
-        "Explore move-in-ready listings with filters tuned for budget, location and convenience.",
-      badge: "For rent",
+      eyebrow: t("standardSearch.rent.eyebrow"),
+      title: t("standardSearch.rent.title"),
+      description: t("standardSearch.rent.description"),
+      badge: t("standardSearch.rent.badge"),
     };
   }
 
   return {
-    eyebrow: "Explore Market",
-    title: "All available properties",
-    description:
-      "Search across sale and rental listings, then narrow the shortlist with practical filters.",
-    badge: "All listings",
+    eyebrow: t("standardSearch.all.eyebrow"),
+    title: t("standardSearch.all.title"),
+    description: t("standardSearch.all.description"),
+    badge: t("standardSearch.all.badge"),
   };
 };
+
+const getSemanticContextContent = (
+  semanticState: SemanticSearchUrlState,
+  t: ReturnType<typeof useTranslations<"PropertiesPage.semanticSearch">>,
+) => {
+  if (!semanticState.query.trim()) {
+    return {
+      eyebrow: t("heroEyebrow"),
+      title: t("heroTitle"),
+      description: t("heroDescription"),
+      badge: t("heroBadge"),
+    };
+  }
+
+  return {
+    eyebrow: semanticState.explain
+      ? t("heroExplainEyebrow")
+      : t("heroResultsEyebrow"),
+    title: t("heroResultsTitle", {
+      query: semanticState.query,
+    }),
+    description: semanticState.explain
+      ? t("heroExplainDescription")
+      : t("heroResultsDescription"),
+    badge: semanticState.explain
+      ? t("heroExplainBadge")
+      : t("heroResultsBadge"),
+  };
+};
+
+const buildStandardPropertyAddress = (params: {
+  address: string;
+  ward: string;
+  province: string;
+}) =>
+  [
+    params.address,
+    findOptionLabel(params.ward, LIST_WARD) || params.ward,
+    findOptionLabel(params.province, LIST_PROVINCE) || params.province,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+const countSemanticFilters = (state: SemanticSearchUrlState) =>
+  Object.values(state.filters).reduce((count, value) => {
+    if (Array.isArray(value)) {
+      return value.length > 0 ? count + 1 : count;
+    }
+
+    return value !== undefined && value !== null && value !== ""
+      ? count + 1
+      : count;
+  }, 0);
 
 const Properties = () => {
   const t = useTranslations("PropertiesPage");
   const savedSearchesT = useTranslations("PropertiesPage.savedSearches");
+  const semanticT = useTranslations("PropertiesPage.semanticSearch");
   const locale = useLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const searchMode: PropertySearchMode =
+    searchParams.get("mode") === SEMANTIC_SEARCH_MODE ? "semantic" : "standard";
+  const isSemanticMode = searchMode === "semantic";
 
   const activeTab: PropertyTabType =
     searchParams.get("tab") === "favorites" ? "favorites" : "all";
@@ -145,6 +228,14 @@ const Properties = () => {
   const initialParams = useMemo(
     () => buildParamsFromSearchParams(searchParams),
     [searchParams],
+  );
+  const semanticState = useMemo(
+    () => parseSemanticSearchState(searchParams),
+    [searchParams],
+  );
+  const semanticRequest = useMemo(
+    () => buildSemanticSearchRequest(semanticState),
+    [semanticState],
   );
   const initialSearchFilters = useMemo(
     () => extractSearchFiltersFromParams(initialParams),
@@ -164,6 +255,10 @@ const Properties = () => {
   const [savedSearchName, setSavedSearchName] = useState("");
   const [isFilterSidebarCollapsed, setIsFilterSidebarCollapsed] =
     useState(false);
+  const [
+    isSemanticFilterSidebarCollapsed,
+    setIsSemanticFilterSidebarCollapsed,
+  ] = useState(false);
   const [isProvinceListCollapsed, setIsProvinceListCollapsed] = useState(false);
   const {
     items: recentlyViewedItems,
@@ -181,14 +276,27 @@ const Properties = () => {
     isFetching,
     isError,
     refetch,
-  } = useOnSale(params);
+  } = useOnSale(params, !isSemanticMode && activeTab === "all");
   const {
     data: favorites,
     isLoading: isFavLoading,
     isFetching: isFavFetching,
     isError: isFavError,
     refetch: refetchFavorites,
-  } = useFavoriteProperties(params);
+  } = useFavoriteProperties(
+    params,
+    !isSemanticMode && activeTab === "favorites",
+  );
+  const {
+    data: semanticResponse,
+    isLoading: isSemanticLoading,
+    isFetching: isSemanticFetching,
+    isError: isSemanticError,
+    refetch: refetchSemantic,
+  } = useSemanticPropertySearch(
+    semanticRequest,
+    isSemanticMode && hasSemanticQuery(semanticState),
+  );
 
   useEffect(() => {
     setParams(initialParams);
@@ -233,7 +341,20 @@ const Properties = () => {
   const currentRefetch = isAllTab ? refetch : refetchFavorites;
   const currentResults = currentData?.data?.results || [];
   const hasCurrentResults = currentResults.length > 0;
-  const contextContent = useMemo(() => getContextContent(params), [params]);
+  const contextContent = useMemo(
+    () => getContextContent(params, t),
+    [params, t],
+  );
+  const semanticContextContent = useMemo(
+    () => getSemanticContextContent(semanticState, semanticT),
+    [semanticState, semanticT],
+  );
+  const semanticResults = semanticResponse?.data?.results || [];
+  const hasSemanticResults = semanticResults.length > 0;
+  const semanticFilterCount = useMemo(
+    () => countSemanticFilters(semanticState),
+    [semanticState],
+  );
 
   const searchSyncKey = useMemo(
     () =>
@@ -244,6 +365,15 @@ const Properties = () => {
         maxPrice: initialSearchFilters.maxPrice ?? 5,
       }),
     [initialSearchFilters],
+  );
+  const semanticSyncKey = useMemo(
+    () =>
+      JSON.stringify({
+        query: semanticState.query,
+        explain: semanticState.explain,
+        filters: semanticState.filters,
+      }),
+    [semanticState],
   );
   const activeFilterCount = useMemo(
     () =>
@@ -271,29 +401,26 @@ const Properties = () => {
     [params],
   );
   const canSaveCurrentSearch = savedSearchQueryString.length > 0;
-  const provinceQuickOptions = useMemo(
-    () => {
-      const allProvinceOptions = LIST_PROVINCE.map((province) => ({
-        label: province.label,
-        value: province.value,
-      }));
+  const provinceQuickOptions = useMemo(() => {
+    const allProvinceOptions = LIST_PROVINCE.map((province) => ({
+      label: province.label,
+      value: province.value,
+    }));
 
-      const featuredOptions = allProvinceOptions.filter((province) => {
-        const normalizedLabel = normalizeProvinceQuery(province.label);
-        const normalizedValue = normalizeProvinceQuery(province.value);
+    const featuredOptions = allProvinceOptions.filter((province) => {
+      const normalizedLabel = normalizeProvinceQuery(province.label);
+      const normalizedValue = normalizeProvinceQuery(province.value);
 
-        return FEATURED_PROVINCE_QUERIES.some(
-          (query) =>
-            normalizedLabel.includes(query) || normalizedValue.includes(query),
-        );
-      });
+      return FEATURED_PROVINCE_QUERIES.some(
+        (query) =>
+          normalizedLabel.includes(query) || normalizedValue.includes(query),
+      );
+    });
 
-      return featuredOptions.length > 0
-        ? featuredOptions
-        : allProvinceOptions.slice(0, 12);
-    },
-    [],
-  );
+    return featuredOptions.length > 0
+      ? featuredOptions
+      : allProvinceOptions.slice(0, 12);
+  }, []);
   const activeProvinceQuery = useMemo(
     () => normalizeProvinceQuery(params.query?.toString()),
     [params.query],
@@ -307,6 +434,14 @@ const Properties = () => {
       params: nextParams,
       tab: nextTab,
     });
+
+    router.replace(`/properties${nextQuery ? `?${nextQuery}` : ""}`, {
+      scroll: false,
+    });
+  };
+
+  const replaceSemanticRoute = (nextState: SemanticSearchUrlState) => {
+    const nextQuery = buildSemanticSearchQueryString(nextState);
 
     router.replace(`/properties${nextQuery ? `?${nextQuery}` : ""}`, {
       scroll: false,
@@ -366,6 +501,14 @@ const Properties = () => {
     gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handleSemanticPageChange = (page: number) => {
+    replaceSemanticRoute({
+      ...semanticState,
+      page,
+    });
+    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const handleTabChange = (tab: PropertyTabType) => {
     const nextParams = { ...params, page: 1 };
     setParams(nextParams);
@@ -385,6 +528,14 @@ const Properties = () => {
     });
   };
 
+  const handleSemanticResetFilters = () => {
+    replaceSemanticRoute({
+      ...semanticState,
+      page: 1,
+      filters: {},
+    });
+  };
+
   const handleFilterChange = (filters: PropertyFilters) => {
     sidebarFiltersRef.current = filters;
     setParams((prev) => {
@@ -397,6 +548,16 @@ const Properties = () => {
       };
       replacePropertiesRoute(nextParams);
       return nextParams;
+    });
+  };
+
+  const handleSemanticFilterChange = (
+    filters: SemanticSearchUrlState["filters"],
+  ) => {
+    replaceSemanticRoute({
+      ...semanticState,
+      page: 1,
+      filters: normalizeSemanticFilters(filters),
     });
   };
 
@@ -422,6 +583,21 @@ const Properties = () => {
       };
       replacePropertiesRoute(nextParams);
       return nextParams;
+    });
+  };
+
+  const handleSemanticSearchChange = ({
+    query,
+    explain,
+  }: {
+    query: string;
+    explain: boolean;
+  }) => {
+    replaceSemanticRoute({
+      ...semanticState,
+      query,
+      explain,
+      page: 1,
     });
   };
 
@@ -488,6 +664,15 @@ const Properties = () => {
     }
   };
 
+  const handleSearchModeChange = (mode: PropertySearchMode) => {
+    if (mode === "standard") {
+      replacePropertiesRoute(params, activeTab);
+      return;
+    }
+
+    replaceSemanticRoute(buildSemanticStateFromStandardParams(params));
+  };
+
   const handleOpenSaveSearchDialog = () => {
     const existingSearch = savedSearches.find(
       (item) => item.queryString === savedSearchQueryString,
@@ -537,109 +722,131 @@ const Properties = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <AdvancedSearch
-        onSearchChange={handleSearchChange}
-        initialFilters={{
-          query: initialSearchFilters.query || "",
-          demandType: initialSearchFilters.demandType || "all",
-          propertyType: initialSearchFilters.propertyType || "all",
-          maxPrice: initialSearchFilters.maxPrice,
-        }}
-        syncKey={searchSyncKey}
+      <PropertySearchModeSwitch
+        mode={searchMode}
+        onChange={handleSearchModeChange}
       />
+
+      {isSemanticMode ? (
+        <SemanticSearchComposer
+          initialQuery={semanticState.query}
+          initialExplain={semanticState.explain}
+          syncKey={semanticSyncKey}
+          isSearching={isSemanticFetching}
+          onSubmit={handleSemanticSearchChange}
+        />
+      ) : (
+        <AdvancedSearch
+          onSearchChange={handleSearchChange}
+          initialFilters={{
+            query: initialSearchFilters.query || "",
+            demandType: initialSearchFilters.demandType || "all",
+            propertyType: initialSearchFilters.propertyType || "all",
+            maxPrice: initialSearchFilters.maxPrice,
+          }}
+          syncKey={searchSyncKey}
+        />
+      )}
 
       <main className="container mx-auto px-4 py-8 md:px-20">
         <div className="flex flex-col gap-8 lg:flex-row">
           <div className="hidden lg:sticky lg:top-32 lg:flex lg:w-1/4 lg:self-start lg:flex-col lg:gap-6">
-            <FilterSidebar
-              sticky={false}
-              className="lg:block"
-              onReset={handleResetFilters}
-              onFilterChange={handleFilterChange}
-              initialFilters={initialSidebarFilters}
-              collapsible
-              collapsed={isFilterSidebarCollapsed}
-              onCollapsedChange={setIsFilterSidebarCollapsed}
-            />
+            {isSemanticMode ? (
+              <SemanticSearchFilters
+                sticky={false}
+                onApply={handleSemanticFilterChange}
+                onReset={handleSemanticResetFilters}
+                initialFilters={semanticState.filters}
+                collapsible
+                collapsed={isSemanticFilterSidebarCollapsed}
+                onCollapsedChange={setIsSemanticFilterSidebarCollapsed}
+              />
+            ) : (
+              <>
+                <FilterSidebar
+                  sticky={false}
+                  className="lg:block"
+                  onReset={handleResetFilters}
+                  onFilterChange={handleFilterChange}
+                  initialFilters={initialSidebarFilters}
+                  collapsible
+                  collapsed={isFilterSidebarCollapsed}
+                  onCollapsedChange={setIsFilterSidebarCollapsed}
+                />
 
-            {isAllTab ? (
-              <section className="overflow-hidden rounded-[28px] border border-stone-200 bg-white p-5 shadow-sm">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
-                        {t("quickLocations.eyebrow")}
-                      </p>
-                      <h2 className="mt-2 flex items-center gap-2 text-lg font-semibold tracking-tight text-stone-900">
-                        <MapPin className="h-4 w-4 text-stone-500" />
-                        {t("quickLocations.title")}
-                      </h2>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setIsProvinceListCollapsed((prev) => !prev)
-                      }
-                      className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50"
-                    >
-                      {isProvinceListCollapsed
-                        ? t("quickLocations.expand")
-                        : t("quickLocations.collapse")}
-                      <ChevronDown
-                        className={`h-3.5 w-3.5 transition-transform ${isProvinceListCollapsed ? "" : "rotate-180"}`}
-                      />
-                    </button>
-                  </div>
-
-                  {!isProvinceListCollapsed ? (
-                    <p className="text-sm leading-6 text-stone-600">
-                      {t("quickLocations.description")}
-                    </p>
-                  ) : null}
-                </div>
-
-                {!isProvinceListCollapsed ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleProvinceQuickSearch()}
-                      className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
-                        !activeProvinceQuery
-                          ? "border-stone-900 bg-stone-900 text-white"
-                          : "border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-300 hover:bg-stone-100"
-                      }`}
-                    >
-                      {t("quickLocations.all")}
-                    </button>
-
-                    {provinceQuickOptions.map((province) => {
-                      const isActive =
-                        normalizeProvinceQuery(province.label) ===
-                          activeProvinceQuery ||
-                        normalizeProvinceQuery(province.value) ===
-                          activeProvinceQuery;
-
-                      return (
+                {isAllTab ? (
+                  <section className="overflow-hidden rounded-[28px] border border-stone-200 bg-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">
+                            {t("quickLocations.eyebrow")}
+                          </p>
+                        </div>
                         <button
-                          key={province.value}
                           type="button"
                           onClick={() =>
-                            handleProvinceQuickSearch(province.label)
+                            setIsProvinceListCollapsed((prev) => !prev)
                           }
+                          className="inline-flex items-center gap-1 rounded-full border border-stone-200 px-2.5 py-1 text-xs font-medium text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50"
+                        >
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 transition-transform ${isProvinceListCollapsed ? "" : "rotate-180"}`}
+                          />
+                        </button>
+                      </div>
+
+                      {!isProvinceListCollapsed ? (
+                        <p className="text-sm leading-6 text-stone-600">
+                          {t("quickLocations.description")}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {!isProvinceListCollapsed ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleProvinceQuickSearch()}
                           className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
-                            isActive
-                              ? "border-red-200 bg-red-50 text-red-600"
-                              : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                            !activeProvinceQuery
+                              ? "border-stone-900 bg-stone-900 text-white"
+                              : "border-stone-200 bg-stone-50 text-stone-700 hover:border-stone-300 hover:bg-stone-100"
                           }`}
                         >
-                          {province.label}
+                          {t("quickLocations.all")}
                         </button>
-                      );
-                    })}
-                  </div>
+
+                        {provinceQuickOptions.map((province) => {
+                          const isActive =
+                            normalizeProvinceQuery(province.label) ===
+                              activeProvinceQuery ||
+                            normalizeProvinceQuery(province.value) ===
+                              activeProvinceQuery;
+
+                          return (
+                            <button
+                              key={province.value}
+                              type="button"
+                              onClick={() =>
+                                handleProvinceQuickSearch(province.label)
+                              }
+                              className={`rounded-full border px-3 py-2 text-xs font-medium transition-colors ${
+                                isActive
+                                  ? "border-red-200 bg-red-50 text-red-600"
+                                  : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                              }`}
+                            >
+                              {province.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </section>
                 ) : null}
-              </section>
-            ) : null}
+              </>
+            )}
           </div>
 
           <div className="flex-1" ref={gridRef}>
@@ -647,61 +854,71 @@ const Properties = () => {
               <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                 <div className="max-w-2xl">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-500">
-                    {contextContent.eyebrow}
+                    {isSemanticMode
+                      ? semanticContextContent.eyebrow
+                      : contextContent.eyebrow}
                   </p>
                   <h1 className="mt-2 text-3xl font-semibold tracking-tight text-stone-900">
-                    {contextContent.title}
+                    {isSemanticMode
+                      ? semanticContextContent.title
+                      : contextContent.title}
                   </h1>
                   <p className="mt-3 text-sm leading-6 text-stone-600">
-                    {contextContent.description}
+                    {isSemanticMode
+                      ? semanticContextContent.description
+                      : contextContent.description}
                   </p>
                 </div>
                 <span className="inline-flex w-fit rounded-full border border-stone-300 bg-white/80 px-4 py-2 text-sm font-medium text-stone-700">
-                  {contextContent.badge}
+                  {isSemanticMode
+                    ? semanticContextContent.badge
+                    : contextContent.badge}
                 </span>
               </div>
             </section>
 
-            <div className="mb-6 overflow-x-auto">
-              <div className="inline-flex min-w-max items-center gap-1 rounded-xl bg-gray-100 p-1">
-                <button
-                  type="button"
-                  onClick={() => handleTabChange("all")}
-                  className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                    isAllTab
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  <Search className="h-4 w-4" />
-                  {t("tabs.allProperties")}
-                </button>
-                {isLoggedIn ? (
+            {!isSemanticMode ? (
+              <div className="mb-6 overflow-x-auto">
+                <div className="inline-flex min-w-max items-center gap-1 rounded-xl bg-gray-100 p-1">
                   <button
                     type="button"
-                    onClick={() => handleTabChange("favorites")}
+                    onClick={() => handleTabChange("all")}
                     className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                      !isAllTab
-                        ? "bg-white text-red-600 shadow-sm"
+                      isAllTab
+                        ? "bg-white text-gray-900 shadow-sm"
                         : "text-gray-500 hover:text-gray-700"
                     }`}
                   >
-                    <Heart
-                      className={`h-4 w-4 ${!isAllTab ? "fill-current" : ""}`}
-                    />
-                    {t("tabs.myFavorites")}
-                    {favorites?.data?.totalResults !== undefined &&
-                    favorites.data.totalResults > 0 ? (
-                      <span className="min-w-[20px] rounded-full bg-red-100 px-1.5 py-0.5 text-center text-xs font-bold text-red-600">
-                        {favorites.data.totalResults}
-                      </span>
-                    ) : null}
+                    <Search className="h-4 w-4" />
+                    {t("tabs.allProperties")}
                   </button>
-                ) : null}
+                  {isLoggedIn ? (
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange("favorites")}
+                      className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
+                        !isAllTab
+                          ? "bg-white text-red-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      <Heart
+                        className={`h-4 w-4 ${!isAllTab ? "fill-current" : ""}`}
+                      />
+                      {t("tabs.myFavorites")}
+                      {favorites?.data?.totalResults !== undefined &&
+                      favorites.data.totalResults > 0 ? (
+                        <span className="min-w-[20px] rounded-full bg-red-100 px-1.5 py-0.5 text-center text-xs font-bold text-red-600">
+                          {favorites.data.totalResults}
+                        </span>
+                      ) : null}
+                    </button>
+                  ) : null}
+                </div>
               </div>
-            </div>
+            ) : null}
 
-            {isAllTab ? (
+            {!isSemanticMode && isAllTab ? (
               <>
                 {recentlyViewedHydrated ? (
                   <div className="mb-6">
@@ -725,55 +942,82 @@ const Properties = () => {
             ) : null}
 
             <div className="mb-6 grid grid-cols-1 gap-3 lg:hidden">
-              <CsButton
-                type="button"
-                onClick={() => router.push(ROUTES.PROPERTY_MAP_SEARCH)}
-                className="h-11 rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white hover:bg-stone-800"
-                icon={<SlidersHorizontal className="h-4 w-4" />}
-              >
-                {t("heading.mapSearch")}
-              </CsButton>
+              {!isSemanticMode ? (
+                <>
+                  <CsButton
+                    type="button"
+                    onClick={() => router.push(ROUTES.PROPERTY_MAP_SEARCH)}
+                    className="h-11 rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white hover:bg-stone-800"
+                    icon={<SlidersHorizontal className="h-4 w-4" />}
+                  >
+                    {t("heading.mapSearch")}
+                  </CsButton>
 
-              <button
-                type="button"
-                onClick={() => setIsMobileFiltersOpen(true)}
-                className="flex h-11 items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50/40"
-              >
-                <span className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4 text-red-500" />
-                  {t("filter.title")}
-                </span>
-                {activeFilterCount > 0 ? (
-                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
-                    {activeFilterCount}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileFiltersOpen(true)}
+                    className="flex h-11 items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50/40"
+                  >
+                    <span className="flex items-center gap-2">
+                      <SlidersHorizontal className="h-4 w-4 text-red-500" />
+                      {t("filter.title")}
+                    </span>
+                    {activeFilterCount > 0 ? (
+                      <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
+                        {activeFilterCount}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-medium text-gray-500">
+                        Open
+                      </span>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFiltersOpen(true)}
+                  className="flex h-11 items-center justify-between rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50/40"
+                >
+                  <span className="flex items-center gap-2">
+                    <SlidersHorizontal className="h-4 w-4 text-red-500" />
+                    {semanticT("filters.title")}
                   </span>
-                ) : (
-                  <span className="text-xs font-medium text-gray-500">
-                    Open
-                  </span>
-                )}
-              </button>
-
-              <CsSelect
-                placeholder={t("sort.placeholder")}
-                value={getSortValue(params)}
-                onChange={handleSortChange}
-                options={[
-                  { value: "newest", label: t("sort.newest") },
-                  { value: "price_asc", label: t("sort.priceLowHigh") },
-                  { value: "price_desc", label: t("sort.priceHighLow") },
-                ]}
-                className="h-11 border-gray-200 bg-white"
-              />
+                  {semanticFilterCount > 0 ? (
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600">
+                      {semanticFilterCount}
+                    </span>
+                  ) : (
+                    <span className="text-xs font-medium text-gray-500">
+                      Open
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
 
             <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {isAllTab ? t("heading.allTitle") : t("heading.favTitle")}
-                </h1>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {isSemanticMode
+                    ? semanticT("resultsTitle")
+                    : isAllTab
+                      ? t("heading.allTitle")
+                      : t("heading.favTitle")}
+                </h2>
                 <p className="mt-1 text-sm text-gray-500">
-                  {currentLoading ? (
+                  {isSemanticMode ? (
+                    isSemanticLoading ? (
+                      <span className="inline-block h-4 w-48 animate-pulse rounded bg-gray-200" />
+                    ) : hasSemanticQuery(semanticState) ? (
+                      semanticT("resultsMeta", {
+                        count: semanticResults.length,
+                        total: semanticResponse?.data?.totalResults || 0,
+                      })
+                    ) : (
+                      semanticT("resultsPlaceholder")
+                    )
+                  ) : currentLoading ? (
                     <span className="inline-block h-4 w-40 animate-pulse rounded bg-gray-200" />
                   ) : (
                     t("heading.showing", {
@@ -784,37 +1028,74 @@ const Properties = () => {
                 </p>
               </div>
 
-              <div className="hidden items-center gap-3 lg:flex">
-                <CsButton
-                  type="button"
-                  onClick={() => router.push(ROUTES.PROPERTY_MAP_SEARCH)}
-                  className="rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white hover:bg-stone-800"
-                  icon={<SlidersHorizontal className="h-4 w-4" />}
-                >
-                  {t("heading.mapSearch")}
-                </CsButton>
+              {!isSemanticMode ? (
+                <div className="hidden items-center gap-3 lg:flex">
+                  <CsButton
+                    type="button"
+                    onClick={() => router.push(ROUTES.PROPERTY_MAP_SEARCH)}
+                    className="rounded-xl bg-stone-900 px-4 text-sm font-semibold text-white hover:bg-stone-800"
+                    icon={<SlidersHorizontal className="h-4 w-4" />}
+                  >
+                    {t("heading.mapSearch")}
+                  </CsButton>
 
-                <span className="text-sm font-medium text-gray-500">
-                  {t("sort.label")}
-                </span>
-                <div className="w-48">
-                  <CsSelect
-                    placeholder={t("sort.placeholder")}
-                    value={getSortValue(params)}
-                    onChange={handleSortChange}
-                    options={[
-                      { value: "newest", label: t("sort.newest") },
-                      { value: "price_asc", label: t("sort.priceLowHigh") },
-                      { value: "price_desc", label: t("sort.priceHighLow") },
-                    ]}
-                    className="h-10 border-gray-200 bg-white"
-                  />
+                  <span className="text-sm font-medium text-gray-500">
+                    {t("sort.label")}
+                  </span>
+                  <div className="w-48">
+                    <select
+                      value={getSortValue(params)}
+                      onChange={(event) => handleSortChange(event.target.value)}
+                      className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none transition focus:border-black"
+                    >
+                      <option value="newest">{t("sort.newest")}</option>
+                      <option value="price_asc">
+                        {t("sort.priceLowHigh")}
+                      </option>
+                      <option value="price_desc">
+                        {t("sort.priceHighLow")}
+                      </option>
+                    </select>
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
 
+            {/* {isSemanticMode && hasSemanticQuery(semanticState) ? (
+              <>
+                {isSemanticLoading ? (
+                  <section className="mb-6 animate-pulse rounded-[28px] border border-stone-200 bg-white p-5 shadow-sm">
+                    <div className="h-3 w-32 rounded bg-stone-100" />
+                    <div className="mt-4 h-8 w-2/3 rounded bg-stone-200" />
+                    <div className="mt-3 h-4 w-full rounded bg-stone-100" />
+                    <div className="mt-2 h-4 w-1/2 rounded bg-stone-100" />
+                    <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                      {Array.from({ length: 3 }).map((_, index) => (
+                        <div
+                          key={`semantic-summary-skeleton-${index + 1}`}
+                          className="rounded-2xl bg-stone-50 p-4"
+                        >
+                          <div className="h-3 w-20 rounded bg-stone-100" />
+                          <div className="mt-3 h-6 w-14 rounded bg-stone-200" />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ) : semanticResponse?.data ? (
+                  <SemanticSearchSummary
+                    className="mb-6"
+                    data={semanticResponse.data}
+                  />
+                ) : null}
+              </>
+            ) : null} */}
+
             <div className="relative">
-              {currentFetching && !currentLoading ? (
+              {(
+                isSemanticMode
+                  ? isSemanticFetching && !isSemanticLoading
+                  : currentFetching && !currentLoading
+              ) ? (
                 <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-32">
                   <div className="rounded-full bg-white/80 p-3 shadow-lg backdrop-blur-sm">
                     <Loader2 className="h-6 w-6 animate-spin text-red-600" />
@@ -824,143 +1105,296 @@ const Properties = () => {
 
               <div
                 className={`grid grid-cols-1 gap-6 transition-opacity duration-300 md:grid-cols-2 xl:grid-cols-3 ${
-                  currentFetching && !currentLoading
-                    ? "opacity-50"
-                    : "opacity-100"
+                  isSemanticMode
+                    ? isSemanticFetching && !isSemanticLoading
+                      ? "opacity-50"
+                      : "opacity-100"
+                    : currentFetching && !currentLoading
+                      ? "opacity-50"
+                      : "opacity-100"
                 }`}
               >
-                {currentLoading
-                  ? PROPERTY_SKELETON_KEYS.map((key) => (
-                      <PropertyCardSkeleton key={key} />
-                    ))
-                  : hasCurrentResults
-                    ? currentResults.map((prop) => (
-                        <PropertyCard
-                          key={prop._id}
-                          id={prop._id}
-                          image={prop.media.thumbnail}
-                          title={prop.title}
-                          badges={{
-                            aiRecommended: false,
-                            tour3D: prop.media.virtualTourUrls.length > 0,
-                          }}
-                          address={`${prop.location.address}, ${findOptionLabel(prop.location.ward, LIST_WARD)}, ${findOptionLabel(prop.location.province, LIST_PROVINCE)}`}
-                          price={prop.features.price.toString()}
-                          currency={prop.features.currency}
-                          specs={{
-                            beds: prop.features.bedrooms,
-                            baths: prop.features.bathrooms,
-                            area: prop.features.area,
-                          }}
-                          unit={prop.features.priceUnit}
-                          agent={{
-                            name: prop.userId.fullName,
-                            avatar: prop.userId.avatarUrl,
-                          }}
-                          postedAt={formatPropertyPostedDate(
-                            prop.createdAt,
-                            locale,
-                          )}
-                          type={
-                            prop.demandType?.toLowerCase() === "sale"
-                              ? "sale"
-                              : "rent"
-                          }
-                          isFavorite={prop.isFavorite}
-                          compareItem={mapPropertyToCompareItem(prop)}
-                        />
+                {isSemanticMode
+                  ? isSemanticLoading
+                    ? PROPERTY_SKELETON_KEYS.map((key) => (
+                        <PropertyCardSkeleton key={key} />
                       ))
-                    : null}
+                    : hasSemanticResults
+                      ? semanticResults.map((result) => {
+                          const property = normalizeSemanticProperty(
+                            result.property,
+                          );
+
+                          return (
+                            <PropertyCard
+                              key={property._id}
+                              id={property._id}
+                              image={property.media.thumbnail}
+                              title={property.title}
+                              badges={{
+                                aiRecommended: true,
+                                tour3D:
+                                  property.media.virtualTourUrls.length > 0,
+                              }}
+                              address={formatSemanticAddress(result.property)}
+                              price={property.features.price.toString()}
+                              currency={property.features.currency}
+                              specs={{
+                                beds: property.features.bedrooms,
+                                baths: property.features.bathrooms,
+                                area: property.features.area,
+                              }}
+                              unit={property.features.priceUnit}
+                              agent={{
+                                name: property.userId.fullName,
+                                avatar: property.userId.avatarUrl,
+                                isPro: property.userId.isPro,
+                                plan: property.userId.plan,
+                              }}
+                              postedAt={formatPropertyPostedDate(
+                                property.createdAt || new Date().toISOString(),
+                                locale,
+                              )}
+                              type={
+                                property.demandType?.toLowerCase() === "sale"
+                                  ? "sale"
+                                  : "rent"
+                              }
+                              isFavorite={property.isFavorite}
+                              compareItem={mapPropertyToCompareItem(property)}
+                              reasons={result.reasons}
+                              scoreLabel={formatSemanticScoreLabel(
+                                result.finalScore,
+                              )}
+                              ctaLabel={t("viewDetails")}
+                            />
+                          );
+                        })
+                      : null
+                  : currentLoading
+                    ? PROPERTY_SKELETON_KEYS.map((key) => (
+                        <PropertyCardSkeleton key={key} />
+                      ))
+                    : hasCurrentResults
+                      ? currentResults.map((prop) => (
+                          <PropertyCard
+                            key={prop._id}
+                            id={prop._id}
+                            image={prop.media.thumbnail}
+                            title={prop.title}
+                            badges={{
+                              aiRecommended: false,
+                              tour3D: prop.media.virtualTourUrls.length > 0,
+                            }}
+                            address={buildStandardPropertyAddress({
+                              address: prop.location.address,
+                              ward: prop.location.ward,
+                              province: prop.location.province,
+                            })}
+                            price={prop.features.price.toString()}
+                            currency={prop.features.currency}
+                            specs={{
+                              beds: prop.features.bedrooms,
+                              baths: prop.features.bathrooms,
+                              area: prop.features.area,
+                            }}
+                            unit={prop.features.priceUnit}
+                            agent={{
+                              name: prop.userId.fullName,
+                              avatar: prop.userId.avatarUrl,
+                            }}
+                            postedAt={formatPropertyPostedDate(
+                              prop.createdAt,
+                              locale,
+                            )}
+                            type={
+                              prop.demandType?.toLowerCase() === "sale"
+                                ? "sale"
+                                : "rent"
+                            }
+                            isFavorite={prop.isFavorite}
+                            compareItem={mapPropertyToCompareItem(prop)}
+                          />
+                        ))
+                      : null}
               </div>
 
-              {!currentLoading && currentError && !hasCurrentResults ? (
-                <StateSurface
-                  className="mt-2"
-                  tone="danger"
-                  eyebrow={isAllTab ? "Properties" : "Favorites"}
-                  icon={<AlertCircle className="h-6 w-6" />}
-                  title={
-                    isAllTab
-                      ? "Could not load properties"
-                      : "Could not load your favorites"
-                  }
-                  description={
-                    isAllTab
-                      ? "The listing feed is temporarily unavailable. Try again or clear the current filters."
-                      : "Your saved properties could not be loaded right now. Try again in a moment."
-                  }
-                  primaryAction={{
-                    label: "Try again",
-                    onClick: () => {
-                      void currentRefetch();
-                    },
-                  }}
-                  secondaryAction={{
-                    label: isAllTab ? "Clear filters" : t("tabs.allProperties"),
-                    onClick: () => {
-                      if (isAllTab) {
-                        handleResetFilters();
-                        return;
+              {isSemanticMode ? (
+                <>
+                  {!hasSemanticQuery(semanticState) ? (
+                    <StateSurface
+                      className="mt-2"
+                      tone="brand"
+                      eyebrow={semanticT("emptyQueryEyebrow")}
+                      icon={<Search className="h-6 w-6" />}
+                      title={semanticT("emptyQueryTitle")}
+                      description={semanticT("emptyQueryDescription")}
+                    />
+                  ) : null}
+
+                  {!isSemanticLoading &&
+                  isSemanticError &&
+                  !hasSemanticResults ? (
+                    <StateSurface
+                      className="mt-2"
+                      tone="danger"
+                      eyebrow={semanticT("errorEyebrow")}
+                      icon={<AlertCircle className="h-6 w-6" />}
+                      title={semanticT("errorTitle")}
+                      description={semanticT("errorDescription")}
+                      primaryAction={{
+                        label: semanticT("retry"),
+                        onClick: () => {
+                          void refetchSemantic();
+                        },
+                      }}
+                      secondaryAction={{
+                        label: semanticT("clearFilters"),
+                        onClick: () => {
+                          handleSemanticResetFilters();
+                        },
+                        variant: "outline",
+                      }}
+                    />
+                  ) : null}
+
+                  {!isSemanticLoading &&
+                  !isSemanticError &&
+                  hasSemanticQuery(semanticState) &&
+                  !hasSemanticResults ? (
+                    <StateSurface
+                      className="mt-2"
+                      tone="brand"
+                      eyebrow={semanticT("emptyEyebrow")}
+                      icon={<House className="h-6 w-6" />}
+                      title={semanticT("emptyTitle")}
+                      description={semanticT("emptyDescription")}
+                      primaryAction={{
+                        label: semanticT("clearFilters"),
+                        onClick: () => {
+                          handleSemanticResetFilters();
+                        },
+                      }}
+                      secondaryAction={{
+                        label: semanticT("retry"),
+                        onClick: () => {
+                          void refetchSemantic();
+                        },
+                        variant: "outline" as const,
+                      }}
+                    />
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  {!currentLoading && currentError && !hasCurrentResults ? (
+                    <StateSurface
+                      className="mt-2"
+                      tone="danger"
+                      eyebrow={isAllTab ? "Properties" : "Favorites"}
+                      icon={<AlertCircle className="h-6 w-6" />}
+                      title={
+                        isAllTab
+                          ? "Could not load properties"
+                          : "Could not load your favorites"
                       }
-
-                      handleTabChange("all");
-                    },
-                    variant: "outline",
-                  }}
-                />
-              ) : null}
-
-              {!currentLoading && !currentError && !hasCurrentResults ? (
-                <StateSurface
-                  className="mt-2"
-                  tone="brand"
-                  eyebrow={isAllTab ? "Properties" : "Favorites"}
-                  icon={
-                    isAllTab ? (
-                      <House className="h-6 w-6" />
-                    ) : (
-                      <Heart className="h-6 w-6" />
-                    )
-                  }
-                  title={
-                    isAllTab
-                      ? "No properties match these filters"
-                      : t("empty.noFavorites")
-                  }
-                  description={
-                    isAllTab
-                      ? "Try widening your budget, changing the property type, or resetting the search to see more listings."
-                      : t("empty.noFavoritesDesc")
-                  }
-                  primaryAction={{
-                    label: isAllTab ? "Reset filters" : t("tabs.allProperties"),
-                    onClick: () => {
-                      if (isAllTab) {
-                        handleResetFilters();
-                        return;
+                      description={
+                        isAllTab
+                          ? "The listing feed is temporarily unavailable. Try again or clear the current filters."
+                          : "Your saved properties could not be loaded right now. Try again in a moment."
                       }
+                      primaryAction={{
+                        label: "Try again",
+                        onClick: () => {
+                          void currentRefetch();
+                        },
+                      }}
+                      secondaryAction={{
+                        label: isAllTab
+                          ? "Clear filters"
+                          : t("tabs.allProperties"),
+                        onClick: () => {
+                          if (isAllTab) {
+                            handleResetFilters();
+                            return;
+                          }
 
-                      handleTabChange("all");
-                    },
-                  }}
-                  secondaryAction={
-                    isAllTab
-                      ? {
-                          label: "Refresh results",
-                          onClick: () => {
-                            void currentRefetch();
-                          },
-                          variant: "outline" as const,
-                        }
-                      : undefined
-                  }
-                />
-              ) : null}
+                          handleTabChange("all");
+                        },
+                        variant: "outline",
+                      }}
+                    />
+                  ) : null}
+
+                  {!currentLoading && !currentError && !hasCurrentResults ? (
+                    <StateSurface
+                      className="mt-2"
+                      tone="brand"
+                      eyebrow={isAllTab ? "Properties" : "Favorites"}
+                      icon={
+                        isAllTab ? (
+                          <House className="h-6 w-6" />
+                        ) : (
+                          <Heart className="h-6 w-6" />
+                        )
+                      }
+                      title={
+                        isAllTab
+                          ? "No properties match these filters"
+                          : t("empty.noFavorites")
+                      }
+                      description={
+                        isAllTab
+                          ? "Try widening your budget, changing the property type, or resetting the search to see more listings."
+                          : t("empty.noFavoritesDesc")
+                      }
+                      primaryAction={{
+                        label: isAllTab
+                          ? "Reset filters"
+                          : t("tabs.allProperties"),
+                        onClick: () => {
+                          if (isAllTab) {
+                            handleResetFilters();
+                            return;
+                          }
+
+                          handleTabChange("all");
+                        },
+                      }}
+                      secondaryAction={
+                        isAllTab
+                          ? {
+                              label: "Refresh results",
+                              onClick: () => {
+                                void currentRefetch();
+                              },
+                              variant: "outline" as const,
+                            }
+                          : undefined
+                      }
+                    />
+                  ) : null}
+                </>
+              )}
             </div>
 
-            {!currentLoading &&
-            !currentError &&
-            (currentData?.data?.totalResults || 0) > 0 ? (
+            {isSemanticMode ? (
+              !isSemanticLoading &&
+              !isSemanticError &&
+              (semanticResponse?.data?.totalResults || 0) > 0 ? (
+                <div className="mt-6 flex w-full justify-center">
+                  <CsPagination
+                    total={semanticResponse?.data?.totalResults || 0}
+                    current={semanticResponse?.data?.page || 1}
+                    pageSize={semanticResponse?.data?.limit || 8}
+                    onChange={handleSemanticPageChange}
+                    disabled={isSemanticFetching}
+                  />
+                </div>
+              ) : null
+            ) : !currentLoading &&
+              !currentError &&
+              (currentData?.data?.totalResults || 0) > 0 ? (
               <div className="mt-6 flex w-full justify-center">
                 <CsPagination
                   total={currentData?.data?.totalResults || 0}
@@ -978,23 +1412,38 @@ const Properties = () => {
       <CsDialog
         open={isMobileFiltersOpen}
         onOpenChange={setIsMobileFiltersOpen}
-        title={t("filter.title")}
+        title={isSemanticMode ? semanticT("filters.title") : t("filter.title")}
         from="bottom"
         footer={null}
         className="w-full max-w-none rounded-t-[28px] sm:max-w-lg"
       >
         <div className="space-y-3">
           <p className="text-sm text-gray-500">
-            Refine bedrooms, bathrooms, and orientation without losing your
-            place in the results.
+            {isSemanticMode
+              ? semanticT("filters.mobileDescription")
+              : "Refine bedrooms, bathrooms, and orientation without losing your place in the results."}
           </p>
-          <FilterSidebar
-            sticky={false}
-            className="border-none p-0"
-            onReset={handleResetFilters}
-            onFilterChange={handleFilterChange}
-            initialFilters={initialSidebarFilters}
-          />
+
+          {isSemanticMode ? (
+            <SemanticSearchFilters
+              sticky={false}
+              className="border-none p-0"
+              onApply={(filters) => {
+                handleSemanticFilterChange(filters);
+                setIsMobileFiltersOpen(false);
+              }}
+              onReset={handleSemanticResetFilters}
+              initialFilters={semanticState.filters}
+            />
+          ) : (
+            <FilterSidebar
+              sticky={false}
+              className="border-none p-0"
+              onReset={handleResetFilters}
+              onFilterChange={handleFilterChange}
+              initialFilters={initialSidebarFilters}
+            />
+          )}
         </div>
       </CsDialog>
 

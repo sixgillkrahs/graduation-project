@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
+import { useLocale } from "next-intl";
 import { useModal } from "./useModal";
 import styles from "./index.module.css";
 import { Icon } from "../Icon";
@@ -21,6 +22,8 @@ const Modal = ({
   children,
   maskClosable = true,
 }: ModalProps) => {
+  const locale = useLocale();
+
   useEffect(() => {
     if (!open) return;
 
@@ -61,7 +64,7 @@ const Modal = ({
             <div className={styles["antd-modal-title"]}>{title}</div>
             <button
               className={styles["antd-modal-close"]}
-              aria-label="Close"
+              aria-label={locale === "vi" ? "Đóng" : "Close"}
               onClick={onCancel}
             >
               <Icon.Close />

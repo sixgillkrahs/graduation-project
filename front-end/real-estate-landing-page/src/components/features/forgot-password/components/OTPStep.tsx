@@ -8,6 +8,7 @@ import { setToken } from "@/store/verify.store";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useVerifyOTP } from "../services/mutate";
+import { useLocale } from "next-intl";
 import Timer from "./Timer";
 
 const OTPStep = ({
@@ -20,22 +21,16 @@ const OTPStep = ({
   const { mutateAsync: verifyOTP, isPending } = useVerifyOTP();
   const { email } = useSelector((state: RootState) => state.verifyOTP);
   const dispatch = useDispatch();
-  const {
-    control,
-    setValue,
-    watch,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IForgotPasswordService.IBodyVerifyOTP>({
-    defaultValues: {
-      otp: "",
-      email,
-    },
-    mode: "onChange",
-  });
-
-  const otpValue = watch("otp");
-
+  const locale = useLocale();
+  const isVi = locale === "vi";
+  const { control, handleSubmit } =
+    useForm<IForgotPasswordService.IBodyVerifyOTP>({
+      defaultValues: {
+        otp: "",
+        email,
+      },
+      mode: "onChange",
+    });
   const onSubmit = async (data: IForgotPasswordService.IBodyVerifyOTP) => {
     const resp = await verifyOTP(data);
     if (resp.success) {
@@ -52,17 +47,27 @@ const OTPStep = ({
         onClick={onBack}
       >
         <Icon.ArrowLeft className="main-color-gray w-5 h-5" />
-        Back
+        {isVi ? "Quay lại" : "Back"}
       </div>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-black mb-1">
-          We've sent you a code
+          {isVi ? "Chúng tôi đã gửi mã cho bạn" : "We've sent you a code"}
         </h2>
 
         <div className="cs-typography-gray text-sm! max-w-[400px]">
-          Enter the code we sent to{" "}
-          <span className="font-medium text-black">{email}</span> to reset your
-          password.
+          {isVi ? (
+            <>
+              Nhập mã đã gửi đến{" "}
+              <span className="font-medium text-black">{email}</span> để đặt lại
+              mật khẩu.
+            </>
+          ) : (
+            <>
+              Enter the code we sent to{" "}
+              <span className="font-medium text-black">{email}</span> to reset
+              your password.
+            </>
+          )}
         </div>
       </div>
       <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
@@ -70,10 +75,12 @@ const OTPStep = ({
           name="otp"
           control={control}
           rules={{
-            required: "OTP is required",
+            required: isVi ? "OTP là bắt buộc" : "OTP is required",
             minLength: {
               value: 6,
-              message: "OTP must be 6 characters",
+              message: isVi
+                ? "OTP phải đủ 6 ký tự"
+                : "OTP must be 6 characters",
             },
           }}
           render={({ field, fieldState }) => (
@@ -92,7 +99,7 @@ const OTPStep = ({
           className="w-full cs-bg-red text-white mt-2"
           loading={isPending}
         >
-          Reset Password
+          {isVi ? "Xác nhận mã" : "Verify Code"}
         </CsButton>
       </form>
       <Timer email={email} />

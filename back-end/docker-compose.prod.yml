@@ -19,6 +19,17 @@ services:
     networks:
       - app-network
 
+  qdrant:
+    image: qdrant/qdrant:v1.14.1
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - app-network
+
   redis:
     image: redis:7.4-alpine
     restart: unless-stopped
@@ -53,6 +64,7 @@ services:
       REDIS_PASS: ${REDIS_PASS:-change-me-redis-password}
       REDIS_DB: ${REDIS_DB:-0}
       REDIS_URL: ${REDIS_URL:-redis://:change-me-redis-password@redis:6379/0}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin@gmail.com}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@gmail.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@123456}
@@ -62,6 +74,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      qdrant:
+        condition: service_started
       redis:
         condition: service_healthy
     restart: unless-stopped
@@ -182,6 +196,7 @@ services:
 
 volumes:
   mongo_data:
+  qdrant_data:
   redis_data:
   prometheus_data:
   alertmanager_data:

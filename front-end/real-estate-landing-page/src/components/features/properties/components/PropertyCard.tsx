@@ -1,11 +1,21 @@
 "use client";
 
-import { Bath, Bed, Heart, MapPin, Maximize, Video } from "lucide-react";
+import {
+  ArrowRight,
+  Bath,
+  Bed,
+  Heart,
+  MapPin,
+  Maximize,
+  Sparkles,
+  Video,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { PropertyCompareItem } from "@/components/features/properties/compare/compare.types";
 import PropertyCompareToggleButton from "@/components/features/properties/compare/PropertyCompareToggleButton";
+import { Badge } from "@/components/ui/badge";
 import { ROUTES } from "@/const/routes";
 import { useAppDispatch } from "@/lib/hooks";
 import { formatPropertyPrice } from "@/lib/property-price";
@@ -36,12 +46,17 @@ export interface PropertyCardProps {
   agent: {
     name: string;
     avatar?: string;
+    isPro?: boolean;
+    plan?: "BASIC" | "PRO";
   };
   postedAt: string;
   className?: string;
   type: "rent" | "sale";
   isFavorite: boolean;
   compareItem: PropertyCompareItem;
+  reasons?: string[];
+  scoreLabel?: string;
+  ctaLabel?: string;
 }
 
 const PropertyCard = ({
@@ -60,6 +75,9 @@ const PropertyCard = ({
   id,
   isFavorite,
   compareItem,
+  reasons,
+  scoreLabel,
+  ctaLabel,
 }: PropertyCardProps) => {
   const dispatch = useAppDispatch();
   const { mutateAsync: recordInteraction } = useRecordInteraction();
@@ -97,6 +115,12 @@ const PropertyCard = ({
     await recordInteraction({ id, type: "FAVORITE", metadata });
     queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.onSale] });
     queryClient.invalidateQueries({ queryKey: [PropertyQueryKey.favorites] });
+    queryClient.invalidateQueries({
+      queryKey: [PropertyQueryKey.semanticSearch],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [PropertyQueryKey.semanticSearchExplain],
+    });
   };
 
   return (
@@ -165,6 +189,12 @@ const PropertyCard = ({
                   {type !== "sale" && "/month"}
                 </span>
               </span>
+              {scoreLabel ? (
+                <Badge className="rounded-full bg-stone-900 px-2.5 py-1 text-[11px] font-semibold text-white">
+                  <Sparkles className="h-3 w-3" />
+                  {scoreLabel}
+                </Badge>
+              ) : null}
             </div>
 
             <h3 className="line-clamp-1 font-semibold text-gray-900 transition-colors group-hover:text-red-500">
@@ -216,11 +246,39 @@ const PropertyCard = ({
               <span className="truncate text-xs font-medium text-gray-600">
                 {agent?.name}
               </span>
+              {agent.isPro || agent.plan === "PRO" ? (
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700"
+                >
+                  PRO
+                </Badge>
+              ) : null}
             </div>
             <span className="text-right text-xs font-medium text-gray-400">
               {t("detail.posted", { date: postedAt })}
             </span>
           </div>
+
+          {reasons?.length ? (
+            <div className="flex flex-wrap gap-2 rounded-2xl border border-stone-100 bg-stone-50 p-3">
+              {reasons.slice(0, 3).map((reason) => (
+                <span
+                  key={reason}
+                  className="inline-flex items-center rounded-full border border-stone-200 bg-white px-2.5 py-1 text-xs font-medium text-stone-700"
+                >
+                  {reason}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {ctaLabel ? (
+            <div className="flex items-center justify-between rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-stone-800">
+              <span>{ctaLabel}</span>
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          ) : null}
         </div>
       </Link>
 

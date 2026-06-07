@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import importlib.util
 import json
 import inspect
 import zipfile
@@ -10,7 +11,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_MODEL_DIR = ROOT / "models" / "hf-moderation"
+DEFAULT_MODEL_DIR = ROOT / "models" / "hf_moderation"
 DEFAULT_ZIP_PATH = ROOT / "models" / "hf_moderation_model.zip"
 
 
@@ -73,6 +74,25 @@ class HFModerationService:
         self._bundle: dict[str, Any] | None = None
         self._lock = Lock()
 
+    def _resolve_model_dir(self) -> Path:
+        direct_config = self.model_dir / "config.json"
+        nested_model_dir = self.model_dir / "model"
+        nested_config = nested_model_dir / "config.json"
+
+        if direct_config.exists():
+            return self.model_dir
+        if nested_config.exists():
+            return nested_model_dir
+        return self.model_dir
+
+    def missing_dependencies(self) -> list[str]:
+        required_modules = ("torch", "transformers")
+        return [
+            module_name
+            for module_name in required_modules
+            if importlib.util.find_spec(module_name) is None
+        ]
+
     def _ensure_model_dir(self) -> None:
         if self.model_dir.exists():
             return
@@ -95,6 +115,7 @@ class HFModerationService:
                 return self._bundle
 
             self._ensure_model_dir()
+            model_dir = self._resolve_model_dir()
 
             try:
                 import torch
@@ -104,16 +125,20 @@ class HFModerationService:
                 )
             except ImportError as exc:
                 raise RuntimeError(
-                    "transformers dependencies are not installed. Run pip install -r AI/requirements.txt"
+                    "transformers dependencies are not installed. Install moderation "
+                    "dependencies with "
+                    '".\\venv\\Scripts\\python.exe -m pip install -r requirements.moderation.txt".'
                 ) from exc
 
             metadata_path = self.model_dir / "metadata.json"
+            if not metadata_path.exists():
+                metadata_path = model_dir / "metadata.json"
             metadata = {}
             if metadata_path.exists():
                 metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
 
             tokenizer = AutoTokenizer.from_pretrained(
-                str(self.model_dir),
+                str(model_dir),
                 local_files_only=True,
             )
             model_kwargs = {
@@ -128,7 +153,7 @@ class HFModerationService:
                 model_kwargs["use_safetensors"] = True
 
             model = AutoModelForSequenceClassification.from_pretrained(
-                str(self.model_dir),
+                str(model_dir),
                 **model_kwargs,
             )
             model.eval()
@@ -146,6 +171,7 @@ class HFModerationService:
                 "clean_margin": metadata.get("clean_margin", 0.08),
                 "max_length": metadata.get("max_length", 128),
                 "metadata": metadata,
+                "model_dir": model_dir,
             }
             return self._bundle
 
@@ -153,11 +179,14 @@ class HFModerationService:
         return self.model_dir.exists() or self.zip_path.exists()
 
     def status(self) -> dict[str, Any]:
+        resolved_model_dir = self._resolve_model_dir()
         return {
             "backend": "hf_transformers",
             "model_dir": str(self.model_dir),
+            "resolved_model_dir": str(resolved_model_dir),
             "zip_path": str(self.zip_path),
             "available": self.available(),
+            "missing_dependencies": self.missing_dependencies(),
         }
 
     def predict(self, text: str) -> dict[str, Any]:

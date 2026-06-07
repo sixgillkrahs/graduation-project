@@ -1,4 +1,7 @@
-import { UpsertPropertyEmbeddingJob } from "@/@types/jobTypes";
+import {
+  DeletePropertyEmbeddingJob,
+  UpsertPropertyEmbeddingJob,
+} from "@/@types/jobTypes";
 import { redisConnection } from "@/config/redis.connection";
 import { QdrantService } from "@/services/qdrant.service";
 import { JobService } from "@/services/job.service";
@@ -27,6 +30,13 @@ export class QdrantWorker {
             textData,
             payload,
           );
+        } else if (job.name === "deletePropertyEmbedding") {
+          const { propertyId } = job.data as DeletePropertyEmbeddingJob;
+
+          logger.info(
+            `[QdrantWorker] Processing delete encoding job for property ${propertyId}`,
+          );
+          await this.qdrantService.deletePropertyEmbedding(propertyId);
         }
       },
       {
@@ -43,10 +53,12 @@ export class QdrantWorker {
       // Log to database on final failure
       if (job && job.attemptsMade >= (job.opts.attempts || 3)) {
         try {
-          const { propertyId } = job.data as UpsertPropertyEmbeddingJob;
+          const { propertyId, operation = "UPSERT" } = job.data as
+            | UpsertPropertyEmbeddingJob
+            | DeletePropertyEmbeddingJob;
           await this.jobService.createJob({
             type: JobTypeEnum.PROPERTY_EMBEDDING,
-            payload: { propertyId },
+            payload: { propertyId, operation },
             status: JobStatusEnum.FAILED,
             attempts: job.attemptsMade,
             maxAttempts: job.opts.attempts || 3,

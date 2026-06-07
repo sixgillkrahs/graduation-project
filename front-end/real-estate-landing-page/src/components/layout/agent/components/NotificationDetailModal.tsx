@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useLocale } from "next-intl";
 import React from "react";
 
 export interface NotificationDetail {
@@ -31,13 +32,17 @@ export const NotificationDetailModal: React.FC<
   NotificationDetailModalProps
 > = ({ isOpen, onClose, notification }) => {
   const { formatDateTime } = useDateTimeFormatter();
+  const locale = useLocale();
+  const isVi = locale === "vi";
   if (!notification) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[380px]" onCancel={onClose}>
         <DialogHeader>
-          <DialogTitle className="text-base">Notification Details</DialogTitle>
+          <DialogTitle className="text-base">
+            {isVi ? "Chi tiết thông báo" : "Notification Details"}
+          </DialogTitle>
         </DialogHeader>
         <div className="py-2">
           <p className="text-sm font-medium text-gray-800 leading-relaxed mb-4">
@@ -46,12 +51,14 @@ export const NotificationDetailModal: React.FC<
           {notification.type === "SCHEDULE" && notification.metadata && (
             <div className="bg-amber-50/50 border border-amber-100 rounded-lg p-3 mb-4 space-y-2">
               <h4 className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-2">
-                Chi tiết lịch hẹn
+                {isVi ? "Chi tiết lịch hẹn" : "Appointment details"}
               </h4>
 
               {notification.metadata.customerName && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500">Khách hàng:</span>
+                  <span className="text-gray-500">
+                    {isVi ? "Khách hàng:" : "Customer:"}
+                  </span>
                   <span className="font-semibold text-gray-700">
                     {notification.metadata.customerName}
                   </span>
@@ -60,7 +67,9 @@ export const NotificationDetailModal: React.FC<
 
               {notification.metadata.date && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500">Ngày xem:</span>
+                  <span className="text-gray-500">
+                    {isVi ? "Ngày xem:" : "Viewing date:"}
+                  </span>
                   <span className="font-semibold text-gray-700">
                     {notification.metadata.date}
                   </span>
@@ -69,7 +78,9 @@ export const NotificationDetailModal: React.FC<
 
               {notification.metadata.startTime && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500">Thời gian:</span>
+                  <span className="text-gray-500">
+                    {isVi ? "Thời gian:" : "Time:"}
+                  </span>
                   <span className="font-semibold text-gray-700">
                     {notification.metadata.startTime}{" "}
                     {notification.metadata.endTime
@@ -81,7 +92,9 @@ export const NotificationDetailModal: React.FC<
 
               {notification.metadata.propertyTitle && (
                 <div className="flex flex-col text-xs pt-1 border-t border-amber-100 mt-1">
-                  <span className="text-gray-500 mb-0.5">Bất động sản:</span>
+                  <span className="text-gray-500 mb-0.5">
+                    {isVi ? "Bất động sản:" : "Property:"}
+                  </span>
                   <span className="font-medium text-gray-700 italic">
                     "{notification.metadata.propertyTitle}"
                   </span>
@@ -93,7 +106,7 @@ export const NotificationDetailModal: React.FC<
           {notification.metadata?.rejectReason && (
             <div className="bg-red-50 text-red-600 p-3 rounded-md border border-red-100 mb-4">
               <span className="font-semibold block mb-1 text-xs uppercase tracking-wider">
-                Lý do từ chối
+                {isVi ? "Lý do từ chối" : "Rejection reason"}
               </span>
               <span className="text-sm whitespace-pre-wrap">
                 {notification.metadata.rejectReason}
@@ -102,7 +115,7 @@ export const NotificationDetailModal: React.FC<
           )}
           <div className="flex flex-col gap-2 mt-4 text-xs text-gray-500">
             <span className="flex items-center gap-2 border-t pt-2">
-              <strong>Trạng thái:</strong>{" "}
+              <strong>{isVi ? "Trạng thái:" : "Status:"}</strong>{" "}
               <Badge
                 variant={
                   notification.metadata?.status === "PUBLISHED" ||
@@ -116,17 +129,25 @@ export const NotificationDetailModal: React.FC<
                 className="font-normal px-2 py-0 h-4 min-h-0 text-[10px]"
               >
                 {notification.status === "PENDING"
-                  ? "Chờ duyệt"
+                  ? isVi
+                    ? "Chờ duyệt"
+                    : "Pending"
                   : notification.status === "CONFIRMED"
-                    ? "Đã duyệt"
+                    ? isVi
+                      ? "Đã duyệt"
+                      : "Confirmed"
                     : notification.status === "CANCELLED"
-                      ? "Đã hủy"
+                      ? isVi
+                        ? "Đã hủy"
+                        : "Cancelled"
                       : notification.metadata?.status || notification.status}
               </Badge>
             </span>
             <span className="flex items-center gap-2">
-              <strong>Date:</strong>{" "}
-              {formatDateTime(notification.timestamp, { includeSeconds: false })}
+              <strong>{isVi ? "Ngày:" : "Date:"}</strong>{" "}
+              {formatDateTime(notification.timestamp, {
+                includeSeconds: false,
+              })}
             </span>
           </div>
         </div>
@@ -137,7 +158,7 @@ export const NotificationDetailModal: React.FC<
             onClick={onClose}
             className="h-8 text-xs px-4"
           >
-            Close
+            {isVi ? "Đóng" : "Close"}
           </Button>
         </DialogFooter>
       </DialogContent>

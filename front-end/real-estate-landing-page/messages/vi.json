@@ -79,22 +79,24 @@
     "switchLanguage": "Chuyển ngôn ngữ sang"
   },
   "Banner": {
-    "title": "Bắt đầu tìm kiếm ngay hôm nay",
+    "eyebrow": "Semantic Search",
+    "title": "Tìm bất động sản bằng ngôn ngữ tự nhiên",
+    "description": "Mô tả căn nhà bạn muốn bằng tiếng Việt, hệ thống sẽ hiểu nhu cầu, khu vực, ngân sách và đưa bạn vào màn tìm kiếm AI.",
     "rent": "Thuê",
     "sell": "Bán",
-    "enterLocation": "Nhập địa điểm",
+    "enterLocation": "Ví dụ: căn hộ 2PN gần quận 1 dưới 3 tỷ",
     "propertyType": "Loại bất động sản",
-    "bedrooms": "Phòng ngủ",
+    "allPropertyTypes": "Tất cả loại BĐS",
     "apartment": "Căn hộ",
     "house": "Nhà ở",
-    "bedroom1": "1 Phòng ngủ",
-    "bedroom2": "2 Phòng ngủ",
-    "bedroom3": "3 Phòng ngủ",
-    "bedroom4": "4 Phòng ngủ",
-    "search": "Tìm kiếm",
-    "popularSearches": "Tìm kiếm phổ biến",
-    "petFriendly": "Cho phép thú cưng",
-    "pool": "Hồ bơi"
+    "villa": "Biệt thự",
+    "land": "Đất nền",
+    "search": "Tìm bằng AI",
+    "explainToggle": "Giải thích bằng AI",
+    "popularSearches": "Gợi ý truy vấn",
+    "prompt1": "căn hộ 2PN gần quận 1 dưới 3 tỷ",
+    "prompt2": "nhà thuê có chỗ đậu xe ở Đà Nẵng",
+    "prompt3": "villa có hồ bơi cho gia đình ở Thảo Điền"
   },
   "WhyUs": {
     "title": "Tại sao chọn",
@@ -259,7 +261,18 @@
     "googleAuthUnavailable": "Google sign in chưa được cấu hình.",
     "signInPasskey": "Đăng nhập bằng Passkey",
     "noAccount": "Chưa có tài khoản?",
-    "signUp": "Đăng ký"
+    "signUp": "Đăng ký",
+    "smartkey": {
+      "title": "Đăng ký Smartkey",
+      "description": "Tài khoản của bạn chưa đăng ký smartkey. Bạn có thể thiết lập ngay bây giờ để lần sau đăng nhập nhanh và an toàn hơn.",
+      "benefit": "Smartkey cho phép bạn đăng nhập bằng vân tay, Face ID hoặc mã PIN thiết bị mà không cần nhập lại mật khẩu.",
+      "unsupportedDescription": "Thiết bị hoặc trình duyệt hiện tại chưa hỗ trợ đăng ký smartkey. Bạn vẫn có thể tiếp tục sử dụng ứng dụng và thiết lập sau trên thiết bị tương thích.",
+      "unsupportedHelp": "Khi dùng thiết bị hỗ trợ WebAuthn hoặc passkey, bạn có thể quay lại đăng ký để đăng nhập nhanh và an toàn hơn.",
+      "registerNow": "Đăng ký Smartkey",
+      "skip": "Để sau",
+      "registerSuccess": "Đăng ký smartkey thành công",
+      "registerFailed": "Đăng ký smartkey thất bại"
+    }
   },
   "SignUp": {
     "createAccount": "Tạo tài khoản",
@@ -460,21 +473,21 @@
       "allProperties": "Tất cả bất động sản",
       "myFavorites": "Yêu thích của tôi"
     },
-      "heading": {
-        "allTitle": "Bất động sản đang bán",
-        "favTitle": "Bất động sản yêu thích",
-        "showing": "Hiển thị {count} trên {total} kết quả",
-        "mapSearch": "Tìm kiếm trên bản đồ"
-      },
-      "quickLocations": {
-        "eyebrow": "Tìm nhanh theo khu vực",
-        "title": "Khám phá bất động sản theo tỉnh, thành phố",
-        "description": "Chọn nhanh khu vực bạn quan tâm để lọc danh sách bất động sản trên toàn quốc mà không cần nhập lại từ đầu.",
-        "collapse": "Thu gọn",
-        "expand": "Mở rộng",
-        "count": "{count} tỉnh, thành phố",
-        "all": "Toàn quốc"
-      },
+    "heading": {
+      "allTitle": "Bất động sản đang bán",
+      "favTitle": "Bất động sản yêu thích",
+      "showing": "Hiển thị {count} trên {total} kết quả",
+      "mapSearch": "Tìm kiếm trên bản đồ"
+    },
+    "quickLocations": {
+      "eyebrow": "Tìm nhanh theo khu vực",
+      "title": "Khám phá bất động sản theo tỉnh, thành phố",
+      "description": "Chọn nhanh khu vực bạn quan tâm để lọc danh sách bất động sản trên toàn quốc mà không cần nhập lại từ đầu.",
+      "collapse": "Thu gọn",
+      "expand": "Mở rộng",
+      "count": "{count} tỉnh, thành phố",
+      "all": "Toàn quốc"
+    },
     "sort": {
       "label": "Sắp xếp:",
       "placeholder": "Sắp xếp",
@@ -527,6 +540,138 @@
       "typeVilla": "Biệt thự",
       "typeLand": "Đất nền",
       "typeOther": "Khác"
+    },
+    "standardSearch": {
+      "virtualTour": {
+        "eyebrow": "Tìm kiếm nhập vai",
+        "title": "Bất động sản có tour 3D",
+        "description": "Xem trước những listing bạn có thể khảo sát từ xa trước khi đặt lịch xem trực tiếp.",
+        "badge": "Chỉ tour 3D"
+      },
+      "sale": {
+        "eyebrow": "Mua nhà rõ ràng hơn",
+        "title": "Bất động sản cần bán",
+        "description": "Tập trung vào các listing sẵn sàng giao dịch, so sánh mức giá và rút gọn khu vực phù hợp nhanh hơn.",
+        "badge": "Cần bán"
+      },
+      "rent": {
+        "eyebrow": "Thuê nhà thông minh hơn",
+        "title": "Bất động sản cho thuê",
+        "description": "Khám phá các listing sẵn sàng dọn vào với bộ lọc phù hợp cho ngân sách, vị trí và tiện ích.",
+        "badge": "Cho thuê"
+      },
+      "all": {
+        "eyebrow": "Khám phá thị trường",
+        "title": "Tất cả bất động sản hiện có",
+        "description": "Tìm kiếm trên cả tin bán và cho thuê, sau đó thu hẹp danh sách bằng các bộ lọc thực tế.",
+        "badge": "Tất cả listing"
+      }
+    },
+    "semanticSearch": {
+      "mode": {
+        "standard": "Tìm kiếm thường",
+        "semantic": "AI ngữ nghĩa"
+      },
+      "eyebrow": "Tìm bất động sản bằng AI",
+      "title": "Mô tả căn nhà bạn muốn bằng ngôn ngữ tự nhiên",
+      "description": "Tìm kiếm bằng tiếng Việt theo cách bạn suy nghĩ thật: khu vực, tầm giá, số phòng ngủ, lối sống và tiện ích cần có trong một câu.",
+      "placeholder": "Ví dụ: căn hộ 2PN gần quận 1 dưới 3 tỷ",
+      "searchCta": "Tìm bằng AI",
+      "explainToggle": "Giải thích kết quả bằng AI",
+      "examplesLabel": "Gợi ý câu lệnh:",
+      "debounceHint": "Kết quả sẽ tự cập nhật sau khi bạn dừng gõ.",
+      "validation": "Hãy nhập ít nhất 2 ký tự để AI hiểu đúng nhu cầu.",
+      "heroEyebrow": "Semantic search",
+      "heroTitle": "AI hiểu nhu cầu, ngân sách và khu vực ưu tiên của bạn",
+      "heroDescription": "Kết hợp mô tả tự nhiên với bộ lọc có cấu trúc để tìm ra những listing sát cách người mua thật sự tìm kiếm.",
+      "heroBadge": "Tìm bằng ngôn ngữ tự nhiên",
+      "heroExplainEyebrow": "Đang bật giải thích AI",
+      "heroResultsEyebrow": "Kết quả theo ý định tìm kiếm",
+      "heroResultsTitle": "Kết quả cho “{query}”",
+      "heroExplainDescription": "Mô hình sẽ rerank lại listing và trả về giải thích ngắn gọn vì sao từng kết quả phù hợp.",
+      "heroResultsDescription": "Các listing này được xếp hạng theo độ khớp ngữ nghĩa, bộ lọc có cấu trúc và điểm rerank.",
+      "heroExplainBadge": "Đang bật giải thích",
+      "heroResultsBadge": "Xếp hạng theo ý định",
+      "resultsTitle": "Kết quả semantic search",
+      "resultsMeta": "Hiển thị {count} trên {total} kết quả semantic",
+      "resultsPlaceholder": "Nhập mô tả tự nhiên để bắt đầu tìm kiếm.",
+      "emptyQueryEyebrow": "AI search",
+      "emptyQueryTitle": "Bắt đầu bằng một mô tả nhu cầu bất động sản",
+      "emptyQueryDescription": "Hãy mô tả căn nhà bạn muốn, sau đó tinh chỉnh thêm bằng tỉnh thành, giá, diện tích, số phòng và tiện ích.",
+      "errorEyebrow": "Semantic search",
+      "errorTitle": "Dịch vụ tìm kiếm AI đang tạm thời gián đoạn",
+      "errorDescription": "Hãy thử lại cùng câu lệnh hoặc nới bớt một vài bộ lọc trước khi tìm lại.",
+      "emptyEyebrow": "Chưa có kết quả phù hợp",
+      "emptyTitle": "Chưa có listing nào khớp với nhu cầu này",
+      "emptyDescription": "Hãy mở rộng khu vực, nới tầm giá hoặc giảm bớt một vài yêu cầu quá chặt.",
+      "retry": "Thử lại",
+      "clearFilters": "Xóa bộ lọc",
+      "filters": {
+        "title": "Bộ lọc AI",
+        "collapse": "Thu gọn",
+        "expand": "Mở rộng",
+        "reset": "Đặt lại",
+        "apply": "Áp dụng bộ lọc AI",
+        "helper": "Dùng bộ lọc khi bạn muốn kiểm soát chặt hơn về ngân sách, diện tích hoặc tiện ích bên cạnh câu mô tả tự nhiên.",
+        "mobileDescription": "Tinh chỉnh tỉnh thành, ngân sách, diện tích và tiện ích mà không làm mất câu truy vấn semantic.",
+        "demandType": "Nhu cầu",
+        "propertyType": "Loại bất động sản",
+        "province": "Tỉnh / Thành phố",
+        "district": "Quận / Huyện",
+        "ward": "Phường / Xã",
+        "provincePlaceholder": "Chọn tỉnh thành",
+        "districtPlaceholder": "Ví dụ: Quận 1",
+        "wardPlaceholder": "Ví dụ: Bến Nghé",
+        "minPrice": "Giá tối thiểu",
+        "maxPrice": "Giá tối đa",
+        "priceHint": "Nhập theo đơn vị tỷ VNĐ",
+        "minArea": "Diện tích tối thiểu",
+        "maxArea": "Diện tích tối đa",
+        "areaHint": "Đơn vị mét vuông",
+        "minBedrooms": "Số phòng ngủ tối thiểu",
+        "minBathrooms": "Số phòng tắm tối thiểu",
+        "selectMinBedrooms": "Mọi số phòng ngủ",
+        "selectMinBathrooms": "Mọi số phòng tắm",
+        "amenities": "Tiện ích",
+        "amenitiesPlaceholder": "Chọn tiện ích",
+        "allDemand": "Mọi nhu cầu",
+        "sale": "Cần bán",
+        "rent": "Cho thuê",
+        "allTypes": "Mọi loại bất động sản",
+        "apartment": "Căn hộ",
+        "house": "Nhà riêng",
+        "streetHouse": "Nhà mặt phố",
+        "villa": "Biệt thự",
+        "land": "Đất nền",
+        "other": "Khác"
+      },
+      "summary": {
+        "answerEyebrow": "Giải thích của AI",
+        "queryEyebrow": "Hệ thống đang hiểu",
+        "resultMeta": "Tìm thấy {total} listing trên {totalPages} trang. Bạn đang xem trang {page}.",
+        "retrieved": "Ứng viên lấy về",
+        "matched": "Ứng viên phù hợp",
+        "rerankModel": "Mô hình rerank",
+        "appliedFilters": "Bộ lọc đã áp dụng",
+        "labels": {
+          "demandType": "Nhu cầu",
+          "propertyType": "Loại",
+          "province": "Tỉnh thành",
+          "district": "Quận huyện",
+          "ward": "Phường xã",
+          "minPrice": "Giá tối thiểu",
+          "maxPrice": "Giá tối đa",
+          "minArea": "Diện tích tối thiểu",
+          "maxArea": "Diện tích tối đa",
+          "minBedrooms": "Phòng ngủ",
+          "minBathrooms": "Phòng tắm",
+          "amenities": "Tiện ích"
+        },
+        "values": {
+          "sale": "Cần bán",
+          "rent": "Cho thuê"
+        }
+      }
     },
     "filter": {
       "title": "Bộ lọc",
@@ -647,12 +792,12 @@
       "furnitureBasic": "Cơ bản",
       "furnitureEmpty": "Trống"
     },
-      "advancedSearch": {
-        "eyebrow": "Bản đồ & danh sách",
-        "title": "Khám phá bất động sản theo khu vực",
-        "description": "Duyệt bất động sản đang bán và cho thuê, lọc theo khu vực, loại hình, ngân sách và số phòng ngủ rồi đối chiếu trực tiếp với vị trí trên bản đồ.",
-        "backToList": "Quay về danh sách bất động sản",
-        "filters": {
+    "advancedSearch": {
+      "eyebrow": "Bản đồ & danh sách",
+      "title": "Khám phá bất động sản theo khu vực",
+      "description": "Duyệt bất động sản đang bán và cho thuê, lọc theo khu vực, loại hình, ngân sách và số phòng ngủ rồi đối chiếu trực tiếp với vị trí trên bản đồ.",
+      "backToList": "Quay về danh sách bất động sản",
+      "filters": {
         "searchPlaceholder": "Nhập khu vực, quận huyện hoặc dự án",
         "allTypes": "Tất cả loại",
         "allPrices": "Mọi mức giá",
@@ -900,7 +1045,7 @@
       "descriptionYear": "So sánh lượt xem và lead (Tháng 1 - Tháng 12)",
       "descriptionMonth": "Hiệu suất theo ngày (30 ngày gần nhất)",
       "month": "Tháng",
-      "year": "Nam",
+      "year": "Năm",
       "pageViews": "Lượt xem trang",
       "contactLeads": "Lead liên hệ"
     }

@@ -6,6 +6,7 @@ import {
   Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import { useLocale } from "next-intl";
 
 interface GoogleMapProps {
   latitude?: number | null;
@@ -34,6 +35,8 @@ const GoogleMap = ({
   height = "400px",
   draggable = true,
 }: GoogleMapProps) => {
+  const locale = useLocale();
+  const isVi = locale === "vi";
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -98,7 +101,7 @@ const GoogleMap = ({
         className="flex items-center justify-center bg-gray-100 rounded-xl text-gray-500"
         style={{ height }}
       >
-        Error loading Google Maps
+        {isVi ? "Tải Google Maps thất bại" : "Error loading Google Maps"}
       </div>
     );
   }
@@ -109,7 +112,9 @@ const GoogleMap = ({
         className="flex items-center justify-center bg-gray-100 rounded-xl animate-pulse"
         style={{ height }}
       >
-        <div className="text-gray-400">Loading map...</div>
+        <div className="text-gray-400">
+          {isVi ? "Đang tải bản đồ..." : "Loading map..."}
+        </div>
       </div>
     );
   }

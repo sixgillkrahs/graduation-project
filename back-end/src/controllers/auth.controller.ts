@@ -88,11 +88,41 @@ export class AuthController extends BaseController {
     );
   }
 
+  private getWebAuthnRegistrationRpId() {
+    return ENV.NODE_ENV === "production" ? "example.com" : "localhost";
+  }
+
+  private getWebAuthnOrigin() {
+    return ENV.NODE_ENV === "production"
+      ? "https://app.example.com"
+      : "http://localhost:3000";
+  }
+
+  private getWebAuthnRequireUserVerification() {
+    return ENV.NODE_ENV === "production"
+      ? true
+      : ENV.WEBAUTHN_REQUIRE_USER_VERIFICATION;
+  }
+
+  private getWebAuthnUserVerificationRequirement() {
+    return this.getWebAuthnRequireUserVerification() ? "required" : "preferred";
+  }
+
+  private isUserVerificationError(error: unknown) {
+    return (
+      error instanceof Error &&
+      error.message.includes(
+        "User verification was required, but user could not be verified",
+      )
+    );
+  }
+
   private async assertUserAccess(
     user: IUser & { _id?: string | { toString(): string } },
     lang: keyof typeof validationMessages,
     errorCode: ErrorCode = ErrorCode.USER_NOT_ACTIVE,
   ) {
+    console.log("user", user);
     if (!user.isActive) {
       throw new AppError(
         validationMessages[lang].userNotActive || "User not active",
@@ -141,6 +171,7 @@ export class AuthController extends BaseController {
           select: "_id email fullName isActive phone lockInfo",
         },
       ]);
+      console.log(auth);
       if (!auth || !auth.password) {
         throw new AppError(
           lang === "vi" ? "Sai tài khoản" : "Incorrect username",
@@ -268,7 +299,7 @@ export class AuthController extends BaseController {
       if (!token) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-          "Refresh token not exist",
+            "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -277,7 +308,7 @@ export class AuthController extends BaseController {
       if (!decoded) {
         throw new AppError(
           validationMessages[lang].refreshTokenNotExist ||
-          "Refresh token not exist",
+            "Refresh token not exist",
           400,
           ErrorCode.INVALID_TOKEN,
         );
@@ -391,6 +422,15 @@ export class AuthController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const { email } = req.body;
+      const lang = req.lang;
+      const user = await this.userService.getUserByEmail(email);
+      if (!user) {
+        throw new AppError(
+          validationMessages[lang].userNotFound || "User not found",
+          404,
+          ErrorCode.USER_NOT_FOUND,
+        );
+      }
       const otp = this.authService.getOTP();
       await redisConnection.set(`otp:${email}`, otp, "EX", 6 * 60);
       await this.emailQueue.sendOTPEmail({
@@ -498,15 +538,16 @@ export class AuthController extends BaseController {
 
       const options = await generateRegistrationOptions({
         rpName: "Havenly",
-        rpID:
-          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
+        rpID: this.getWebAuthnRegistrationRpId(),
         userID: new Uint8Array(Buffer.from(currentUser._id.toString())),
         userName: currentUser.userId.email,
         timeout: 60000,
         attestationType: "none",
         authenticatorSelection: {
           residentKey: "preferred",
-          userVerification: "preferred",
+          // Keep registration and verification aligned so dev/local flows do not
+          // produce credentials without UV and then fail during server-side verify.
+          userVerification: "required",
         },
       });
 
@@ -525,6 +566,8 @@ export class AuthController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const currentUser = req.user;
       const lang = req.lang;
+      const requireUserVerification =
+        this.getWebAuthnRequireUserVerification();
       const expectedChallenge = req.headers.cookie
         ?.split("; ")
         .find((item) => item.startsWith("webauthn_register_challenge"))
@@ -538,16 +581,28 @@ export class AuthController extends BaseController {
           ErrorCode.WEBAUTHN_CHALLENGE_NOT_FOUND,
         );
       }
-      const verification = await verifyRegistrationResponse({
-        response: req.body,
-        expectedChallenge,
-        expectedOrigin:
-          process.env.NODE_ENV === "production"
-            ? "https://app.example.com"
-            : "http://localhost:3000",
-        expectedRPID:
-          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
-      });
+      let verification;
+      try {
+        verification = await verifyRegistrationResponse({
+          response: req.body,
+          expectedChallenge,
+          expectedOrigin: this.getWebAuthnOrigin(),
+          expectedRPID: this.getWebAuthnRegistrationRpId(),
+          requireUserVerification,
+        });
+      } catch (error) {
+        if (this.isUserVerificationError(error)) {
+          throw new AppError(
+            lang === "vi"
+              ? "Thiết bị chưa xác minh người dùng. Hãy dùng vân tay, Face ID, Windows Hello hoặc khóa màn hình rồi thử lại."
+              : "User verification is required. Please use biometrics, device PIN, or screen lock and try again.",
+            400,
+            ErrorCode.WEBAUTHN_VERIFICATION_FAILED,
+          );
+        }
+
+        throw error;
+      }
 
       if (!verification.verified || !verification.registrationInfo) {
         throw new AppError(
@@ -586,9 +641,8 @@ export class AuthController extends BaseController {
   ) => {
     this.handleRequest(req, res, next, async () => {
       const options = generateAuthenticationOptions({
-        rpID:
-          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
-        userVerification: "preferred",
+        rpID: this.getWebAuthnRegistrationRpId(),
+        userVerification: this.getWebAuthnUserVerificationRequirement(),
         timeout: 60000,
       });
       res.cookie("webauthn_login_challenge", (await options).challenge, {
@@ -610,6 +664,8 @@ export class AuthController extends BaseController {
     this.handleRequest(req, res, next, async () => {
       const lang = req.lang;
       const { response } = req.body;
+      const requireUserVerification =
+        this.getWebAuthnRequireUserVerification();
       const expectedChallenge = req.headers.cookie
         ?.split("; ")
         .find((item) => item.startsWith("webauthn_login_challenge"))
@@ -672,24 +728,36 @@ export class AuthController extends BaseController {
         );
       }
 
-      const verification = await verifyAuthenticationResponse({
-        response,
-        expectedChallenge,
-        expectedOrigin:
-          process.env.NODE_ENV === "production"
-            ? "https://app.example.com"
-            : "http://localhost:3000",
-        expectedRPID:
-          process.env.NODE_ENV === "production" ? "example.com" : "localhost",
-        credential: {
-          id: passkey.credentialID,
-          publicKey: new Uint8Array(
-            Buffer.from(passkey.publicKey, "base64url"),
-          ),
-          counter: passkey.counter,
-          transports: passkey.transports as AuthenticatorTransportFuture[],
-        },
-      });
+      let verification;
+      try {
+        verification = await verifyAuthenticationResponse({
+          response,
+          expectedChallenge,
+          expectedOrigin: this.getWebAuthnOrigin(),
+          expectedRPID: this.getWebAuthnRegistrationRpId(),
+          requireUserVerification,
+          credential: {
+            id: passkey.credentialID,
+            publicKey: new Uint8Array(
+              Buffer.from(passkey.publicKey, "base64url"),
+            ),
+            counter: passkey.counter,
+            transports: passkey.transports as AuthenticatorTransportFuture[],
+          },
+        });
+      } catch (error) {
+        if (this.isUserVerificationError(error)) {
+          throw new AppError(
+            lang === "vi"
+              ? "Thiết bị chưa xác minh người dùng. Hãy dùng vân tay, Face ID, Windows Hello hoặc khóa màn hình rồi thử lại."
+              : "User verification is required. Please use biometrics, device PIN, or screen lock and try again.",
+            400,
+            ErrorCode.WEBAUTHN_VERIFICATION_FAILED,
+          );
+        }
+
+        throw error;
+      }
 
       if (!verification.verified) {
         throw new AppError(

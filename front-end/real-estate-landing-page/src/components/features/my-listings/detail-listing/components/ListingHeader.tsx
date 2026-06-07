@@ -1,6 +1,7 @@
 import React from "react";
 import { Dropdown, DropdownItem, Icon } from "@/components/ui";
 import { MapPin, AlertCircle } from "lucide-react";
+import { useLocale } from "next-intl";
 
 interface ListingHeaderProps {
   property: any;
@@ -31,8 +32,30 @@ export const ListingHeader = React.memo(
     onEdit,
     onView,
   }: ListingHeaderProps) => {
+    const locale = useLocale();
+    const isVi = locale === "vi";
     const getStatusColor = (status: string) =>
       STATUS_COLORS[status] || STATUS_COLORS["DRAFT"];
+    const getStatusLabel = (status: string) => {
+      if (!isVi) return status;
+
+      switch (status) {
+        case "PUBLISHED":
+          return "Đang hiển thị";
+        case "PENDING":
+          return "Chờ duyệt";
+        case "DRAFT":
+          return "Bản nháp";
+        case "REJECTED":
+          return "Bị từ chối";
+        case "SOLD":
+          return "Đã bán";
+        case "EXPIRED":
+          return "Đã ẩn";
+        default:
+          return status;
+      }
+    };
 
     return (
       <>
@@ -51,7 +74,7 @@ export const ListingHeader = React.memo(
                   property.status,
                 )}`}
               >
-                {property.status}
+                {getStatusLabel(property.status)}
               </span>
             </div>
             <div className="flex items-center text-sm text-gray-500 gap-2">
@@ -66,7 +89,7 @@ export const ListingHeader = React.memo(
               onClick={onBack}
               className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
             >
-              Back
+              {isVi ? "Quay lại" : "Back"}
             </button>
 
             {(property.status === "PUBLISHED" ||
@@ -81,7 +104,13 @@ export const ListingHeader = React.memo(
                     className="px-4 py-2 bg-blue-600 border border-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center gap-2"
                   >
                     <Icon.Settings className="w-4 h-4" />
-                    {isUpdating ? "Updating..." : "Change Status"}
+                    {isUpdating
+                      ? isVi
+                        ? "Đang cập nhật..."
+                        : "Updating..."
+                      : isVi
+                        ? "Đổi trạng thái"
+                        : "Change Status"}
                   </button>
                 }
               >
@@ -90,7 +119,7 @@ export const ListingHeader = React.memo(
                     <DropdownItem onClick={onOpenSoldModal}>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        Mark as Sold
+                        {isVi ? "Đánh dấu đã bán" : "Mark as Sold"}
                       </div>
                     </DropdownItem>
                   )}
@@ -98,7 +127,7 @@ export const ListingHeader = React.memo(
                     <DropdownItem onClick={() => onUpdateStatus("PUBLISHED")}>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        Mark as Published
+                        {isVi ? "Đánh dấu đã đăng" : "Mark as Published"}
                       </div>
                     </DropdownItem>
                   )}
@@ -109,7 +138,7 @@ export const ListingHeader = React.memo(
                     >
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        Hide (Expired)
+                        {isVi ? "Ẩn tin (hết hạn)" : "Hide (Expired)"}
                       </div>
                     </DropdownItem>
                   )}
@@ -122,7 +151,7 @@ export const ListingHeader = React.memo(
               className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex items-center gap-2"
             >
               <Icon.Edit className="w-4 h-4" />
-              Edit Property
+              {isVi ? "Sửa tin đăng" : "Edit Property"}
             </button>
           </div>
         </div>
@@ -131,8 +160,14 @@ export const ListingHeader = React.memo(
           <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex gap-3 text-red-800 shrink-0">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div className="flex flex-col text-sm">
-              <span className="font-semibold">Property Rejected by Admin</span>
-              <span>Reason: {property.rejectReason}</span>
+              <span className="font-semibold">
+                {isVi
+                  ? "Tin đăng bị quản trị viên từ chối"
+                  : "Property Rejected by Admin"}
+              </span>
+              <span>
+                {isVi ? "Lý do" : "Reason"}: {property.rejectReason}
+              </span>
             </div>
           </div>
         )}

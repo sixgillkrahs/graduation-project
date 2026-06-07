@@ -79,22 +79,24 @@
     "switchLanguage": "Switch language to"
   },
   "Banner": {
-    "title": "Start Your Search Today",
+    "eyebrow": "Semantic Search",
+    "title": "Search properties with natural language",
+    "description": "Describe the home you want in Vietnamese or English and jump straight into the AI search experience with intent, location, and budget understood.",
     "rent": "Rent",
     "sell": "Sell",
-    "enterLocation": "Enter location",
+    "enterLocation": "Example: 2-bedroom apartment near District 1 under 3 billion",
     "propertyType": "Property Type",
-    "bedrooms": "Bedrooms",
+    "allPropertyTypes": "All property types",
     "apartment": "Apartment",
     "house": "House",
-    "bedroom1": "1 Bedroom",
-    "bedroom2": "2 Bedrooms",
-    "bedroom3": "3 Bedrooms",
-    "bedroom4": "4 Bedrooms",
-    "search": "Search",
-    "popularSearches": "Popular Searches",
-    "petFriendly": "Pet Friendly",
-    "pool": "Pool"
+    "villa": "Villa",
+    "land": "Land",
+    "search": "Search with AI",
+    "explainToggle": "Explain with AI",
+    "popularSearches": "Suggested prompts",
+    "prompt1": "2-bedroom apartment near District 1 under 3 billion",
+    "prompt2": "rental house with parking in Da Nang",
+    "prompt3": "family villa with a pool in Thao Dien"
   },
   "WhyUs": {
     "title": "Why Choose",
@@ -259,7 +261,18 @@
     "googleAuthUnavailable": "Google sign in is not configured yet.",
     "signInPasskey": "Sign In with Passkey",
     "noAccount": "Don't have an account?",
-    "signUp": "Sign Up"
+    "signUp": "Sign Up",
+    "smartkey": {
+      "title": "Set up Smartkey sign-in",
+      "description": "Your account does not have a registered smartkey yet. You can add one now to sign in faster and more securely next time.",
+      "benefit": "Smartkey lets you sign in with fingerprint, Face ID, or device PIN without typing your password again.",
+      "unsupportedDescription": "This device or browser does not support smartkey setup right now. You can keep using the app and register later on a compatible device.",
+      "unsupportedHelp": "When you use a device with WebAuthn or passkey support, you can come back and register a smartkey for faster, safer sign-in.",
+      "registerNow": "Register Smartkey",
+      "skip": "Skip for now",
+      "registerSuccess": "Smartkey registered successfully",
+      "registerFailed": "Smartkey registration failed"
+    }
   },
   "SignUp": {
     "createAccount": "Create an Account",
@@ -460,21 +473,21 @@
       "allProperties": "All Properties",
       "myFavorites": "My Favorites"
     },
-      "heading": {
-        "allTitle": "Properties for Sale",
-        "favTitle": "My Favorite Properties",
-        "showing": "Showing {count} of {total} results",
-        "mapSearch": "Search on map"
-      },
-      "quickLocations": {
-        "eyebrow": "Quick area finder",
-        "title": "Browse listings by province and city",
-        "description": "Jump into the area you care about and filter the national property list without rebuilding the search from scratch.",
-        "collapse": "Collapse",
-        "expand": "Expand",
-        "count": "{count} provinces and cities",
-        "all": "Nationwide"
-      },
+    "heading": {
+      "allTitle": "Properties for Sale",
+      "favTitle": "My Favorite Properties",
+      "showing": "Showing {count} of {total} results",
+      "mapSearch": "Search on map"
+    },
+    "quickLocations": {
+      "eyebrow": "Quick area finder",
+      "title": "Browse listings by province and city",
+      "description": "Jump into the area you care about and filter the national property list without rebuilding the search from scratch.",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "count": "{count} provinces and cities",
+      "all": "Nationwide"
+    },
     "sort": {
       "label": "Sort by:",
       "placeholder": "Sort",
@@ -527,6 +540,138 @@
       "typeVilla": "Villa",
       "typeLand": "Land/Plot",
       "typeOther": "Other"
+    },
+    "standardSearch": {
+      "virtualTour": {
+        "eyebrow": "Immersive Search",
+        "title": "Homes with 3D virtual tours",
+        "description": "Browse listings you can inspect remotely before booking an in-person visit.",
+        "badge": "3D tours only"
+      },
+      "sale": {
+        "eyebrow": "Buy With Clarity",
+        "title": "Homes for sale",
+        "description": "Focus on ownership-ready listings, compare pricing, and shortlist the right neighborhoods faster.",
+        "badge": "For sale"
+      },
+      "rent": {
+        "eyebrow": "Rent Smarter",
+        "title": "Rental properties",
+        "description": "Explore move-in-ready listings with filters tuned for budget, location and convenience.",
+        "badge": "For rent"
+      },
+      "all": {
+        "eyebrow": "Explore Market",
+        "title": "All available properties",
+        "description": "Search across sale and rental listings, then narrow the shortlist with practical filters.",
+        "badge": "All listings"
+      }
+    },
+    "semanticSearch": {
+      "mode": {
+        "standard": "Standard search",
+        "semantic": "Semantic AI"
+      },
+      "eyebrow": "Semantic property search",
+      "title": "Describe the home you want in natural language",
+      "description": "Search in Vietnamese the way you actually think: neighborhood, price, bedrooms, lifestyle, and must-have amenities in one prompt.",
+      "placeholder": "Example: 2-bedroom apartment near District 1 under 3 billion",
+      "searchCta": "Search with AI",
+      "explainToggle": "Explain results with AI",
+      "examplesLabel": "Quick prompts:",
+      "debounceHint": "Results update automatically after you pause typing.",
+      "validation": "Enter at least 2 characters so AI can understand the intent.",
+      "heroEyebrow": "Semantic search",
+      "heroTitle": "AI can interpret intent, budget, and preferred area",
+      "heroDescription": "Combine natural language with structured filters to surface listings that fit the way buyers actually search.",
+      "heroBadge": "Natural-language search",
+      "heroExplainEyebrow": "AI explanation enabled",
+      "heroResultsEyebrow": "Intent-based matches",
+      "heroResultsTitle": "Results for “{query}”",
+      "heroExplainDescription": "The model reranks listings and returns a compact explanation for why each match fits the request.",
+      "heroResultsDescription": "These listings are ranked by semantic relevance, structured filters, and rerank score.",
+      "heroExplainBadge": "AI reasoning on",
+      "heroResultsBadge": "Ranked by intent",
+      "resultsTitle": "Semantic search results",
+      "resultsMeta": "Showing {count} of {total} semantic matches",
+      "resultsPlaceholder": "Type a natural-language prompt to start searching.",
+      "emptyQueryEyebrow": "AI search",
+      "emptyQueryTitle": "Start with a natural-language property brief",
+      "emptyQueryDescription": "Describe the kind of home you want, then refine with province, price, area, bedrooms, and amenities.",
+      "errorEyebrow": "Semantic search",
+      "errorTitle": "The AI search service is temporarily unavailable",
+      "errorDescription": "Try the same prompt again or clear a few filters before retrying.",
+      "emptyEyebrow": "No semantic matches",
+      "emptyTitle": "No listings matched this intent yet",
+      "emptyDescription": "Try broadening the area, relaxing the price range, or removing a few strict requirements.",
+      "retry": "Try again",
+      "clearFilters": "Clear filters",
+      "filters": {
+        "title": "AI filters",
+        "collapse": "Collapse",
+        "expand": "Expand",
+        "reset": "Reset",
+        "apply": "Apply AI filters",
+        "helper": "Use filters when you need stronger control over budget, area, or amenities on top of the natural-language prompt.",
+        "mobileDescription": "Tune province, budget, area, and amenities without losing your semantic query.",
+        "demandType": "Demand",
+        "propertyType": "Property type",
+        "province": "City / Province",
+        "district": "District",
+        "ward": "Ward",
+        "provincePlaceholder": "Select a province",
+        "districtPlaceholder": "Example: District 1",
+        "wardPlaceholder": "Example: Ben Nghe",
+        "minPrice": "Min price",
+        "maxPrice": "Max price",
+        "priceHint": "Input in billion VND",
+        "minArea": "Min area",
+        "maxArea": "Max area",
+        "areaHint": "Measured in square meters",
+        "minBedrooms": "Min bedrooms",
+        "minBathrooms": "Min bathrooms",
+        "selectMinBedrooms": "Any bedrooms",
+        "selectMinBathrooms": "Any bathrooms",
+        "amenities": "Amenities",
+        "amenitiesPlaceholder": "Select amenities",
+        "allDemand": "All demand",
+        "sale": "For sale",
+        "rent": "For rent",
+        "allTypes": "All property types",
+        "apartment": "Apartment",
+        "house": "House",
+        "streetHouse": "Street house",
+        "villa": "Villa",
+        "land": "Land",
+        "other": "Other"
+      },
+      "summary": {
+        "answerEyebrow": "AI explanation",
+        "queryEyebrow": "Search understanding",
+        "resultMeta": "{total} listings found across {totalPages} pages. You are viewing page {page}.",
+        "retrieved": "Retrieved",
+        "matched": "Matched",
+        "rerankModel": "Rerank model",
+        "appliedFilters": "Applied filters",
+        "labels": {
+          "demandType": "Demand",
+          "propertyType": "Type",
+          "province": "Province",
+          "district": "District",
+          "ward": "Ward",
+          "minPrice": "Min price",
+          "maxPrice": "Max price",
+          "minArea": "Min area",
+          "maxArea": "Max area",
+          "minBedrooms": "Bedrooms",
+          "minBathrooms": "Bathrooms",
+          "amenities": "Amenities"
+        },
+        "values": {
+          "sale": "For sale",
+          "rent": "For rent"
+        }
+      }
     },
     "filter": {
       "title": "Filters",
@@ -647,12 +792,12 @@
       "furnitureBasic": "Basic furnished",
       "furnitureEmpty": "Unfurnished"
     },
-      "advancedSearch": {
-        "eyebrow": "Map and listings",
-        "title": "Explore properties by area",
-        "description": "Browse sale and rental properties, refine the list by area, property type, budget, and bedroom count, then compare each listing directly on the map.",
-        "backToList": "Back to property list",
-        "filters": {
+    "advancedSearch": {
+      "eyebrow": "Map and listings",
+      "title": "Explore properties by area",
+      "description": "Browse sale and rental properties, refine the list by area, property type, budget, and bedroom count, then compare each listing directly on the map.",
+      "backToList": "Back to property list",
+      "filters": {
         "searchPlaceholder": "Search by area, district, or project",
         "allTypes": "All types",
         "allPrices": "Any price",
@@ -1354,7 +1499,7 @@
     "review": {
       "title": "Review Your Listing",
       "description": "Please review all the information before publishing your listing.",
-      "notSpecified": "Not specified",
+      "notSpecified": "Not specified1",
       "na": "N/A",
       "ready": "Ready to publish",
       "previewMode": "Preview Mode",

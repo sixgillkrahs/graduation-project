@@ -1,6 +1,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { formatPropertyPrice } from "@/lib/property-price";
 
 const TourViewer = dynamic(
@@ -13,6 +14,9 @@ interface ListingMediaProps {
 }
 
 export const ListingMedia = React.memo(({ property }: ListingMediaProps) => {
+  const locale = useLocale();
+  const isVi = locale === "vi";
+
   return (
     <div className="lg:col-span-2 space-y-6">
       {/* Main Image Banner */}
@@ -23,7 +27,7 @@ export const ListingMedia = React.memo(({ property }: ListingMediaProps) => {
             property.media.thumbnail ||
             "https://via.placeholder.com/800"
           }
-          alt="Main property view"
+          alt={isVi ? "Ảnh chính bất động sản" : "Main property view"}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw"
@@ -46,7 +50,7 @@ export const ListingMedia = React.memo(({ property }: ListingMediaProps) => {
           >
             <Image
               src={img}
-              alt={`Gallery ${idx}`}
+              alt={isVi ? `Ảnh thư viện ${idx + 1}` : `Gallery ${idx + 1}`}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 33vw, 20vw"
@@ -56,9 +60,12 @@ export const ListingMedia = React.memo(({ property }: ListingMediaProps) => {
       </div>
 
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Description</h3>
+        <h3 className="text-lg font-bold text-gray-800 mb-4">
+          {isVi ? "Mô tả" : "Description"}
+        </h3>
         <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
-          {property.description || "No description provided."}
+          {property.description ||
+            (isVi ? "Chưa có mô tả." : "No description provided.")}
         </p>
       </div>
 
@@ -67,14 +74,14 @@ export const ListingMedia = React.memo(({ property }: ListingMediaProps) => {
           property.media.virtualTourUrls.length > 0)) && (
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
           <h3 className="text-lg font-bold text-gray-800">
-            Virtual Tour & Video
+            {isVi ? "Tour ảo & Video" : "Virtual Tour & Video"}
           </h3>
 
           {property.media.virtualTourUrls &&
             property.media.virtualTourUrls.length > 0 && (
               <div className="space-y-4">
                 <h4 className="text-sm font-semibold text-gray-600">
-                  360° Virtual Tour
+                  {isVi ? "Tour ảo 360°" : "360° Virtual Tour"}
                 </h4>
                 <div className="w-full aspect-video rounded-xl overflow-hidden bg-gray-100 border border-gray-200 relative">
                   <TourViewer urls={property.media.virtualTourUrls} />
@@ -85,7 +92,7 @@ export const ListingMedia = React.memo(({ property }: ListingMediaProps) => {
           {property.media.videoLink && (
             <div className="space-y-4 mt-6">
               <h4 className="text-sm font-semibold text-gray-600">
-                Property Video
+                {isVi ? "Video bất động sản" : "Property Video"}
               </h4>
               <div className="w-full aspect-video rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
                 <iframe

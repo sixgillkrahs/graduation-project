@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreatePassword } from "./services/mutate";
@@ -16,8 +17,10 @@ import { Password } from "@/components/ui/password";
 const VerifyEmail = () => {
   const router = useRouter();
   const { token } = useParams();
+  const locale = useLocale();
   const { data, isLoading, isError } = useVerifyEmail(token);
   const { mutateAsync: createPassword, isPending } = useCreatePassword();
+  const isVi = locale === "vi";
 
   const {
     control,
@@ -50,26 +53,38 @@ const VerifyEmail = () => {
 
   const onSubmit = async (data: IVerifyEmailService.IBodyCreatePassword) => {
     await createPassword(data);
-    toast.success("The password has been successfully created");
+    toast.success(
+      isVi
+        ? "Mật khẩu đã được tạo thành công"
+        : "The password has been successfully created",
+    );
     router.push(ROUTES.SIGN_IN);
   };
 
   if (isError) {
-    return <div>Error: {data?.message}</div>;
+    return (
+      <div>
+        {isVi ? "Lỗi" : "Error"}: {data?.message}
+      </div>
+    );
   }
 
   return (
     <div className="px-10 py-5 h-full">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-black">Verify Email</h2>
+        <h2 className="text-2xl font-bold text-black">
+          {isVi ? "Xác minh email" : "Verify Email"}
+        </h2>
         <span className="cs-typography-gray text-sm!">
-          Please set your password to activate your account.
+          {isVi
+            ? "Vui lòng đặt mật khẩu để kích hoạt tài khoản."
+            : "Please set your password to activate your account."}
         </span>
       </div>
 
       <div className="h-75">
         {isLoading ? (
-          <div>Loading...</div>
+          <div>{isVi ? "Đang tải..." : "Loading..."}</div>
         ) : (
           <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
             <Controller
@@ -78,7 +93,7 @@ const VerifyEmail = () => {
               render={({ field }) => (
                 <Input
                   label="Email"
-                  placeholder="Enter email"
+                  placeholder={isVi ? "Nhập email" : "Enter email"}
                   error={errors.email?.message}
                   disabled
                   suffix={<Icon.Mail className="main-color-gray w-5 h-5" />}
@@ -90,16 +105,20 @@ const VerifyEmail = () => {
               name="password"
               control={control}
               rules={{
-                required: "Password is required",
+                required: isVi
+                  ? "Mật khẩu là bắt buộc"
+                  : "Password is required",
                 minLength: {
                   value: 6,
-                  message: "Password must be at least 6 characters long",
+                  message: isVi
+                    ? "Mật khẩu phải có ít nhất 6 ký tự"
+                    : "Password must be at least 6 characters long",
                 },
               }}
               render={({ field }) => (
                 <Password
-                  label="Password"
-                  placeholder="Enter password"
+                  label={isVi ? "Mật khẩu" : "Password"}
+                  placeholder={isVi ? "Nhập mật khẩu" : "Enter password"}
                   error={errors.password?.message}
                   {...field}
                 />
@@ -110,14 +129,19 @@ const VerifyEmail = () => {
               name="confirmPassword"
               control={control}
               rules={{
-                required: "Confirm Password is required",
+                required: isVi
+                  ? "Xác nhận mật khẩu là bắt buộc"
+                  : "Confirm Password is required",
                 validate: (value) =>
-                  value === password || "Passwords do not match",
+                  value === password ||
+                  (isVi
+                    ? "Mật khẩu xác nhận không khớp"
+                    : "Passwords do not match"),
               }}
               render={({ field }) => (
                 <Password
-                  label="Confirm Password"
-                  placeholder="Re-enter password"
+                  label={isVi ? "Xác nhận mật khẩu" : "Confirm Password"}
+                  placeholder={isVi ? "Nhập lại mật khẩu" : "Re-enter password"}
                   error={errors.confirmPassword?.message}
                   {...field}
                 />
@@ -129,7 +153,7 @@ const VerifyEmail = () => {
               className="w-full cs-bg-red text-white mt-2"
               loading={isPending}
             >
-              Verify & Continue
+              {isVi ? "Xác nhận & Tiếp tục" : "Verify & Continue"}
             </CsButton>
           </form>
         )}
@@ -137,9 +161,9 @@ const VerifyEmail = () => {
 
       <div className="mt-12 text-center">
         <span className="cs-typography-gray text-sm!">
-          Already verified?{" "}
+          {isVi ? "Đã xác minh rồi?" : "Already verified?"}{" "}
           <Link href={ROUTES.SIGN_IN} className="text-red-500">
-            Sign In
+            {isVi ? "Đăng nhập" : "Sign In"}
           </Link>
         </span>
       </div>

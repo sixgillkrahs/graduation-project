@@ -48,6 +48,12 @@ export type UpsertPropertyEmbeddingJob = {
   propertyId: string;
   textData: string;
   payload?: any;
+  operation?: "UPSERT";
+};
+
+export type DeletePropertyEmbeddingJob = {
+  propertyId: string;
+  operation: "DELETE";
 };
 
 export type SendAppointmentConfirmedEmailJob = {

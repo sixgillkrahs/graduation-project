@@ -9,6 +9,7 @@ export class QdrantService {
   private client: QdrantClient;
   private collectionName = ENV.QDRANT_COLLECTION;
   private genAI: GoogleGenerativeAI;
+  private collectionReady: Promise<void>;
 
   constructor() {
     this.client = new QdrantClient({
@@ -16,7 +17,7 @@ export class QdrantService {
       apiKey: ENV.QDRANT_API_KEY,
     });
     this.genAI = new GoogleGenerativeAI(ENV.GEMINI_API_KEY);
-    this.initCollection();
+    this.collectionReady = this.initCollection();
   }
 
   private initCollection = async () => {
@@ -77,6 +78,7 @@ export class QdrantService {
     payload: any = {},
   ) => {
     try {
+      await this.collectionReady;
       const vector = await this.generateEmbedding(textData);
       const uuid = this.mongoIdToUuid(propertyId);
 
@@ -100,11 +102,27 @@ export class QdrantService {
     }
   };
 
+  public deletePropertyEmbedding = async (propertyId: string) => {
+    try {
+      await this.collectionReady;
+      const uuid = this.mongoIdToUuid(propertyId);
+
+      await this.client.delete(this.collectionName, {
+        points: [uuid],
+      });
+      logger.info(`Deleted embedding for property ${propertyId}`);
+    } catch (error) {
+      logger.error(`Error deleting embedding for ${propertyId}:`, error);
+      throw error;
+    }
+  };
+
   public searchSimilarProperties = async (
     propertyId: string,
     limit: number = 5,
   ) => {
     try {
+      await this.collectionReady;
       // Recommend similar properties by looking up the existing property's vector
       // Alternatively, we can use search with the current property's embedding
 
@@ -134,6 +152,31 @@ export class QdrantService {
         `Failed to search similar properties for ${propertyId}:`,
         error,
       );
+      return [];
+    }
+  };
+
+  public searchPropertiesByQuery = async (
+    query: string,
+    limit: number = 10,
+  ) => {
+    try {
+      await this.collectionReady;
+      const vector = await this.generateEmbedding(query);
+
+      const searchResults = await this.client.search(this.collectionName, {
+        vector,
+        limit,
+        with_payload: true,
+      });
+
+      return searchResults.map((res) => ({
+        id: this.uuidToMongoId(String(res.id)),
+        score: Number(res.score || 0),
+        payload: res.payload || {},
+      }));
+    } catch (error) {
+      logger.error(`Failed to search properties by query "${query}":`, error);
       return [];
     }
   };

@@ -2,6 +2,7 @@
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
+import { useLocale } from "next-intl";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,9 @@ function DialogContent({
   showCloseButton?: boolean;
   onCancel?: () => void;
 }) {
+  const locale = useLocale();
+  const closeLabel = locale === "vi" ? "Đóng" : "Close";
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -77,7 +81,7 @@ function DialogContent({
             className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{closeLabel}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -103,6 +107,9 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean;
 }) {
+  const locale = useLocale();
+  const closeLabel = locale === "vi" ? "Đóng" : "Close";
+
   return (
     <div
       data-slot="dialog-footer"
@@ -115,7 +122,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline">{closeLabel}</Button>
         </DialogPrimitive.Close>
       )}
     </div>
@@ -185,6 +192,10 @@ function CsDialog({
   };
   closeOnClickOutside?: boolean;
 }) {
+  const locale = useLocale();
+  const closeLabel = locale === "vi" ? "Đóng" : "Close";
+  const okLabel = locale === "vi" ? "Xác nhận" : "Ok";
+
   return (
     <Dialog
       open={open}
@@ -209,7 +220,7 @@ function CsDialog({
               type={cancelProps?.type || "button"}
               className={cn("min-w-20", cancelProps?.className)}
             >
-              {cancelProps?.cancelText || "Close"}
+              {cancelProps?.cancelText || closeLabel}
             </CsButton>
           </DialogClose>
           <CsButton
@@ -218,7 +229,7 @@ function CsDialog({
             className={cn("min-w-20", okProps?.className)}
             loading={okProps?.loading || false}
           >
-            {okProps?.okText || "Ok"}
+            {okProps?.okText || okLabel}
           </CsButton>
         </DialogFooter>
       </DialogContent>

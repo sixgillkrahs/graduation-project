@@ -9,6 +9,7 @@ import { useGetMyNotices } from "@/components/layout/agent/services/query";
 import { useSocket } from "@/components/features/message/services/socket-context";
 import { cn } from "@/lib/utils";
 import { Bell, CheckCheck } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -16,10 +17,13 @@ type NotificationBellProps = {
   isAuthenticated: boolean;
 };
 
-const mapPayloadToNotice = (payload: any): INoticeDto => ({
+const mapPayloadToNotice = (
+  payload: any,
+  fallbackTitle: string,
+): INoticeDto => ({
   id: payload.id || `notice-${Date.now()}`,
   userId: payload.userId || "",
-  title: payload.title || "Thong bao moi",
+  title: payload.title || fallbackTitle,
   content: payload.message || payload.content || "",
   isRead: false,
   type: payload.type || "SYSTEM",
@@ -31,10 +35,12 @@ const mapPayloadToNotice = (payload: any): INoticeDto => ({
 const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
   const router = useRouter();
   const socket = useSocket();
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [liveNotices, setLiveNotices] = useState<INoticeDto[]>([]);
   const [liveUnread, setLiveUnread] = useState(0);
+  const isVi = locale === "vi";
   const { data, refetch } = useGetMyNotices({ page: 1, limit: 8 });
   const { mutate: readNotice } = useReadNotice();
   const { mutate: markAllAsRead, isPending: isMarkingAllRead } =
@@ -72,7 +78,10 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
     }
 
     const handleNewNotification = (payload: any) => {
-      const notice = mapPayloadToNotice(payload);
+      const notice = mapPayloadToNotice(
+        payload,
+        isVi ? "Thông báo mới" : "New notification",
+      );
 
       setLiveNotices((current) => [notice, ...current]);
       setLiveUnread((current) => current + 1);
@@ -90,7 +99,7 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
       socket.off("schedule:new_request", handleNewNotification);
       socket.off("schedule:status_update", handleNewNotification);
     };
-  }, [isAuthenticated, refetch, socket]);
+  }, [isAuthenticated, isVi, refetch, socket]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -152,7 +161,7 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
         type="button"
         onClick={() => setIsOpen((current) => !current)}
         className="relative rounded-full border border-border bg-background p-2.5 text-muted-foreground transition hover:border-primary/30 hover:text-foreground focus:outline-none focus:ring-4 focus:ring-primary/10"
-        aria-label="Notifications"
+        aria-label={isVi ? "Thông báo" : "Notifications"}
       >
         <Bell className="size-5" />
         {unreadCount > 0 && (
@@ -165,7 +174,9 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
       {isOpen && (
         <div className="absolute right-0 top-full z-50 mt-3 w-[22rem] overflow-hidden rounded-3xl border border-border bg-background shadow-xl">
           <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
-            <h3 className="text-sm font-semibold text-foreground">Thong bao</h3>
+            <h3 className="text-sm font-semibold text-foreground">
+              {isVi ? "Thông báo" : "Notifications"}
+            </h3>
             <button
               type="button"
               onClick={handleMarkAllAsRead}
@@ -173,13 +184,13 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
               className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:border-primary/30 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <CheckCheck className="size-3.5" />
-              Danh dau tat ca da doc
+              {isVi ? "Đánh dấu tất cả đã đọc" : "Mark all as read"}
             </button>
           </div>
 
           {notices.length === 0 ? (
             <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-              Chua co thong bao nao.
+              {isVi ? "Chưa có thông báo nào." : "No notifications yet."}
             </div>
           ) : (
             <div className="max-h-96 overflow-y-auto">
@@ -203,7 +214,7 @@ const NotificationBell = ({ isAuthenticated }: NotificationBellProps) => {
                       </p>
                       {notice.metadata?.actionUrl && (
                         <span className="mt-3 inline-flex rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                          Danh gia ngay
+                          {isVi ? "Xem ngay" : "Open now"}
                         </span>
                       )}
                     </div>

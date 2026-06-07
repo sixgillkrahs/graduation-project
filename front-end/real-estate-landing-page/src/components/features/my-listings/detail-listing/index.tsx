@@ -6,6 +6,7 @@ import {
 } from "@/components/features/my-listings/services/query";
 import { normalizePropertyPrice } from "@/lib/property-price";
 import { AlertCircle } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState, useCallback } from "react";
 import { toast } from "@/lib/toast";
@@ -21,7 +22,9 @@ import { CelebrationModal } from "./components/CelebrationModal";
 export const ListingDetail = () => {
   const router = useRouter();
   const params = useParams();
+  const locale = useLocale();
   const propertyId = params?.id as string;
+  const isVi = locale === "vi";
 
   const { data, isLoading, refetch } = useGetPropertyDetail(propertyId);
   const { mutate: updateStatus, isPending: isUpdating } =
@@ -59,7 +62,11 @@ export const ListingDetail = () => {
         { id: propertyId, status: newStatus, ...extraData },
         {
           onSuccess: () => {
-            toast.success(`Property marked as ${newStatus.toLowerCase()}`);
+            toast.success(
+              isVi
+                ? `Bất động sản đã được chuyển sang trạng thái ${newStatus.toLowerCase()}`
+                : `Property marked as ${newStatus.toLowerCase()}`,
+            );
             if (newStatus === "SOLD") {
               setIsSoldModalOpen(false);
               setIsCelebrationModalOpen(true);
@@ -70,13 +77,15 @@ export const ListingDetail = () => {
           onError: (err: any) => {
             toast.error(
               err?.response?.data?.message ||
-                "Failed to update property status",
+                (isVi
+                  ? "Cập nhật trạng thái bất động sản thất bại"
+                  : "Failed to update property status"),
             );
           },
         },
       );
     },
-    [propertyId, updateStatus, reset, refetch],
+    [isVi, propertyId, updateStatus, reset, refetch],
   );
 
   const handleConfirmSold = useCallback(
@@ -125,16 +134,19 @@ export const ListingDetail = () => {
         <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-500 mb-4">
           <AlertCircle className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold text-gray-800">Property Not Found</h2>
+        <h2 className="text-xl font-bold text-gray-800">
+          {isVi ? "Không tìm thấy bất động sản" : "Property Not Found"}
+        </h2>
         <p className="text-gray-500 mt-2 text-center">
-          The property you are looking for does not exist or you don't have
-          permission to view it.
+          {isVi
+            ? "Bất động sản bạn đang tìm không tồn tại hoặc bạn không có quyền xem."
+            : "The property you are looking for does not exist or you don't have permission to view it."}
         </p>
         <button
           onClick={handleBack}
           className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
-          Back to Listings
+          {isVi ? "Quay lại danh sách tin" : "Back to Listings"}
         </button>
       </div>
     );
@@ -193,4 +205,3 @@ export const ListingDetail = () => {
 };
 
 export default ListingDetail;
-

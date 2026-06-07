@@ -183,6 +183,14 @@ export interface SelectOption {
   value: string | number;
 }
 
+const EMPTY_SELECT_VALUE = "__cs_select_empty__";
+
+const toInternalSelectValue = (value: string | number) =>
+  value === "" ? EMPTY_SELECT_VALUE : String(value);
+
+const fromInternalSelectValue = (value: string) =>
+  value === EMPTY_SELECT_VALUE ? "" : value;
+
 interface CsSelectProps
   extends Omit<
     React.ComponentProps<typeof SelectPrimitive.Root>,
@@ -359,6 +367,8 @@ function CsSelect({
     );
   }
 
+  const singleValue = Array.isArray(value) ? undefined : value;
+
   return (
     <Field
       data-invalid={!!error}
@@ -366,8 +376,10 @@ function CsSelect({
     >
       {label && <FieldLabel>{label}</FieldLabel>}
       <Select
-        value={value != null ? String(value) : undefined}
-        onValueChange={onChange}
+        value={
+          singleValue != null ? toInternalSelectValue(singleValue) : undefined
+        }
+        onValueChange={(nextValue) => onChange?.(fromInternalSelectValue(nextValue))}
         {...props}
       >
         <SelectTrigger
@@ -379,7 +391,10 @@ function CsSelect({
         <SelectContent>
           {options.length > 0 ? (
             options.map((option) => (
-              <SelectItem key={option.value} value={String(option.value)}>
+              <SelectItem
+                key={`${typeof option.value}-${String(option.value)}`}
+                value={toInternalSelectValue(option.value)}
+              >
                 {option.label}
               </SelectItem>
             ))

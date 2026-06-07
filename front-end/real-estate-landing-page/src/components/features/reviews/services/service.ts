@@ -1,6 +1,11 @@
 import { IResp } from "@/@types/service";
 import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
+import {
+  normalizeAgentReviewListApiResponse,
+  normalizePublicReviewListApiResponse,
+  normalizeReviewResponse,
+} from "./normalize";
 import { ReviewsEndpoint } from "./config";
 
 export default class ReviewsService {
@@ -35,7 +40,7 @@ export default class ReviewsService {
       url: ReviewsEndpoint.getPublicByAgent(agentUserId),
       method: AxiosMethod.GET,
       params,
-    });
+    }).then(normalizePublicReviewListApiResponse);
   };
 
   public static readonly getMyReviews = (
@@ -45,7 +50,7 @@ export default class ReviewsService {
       url: ReviewsEndpoint.getMyReviews(),
       method: AxiosMethod.GET,
       params,
-    });
+    }).then(normalizeAgentReviewListApiResponse);
   };
 
   public static readonly replyToReview = (
@@ -57,7 +62,7 @@ export default class ReviewsService {
       data: {
         reply: payload.reply,
       },
-    });
+    }).then(normalizeReviewResponse);
   };
 
   public static readonly generateAutoReply = (
@@ -66,7 +71,7 @@ export default class ReviewsService {
     return request({
       url: ReviewsEndpoint.generateAutoReply(payload.reviewId),
       method: AxiosMethod.POST,
-    });
+    }).then(normalizeReviewResponse);
   };
 
   public static readonly applyAutoReply = (
@@ -78,7 +83,7 @@ export default class ReviewsService {
       data: {
         reply: payload.reply,
       },
-    });
+    }).then(normalizeReviewResponse);
   };
 
   public static readonly discardAutoReply = (
@@ -87,7 +92,7 @@ export default class ReviewsService {
     return request({
       url: ReviewsEndpoint.discardAutoReply(payload.reviewId),
       method: AxiosMethod.PATCH,
-    });
+    }).then(normalizeReviewResponse);
   };
 
   public static readonly reportReview = (
@@ -99,6 +104,6 @@ export default class ReviewsService {
       data: {
         reason: payload.reason,
       },
-    });
+    }).then(normalizeReviewResponse);
   };
 }

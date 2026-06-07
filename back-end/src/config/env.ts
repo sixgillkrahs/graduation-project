@@ -65,6 +65,10 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_REDIRECT_URI: z.string().url().optional(),
+  WEBAUTHN_REQUIRE_USER_VERIFICATION: z.coerce
+    .boolean()
+    .optional()
+    .default(true),
   // Cloudinary
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
@@ -78,7 +82,11 @@ const envSchema = z.object({
   REVIEW_REPLY_GEMINI_MODEL: z
     .string()
     .optional()
-    .default("gemini-2.0-flash"),
+    .default("gemini-2.5-flash-lite"),
+  PROPERTY_SEARCH_GEMINI_MODEL: z
+    .string()
+    .optional()
+    .default("gemini-2.5-flash-lite"),
   ADMIN_UNITS_BASE_URL: z
     .string()
     .url()

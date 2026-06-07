@@ -6,7 +6,10 @@ import { PropertyInteractionService } from "@/services/property-interaction.serv
 import { PropertySaleService } from "@/services/property-sale.service";
 import { PropertyService } from "@/services/property.service";
 import { AgentService } from "@/services/agent.service";
-import { createPropertySchema } from "@/validators/property.validator";
+import {
+  aiSearchPropertySchema,
+  createPropertySchema,
+} from "@/validators/property.validator";
 import { Router } from "express";
 import { EmailQueue } from "@/queues/email.queue";
 import { AgentLeaderboardQueue } from "@/queues/agent-leaderboard.queue";
@@ -450,6 +453,20 @@ router.get(
   "/agent/:agentId/on-sale",
   optionalAuth,
   propertyController.getAgentOnSaleProperties,
+);
+
+router.post(
+  "/ai-search",
+  optionalAuth,
+  validateRequest(aiSearchPropertySchema),
+  propertyController.aiSearchProperties,
+);
+
+router.post(
+  "/ai-search/explain",
+  optionalAuth,
+  validateRequest(aiSearchPropertySchema),
+  propertyController.aiSearchPropertiesWithExplanation,
 );
 
 /**

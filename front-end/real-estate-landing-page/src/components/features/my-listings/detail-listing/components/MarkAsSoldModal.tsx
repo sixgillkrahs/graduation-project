@@ -17,6 +17,7 @@ import {
   useTransform,
 } from "framer-motion";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { useLocale } from "next-intl";
 
 interface MarkAsSoldModalProps {
   isOpen: boolean;
@@ -38,11 +39,13 @@ const SlideToSubmit = ({
   isUpdating: boolean;
   onSubmitTrigger: () => void;
 }) => {
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const x = useMotionValue(0);
   const controls = useAnimation();
   const [hasTriggered, setHasTriggered] = useState(false);
+  const isVi = locale === "vi";
 
   useEffect(() => {
     if (containerRef.current) {
@@ -113,7 +116,13 @@ const SlideToSubmit = ({
         style={{ opacity: textOpacity }}
         className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-gray-500 pointer-events-none"
       >
-        {isUpdating ? "Confirming..." : "Slide to confirm"}
+        {isUpdating
+          ? isVi
+            ? "Đang xác nhận..."
+            : "Confirming..."
+          : isVi
+            ? "Kéo để xác nhận"
+            : "Slide to confirm"}
       </motion.span>
 
       <motion.div
@@ -152,7 +161,9 @@ export const MarkAsSoldModal = React.memo(
     currency,
     priceUnit,
   }: MarkAsSoldModalProps) => {
+    const locale = useLocale();
     const submitBtnRef = useRef<HTMLButtonElement>(null);
+    const isVi = locale === "vi";
 
     const triggerSubmit = () => {
       if (submitBtnRef.current) {
@@ -170,28 +181,39 @@ export const MarkAsSoldModal = React.memo(
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Mark Property as Sold</DialogTitle>
+            <DialogTitle>
+              {isVi ? "Đánh dấu bất động sản đã bán" : "Mark Property as Sold"}
+            </DialogTitle>
             <DialogDescription>
-              To help track your sales KPIs and generate better analytics,
-              please provide the sale price and the customer's name (optional).
+              {isVi
+                ? "Để theo dõi KPI bán hàng và tạo báo cáo tốt hơn, vui lòng cung cấp giá bán và tên khách hàng (không bắt buộc)."
+                : "To help track your sales KPIs and generate better analytics, please provide the sale price and the customer's name (optional)."}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(handleConfirmSold)}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Total Sale Price ({currency}){" "}
+                  {isVi
+                    ? `Tổng giá bán (${currency})`
+                    : `Total Sale Price (${currency})`}{" "}
                   <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="soldPrice"
                   control={control}
-                  rules={{ required: "Please enter the sale price." }}
+                  rules={{
+                    required: isVi
+                      ? "Vui lòng nhập giá bán."
+                      : "Please enter the sale price.",
+                  }}
                   render={({ field }) => (
                     <Input
                       type="text"
                       inputMode="decimal"
-                      placeholder="E.g. 1800700000"
+                      placeholder={
+                        isVi ? "Ví dụ: 1800700000" : "E.g. 1800700000"
+                      }
                       error={errors.soldPrice?.message as string}
                       {...field}
                     />
@@ -200,7 +222,9 @@ export const MarkAsSoldModal = React.memo(
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Sold To (Customer Name / Phone)
+                  {isVi
+                    ? "Bán cho (Tên khách hàng / Số điện thoại)"
+                    : "Sold To (Customer Name / Phone)"}
                 </label>
                 <Controller
                   name="soldTo"
@@ -208,7 +232,11 @@ export const MarkAsSoldModal = React.memo(
                   render={({ field }) => (
                     <Input
                       type="text"
-                      placeholder="E.g. John Doe 0987654321"
+                      placeholder={
+                        isVi
+                          ? "Ví dụ: Nguyễn Văn A 0987654321"
+                          : "E.g. John Doe 0987654321"
+                      }
                       error={errors.soldTo?.message as string}
                       {...field}
                     />
@@ -217,22 +245,31 @@ export const MarkAsSoldModal = React.memo(
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Customer Email <span className="text-red-500">*</span>
+                  {isVi ? "Email khách hàng" : "Customer Email"}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   name="soldToEmail"
                   control={control}
                   rules={{
-                    required: "Please enter the customer's email.",
+                    required: isVi
+                      ? "Vui lòng nhập email của khách hàng."
+                      : "Please enter the customer's email.",
                     pattern: {
                       value: /\S+@\S+\.\S+/,
-                      message: "Invalid email format",
+                      message: isVi
+                        ? "Định dạng email không hợp lệ"
+                        : "Invalid email format",
                     },
                   }}
                   render={({ field }) => (
                     <Input
                       type="email"
-                      placeholder="E.g. customer@example.com"
+                      placeholder={
+                        isVi
+                          ? "Ví dụ: khachhang@example.com"
+                          : "E.g. customer@example.com"
+                      }
                       error={errors.soldToEmail?.message as string}
                       {...field}
                     />
@@ -258,7 +295,7 @@ export const MarkAsSoldModal = React.memo(
                   reset();
                 }}
               >
-                Cancel
+                {isVi ? "Hủy" : "Cancel"}
               </CsButton>
             </div>
           </form>

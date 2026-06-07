@@ -8,13 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Password } from "@/components/ui/password";
 import { Separator } from "@/components/ui/separator";
+import AuthService from "@/shared/auth/AuthService";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { toast } from "@/lib/toast";
-import { startAuthentication } from "@simplewebauthn/browser";
+import {
+  startAuthentication,
+  startRegistration,
+} from "@simplewebauthn/browser";
+import SmartkeyPrompt from "./components/SmartkeyPrompt";
+import {
+  useRegisterPasskeyAfterLogin,
+  useVerifyPasskeyAfterLogin,
+} from "./services/passkey";
 import {
   useSignIn,
   useSignInPasskey,
@@ -29,8 +38,23 @@ const SignIn = () => {
   const t = useTranslations("SignIn");
   const { mutateAsync: signIn, isPending } = useSignIn();
   const { mutateAsync: signInPasskey } = useSignInPasskey();
-
   const { mutateAsync: verifySignInPasskey } = useVerifySignInPasskey();
+  const registerPasskeyAfterLoginMutation = useRegisterPasskeyAfterLogin();
+  const verifyPasskeyAfterLoginMutation = useVerifyPasskeyAfterLogin();
+  const { mutateAsync: registerPasskeyAfterLogin } =
+    registerPasskeyAfterLoginMutation;
+  const { mutateAsync: verifyPasskeyAfterLogin } =
+    verifyPasskeyAfterLoginMutation;
+  const [isSmartkeyPromptOpen, setIsSmartkeyPromptOpen] = useState(false);
+  const [smartkeyError, setSmartkeyError] = useState<string | null>(null);
+
+  const canUseSmartkey = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.isSecureContext &&
+      "PublicKeyCredential" in window,
+    [],
+  );
 
   const {
     handleSubmit,
@@ -59,6 +83,20 @@ const SignIn = () => {
       password: data.password,
       rememberMe: data.rememberMe,
     });
+
+    try {
+      const me = await AuthService.getMe();
+      const hasRegisteredSmartkey = Boolean(me?.data?.passkeys?.length);
+
+      if (!hasRegisteredSmartkey) {
+        setSmartkeyError(null);
+        setIsSmartkeyPromptOpen(true);
+        return;
+      }
+    } catch (_error) {
+      // Fall back to the existing redirect if the profile check fails.
+    }
+
     router.push(callbackUrl);
   };
 
@@ -102,6 +140,46 @@ const SignIn = () => {
       toast.error(t("googleAuthFailed"));
     }
   }, [authError, t]);
+
+  const handleSkipSmartkeyRegistration = () => {
+    setSmartkeyError(null);
+    setIsSmartkeyPromptOpen(false);
+    router.push(callbackUrl);
+  };
+
+  const handleRegisterSmartkey = async () => {
+    if (!canUseSmartkey) {
+      setSmartkeyError(t("smartkey.unsupportedDescription"));
+      return;
+    }
+
+    setSmartkeyError(null);
+
+    try {
+      const options = await registerPasskeyAfterLogin();
+
+      if (!options.success) {
+        throw new Error("Failed to initialize smartkey registration");
+      }
+
+      const credential = await startRegistration(options.data as any);
+      const verification = await verifyPasskeyAfterLogin(credential);
+
+      if (!verification.success) {
+        throw new Error("Failed to verify smartkey registration");
+      }
+
+      setIsSmartkeyPromptOpen(false);
+      toast.success(t("smartkey.registerSuccess"));
+      router.push(callbackUrl);
+    } catch (err: any) {
+      if (err?.name !== "NotAllowedError" && err?.name !== "AbortError") {
+        console.error("Passkey registration error:", err);
+        setSmartkeyError(t("smartkey.registerFailed"));
+        toast.error(t("smartkey.registerFailed"));
+      }
+    }
+  };
 
   return (
     <>
@@ -205,6 +283,19 @@ const SignIn = () => {
           </Link>
         </span>
       </div>
+      <SmartkeyPrompt
+        open={isSmartkeyPromptOpen}
+        isSupported={canUseSmartkey}
+        isLoading={
+          registerPasskeyAfterLoginMutation.isPending ||
+          verifyPasskeyAfterLoginMutation.isPending
+        }
+        errorMessage={smartkeyError}
+        onRegister={() => {
+          void handleRegisterSmartkey();
+        }}
+        onSkip={handleSkipSmartkeyRegistration}
+      />
     </>
   );
 };

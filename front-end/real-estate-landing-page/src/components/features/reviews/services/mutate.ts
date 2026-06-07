@@ -3,6 +3,62 @@ import { useMutation } from "@tanstack/react-query";
 import { ReviewsQueryKey } from "./config";
 import ReviewsService from "./service";
 
+const replaceReviewInPaginatedCache = <
+  T extends
+    | IReviewService.AgentListResponse
+    | IReviewService.PublicListResponse,
+>(
+  cache: { data?: T } | undefined,
+  review: IReviewService.ReviewItem,
+) => {
+  if (!cache?.data?.results?.length) {
+    return cache;
+  }
+
+  let hasUpdatedReview = false;
+  const nextResults = cache.data.results.map((currentReview) => {
+    if (currentReview.id !== review.id) {
+      return currentReview;
+    }
+
+    hasUpdatedReview = true;
+    return {
+      ...currentReview,
+      ...review,
+    };
+  });
+
+  if (!hasUpdatedReview) {
+    return cache;
+  }
+
+  return {
+    ...cache,
+    data: {
+      ...cache.data,
+      results: nextResults,
+    },
+  };
+};
+
+const syncReviewCaches = (review: IReviewService.ReviewItem) => {
+  queryClient.setQueriesData(
+    {
+      queryKey: [ReviewsQueryKey.myList],
+    },
+    (cache: { data?: IReviewService.AgentListResponse } | undefined) =>
+      replaceReviewInPaginatedCache(cache, review),
+  );
+
+  queryClient.setQueriesData(
+    {
+      queryKey: [ReviewsQueryKey.publicList],
+    },
+    (cache: { data?: IReviewService.PublicListResponse } | undefined) =>
+      replaceReviewInPaginatedCache(cache, review),
+  );
+};
+
 export const useReplyReview = () => {
   return useMutation({
     mutationFn: (payload: IReviewService.ReplyPayload) =>
@@ -11,7 +67,8 @@ export const useReplyReview = () => {
       ERROR_SOURCE: "Không thể gửi phản hồi",
       SUCCESS_MESSAGE: "Đã gửi phản hồi cho khách hàng",
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      syncReviewCaches(response.data);
       queryClient.invalidateQueries({
         queryKey: [ReviewsQueryKey.myList],
       });
@@ -51,10 +108,8 @@ export const useGenerateAutoReply = () => {
       ERROR_SOURCE: "Khong the tao goi y AI",
       SUCCESS_MESSAGE: "Da tao goi y AI cho phan hoi",
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [ReviewsQueryKey.myList],
-      });
+    onSuccess: (response) => {
+      syncReviewCaches(response.data);
     },
   });
 };
@@ -67,7 +122,8 @@ export const useApplyAutoReply = () => {
       ERROR_SOURCE: "Khong the ap dung goi y AI",
       SUCCESS_MESSAGE: "Da dang phan hoi bang goi y AI",
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      syncReviewCaches(response.data);
       queryClient.invalidateQueries({
         queryKey: [ReviewsQueryKey.myList],
       });
@@ -86,10 +142,8 @@ export const useDiscardAutoReply = () => {
       ERROR_SOURCE: "Khong the bo goi y AI",
       SUCCESS_MESSAGE: "Da bo goi y AI",
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [ReviewsQueryKey.myList],
-      });
+    onSuccess: (response) => {
+      syncReviewCaches(response.data);
     },
   });
 };
@@ -102,7 +156,8 @@ export const useReportReview = () => {
       ERROR_SOURCE: "Không thể báo cáo đánh giá",
       SUCCESS_MESSAGE: "Đã chuyển đánh giá cho Admin kiểm tra",
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      syncReviewCaches(response.data);
       queryClient.invalidateQueries({
         queryKey: [ReviewsQueryKey.myList],
       });

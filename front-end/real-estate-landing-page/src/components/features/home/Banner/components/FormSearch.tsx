@@ -1,39 +1,50 @@
 "use client";
 
 import { CsButton } from "@/components/custom";
-import { Slider, Tabs, Tag } from "@/components/ui";
+import { Tabs } from "@/components/ui";
 import { CsSelect } from "@/components/ui/select";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { ROUTES } from "@/const/routes";
-import LocationAutocomplete from "@/components/features/properties/components/LocationAutocomplete";
 import { motion } from "framer-motion";
+import { Textarea } from "@/components/ui/textarea";
+import { Sparkles } from "lucide-react";
+import {
+  buildSemanticSearchQueryString,
+  DEFAULT_SEMANTIC_LIMIT,
+  DEFAULT_SEMANTIC_PAGE,
+} from "@/components/features/properties/semantic-search/url-state";
 
 interface BannerSearchValues {
   query: string;
   demandType: string;
   propertyType: string;
-  maxPrice: number;
-  bedrooms: string;
+  explain: boolean;
 }
+
+const TYPE_SPEED_MS = 55;
+const DELETE_SPEED_MS = 28;
+const HOLD_TYPED_MS = 1500;
+const HOLD_EMPTY_MS = 320;
 
 const FormSearch = () => {
   const t = useTranslations("Banner");
   const router = useRouter();
 
   const optionsType = [
+    { label: t("allPropertyTypes"), value: "" },
     { label: t("apartment"), value: "APARTMENT" },
     { label: t("house"), value: "HOUSE" },
+    { label: t("villa"), value: "VILLA" },
+    { label: t("land"), value: "LAND" },
   ];
 
-  const optionsBedrooms = [
-    { label: t("bedroom1"), value: "1" },
-    { label: t("bedroom2"), value: "2" },
-    { label: t("bedroom3"), value: "3" },
-    { label: t("bedroom4"), value: "4" },
-  ];
+  const suggestedPrompts = [t("prompt1"), t("prompt2"), t("prompt3")];
+  const [animatedPlaceholder, setAnimatedPlaceholder] = useState("");
+  const [activePromptIndex, setActivePromptIndex] = useState(0);
+  const [isDeletingPrompt, setIsDeletingPrompt] = useState(false);
 
   const { control, handleSubmit, setValue, watch } =
     useForm<BannerSearchValues>({
@@ -41,22 +52,78 @@ const FormSearch = () => {
         query: "",
         demandType: "RENT",
         propertyType: "",
-        maxPrice: 20,
-        bedrooms: "",
+        explain: true,
       },
     });
 
   const demandType = watch("demandType");
+  const explain = watch("explain");
+  const query = watch("query");
+
+  useEffect(() => {
+    const prompts = suggestedPrompts.filter(Boolean);
+
+    if (prompts.length === 0) {
+      return;
+    }
+
+    const currentPrompt = prompts[activePromptIndex % prompts.length] || "";
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    if (!isDeletingPrompt && animatedPlaceholder === currentPrompt) {
+      timeoutId = setTimeout(() => {
+        setIsDeletingPrompt(true);
+      }, HOLD_TYPED_MS);
+      return () => clearTimeout(timeoutId);
+    }
+
+    if (isDeletingPrompt && animatedPlaceholder.length === 0) {
+      timeoutId = setTimeout(() => {
+        setIsDeletingPrompt(false);
+        setActivePromptIndex((prev) => (prev + 1) % prompts.length);
+      }, HOLD_EMPTY_MS);
+      return () => clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(
+      () => {
+        setAnimatedPlaceholder((prev) =>
+          isDeletingPrompt
+            ? prev.slice(0, -1)
+            : currentPrompt.slice(0, prev.length + 1),
+        );
+      },
+      isDeletingPrompt ? DELETE_SPEED_MS : TYPE_SPEED_MS,
+    );
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    activePromptIndex,
+    animatedPlaceholder,
+    isDeletingPrompt,
+    suggestedPrompts,
+  ]);
 
   const onSubmit = (data: BannerSearchValues) => {
-    const params = new URLSearchParams();
-    if (data.demandType) params.append("demandType", data.demandType);
-    if (data.propertyType) params.append("propertyType", data.propertyType);
-    if (data.maxPrice < 20) params.append("maxPrice", data.maxPrice.toString());
-    if (data.query) params.append("query", data.query);
-    // Optionally keep bedrooms if the backend ever supports it, but AdvancedSearch doesn't use it yet
+    const query = data.query.trim();
 
-    router.push(`${ROUTES.PROPERTIES}?${params.toString()}`);
+    const queryString = buildSemanticSearchQueryString({
+      query,
+      page: DEFAULT_SEMANTIC_PAGE,
+      limit: DEFAULT_SEMANTIC_LIMIT,
+      explain: data.explain,
+      filters: {
+        demandType:
+          data.demandType === "RENT" || data.demandType === "SALE"
+            ? data.demandType
+            : undefined,
+        propertyType: data.propertyType
+          ? (data.propertyType as "APARTMENT" | "HOUSE" | "VILLA" | "LAND")
+          : undefined,
+      },
+    });
+
+    router.push(`${ROUTES.PROPERTIES}?${queryString}`);
   };
 
   return (
@@ -64,11 +131,14 @@ const FormSearch = () => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-      className="absolute bottom-4 left-4 right-4 md:bottom-2 md:right-20 md:left-auto z-10 max-w-sm md:max-w-md bg-white/90 backdrop-blur-md p-4 md:p-7 rounded-xl shadow-lg"
+      className="absolute bottom-4 left-4 right-4 z-10 max-w-sm rounded-[28px] border border-white/50 bg-white/90 p-4 shadow-2xl backdrop-blur-md md:bottom-20 md:left-auto md:right-20 md:max-w-lg md:p-7"
     >
-      <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight mb-4">
+      <h2 className="mb-3 text-2xl font-bold leading-tight text-black md:text-3xl">
         {t("title")}
       </h2>
+      <p className="mb-4 text-sm leading-6 text-stone-600">
+        {t("description")}
+      </p>
       <Tabs
         fullWidth
         current={demandType === "RENT" ? 0 : 1}
@@ -77,20 +147,24 @@ const FormSearch = () => {
         }
         items={[{ title: t("rent") }, { title: t("sell") }]}
       />
-      <div className="h-px bg-black/10 my-4"></div>
+      <div className="my-4 h-px bg-black/10"></div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
         <Controller
           name="query"
           control={control}
           render={({ field }) => (
-            <LocationAutocomplete
+            <Textarea
               value={field.value}
+              rows={2}
               onChange={field.onChange}
-              placeholder={t("enterLocation")}
+              placeholder={
+                query.trim() ? t("enterLocation") : animatedPlaceholder
+              }
+              className="min-h-20 rounded-2xl border-stone-200 bg-white px-4 py-3 text-sm leading-6 shadow-none focus-visible:ring-0 md:text-base"
             />
           )}
         />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Controller
             name="propertyType"
             control={control}
@@ -104,46 +178,31 @@ const FormSearch = () => {
             )}
           />
           <Controller
-            name="bedrooms"
+            name="explain"
             control={control}
             render={({ field }) => (
-              <CsSelect
-                placeholder={t("bedrooms")}
-                options={optionsBedrooms}
-                value={field.value}
-                onChange={field.onChange}
-              />
+              <button
+                type="button"
+                onClick={() => field.onChange(!field.value)}
+                className={`inline-flex h-11 items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition-colors ${
+                  explain
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                }`}
+              >
+                <Sparkles className="h-4 w-4" />
+                {t("explainToggle")}
+              </button>
             )}
           />
         </div>
-        <Controller
-          name="maxPrice"
-          control={control}
-          render={({ field }) => (
-            <Slider
-              min={0}
-              max={20}
-              step={0.5}
-              currentValue={field.value}
-              onChange={field.onChange}
-            />
-          )}
-        />
-        <CsButton type="submit" className="cs-bg-black text-white">
+        <CsButton
+          type="submit"
+          className="h-11 rounded-2xl bg-stone-950 text-white hover:bg-stone-800"
+        >
           {t("search")}
         </CsButton>
       </form>
-      <div className="h-px bg-black/10 my-4"></div>
-      <div className="flex  flex-col items-center gap-2">
-        <span className="cs-paragraph-gray text-[16px]!">
-          {t("popularSearches")}
-        </span>
-        <div className="flex gap-2 flex-wrap justify-center">
-          <Tag title={t("petFriendly")} />
-          <Tag title={t("house")} />
-          <Tag title={t("pool")} />
-        </div>
-      </div>
     </motion.div>
   );
 };

@@ -176,6 +176,60 @@ export class PropertyController extends BaseController {
     });
   }
 
+  private async enrichAiSearchResults(
+    results: Array<{
+      property: any;
+      vectorScore: number;
+      filterScore: number;
+      rerankScore: number;
+      finalScore: number;
+      reasons: string[];
+    }>,
+    user?: any,
+  ) {
+    if (results.length === 0) {
+      return results;
+    }
+
+    let favoritedPropertyIds = new Set<string>();
+    if (user) {
+      const propertyIds = results.map((item) => item.property?._id?.toString());
+      const userId = user.userId?._id
+        ? user.userId._id.toString()
+        : user.userId?.toString?.();
+
+      if (userId && propertyIds.length > 0) {
+        const interactions =
+          await this.propertyInteractionService.getLatestInteractionsForUser(
+            userId,
+            propertyIds,
+            InteractionType.FAVORITE,
+          );
+
+        interactions.forEach((interaction: any) => {
+          if (
+            interaction.latestInteraction &&
+            interaction.latestInteraction.metadata?.action !== "UNSAVE"
+          ) {
+            favoritedPropertyIds.add(interaction._id.toString());
+          }
+        });
+      }
+    }
+
+    const propertiesWithFavorite = results.map((item) => ({
+      ...item.property,
+      isFavorite: favoritedPropertyIds.has(item.property._id.toString()),
+    }));
+    const propertiesWithAgentPlan =
+      await this.enrichPropertiesWithAgentPlan(propertiesWithFavorite);
+
+    return results.map((item, index) => ({
+      ...item,
+      property: propertiesWithAgentPlan[index],
+    }));
+  }
+
   /**
    * Parse custom filter params into MongoDB queries.
    * Handles: minBedrooms, minBathrooms, maxPrice, query (text search)
@@ -904,6 +958,16 @@ export class PropertyController extends BaseController {
         updateData,
       );
 
+      if (status === PropertyStatusEnum.PUBLISHED && updatedProperty) {
+        this.propertyService.embedAndUpsertProperty(updatedProperty);
+      }
+
+      if (
+        [PropertyStatusEnum.SOLD, PropertyStatusEnum.EXPIRED].includes(status)
+      ) {
+        this.propertyService.removePropertyEmbedding(id);
+      }
+
       if (status === PropertyStatusEnum.SOLD) {
         await this.propertySaleService.upsertPropertySale(
           existingProperty as any,
@@ -959,6 +1023,7 @@ export class PropertyController extends BaseController {
       }
 
       await this.propertyService.deleteProperty(id);
+      this.propertyService.removePropertyEmbedding(id);
       return { success: true };
     });
   };
@@ -993,13 +1058,15 @@ export class PropertyController extends BaseController {
         );
       }
 
-      await this.propertyService.updateProperty(id, {
+      const updatedProperty = await this.propertyService.updateProperty(id, {
         status: targetStatus,
         adminNote: note,
       });
 
       // Embed property into Qdrant after approval
-      this.propertyService.embedAndUpsertProperty(existingProperty);
+      this.propertyService.embedAndUpsertProperty(
+        updatedProperty || { ...existingProperty, status: targetStatus },
+      );
 
       const io = req.io;
       if (io) {
@@ -1066,6 +1133,7 @@ export class PropertyController extends BaseController {
         status: targetStatus,
         rejectReason: reason,
       });
+      this.propertyService.removePropertyEmbedding(id);
 
       const io = req.io;
       if (io) {
@@ -1379,6 +1447,45 @@ export class PropertyController extends BaseController {
         : [];
 
       return { ...properties, results: resultsWithFavorite };
+    });
+  };
+
+  aiSearchProperties = (req: Request, res: Response, next: NextFunction) => {
+    this.handleRequest(req, res, next, async () => {
+      const user = (req as any).user;
+      const searchResult = await this.propertyService.aiSearchProperties({
+        query: req.body.query,
+        filters: req.body.filters,
+        limit: req.body.limit,
+        page: req.body.page,
+      });
+
+      return {
+        ...searchResult,
+        results: await this.enrichAiSearchResults(searchResult.results, user),
+      };
+    });
+  };
+
+  aiSearchPropertiesWithExplanation = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    this.handleRequest(req, res, next, async () => {
+      const user = (req as any).user;
+      const searchResult =
+        await this.propertyService.aiSearchPropertiesWithExplanation({
+          query: req.body.query,
+          filters: req.body.filters,
+          limit: req.body.limit,
+          page: req.body.page,
+        });
+
+      return {
+        ...searchResult,
+        results: await this.enrichAiSearchResults(searchResult.results, user),
+      };
     });
   };
 

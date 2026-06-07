@@ -88,22 +88,24 @@ const AgentPublicProfile = () => {
   const { data: me } = useGetMe();
   const { data: profileData } = useAgentPublicProfile(agentId);
   const { data: publicReviewsData, isLoading: isLoadingPublicReviews } =
-    useGetPublicAgentReviews(agentId, {
-      page: 1,
-      limit: 6,
-    }, settings.enableListingReviews);
+    useGetPublicAgentReviews(
+      agentId,
+      {
+        page: 1,
+        limit: 6,
+      },
+      settings.enableListingReviews,
+    );
   const { data: activeListingsData, isLoading: isLoadingActiveListings } =
     useAgentOnSaleProperties(agentId, {
       page: 1,
       limit: 4,
     });
-  const {
-    data: reviewEligibilityData,
-    isLoading: isLoadingReviewEligibility,
-  } = useGetAgentReviewEligibility(
-    agentId,
-    settings.enableListingReviews && Boolean(me?.data?.userId),
-  );
+  const { data: reviewEligibilityData, isLoading: isLoadingReviewEligibility } =
+    useGetAgentReviewEligibility(
+      agentId,
+      settings.enableListingReviews && Boolean(me?.data?.userId),
+    );
   const { mutateAsync: createConversation, isPending: isCreatingConversation } =
     useCreateConversation();
   const { mutateAsync: createAgentReview, isPending: isCreatingAgentReview } =
@@ -399,8 +401,8 @@ const AgentPublicProfile = () => {
                     {!settings.enableListingReviews
                       ? "Reviews are currently disabled"
                       : canReviewAgent
-                      ? t("actions.writeReview")
-                      : t("actions.reviewUnavailable")}
+                        ? t("actions.writeReview")
+                        : t("actions.reviewUnavailable")}
                   </CsButton>
                   <CsButton
                     className="w-full border-border bg-background text-foreground hover:bg-accent"
@@ -518,7 +520,9 @@ const AgentPublicProfile = () => {
                             bgImage.src
                           }
                           title={listing.title}
-                          price={`$${listing.features?.price?.toLocaleString() || 0}`}
+                          price={String(listing.features?.price || 0)}
+                          currency={listing.features?.currency}
+                          unit={listing.features?.priceUnit}
                           address={`${listing.location?.address}, ${listing.location?.ward}, ${listing.location?.province}`}
                           specs={{
                             beds: listing.features?.bedrooms || 0,
@@ -577,156 +581,160 @@ const AgentPublicProfile = () => {
 
             {settings.enableListingReviews ? (
               <section className="rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8">
-              <div className="mb-6">
-                <p className="text-sm font-semibold text-primary">
-                  {t("reviews.title")}
-                </p>
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  {t("reviews.subtitle", { name: displayName })}
-                </h2>
-              </div>
-
-              {isLoadingPublicReviews ? (
-                <div className="flex min-h-52 items-center justify-center">
-                  <LoaderCircle className="size-6 animate-spin text-primary" />
-                </div>
-              ) : publicReviews.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 rounded-[24px] border border-dashed border-border bg-muted/20 px-6 py-14 text-center">
-                  <div className="flex size-12 items-center justify-center rounded-full bg-primary/8 text-primary">
-                    <Star className="size-5" />
-                  </div>
-                  <p className="font-semibold text-foreground">
-                    {t("reviews.emptyTitle")}
+                <div className="mb-6">
+                  <p className="text-sm font-semibold text-primary">
+                    {t("reviews.title")}
                   </p>
-                  <p className="max-w-xs text-sm leading-6 text-muted-foreground">
-                    {t("reviews.emptyDescription")}
-                  </p>
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    {t("reviews.subtitle", { name: displayName })}
+                  </h2>
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-                    <div className="rounded-[24px] border border-border bg-muted/20 p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        Điểm đánh giá
-                      </p>
-                      <p className="mt-3 text-5xl font-semibold tracking-tight text-foreground">
-                        {reviewsSummary?.averageRating?.toFixed(1) || "0.0"}
-                      </p>
-                      <div className="mt-3">
-                        <ReviewStars
-                          rating={Math.round(
-                            reviewsSummary?.averageRating || 0,
-                          )}
-                          size={18}
-                        />
-                      </div>
-                      <p className="mt-3 text-sm text-muted-foreground">
-                        {reviewsSummary?.totalReviews || 0} review đã xuất bản
-                      </p>
-                    </div>
 
-                    <div className="rounded-[24px] border border-border bg-background p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                        Phân bổ điểm số
-                      </p>
-                      <div className="mt-4 space-y-3">
-                        {reviewsSummary?.breakdown.map((item) => {
-                          const width =
-                            reviewsSummary.totalReviews > 0
-                              ? (item.count / reviewsSummary.totalReviews) * 100
-                              : 0;
-
-                          return (
-                            <div
-                              key={`public-breakdown-${item.star}`}
-                              className="flex items-center gap-3"
-                            >
-                              <span className="w-10 text-xs font-semibold text-muted-foreground">
-                                {item.star} sao
-                              </span>
-                              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
-                                <div
-                                  className="h-full rounded-full bg-[color:var(--color-rating-star)]"
-                                  style={{ width: `${width}%` }}
-                                />
-                              </div>
-                              <span className="w-6 text-right text-xs text-muted-foreground">
-                                {item.count}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                {isLoadingPublicReviews ? (
+                  <div className="flex min-h-52 items-center justify-center">
+                    <LoaderCircle className="size-6 animate-spin text-primary" />
                   </div>
-
-                  <div className="space-y-4">
-                    {publicReviews.map((review) => (
-                      <article
-                        key={review.id}
-                        className="rounded-[24px] border border-border bg-background p-5"
-                      >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="flex items-start gap-3">
-                            <div className="flex size-11 items-center justify-center rounded-full border border-border bg-muted text-sm font-semibold text-foreground">
-                              {review.customerInitial}
-                            </div>
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <p className="font-semibold text-foreground">
-                                  {review.customerName}
-                                </p>
-                                <span className="text-xs text-muted-foreground">
-                                  •
-                                </span>
-                                <p className="text-xs text-muted-foreground">
-                                  {formatReviewDate(review.createdAt)}
-                                </p>
-                              </div>
-                              <div className="mt-2">
-                                <ReviewStars rating={review.rating} size={15} />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
-                            {review.propertyName}
-                          </div>
-                        </div>
-
-                        {review.tags.length > 0 && (
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {review.tags.map((tag) => (
-                              <span
-                                key={`${review.id}-${tag}`}
-                                className="rounded-full border border-[color:var(--color-border-primary)] bg-[color:var(--color-bg-primary)]/10 px-3 py-1 text-xs font-medium text-[color:var(--color-text-primary)]"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        <p className="mt-4 text-sm leading-7 text-foreground/85">
-                          {review.comment ||
-                            "Khách hàng không để lại nhận xét chi tiết."}
+                ) : publicReviews.length === 0 ? (
+                  <div className="flex flex-col items-center gap-3 rounded-[24px] border border-dashed border-border bg-muted/20 px-6 py-14 text-center">
+                    <div className="flex size-12 items-center justify-center rounded-full bg-primary/8 text-primary">
+                      <Star className="size-5" />
+                    </div>
+                    <p className="font-semibold text-foreground">
+                      {t("reviews.emptyTitle")}
+                    </p>
+                    <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+                      {t("reviews.emptyDescription")}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+                      <div className="rounded-[24px] border border-border bg-muted/20 p-5">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                          Điểm đánh giá
                         </p>
+                        <p className="mt-3 text-5xl font-semibold tracking-tight text-foreground">
+                          {reviewsSummary?.averageRating?.toFixed(1) || "0.0"}
+                        </p>
+                        <div className="mt-3">
+                          <ReviewStars
+                            rating={Math.round(
+                              reviewsSummary?.averageRating || 0,
+                            )}
+                            size={18}
+                          />
+                        </div>
+                        <p className="mt-3 text-sm text-muted-foreground">
+                          {reviewsSummary?.totalReviews || 0} review đã xuất bản
+                        </p>
+                      </div>
 
-                        {review.agentReply && (
-                          <div className="mt-4 rounded-2xl border border-border bg-muted/20 px-4 py-4">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                              Phản hồi từ môi giới
-                            </p>
-                            <p className="mt-2 text-sm leading-7 text-foreground/85">
-                              {review.agentReply.content}
-                            </p>
+                      <div className="rounded-[24px] border border-border bg-background p-5">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                          Phân bổ điểm số
+                        </p>
+                        <div className="mt-4 space-y-3">
+                          {reviewsSummary?.breakdown.map((item) => {
+                            const width =
+                              reviewsSummary.totalReviews > 0
+                                ? (item.count / reviewsSummary.totalReviews) *
+                                  100
+                                : 0;
+
+                            return (
+                              <div
+                                key={`public-breakdown-${item.star}`}
+                                className="flex items-center gap-3"
+                              >
+                                <span className="w-10 text-xs font-semibold text-muted-foreground">
+                                  {item.star} sao
+                                </span>
+                                <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                  <div
+                                    className="h-full rounded-full bg-[color:var(--color-rating-star)]"
+                                    style={{ width: `${width}%` }}
+                                  />
+                                </div>
+                                <span className="w-6 text-right text-xs text-muted-foreground">
+                                  {item.count}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {publicReviews.map((review) => (
+                        <article
+                          key={review.id}
+                          className="rounded-[24px] border border-border bg-background p-5"
+                        >
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="flex items-start gap-3">
+                              <div className="flex size-11 items-center justify-center rounded-full border border-border bg-muted text-sm font-semibold text-foreground">
+                                {review.customerInitial}
+                              </div>
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="font-semibold text-foreground">
+                                    {review.customerName}
+                                  </p>
+                                  <span className="text-xs text-muted-foreground">
+                                    •
+                                  </span>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatReviewDate(review.createdAt)}
+                                  </p>
+                                </div>
+                                <div className="mt-2">
+                                  <ReviewStars
+                                    rating={review.rating}
+                                    size={15}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="rounded-full border border-border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
+                              {review.propertyName}
+                            </div>
                           </div>
-                        )}
-                      </article>
-                    ))}
+
+                          {review.tags.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              {review.tags.map((tag) => (
+                                <span
+                                  key={`${review.id}-${tag}`}
+                                  className="rounded-full border border-[color:var(--color-border-primary)] bg-[color:var(--color-bg-primary)]/10 px-3 py-1 text-xs font-medium text-[color:var(--color-text-primary)]"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          <p className="mt-4 text-sm leading-7 text-foreground/85">
+                            {review.comment ||
+                              "Khách hàng không để lại nhận xét chi tiết."}
+                          </p>
+
+                          {review.agentReply && (
+                            <div className="mt-4 rounded-2xl border border-border bg-muted/20 px-4 py-4">
+                              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                                Phản hồi từ môi giới
+                              </p>
+                              <p className="mt-2 text-sm leading-7 text-foreground/85">
+                                {review.agentReply.content}
+                              </p>
+                            </div>
+                          )}
+                        </article>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               </section>
             ) : null}
           </div>

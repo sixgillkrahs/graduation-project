@@ -53,30 +53,93 @@ export class JobService {
 
     try {
       if (job.type === JobTypeEnum.PROPERTY_EMBEDDING) {
-        const { propertyId } = job.payload;
+        const { propertyId, operation = "UPSERT" } = job.payload;
         if (!propertyId) {
           throw new Error("Missing propertyId in payload");
         }
 
-        const property = await this.propertyService.getPropertyById(propertyId) as any;
-        if (!property) {
-          throw new Error("Property not found");
-        }
+        if (operation === "DELETE") {
+          await this.qdrantService.deletePropertyEmbedding(propertyId);
+        } else {
+          const property = await this.propertyService.getPropertyById(
+            propertyId,
+          ) as any;
+          if (!property) {
+            throw new Error("Property not found");
+          }
 
-        // Retry: chạy embedding trực tiếp (không enqueue) để await kết quả và cập nhật status đúng
-        const textData = `${property.title}. ${property.description}. Located in ${property.location?.ward}, ${property.location?.district}, ${property.location?.province}. Features: ${property.features?.bedrooms} bedrooms, ${property.features?.bathrooms} bathrooms. Type: ${property.propertyType}. Setup: ${property.features?.furniture}. Direction: ${property.features?.direction}.`;
-        const payload = {
-          propertyId: property._id.toString(),
-          price: property.features?.price,
-          type: property.propertyType,
-          district: property.location?.district,
-          province: property.location?.province,
-        };
-        await this.qdrantService.upsertPropertyEmbedding(
-          property._id.toString(),
-          textData,
-          payload,
-        );
+          // Retry: chạy embedding trực tiếp (không enqueue) để await kết quả và cập nhật status đúng
+          const textData = [
+            property.title,
+            property.projectName
+              ? `Project: ${property.projectName}`
+              : undefined,
+            property.description,
+            property.demandType
+              ? `Demand type: ${property.demandType}`
+              : undefined,
+            property.propertyType
+              ? `Property type: ${property.propertyType}`
+              : undefined,
+            property.location?.address
+              ? `Address: ${property.location.address}`
+              : undefined,
+            [
+              property.location?.ward,
+              property.location?.district,
+              property.location?.province,
+            ]
+              .filter(Boolean)
+              .join(", "),
+            Number.isFinite(property.features?.area)
+              ? `Area: ${property.features.area} m2`
+              : undefined,
+            Number.isFinite(property.features?.price)
+              ? `Price: ${property.features.price} ${property.features?.currency || ""} ${property.features?.priceUnit || ""}`.trim()
+              : undefined,
+            Number.isFinite(property.features?.bedrooms)
+              ? `Bedrooms: ${property.features.bedrooms}`
+              : undefined,
+            Number.isFinite(property.features?.bathrooms)
+              ? `Bathrooms: ${property.features.bathrooms}`
+              : undefined,
+            property.features?.furniture
+              ? `Furniture: ${property.features.furniture}`
+              : undefined,
+            property.features?.direction
+              ? `Direction: ${property.features.direction}`
+              : undefined,
+            property.features?.legalStatus
+              ? `Legal status: ${property.features.legalStatus}`
+              : undefined,
+            Array.isArray(property.amenities) && property.amenities.length > 0
+              ? `Amenities: ${property.amenities.join(", ")}`
+              : undefined,
+          ]
+            .map((value) => (typeof value === "string" ? value.trim() : ""))
+            .filter(Boolean)
+            .join(". ");
+
+          const payload = {
+            propertyId: property._id.toString(),
+            status: property.status,
+            demandType: property.demandType,
+            type: property.propertyType,
+            province: property.location?.province,
+            district: property.location?.district,
+            ward: property.location?.ward,
+            price: property.features?.price,
+            area: property.features?.area,
+            bedrooms: property.features?.bedrooms,
+            bathrooms: property.features?.bathrooms,
+            amenities: property.amenities || [],
+          };
+          await this.qdrantService.upsertPropertyEmbedding(
+            property._id.toString(),
+            textData,
+            payload,
+          );
+        }
       } else {
         throw new Error("Unsupported job type");
       }

@@ -3,6 +3,7 @@ import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
 
 interface IUser {
+  _id: string;
   userId: {
     _id: string;
     fullName: string;
@@ -15,6 +16,12 @@ interface IUser {
     code: string;
     [k: string]: any;
   };
+  passkeys?: Array<{
+    credentialID: string;
+    publicKey: string;
+    counter: number;
+    transports: string[];
+  }>;
 }
 
 export default class AuthService {

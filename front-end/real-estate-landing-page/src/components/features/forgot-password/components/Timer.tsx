@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { useForgotPassword } from "../services/mutate";
 
 const RESEND_SECONDS = 45;
 
 const Timer = ({ email }: { email: string }) => {
   const { mutateAsync: sendOTP } = useForgotPassword();
+  const locale = useLocale();
   const [seconds, setSeconds] = useState(RESEND_SECONDS);
   const [canResend, setCanResend] = useState(false);
+  const isVi = locale === "vi";
 
   useEffect(() => {
     if (seconds <= 0) {
@@ -32,7 +35,7 @@ const Timer = ({ email }: { email: string }) => {
 
   return (
     <div className="mt-6 text-center text-sm text-gray-500">
-      <span>Didn’t receive the code?</span>
+      <span>{isVi ? "Chưa nhận được mã?" : "Didn’t receive the code?"}</span>
 
       {canResend ? (
         <button
@@ -44,11 +47,11 @@ const Timer = ({ email }: { email: string }) => {
             transition-colors
           "
         >
-          Resend code
+          {isVi ? "Gửi lại mã" : "Resend code"}
         </button>
       ) : (
         <span className="ml-1">
-          Resend in{" "}
+          {isVi ? "Gửi lại sau" : "Resend in"}{" "}
           <span className="font-medium text-gray-700">{seconds}s</span>
         </span>
       )}

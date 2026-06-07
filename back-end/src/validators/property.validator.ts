@@ -105,3 +105,33 @@ export const createPropertySchema = (lang: keyof typeof validationMessages) => {
     body: bodySchema,
   });
 };
+
+export const aiSearchPropertySchema = (
+  lang: keyof typeof validationMessages,
+) => {
+  const t = validationMessages[lang] || validationMessages.vi;
+
+  return z.object({
+    body: z.object({
+      query: z.string().trim().min(2, t.required("Nội dung tìm kiếm")),
+      limit: z.coerce.number().int().min(1).max(20).optional(),
+      page: z.coerce.number().int().min(1).max(50).optional(),
+      filters: z
+        .object({
+          demandType: z.enum(PropertyDemandTypeEnum).optional(),
+          propertyType: z.enum(PropertyTypeEnum).optional(),
+          province: z.string().trim().optional(),
+          district: z.string().trim().optional(),
+          ward: z.string().trim().optional(),
+          minPrice: z.coerce.number().positive().optional(),
+          maxPrice: z.coerce.number().positive().optional(),
+          minArea: z.coerce.number().positive().optional(),
+          maxArea: z.coerce.number().positive().optional(),
+          minBedrooms: z.coerce.number().int().min(0).optional(),
+          minBathrooms: z.coerce.number().int().min(0).optional(),
+          amenities: z.array(z.string().trim().min(1)).optional(),
+        })
+        .optional(),
+    }),
+  });
+};

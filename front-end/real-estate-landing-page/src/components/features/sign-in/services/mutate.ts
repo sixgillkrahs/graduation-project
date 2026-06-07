@@ -3,7 +3,7 @@ import { useMutation, UseMutationResult } from "@tanstack/react-query";
 import SignInService from "./service";
 
 export const useSignIn = (): UseMutationResult<
-  IResp<void>,
+  IResp<ISignInService.ISignInResponse>,
   Error,
   ISignInService.IBodySignIn,
   void

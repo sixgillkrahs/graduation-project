@@ -1,6 +1,8 @@
 import { IPaginationResp, IParamsPagination, IResp } from "@/@types/service";
 import { AxiosMethod } from "@/lib/axios/method";
 import request from "@/lib/axios/request";
+import type { SemanticPropertySearchResponseData } from "../semantic-search/types";
+import type { SemanticPropertySearchRequest } from "../semantic-search/types";
 import { PropertyDto } from "../dto/property.dto";
 import { PropertyEndpoint } from "./config";
 
@@ -70,6 +72,30 @@ export default class PropertyService {
     return request({
       url: PropertyEndpoint.recommended(id),
       method: AxiosMethod.GET,
+    });
+  };
+
+  public static readonly semanticSearch = (
+    payload: SemanticPropertySearchRequest,
+    signal?: AbortSignal,
+  ): Promise<IResp<SemanticPropertySearchResponseData>> => {
+    return request({
+      url: PropertyEndpoint.semanticSearch(),
+      method: AxiosMethod.POST,
+      data: payload,
+      signal,
+    });
+  };
+
+  public static readonly semanticSearchExplain = (
+    payload: SemanticPropertySearchRequest,
+    signal?: AbortSignal,
+  ): Promise<IResp<SemanticPropertySearchResponseData>> => {
+    return request({
+      url: PropertyEndpoint.semanticSearchExplain(),
+      method: AxiosMethod.POST,
+      data: payload,
+      signal,
     });
   };
 }

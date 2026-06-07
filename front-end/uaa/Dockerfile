@@ -38,7 +38,6 @@ ARG BUILD_SCRIPT=build:prod
 ARG VITE_BASEURL=http://localhost:8080/api/
 ARG VITE_BASEURL_AI=http://localhost:8082/
 ARG ENVIRONMENT=production
-ENV NODE_ENV=production
 ENV VITE_BASEURL=${VITE_BASEURL}
 ENV VITE_BASEURL_AI=${VITE_BASEURL_AI}
 ENV ENVIRONMENT=${ENVIRONMENT}
@@ -61,6 +60,7 @@ COPY ${APP_DIR}/tsconfig.app.json ./tsconfig.app.json
 COPY ${APP_DIR}/tsconfig.node.json ./tsconfig.node.json
 COPY ${APP_DIR}/vite.config.ts ./vite.config.ts
 
+ENV NODE_ENV=production
 RUN pnpm run ${BUILD_SCRIPT}
 
 FROM nginxinc/nginx-unprivileged:${NGINX_VERSION} AS runner
