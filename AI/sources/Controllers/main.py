@@ -86,9 +86,11 @@ async def extract_info(image_input=None):
         IMG = image_input
 
     # Normalize orientation via EXIF data
+    # 1. Tự động xoay ảnh theo EXIF metadata (nếu có)
     IMG = ImageOps.exif_transpose(IMG)
 
     # Convert to RGB mode if needed to avoid JPEG saving errors for RGBA images
+    # 2. Chuyển đổi sang hệ màu RGB (tránh lỗi lưu ảnh RGBA sang định dạng JPEG)
     if IMG.mode != "RGB":
         IMG = IMG.convert("RGB")
 
@@ -97,6 +99,7 @@ async def extract_info(image_input=None):
     best_categories = None
 
     # Try 4 orientations (0, 90, 180, 270 degrees) to find the correct upright position
+    # 3. Thử xoay ảnh ở 4 hướng để tìm chiều đúng của thẻ ID
     for angle in [0, 90, 180, 270]:
         if angle == 0:
             rotated_img = IMG
@@ -107,17 +110,19 @@ async def extract_info(image_input=None):
         elif angle == 270:
             rotated_img = IMG.transpose(Image.ROTATE_270)
 
+        # Phát hiện 4 góc của thẻ ID
         CORNER = corner_model(rotated_img)
         predictions = CORNER.pred[0]
         categories = predictions[:, 5].tolist()
 
-        # Check if we successfully detected exactly 4 unique corners
+        # Kiểm tra xem có phát hiện đủ 4 góc không
         if len(categories) == 4 and len(set(map(int, categories))) == 4:
             best_img = rotated_img
             best_predictions = predictions
             best_categories = categories
             break
 
+        # Nếu chưa tìm được ảnh đúng hướng thì giữ tạm ảnh đầu tiên có 4 góc
         # Keep the first rotation that yields 4 corners if no perfect match (4 unique corners) is found yet
         if len(categories) == 4 and best_predictions is None:
             best_img = rotated_img
@@ -125,21 +130,26 @@ async def extract_info(image_input=None):
             best_categories = categories
 
     if best_img is None:
-        # Fallback to the original (EXIF-transposed) image
+        # Sử dụng ảnh gốc đã xoay theo EXIF
         best_img = IMG
         CORNER = corner_model(IMG)
         best_predictions = CORNER.pred[0]
         best_categories = best_predictions[:, 5].tolist()
 
+    # Gán giá trị tìm được vào biến IMG
     IMG = best_img
     predictions = best_predictions
     categories = best_categories
 
+    # Kiểm tra xem có phát hiện đủ 4 góc không
     if len(categories) != 4:
         error = "Detecting corner failed! Please ensure the image shows a clear ID card."
         return JSONResponse(status_code=401, content={"message": error})
+    
+    # Sắp xếp thứ tự các góc (trên-trái, trên-phải, dưới-phải, dưới-trái)
     boxes = utils.class_Order(predictions[:, :4].tolist(), categories)
 
+    # Tính toán các điểm trung tâm của 4 góc
     center_points = list(map(utils.get_center_point, boxes))
 
     """ Temporary fixing """
