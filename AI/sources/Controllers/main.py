@@ -6,7 +6,7 @@ import yolov5
 from fastapi import APIRouter, File, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from PIL import Image
+from PIL import Image, ImageOps
 from vietocr.tool.config import Cfg
 from vietocr.tool.predictor import Predictor
 
@@ -81,15 +81,60 @@ async def extract_info(image_input=None):
         os.mkdir(SAVE_DIR)
 
     if isinstance(image_input, str):
-        img = image_input
-        IMG = Image.open(img)
+        IMG = Image.open(image_input)
     else:
-        img = image_input
         IMG = image_input
 
-    CORNER = corner_model(img)
-    predictions = CORNER.pred[0]
-    categories = predictions[:, 5].tolist()
+    # Normalize orientation via EXIF data
+    IMG = ImageOps.exif_transpose(IMG)
+
+    # Convert to RGB mode if needed to avoid JPEG saving errors for RGBA images
+    if IMG.mode != "RGB":
+        IMG = IMG.convert("RGB")
+
+    best_img = None
+    best_predictions = None
+    best_categories = None
+
+    # Try 4 orientations (0, 90, 180, 270 degrees) to find the correct upright position
+    for angle in [0, 90, 180, 270]:
+        if angle == 0:
+            rotated_img = IMG
+        elif angle == 90:
+            rotated_img = IMG.transpose(Image.ROTATE_90)
+        elif angle == 180:
+            rotated_img = IMG.transpose(Image.ROTATE_180)
+        elif angle == 270:
+            rotated_img = IMG.transpose(Image.ROTATE_270)
+
+        CORNER = corner_model(rotated_img)
+        predictions = CORNER.pred[0]
+        categories = predictions[:, 5].tolist()
+
+        # Check if we successfully detected exactly 4 unique corners
+        if len(categories) == 4 and len(set(map(int, categories))) == 4:
+            best_img = rotated_img
+            best_predictions = predictions
+            best_categories = categories
+            break
+
+        # Keep the first rotation that yields 4 corners if no perfect match (4 unique corners) is found yet
+        if len(categories) == 4 and best_predictions is None:
+            best_img = rotated_img
+            best_predictions = predictions
+            best_categories = categories
+
+    if best_img is None:
+        # Fallback to the original (EXIF-transposed) image
+        best_img = IMG
+        CORNER = corner_model(IMG)
+        best_predictions = CORNER.pred[0]
+        best_categories = best_predictions[:, 5].tolist()
+
+    IMG = best_img
+    predictions = best_predictions
+    categories = best_categories
+
     if len(categories) != 4:
         error = "Detecting corner failed! Please ensure the image shows a clear ID card."
         return JSONResponse(status_code=401, content={"message": error})
